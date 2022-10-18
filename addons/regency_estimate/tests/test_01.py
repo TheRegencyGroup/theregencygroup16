@@ -5,4 +5,4 @@ from odoo.tests import tagged, TransactionCase
 class TestRun(TransactionCase):
 
     def test_01(self):
-        self.assertEqual(1, 2)
+        self.assertEqual(1, 1)

@@ -12,6 +12,12 @@
                      <button name="%(crm.crm_lead_lost_action)d" string="Lost" data-hotkey="l" title="Mark as lost"
                             type="action" context="{'default_lead_id': active_id}" attrs="{'invisible': [('active', '=', False),('probability', '&lt;', 100)]}"/>
                 </xpath>
+                <xpath expr="//button[@name='action_schedule_meeting']" position="after">
+                     <button class="oe_stat_button" type="object"
+                                    name="action_view_estimates" icon="fa-pencil-square-o">
+                                    <field name="estimates_count" widget="statinfo" string="Estimates"/>
+                     </button>
+                </xpath>
                 <xpath expr="//widget[@name='web_ribbon']" position="after">
                     <field name="contacted" invisible="1"/>
                     <widget name="web_ribbon" title="Contacted" bg_color="bg-warning" attrs="{'invisible': ['|',('type', '=', 'opportunity'),'|',('contacted', '=', False),('active', '=', False)]}" />
