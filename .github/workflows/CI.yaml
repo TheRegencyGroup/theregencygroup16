@@ -1,0 +1,37 @@
+name: CI
+on:
+  pull_request:
+    branches:
+      - 'main'
+      - 'prod'
+    types: ['closed','opened','synchronize']
+jobs:
+  odoo-tests:
+    name: Odoo regency tests
+    runs-on: ubuntu-latest
+    container:
+      image: quay.io/opsway/odoo:regency
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      PGHOST: postgres
+      PGDATABASE: regency-ci-test
+      PGUSER: odoo
+      PGPASSWORD: myodoo
+    services:
+      postgres:
+        image: postgres:14.5
+        env:
+          POSTGRES_USER: odoo
+          POSTGRES_PASSWORD: myodoo
+          POSTGRES_DB: regency-ci-test
+        ports:
+          - 5432:5432
+        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+    steps:
+      - uses: actions/checkout@v2
+      - name: preparing odoo
+        run: |
+          mv addons/* /mnt/extra-addons
+          mv env/ci-test/odoo.conf /etc/odoo/odoo.conf
+      - name: run tests
+        run: python3 -u /usr/bin/odoo --conf /etc/odoo/odoo.conf -i regency_init

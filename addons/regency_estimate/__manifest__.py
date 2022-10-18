@@ -32,6 +32,9 @@
         'views/crm_lead.xml',
         'views/crm_stage.xml'
     ],
+    'demo': [
+        'data/product_demo.xml',
+    ],
     'assets': {
         'web.assets_frontend': [
             'regency_estimate/static/src/js/**/*'
