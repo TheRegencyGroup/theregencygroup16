@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_partner_form" model="ir.ui.view">
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//div[@name='button_box']" position="inside">
+                <button name="action_show_sale_estimates" type="object"
+                        class="oe_stat_button" icon="fa-calendar">
+                    <div class="o_stat_info">
+                        <field name="sale_estimate_count" class="o_stat_value"/>
+                        <span class="o_stat_text" attrs="{'invisible': [('sale_estimate_count', '=', 1)]}">
+                            Estimates</span>
+                        <span class="o_stat_text" attrs="{'invisible': [('sale_estimate_count', '!=', 1)]}">
+                            Estimate</span>
+                    </div>
+                </button>
+                <button name="action_show_product_pricesheets" type="object"
+                        class="oe_stat_button" icon="fa-calendar">
+                    <div class="o_stat_info">
+                        <field name="product_pricesheet_count" class="o_stat_value"/>
+                        <span class="o_stat_text" attrs="{'invisible': [('product_pricesheet_count', '=', 1)]}">
+                            Price Sheets</span>
+                        <span class="o_stat_text" attrs="{'invisible': [('product_pricesheet_count', '!=', 1)]}">
+                            Price Sheet</span>
+                    </div>
+                </button>
+                <button name="action_show_rfq" type="object"
+                        class="oe_stat_button" icon="fa-calendar">
+                    <div class="o_stat_info">
+                        <field name="rfq_count" class="o_stat_value"/>
+                        <span class="o_stat_text" attrs="{'invisible': [('rfq_count', '=', 1)]}">
+                            Quotations</span>
+                        <span class="o_stat_text" attrs="{'invisible': [('rfq_count', '!=', 1)]}">
+                            Quotation</span>
+                    </div>
+                </button>
+                <button name="action_show_consumption_agreements" type="object"
+                        class="oe_stat_button" icon="fa-calendar">
+                    <div class="o_stat_info">
+                        <field name="consumption_agreement_count" class="o_stat_value"/>
+                        <span class="o_stat_text" attrs="{'invisible': [('consumption_agreement_count', '=', 1)]}">
+                            Consumption Agreements</span>
+                        <span class="o_stat_text" attrs="{'invisible': [('consumption_agreement_count', '!=', 1)]}">
+                            Consumption Agreement</span>
+                    </div>
+                </button>
+            </xpath>
+        </field>
+    </record>
+</odoo>

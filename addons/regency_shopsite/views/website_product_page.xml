@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="product" inherit_id="website_sale.product" priority="200">
+        <xpath expr="//t[@t-call='website_sale.shop_product_carousel']" position="replace">
+            <t t-set="overlay_templates" t-value="product._get_overlay_templates()"/>
+            <t t-if="overlay_templates">
+                <div class="toggle_product_overlay_editor_buttons mb-2">
+                    <button class="btn btn-primary py-1 toggle_product_overlay_editor">
+                        <i class="fa fa-object-group mr4"/>Editor
+                    </button>
+                    <button class="btn btn-primary py-1 toggle_product_overlay_gallery d-none">
+                        <i class="fa fa-image mr4"/>Gallery
+                    </button>
+                </div>
+                <div data-owl-widget="ProductOverlayEditorRootComponent"
+                     t-att-data-overlay-templates-props="overlay_templates"></div>
+                <div class="product_gallery">
+                    <t t-call="website_sale.shop_product_carousel"/>
+                </div>
+            </t>
+            <t t-else="">
+                <t t-call="website_sale.shop_product_carousel"/>
+            </t>
+        </xpath>
+    </template>
+</odoo>

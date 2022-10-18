@@ -1,0 +1,122 @@
+<?xml version="1.0"?>
+<odoo>
+    <data>
+        <record id="action_product_price_sheet_new" model="ir.actions.act_window">
+            <field name="name">Price Sheet</field>
+            <field name="res_model">product.price.sheet</field>
+            <field name="view_mode">form,tree</field>
+            <field name="domain">[('opportunity_id', '=', active_id)]</field>
+            <field name="context">{'search_default_opportunity_id': active_id, 'default_opportunity_id': active_id}</field>
+        </record>
+
+         <record id="action_product_price_sheet" model="ir.actions.act_window">
+            <field name="name">Price Sheet</field>
+            <field name="res_model">product.price.sheet</field>
+            <field name="view_mode">tree,form,kanban</field>
+        </record>
+
+        <record id="product_price_sheet_view_inherit" model="ir.ui.view">
+            <field name="name">product.price.sheet.form</field>
+            <field name="model">product.price.sheet</field>
+            <field name="arch" type="xml">
+                 <form string="Products Price Sheet">
+                    <header>
+<!--                        <button string="New Quotation" name="action_new_quotation" type="object" class="oe_highlight"-->
+<!--                                data-hotkey="q"-->
+<!--                                title="Create new quotation"/>-->
+                        <button string="Confirm" name="action_confirm" type="object" class="oe_highlight"
+                                data-hotkey="q"
+                                title="Confirm"/>
+                        <field name="state" widget="statusbar" statusbar_visible="draft,confirmed"/>
+                    </header>
+                     <sheet style="max-width:90%;">
+                        <div class="oe_button_box" name="button_box">
+                                <button class="oe_stat_button" type="object"
+                                    name="action_view_sale_quotation" icon="fa-pencil-square-o" >
+                                    <field name="quotation_count" widget="statinfo" string="Quotations"/>
+                                </button>
+                                <button name="preview_price_sheets"
+                                    type="object"
+                                    class="oe_stat_button"
+                                    icon="fa-globe icon">
+                                    <div class="o_field_widget o_stat_info">
+                                        <span class="o_stat_text">Customer</span>
+                                        <span class="o_stat_text">Preview</span>
+                                    </div>
+                                </button>
+                        </div>
+                        <div class="oe_title">
+                            <h1><field name="name" placeholder="e.g. USD Retailers"/></h1>
+                        </div>
+                        <group>
+                          <group name="pricelist_settings">
+                              <field name="estimate_id"/>
+                              <field name="partner_id"/>
+                              <field name="currency_id" groups="base.group_multi_currency"/>
+                          </group>
+                        </group>
+                        <notebook>
+                            <page name="pricelist" string="Price Sheet Items">
+                              <field name="item_ids"  widget="section_and_note_one2many"
+                                mode="tree" >
+                                  <tree string="Price Sheet Items" editable="bottom">
+                                      <control>
+                                        <create name="add_product_control" string="Add a product"/>
+                                        <create name="add_section_control" string="Add a section" context="{'default_display_type': 'line_section'}"/>
+                                        <create name="add_note_control" string="Add a note" context="{'default_display_type': 'line_note'}"/>
+                                      </control>
+                                      <field name="sequence" widget="handle" />
+                                      <!-- We do not display the type because we don't want the user to be bothered with that information if he has no section or note. -->
+                                      <field name="display_type" invisible="1"/>
+                                      <field name="product_id"/>
+                                      <field name="name" widget="section_and_note_text" optional="show"/>
+                                      <field name="min_quantity"/>
+                                      <field name="max_quantity" invisible="1"/>
+                                      <field name="insection_rownumber" invisible="1"/>
+                                      <field name="qty_range_str"/>
+                                      <field name="vendor_price" string="Vendor Price per Unit"/>
+                                      <field name="FOB"/>
+                                      <field name="duty"/>
+                                      <field name="freight"/>
+                                      <field name="currency_id" invisible="1"/>
+                                      <field name="price" string="Unit Price" />
+                                      <field name="total"/>
+                                      <field name="margin"/>
+                                      <field name="production_lead_time"/>
+                                      <field name="shipping_lead_time"/>
+                                      <field name="shipping_options"/>
+                                      <field name="partner_id"/>
+                                      <field name="allow_consumption_agreement"/>
+                                      <button name="action_check_prices" type="object" class="fa fa-history"/>
+                                      <button name="copy_item" type="object" class="fa fa-copy"/>
+                                  </tree>
+                              </field>
+                            </page>
+                        </notebook>
+                    </sheet>
+<!--                    <div class="o_attachment_preview"/>-->
+<!--                    <div class="oe_chatter">-->
+<!--                        <field name="message_follower_ids"/>-->
+<!--                        <field name="message_ids"/>-->
+<!--                    </div>-->
+                </form>
+
+            </field>
+        </record>
+
+        <record id="product_price_sheet_list_view" model="ir.ui.view">
+            <field name="name">product.price.sheet.tree</field>
+            <field name="model">product.price.sheet</field>
+            <field name="arch" type="xml">
+                <tree>
+                     <field name="name"/>
+                    <field name="currency_id"/>
+                    <field name="opportunity_id"/>
+                </tree>
+            </field>
+        </record>
+
+        <menuitem id="menu_product_price_sheet" name="Price Sheets" parent="sale.sale_order_menu" action="action_product_price_sheet"  sequence="3"/>
+
+    </data>
+</odoo>

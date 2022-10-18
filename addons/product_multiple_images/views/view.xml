@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <record model="ir.ui.view" id="product_image_view_kanban">
+        <field name="name">product.image.view.kanban</field>
+        <field name="model">product.image</field>
+        <field name="inherit_id" ref="website_sale.product_image_view_kanban" />
+        <field name="arch" type="xml">
+            <xpath expr="//kanban" position="attributes">
+                <attribute name="multi_images">1</attribute>
+            </xpath>
+        </field>
+    </record>
+</odoo>

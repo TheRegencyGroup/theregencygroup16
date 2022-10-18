@@ -1,0 +1,209 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="consumption_agreement_form_view" model="ir.ui.view">
+        <field name="name">consumption.agreement.form</field>
+        <field name="model">consumption.agreement</field>
+        <field name="arch" type="xml">
+             <form string="Consumption Agreement">
+                <header>
+                    <button name="action_confirm" data-hotkey="v"
+                        string="Confirm" type="object"
+                        attrs="{'invisible': [('state', 'not in', ['draft'])]}"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,confirmed"/>
+                </header>
+                <sheet>
+                     <div class="oe_button_box" name="button_box">
+                        <button name="preview_consumptions"
+                            type="object"
+                            class="oe_stat_button"
+                            icon="fa-globe icon">
+                            <div class="o_field_widget o_stat_info">
+                                <span class="o_stat_text">Customer</span>
+                                <span class="o_stat_text">Preview</span>
+                            </div>
+                        </button>
+                    </div>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" attrs="{'readonly': [('state', 'not in', ['draft'])]}"/>
+                        </h1>
+                    </div>
+                    <group name="agreement_header">
+                        <group name="partner_details">
+                            <field name="partner_id" attrs="{'readonly': [('state', 'not in', ['draft'])]}" widget="res_partner_many2one" context="{'res_partner_search_mode': 'customer', 'show_address': 1, 'show_vat': True}" options='{"always_reload": True}'/>
+                        </group>
+                        <group name="other_details">
+                            <field name="signed_date" />
+                            <field name="currency_id" attrs="{'readonly': [('state', 'not in', ['draft'])]}"/>
+                        </group>
+                    </group>
+                    <group>
+                          <field
+                                name="allowed_partner_ids"
+                                widget="many2many_tags"
+                                mode="tree"
+                                attrs="{'readonly': [('state', 'not in', ['draft'])]}"
+                            />
+                    </group>
+                    <notebook>
+                        <page string="Products" name="agreement_lines">
+                            <field
+                                name="line_ids"
+                                widget="one2many"
+                                mode="tree"
+                                attrs="{'readonly': [('state', 'not in', ['draft'])]}"
+                            >
+                                <tree editable="bottom">
+                                    <field name="product_id"/>
+                                    <field name="allowed_partner_ids" widget="many2many_tags"/>
+                                    <field name="qty_allowed"/>
+                                    <field name="qty_consumed"/>
+                                    <field name="qty_remaining"/>
+                                    <field name="price_unit"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+              </form>
+        </field>
+    </record>
+
+    <record id="consumption_agreement_line_form_view" model="ir.ui.view">
+        <field name="name">consumption.agreement.line.form</field>
+        <field name="model">consumption.agreement.line</field>
+        <field name="arch" type="xml">
+             <form string="Agreement Line">
+                   <sheet>
+                       <group>
+                            <field name="agreement_id" readonly="1"/>
+                            <field name="partner_id" readonly="1"/>
+                            <field name="product_id" readonly="1"/>
+                            <field name="state" readonly="1"/>
+                       </group>
+                       <group>
+                           <field name="qty_allowed" readonly="1"/>
+                           <field name="qty_consumed" readonly="1"/>
+                           <field name="price_unit" readonly="1"/>
+                           <field name="currency_id" readonly="1"/>
+                       </group>
+                       <group>
+                            <field name="allowed_partner_ids" widget="many2many_tags" readonly="1"/>
+                            <field name="sale_order_line_ids" readonly="1"/>
+                       </group>
+                   </sheet>
+             </form>
+        </field>
+    </record>
+
+    <record id="consumption_agreement_tree_view" model="ir.ui.view">
+        <field name="name">consumption.agreement.tree</field>
+        <field name="model">consumption.agreement</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>
+                <field name="partner_id"/>
+                <field name="currency_id"/>
+                <field name="signed_date"/>
+                <field name="state"/>
+            </tree>
+        </field>
+    </record>
+
+     <record id="consumption_agreement_line_tree_view" model="ir.ui.view">
+        <field name="name">consumption.agreement.tree</field>
+        <field name="model">consumption.agreement.line</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="agreement_id"/>
+                <field name="partner_id"/>
+                <field name="product_id"/>
+                <field name="qty_allowed" sum="Un-Confirmed Agreement Qty"/>
+                <field name="qty_allowed_confirmed" sum="Confirmed Agreement Qty"/>
+                <field name="qty_consumed" sum="Un-Confirmed Ordered Qty"/>
+                <field name="qty_consumed_confirmed" sum="Confirmed Ordered Qty"/>
+                <field name="price_unit"/>
+                <field name="currency_id"/>
+                <field name="state"/>
+            </tree>
+        </field>
+    </record>
+
+     <record id="consumption_agreement_search_view" model="ir.ui.view">
+            <field name="name">consumption.agreement.select</field>
+            <field name="model">consumption.agreement</field>
+            <field name="priority" eval="15"/>
+            <field name="arch" type="xml">
+                <search string="Consumption Agreement">
+                    <field name="name" string="Agreement" filter_domain="['|',  ('name', 'ilike', self), ('partner_id', 'child_of', self)]"/>
+                    <field name="line_ids" string="Product" filter_domain="[('line_ids.product_id', 'ilike', self)]"/>
+
+                    <filter string="Confirmed" domain="[('state', '=', 'confirmed')]" name="confirmed_agreements_filter"/>
+                    <group expand="0" string="Group By">
+                        <filter string="State" name="state" domain="[]" context="{'group_by': 'state'}"/>
+                        <filter name="customer" string="Customer" domain="[]" context="{'group_by': 'partner_id'}"/>
+                    </group>
+               </search>
+            </field>
+     </record>
+
+     <record id="consumption_agreement_line_search_view" model="ir.ui.view">
+            <field name="name">consumption.agreement.line.select</field>
+            <field name="model">consumption.agreement.line</field>
+            <field name="priority" eval="15"/>
+            <field name="arch" type="xml">
+                <search string="Consumption Agreement Line">
+                    <field name="agreement_id" string="Agreement" filter_domain="['|',  ('agreement_id.name', 'ilike', self), ('agreement_id.partner_id', 'child_of', self)]"/>
+                    <field name="sale_order_line_ids" string="Sale Order" filter_domain="[('sale_order_line_ids.order_id.name', 'ilike', self)]"/>
+                    <field name="partner_id" string="Customer"/>
+
+                    <filter string="Confirmed" domain="[('state', '=', 'confirmed')]" name="confirmed_agreements_filter"/>
+                    <group expand="0" string="Group By">
+                        <filter string="State" name="state" domain="[]" context="{'group_by': 'state'}"/>
+                        <filter name="customer" string="Customer" domain="[]" context="{'group_by': 'partner_id'}"/>
+                        <filter name="agreement" string="Agreement" domain="[]" context="{'group_by': 'agreement_id'}"/>
+                        <filter name="product" string="Product" domain="[]" context="{'group_by': 'product_id'}"/>
+                    </group>
+               </search>
+            </field>
+     </record>
+
+    <record id="consumption_agreement_action" model="ir.actions.act_window">
+            <field name="name">Consumption Agreement</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">consumption.agreement</field>
+            <field name="view_mode">tree,form</field>
+            <field name="search_view_id" ref="consumption_agreement_search_view"/>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    Create a new agreement
+                </p>
+            </field>
+    </record>
+
+     <record id="consumption_agreement_line_action" model="ir.actions.act_window">
+            <field name="name">Consumption Agreement Lines</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">consumption.agreement.line</field>
+            <field name="view_mode">tree,form</field>
+            <field name="search_view_id" ref="consumption_agreement_line_search_view"/>
+    </record>
+
+    <menuitem id="consumption_agreement_menu"
+        name="Consumption Agreement"
+        parent="sale.sale_order_menu"
+        action="consumption_agreement_action"
+        sequence="5"/>
+
+    <menuitem id="consumption_agreement_lines_menu"
+        name="Consumption Agreement Lines"
+        parent="sale.sale_order_menu"
+        action="consumption_agreement_line_action"
+        sequence="6"/>
+
+</odoo>

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+       <record id="product_template_form_view" model="ir.ui.view">
+            <field name="name">product.product.view.form.extended</field>
+            <field name="model">product.template</field>
+            <field name="inherit_id" ref="product.product_template_form_view"/>
+            <field name="arch" type="xml">
+                <xpath expr="//sheet[@name='product_form']//div[@name='options']" position="inside">
+                    <span class="d-inline-block">
+                        <field name="is_fit_for_overlay"/>
+                        <label for="is_fit_for_overlay"/>
+                    </span>
+                </xpath>
+                <xpath expr="//div[hasclass('oe_button_box')]" position="inside">
+                    <button name="%(regency_shopsite.overlay_templates_for_product_template_action)d" type="action"
+                        icon="fa-object-group" class="oe_stat_button">
+                        <field string="Overlay template" name="overlay_template_count" widget="statinfo" />
+                    </button>
+                </xpath>
+            </field>
+       </record>
+</odoo>

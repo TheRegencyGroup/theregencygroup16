@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="overlay_templates_for_product_template_action" model="ir.actions.act_window">
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">overlay.template</field>
+        <field name="view_mode">tree,form</field>
+        <field name="domain">[('product_template_id', '=', active_id)]</field>
+    </record>
+
+    <record id="overlay_template_tree_view" model="ir.ui.view">
+        <field name="name">overlay.template.view.tree</field>
+        <field name="model">overlay.template</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>
+                <field name="product_template_id"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="overlay_template_form_view" model="ir.ui.view">
+        <field name="name">overlay.template.view.form</field>
+        <field name="model">overlay.template</field>
+        <field name="arch" type="xml">
+            <form>
+                <field name="active" invisible="1"/>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="show_on_website" type="object"
+                                string="Go to Website" class="oe_stat_button" icon="fa-globe"/>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="product_template_id"/>
+                            <field name="overlay_attribute_value_id"/>
+                            <field name="overlay_product_ids"
+                                   attrs="{'invisible': [('overlay_attribute_value_id', '=', False)]}">
+                                <tree editable="top" delete="0">
+                                    <field name="product_tmpl_id"/>
+                                </tree>
+                            </field>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Overlay Editor" id="editor">
+                            <group>
+                                <group>
+                                    <field name="overlay_position_ids" widget="many2many_tags"/>
+                                </group>
+                            </group>
+                            <field name="areas_json" widget="overlay_areas"/>
+                        </page>
+                        <page string="Attributes &amp; Variants" id="attributes">
+                            <field name="overlay_attribute_line_ids" widget="one2many" context="{'show_attribute': False}">
+                                <tree string="Variants" editable="bottom">
+                                    <field name="possible_attribute_ids" invisible="1"/>
+                                    <field name="possible_value_ids" invisible="1"/>
+                                    <field name="attribute_id" attrs="{'readonly': [('id', '!=', False)]}"/>
+                                    <field name="value_ids" widget="many2many_tags"
+                                           options="{'no_create_edit': True, 'color_field': 'color'}"
+                                           context="{'default_attribute_id': attribute_id, 'show_attribute': False}"/>
+                                </tree>
+                            </field>
+                            <div>
+                                <h4 groups="base.group_no_one">Product Variants</h4>
+                            </div>
+                            <field name="product_variant_ids" widget="many2many_tags" groups="base.group_no_one"/>
+                        </page>
+                        <page string="Price Items" id="price_items">
+                            <field name="price_item_ids" widget="one2many"
+                                   context="{'form_view_ref': 'regency_shopsite.product_pricelist_item_form_view_from_overlay_tmpl'}">
+                            <tree string="Price Items">
+                                    <field name="pricelist_id"/>
+                                    <field name="min_quantity"/>
+                                    <field name="price"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="overlay_template_action" model="ir.actions.act_window">
+        <field name="name">Shopsite item templates</field>
+        <field name="res_model">overlay.template</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <menuitem id="overlay_template_menuitem"
+              parent="sale.product_menu_catalog"
+              action="overlay_template_action"/>
+
+</odoo>

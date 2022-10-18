@@ -1,0 +1,485 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <template id="portal_my_home_menu_price_sheets" name="Portal layout : price sheet menu entries" inherit_id="portal.portal_breadcrumbs" priority="20">
+        <xpath expr="//ol[hasclass('o_portal_submenu')]" position="inside">
+            <li t-if="page_name == 'price_sheet' or price_sheet" t-attf-class="breadcrumb-item #{'active ' if not price_sheet else ''}">
+                <a t-if="price_sheet" t-attf-href="/my/price_sheets?{{ keep_query() }}">Price Sheets</a>
+                <t t-else="">Price Sheets</t>
+            </li>
+            <li t-if="price_sheet" class="breadcrumb-item active">
+                <span>Price Sheets</span>
+                <t t-esc="price_sheet.name"/>
+            </li>
+        </xpath>
+    </template>
+
+    <template id="portal_my_home_price_sheet" name="Price Sheets" customize_show="True" inherit_id="portal.portal_my_home" priority="20">
+        <xpath expr="//div[hasclass('o_portal_docs')]" position="inside">
+            <t t-call="portal.portal_docs_entry">
+                <t t-set="title">Price Sheets</t>
+                <t t-set="url" t-value="'/my/price_sheets'"/>
+                <t t-set="placeholder_count" t-value="'price_sheets_count'"/>
+            </t>
+        </xpath>
+    </template>
+
+    <template id="portal_my_price_sheets" name="My Price Sheets">
+        <t t-call="portal.portal_layout">
+            <t t-set="breadcrumbs_searchbar" t-value="True"/>
+
+            <t t-call="portal.portal_searchbar">
+                <t t-set="title">Price Sheets</t>
+            </t>
+            <t t-if="not price_sheets">
+                <p>There are currently no Price Sheets for your account.</p>
+            </t>
+            <t t-if="price_sheets" t-call="portal.portal_table">
+                <thead>
+                    <tr class="active">
+                        <th>Price Sheet #</th>
+                        <th class="text-right">Create Date</th>
+                        <th class="text-center">State</th>
+                    </tr>
+                </thead>
+                <t t-foreach="price_sheets" t-as="price_sheet">
+                    <tr>
+                        <td><a t-att-href="price_sheet.get_portal_url()"><t t-esc="price_sheet.name"/></a></td>
+                        <td class="text-right"><span t-field="price_sheet.create_date"/></td>
+                        <td class="text-center">
+                            <span t-field="price_sheet.state"/>
+                        </td>
+                    </tr>
+                </t>
+            </t>
+        </t>
+    </template>
+
+    <!-- Complete page of the sale_order -->
+    <template id="price_sheet_portal_template" name="Price Sheet Portal Template" inherit_id="portal.portal_sidebar" primary="True">
+        <xpath expr="//div[hasclass('o_portal_sidebar')]" position="inside">
+            <t t-set="o_portal_fullwidth_alert" groups="sales_team.group_sale_salesman">
+                <t t-call="portal.portal_back_in_edit_mode">
+                    <t t-set="backend_url" t-value="'/web#model=%s&amp;id=%s&amp;action=%s&amp;view_type=form' % (price_sheet._name, price_sheet.id, price_sheet.id)"/>
+                </t>
+            </t>
+
+            <div class="row mt16 o_portal_sale_sidebar">
+                <!-- Sidebar -->
+                <t t-call="portal.portal_record_sidebar">
+                    <t t-set="classes" t-value="'col-lg-auto d-print-none'"/>
+
+                    <t t-set="title">
+                        <h2 class="mb-0"><b t-field="price_sheet.name" data-id="price_sheet_name"/> </h2>
+                    </t>
+                    <t t-set="entries">
+                        <ul class="list-group list-group-flush flex-wrap flex-row flex-lg-column">
+                            <li class="list-group-item flex-grow-1">
+<!--                                <a t-if="price_sheet.has_to_be_signed()" role="button" class="btn btn-primary btn-block mb8" data-toggle="modal" data-target="#modalaccept" href="#">-->
+<!--                                    <i class="fa fa-check"/> Accept &amp; Sign-->
+<!--                                </a>-->
+                                <a t-if="price_sheet.state == 'confirmed'" id="create_sale_order_from_price_sheet_button" role="button" class="btn btn-primary btn-block mb8" href="#">
+                                    <i class="fa fa-check"/> Create Sale Order
+                                </a>
+                                <a t-if="price_sheet.state == 'confirmed'" id="create_consumption_from_price_sheet_button" role="button" class="btn btn-primary btn-block mb8" href="#">
+                                    <i class="fa fa-check"/> Create Consumption Agreement
+                                </a>
+                                <div class="o_download_pdf btn-toolbar flex-sm-nowrap">
+<!--                                    <div class="btn-group flex-grow-1 mr-1 mb-1">-->
+<!--                                        <a class="btn btn-secondary btn-block o_download_btn" t-att-href="consumption.get_portal_url(report_type='pdf', download=True)" title="Download"><i class="fa fa-download"/> Download</a>-->
+<!--                                    </div>-->
+<!--                                    <div class="btn-group flex-grow-1 mb-1">-->
+<!--                                        <a class="btn btn-secondary btn-block o_print_btn o_portal_invoice_print" t-att-href="consumption.get_portal_url(report_type='pdf')" id="print_invoice_report" title="Print" target="_blank"><i class="fa fa-print"/> Print</a>-->
+<!--                                    </div>-->
+                                </div>
+                            </li>
+
+                            <li class="navspy list-group-item pl-0 flex-grow-1" t-ignore="true" role="complementary">
+                                <ul class="nav flex-column bs-sidenav"></ul>
+                            </li>
+
+<!--                            <t t-if="price_sheet.state in ['draft', 'confirmed']">-->
+<!--&lt;!&ndash;                                <li t-if="sale_order.validity_date" class="list-group-item">&ndash;&gt;-->
+<!--&lt;!&ndash;                                    <small><b class="text-muted">This offer expires on</b></small>&ndash;&gt;-->
+<!--&lt;!&ndash;                                    <div t-field="sale_order.validity_date"></div>&ndash;&gt;-->
+<!--&lt;!&ndash;                                </li>&ndash;&gt;-->
+<!--                                <li t-if="sale_order.amount_undiscounted - sale_order.amount_untaxed &gt; 0.01" class="list-group-item flex-grow-1">-->
+<!--&lt;!&ndash;                                    <small><b class="text-muted">Your advantage</b></small>&ndash;&gt;-->
+<!--&lt;!&ndash;                                    <small>&ndash;&gt;-->
+<!--&lt;!&ndash;                                        <b t-field="price_sheet.amount_undiscounted"&ndash;&gt;-->
+<!--&lt;!&ndash;                                            t-options='{"widget": "monetary", "display_currency": sale_order.pricelist_id.currency_id}'&ndash;&gt;-->
+<!--&lt;!&ndash;                                            style="text-decoration: line-through"&ndash;&gt;-->
+<!--&lt;!&ndash;                                            class="d-block mt-1"&ndash;&gt;-->
+<!--&lt;!&ndash;                                            data-id="amount_undiscounted" />&ndash;&gt;-->
+<!--&lt;!&ndash;                                    </small>&ndash;&gt;-->
+<!--                                    <t t-if="price_sheet.amount_untaxed == price_sheet.amount_total">-->
+<!--                                        <h4 t-field="price_sheet.amount_total" class="text-success" data-id="total_amount"/>-->
+<!--                                    </t>-->
+<!--                                    <t t-else="">-->
+<!--                                        <h4 t-field="price_sheet.amount_untaxed" class="text-success mb-0" data-id="total_untaxed"/>-->
+<!--                                        <small>(<span t-field="price_sheet.amount_total" data-id="total_amount"/> Incl. tax)</small>-->
+<!--                                    </t>-->
+<!--                                </li>-->
+<!--                            </t>-->
+
+                            <li t-if="price_sheet.opportunity_id.user_id" class="list-group-item flex-grow-1">
+                                <div class="small mb-1"><strong class="text-muted">Salesperson</strong></div>
+                                <div class="row flex-nowrap">
+                                    <div class="col flex-grow-0 pr-2">
+                                        <img class="rounded-circle mr4 float-left o_portal_contact_img" t-att-src="image_data_uri(price_sheet.opportunity_id.user_id.avatar_1024)" alt="Contact"/>
+                                    </div>
+                                    <div class="col pl-0" style="min-width: 150px">
+                                        <span t-field="price_sheet.opportunity_id.user_id" t-options='{"widget": "contact", "fields": ["name", "phone"], "no_marker": True}'/>
+                                        <a href="#discussion" class="small"><i class="fa fa-comment"></i> Send message</a>
+                                    </div>
+                                </div>
+                            </li>
+                        </ul>
+                    </t>
+                </t>
+
+                <!-- Page content -->
+                <div id="price_sheet_content" class="col-12 col-lg justify-content-end">
+
+                    <!-- modal relative to the actions sign and pay -->
+                    <div role="dialog" class="modal fade" id="modalaccept">
+                        <div class="modal-dialog" t-if="price_sheet.has_to_be_signed()">
+                            <form id="accept" method="POST" t-att-data-order-id="price_sheet.id" t-att-data-token="price_sheet.access_token" class="js_accept_json modal-content js_website_submit_form">
+                                <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                                <header class="modal-header">
+                                    <h4 class="modal-title">Validate Order</h4>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">×</button>
+                                </header>
+                                <main class="modal-body" id="sign-dialog">
+                                    <p>
+                                        <span>By signing this proposal, I agree to the following terms:</span>
+                                        <ul>
+                                            <li><span>Accepted on the behalf of:</span> <b t-field="consumption.partner_id.commercial_partner_id"/></li>
+<!--                                            <li><span>For an amount of:</span> <b data-id="total_amount" t-field="sale_order.amount_total"/></li>-->
+<!--                                            <li t-if="sale_order.payment_term_id"><span>With payment terms:</span> <b t-field="sale_order.payment_term_id.note"/></li>-->
+                                        </ul>
+                                    </p>
+                                    <t t-call="portal.signature_form">
+                                        <t t-set="call_url" t-value="price_sheet.get_portal_url(suffix='/accept')"/>
+                                        <t t-set="default_name" t-value="price_sheet.partner_id.name"/>
+                                    </t>
+                                </main>
+                            </form>
+                        </div>
+
+                    </div>
+
+                    <!-- modal relative to the action reject -->
+                    <div role="dialog" class="modal fade" id="modaldecline">
+                        <div class="modal-dialog">
+                            <form id="decline" method="POST" t-attf-action="/my/price_sheets/#{price_sheet.id}/decline?access_token=#{price_sheet.access_token}" class="modal-content">
+                                <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                                <header class="modal-header">
+                                    <h4 class="modal-title">Reject This Price Sheet</h4>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">×</button>
+                                </header>
+                                <main class="modal-body">
+                                    <p>
+                                        Tell us why you are refusing this quotation, this will help us improve our services.
+                                    </p>
+                                    <textarea rows="4" name="decline_message" required="" placeholder="Your feedback..." class="form-control" />
+                                </main>
+                                <footer class="modal-footer">
+                                    <button type="submit" t-att-id="price_sheet.id" class="btn btn-danger"><i class="fa fa-times"></i> Reject</button>
+                                    <button type="button" class="btn btn-primary" data-dismiss="modal">Cancel</button>
+                                </footer>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- status messages -->
+                    <div t-if="message == 'sign_ok'" class="alert alert-success alert-dismissable d-print-none" role="status">
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">×</button>
+                        <strong>Thank You!</strong><br/>
+                        <t t-if="message == 'sign_ok' and price_sheet.state in ['confirmed']">Your order has been confirmed.</t>
+                        <t t-else="">Your order has been signed.</t>
+                    </div>
+
+                    <div t-if="request.params.get('new_consumption')" class="alert alert-success alert-dismissable d-print-none" role="status">
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">×</button>
+                        New Consumption Agreement <a t-att-href="request.params.get('consumption_url')"><t t-esc="request.params.get('new_consumption')"/></a> has been created.
+                    </div>
+
+                    <div t-if="message == 'cant_reject'" class="alert alert-danger alert-dismissable d-print-none" role="alert">
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">×</button>
+                        Your order is not in a state to be rejected.
+                    </div>
+
+<!--                    <t t-if="sale_order.transaction_ids">-->
+<!--                        <t t-call="payment.transaction_status">-->
+<!--                            <t t-set="tx" t-value="sale_order.get_portal_last_transaction()"/>-->
+<!--                        </t>-->
+<!--                    </t>-->
+
+<!--                    <div t-if="price_sheet.state == 'cancel'" class="alert alert-danger alert-dismissable d-print-none" role="alert">-->
+<!--                        <button type="button" class="close" data-dismiss="alert" aria-label="close">×</button>-->
+<!--                        <strong>This quotation has been canceled.</strong> <a role="button" href="#discussion"><i class="fa fa-comment"/> Contact us to get a new quotation.</a>-->
+<!--                    </div>-->
+
+                    <!-- main content -->
+                    <div t-attf-class="card #{'pb-5' if report_type == 'html' else ''}" id="portal_sale_content">
+                        <div t-call="regency_estimate.price_sheet_portal_content"/>
+                    </div>
+
+                    <!-- bottom actions -->
+                    <div class="row justify-content-center text-center d-print-none pt-1 pb-4">
+
+                        <t t-if="price_sheet.has_to_be_signed()">
+                            <div class="col-sm-auto mt8">
+                                <a role="button" class="btn btn-primary" data-toggle="modal" data-target="#modalaccept" href="#"><i class="fa fa-check"/> Accept &amp; Sign</a>
+                            </div>
+                            <div class="col-sm-auto mt8">
+                                <a role="button" class="btn btn-secondary" href="#discussion"><i class="fa fa-comment"/> Feedback</a>
+                            </div>
+                            <div class="col-sm-auto mt8">
+                                <a role="button" class="btn btn-danger" data-toggle="modal" data-target="#modaldecline" href="#"> <i class="fa fa-times"/> Reject</a>
+                            </div>
+                        </t>
+                        <t t-if="price_sheet.state == 'confirmed'">
+                            <div class="col-sm-auto mt8">
+                                <a role="button" class="btn btn-primary" id="create_sale_order_from_price_sheet_button" href="#"><i class="fa fa-check"/> Create Sale Order</a>
+                            </div>
+                            <div class="col-sm-auto mt8">
+                                <a role="button" class="btn btn-primary" id="create_consumption_from_price_sheet_button" href="#"><i class="fa fa-check"/> Create Consumption Agreement</a>
+                            </div>
+                        </t>
+                    </div>
+
+                    <!-- chatter -->
+                    <div id="price_sheet_communication" class="mt-4">
+                        <h2>History</h2>
+                        <t t-call="portal.message_thread">
+                            <t t-set="object" t-value="price_sheet"/>
+                        </t>
+                    </div>
+                </div><!-- // #quote_content -->
+            </div>
+        </xpath>
+    </template>
+
+
+    <template id="price_sheet_portal_content" name="Price Sheet Portal Content">
+        <!-- Intro -->
+        <div id="introduction" t-attf-class="pb-2 pt-3 #{'card-header bg-white' if report_type == 'html' else ''}">
+          <h2 class="my-0">
+                Price Sheet
+                <em t-esc="price_sheet.name"/>
+            </h2>
+        </div>
+
+        <div t-attf-class="#{'card-body' if report_type == 'html' else ''}">
+            <!-- Informations -->
+            <div id="informations">
+<!--                <div t-if="sale_order.transaction_ids and not invoices and sale_order.state in ('sent', 'sale') and portal_confirmation == 'pay' and not success and not error" t-att-data-order-id="sale_order.id">-->
+<!--                    <t t-if="sale_order.transaction_ids">-->
+<!--                        <t t-call="payment.transaction_status">-->
+<!--                            <t t-set="tx" t-value="sale_order.get_portal_last_transaction()"/>-->
+<!--                        </t>-->
+<!--                    </t>-->
+<!--                </div>-->
+                <div class="row" id="so_date">
+                    <div class="mb-3 col-6">
+                      <strong>Order Date:</strong>
+                      <span t-field="price_sheet.create_date" t-options='{"widget": "date"}'/>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-6">
+                        <strong>Invoicing Address:</strong>
+                        <address t-field="price_sheet.partner_id" t-options='{"widget": "contact", "fields": ["address", "name"], "no_marker": True}'/>
+                    </div>
+<!--                     <t t-if="price_sheet.partner_shipping_id != sale_order.partner_invoice_id">-->
+<!--                        <div id="shipping_address" class="col-lg-6">-->
+<!--                            <strong class="d-block mb-1">Shipping Address:</strong>-->
+<!--                            <address t-field="sale_order.partner_shipping_id" t-options='{"widget": "contact", "fields": ["address", "name"], "no_marker": True}'/>-->
+<!--                        </div>-->
+<!--                    </t>-->
+                </div>
+
+<!--                <t t-set="invoices" t-value="[i for i in sale_order.invoice_ids if i.state not in ['draft', 'cancel']]"/>-->
+<!--                <div t-if="invoices" class="row">-->
+<!--                    <div class="col">-->
+<!--                        <strong class="d-block mb-1">Invoices</strong>-->
+<!--                        <ul class="list-group mb-4">-->
+<!--                            <t t-foreach="invoices" t-as="i">-->
+<!--                                <t t-set="report_url" t-value="i.get_portal_url(report_type='pdf', download=True)"/>-->
+<!--                                <div class="d-flex flex-wrap align-items-center justify-content-between">-->
+<!--                                    <div>-->
+<!--                                        <a t-att-href="report_url">-->
+<!--                                            <span t-esc="i.name"/>-->
+<!--                                        </a>-->
+<!--                                        <div class="small d-lg-inline-block">Date: <span class="text-muted" t-field="i.invoice_date"/></div>-->
+<!--                                    </div>-->
+<!--                                    <span t-if="i.payment_state in ('paid', 'in_payment')" class="small badge badge-success orders_label_text_align"><i class="fa fa-fw fa-check"/> <b>Paid</b></span>-->
+<!--                                    <span t-else="" class="small badge badge-info orders_label_text_align"><i class="fa fa-fw fa-clock-o"/> <b>Waiting Payment</b></span>-->
+<!--                                </div>-->
+<!--                            </t>-->
+<!--                        </ul>-->
+<!--                    </div>-->
+<!--                </div>-->
+            </div>
+
+            <section id="details" style="page-break-inside: auto;" class="mt32">
+                <h3 id="details">Pricing</h3>
+
+<!--                <t t-set="display_discount" t-value="True in [line.discount > 0 for line in sale_order.order_line]"/>-->
+
+                <table t-att-data-order-id="price_sheet.id" t-att-data-token="price_sheet.access_token" class="table table-sm" id="price_sheet_table">
+                    <thead class="bg-100">
+                        <tr>
+                            <th class="text-left">Products</th>
+                            <th class="text-center">Qty Range</th>
+                            <th class="text-right">Quantity</th>
+                            <th t-attf-class="text-right {{ 'd-none d-sm-table-cell' if report_type == 'html' else '' }}">Unit Price</th>
+<!--                            <th t-if="display_discount" t-attf-class="text-right {{ 'd-none d-sm-table-cell' if report_type == 'html' else '' }}">-->
+<!--                                <span>Disc.%</span>-->
+<!--                            </th>-->
+                            <th class="text-right" >
+                                <span groups="account.group_show_line_subtotals_tax_excluded">Amount</span>
+                                <span groups="account.group_show_line_subtotals_tax_included">Total Price</span>
+                            </th>
+                            <th class="text-center">Shipping options</th>
+                            <th class="text-center">Order Type</th>
+                        </tr>
+                    </thead>
+                    <tbody class="sale_tbody">
+
+                        <t t-set="current_subtotal" t-value="0"/>
+
+                        <t t-foreach="price_sheet.item_ids" t-as="line">
+
+                            <t t-set="current_subtotal" t-value="current_subtotal + line.price_subtotal" groups="account.group_show_line_subtotals_tax_excluded"/>
+                            <t t-set="current_subtotal" t-value="current_subtotal + line.price_total" groups="account.group_show_line_subtotals_tax_included"/>
+
+                            <tr t-att-class="'bg-200 font-weight-bold o_line_section' if line.display_type == 'line_section' else 'font-italic o_line_note' if line.display_type == 'line_note' else ''">
+                                <t t-if="not line.display_type">
+                                    <t t-if="line.insection_rownumber == 1">
+                                       <td  t-att-rowspan="line.insection_total_rows" id="product_name"><span t-field="line.name"/></td>
+                                    </t>
+                                    <td class="text-center" id="qty_range">
+                                        <span t-field="line.qty_range_str"/>
+                                    </td>
+                                    <td class="text-right">
+                                        <div  id="quote_edit_qty" class="input-group js_quantity_container pull-right">
+                                            <div class="input-group-prepend d-print-none">
+                                                <span class="input-group-text d-none d-md-inline-block">
+                                                    <a t-att-data-line-id="line.id" t-att-data-remove="True" href="#" class="js_update_price_sheet_line_json" aria-label="Remove one" title="Remove one">
+                                                        <span class="fa fa-minus"/>
+                                                    </a>
+                                                </span>
+                                            </div>
+                                            <input type="text" class="js_price_sheet_quantity form-control" t-att-data-line-id="line.id" t-att-value="line.product_uom_qty"/>
+                                            <div class="input-group-append d-print-none">
+                                                <span class="input-group-text d-none d-md-inline-block">
+                                                    <a t-att-data-line-id="line.id" href="#" class="js_update_price_sheet_line_json" aria-label="Add one" title="Add one">
+                                                        <span class="fa fa-plus"/>
+                                                    </a>
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td t-attf-class="text-right {{ 'd-none d-sm-table-cell' if report_type == 'html' else '' }}">
+                                        <div
+                                            t-field="line.price"
+                                            class="text-right"
+                                        />
+                                    </td>
+<!--                                    <td t-if="display_discount" t-attf-class="text-right {{ 'd-none d-sm-table-cell' if report_type == 'html' else '' }}">-->
+<!--                                        <strong t-if="line.discount &gt; 0" class="text-info">-->
+<!--                                            <t t-esc="((line.discount % 1) and '%s' or '%d') % line.discount"/>%-->
+<!--                                        </strong>-->
+<!--                                    </td>-->
+
+                                    <td class="text-right">
+                                        <span class="oe_order_line_price_subtotal" t-field="line.price_subtotal" groups="account.group_show_line_subtotals_tax_excluded"/>
+                                        <span class="oe_order_line_price_total" t-field="line.price_total" groups="account.group_show_line_subtotals_tax_included"/>
+                                    </td>
+                                    <t t-if="line.insection_rownumber == 1">
+                                           <td t-att-rowspan="line.insection_total_rows" class="text-center" id="shipping_options"><span t-field="line.shipping_options"/></td>
+                                    </t>
+                                    <td>
+                                      <select  t-att-data-line-id="line.id" class="form-control js_price_sheet_selection_type">
+                                            <option value="dropship" t-att-selected="line.consumption_type == 'dropship'">Dropship</option>
+                                            <option t-if="line.allow_consumption_agreement" value="consumption" t-att-selected="line.consumption_type == 'consumption'">Consumption Agreement</option>
+                                      </select>
+                                     </td>
+                                </t>
+                                <t t-if="line.display_type == 'line_section'">
+                                    <td colspan="99">
+                                        <span t-field="line.name"/>
+                                    </td>
+                                    <t t-set="current_section" t-value="line"/>
+                                    <t t-set="current_subtotal" t-value="0"/>
+                                </t>
+                                <t t-if="line.display_type == 'line_note'">
+                                    <td colspan="99">
+                                        <span t-field="line.name"/>
+                                    </td>
+                                </t>
+                            </tr>
+
+                            <t t-if="current_section and (line_last or price_sheet.item_ids[line_index+1].display_type == 'line_section')">
+                                <tr class="is-subtotal text-right">
+                                    <td colspan="99">
+                                        <strong class="mr16">Subtotal</strong>
+                                        <span
+                                            t-esc="current_subtotal"
+                                            t-options='{"widget": "monetary", "display_currency": price_sheet.currency_id}'
+                                        />
+                                    </td>
+                                </tr>
+                            </t>
+                        </t>
+                    </tbody>
+                </table>
+
+                <div id="total" class="row" name="total" style="page-break-inside: avoid;">
+                    <div t-attf-class="#{'col-6' if report_type != 'html' else 'col-sm-7 col-md-6'} ml-auto">
+                        <t t-call="regency_estimate.price_sheet_portal_content_totals_table"/>
+                    </div>
+                </div>
+            </section>
+
+<!--            <section t-if="sale_order.signature" id="signature" name="Signature">-->
+<!--                <div class="row mt-4" name="signature">-->
+<!--                    <div t-attf-class="#{'col-3' if report_type != 'html' else 'col-sm-7 col-md-4'} ml-auto text-center">-->
+<!--                        <h5>Signature</h5>-->
+<!--                        <img t-att-src="image_data_uri(price_sheet.signature)" style="max-height: 6rem; max-width: 100%;"/>-->
+<!--                        <p t-field="price_sheet.signed_by"/>-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--            </section>-->
+
+            <section id="terms" class="mt-5" t-if="not is_html_empty(price_sheet.note)">
+                <h3 class="">Terms &amp; Conditions</h3>
+                <hr class="mt-0 mb-1"/>
+                <t t-if="price_sheet.terms_type == 'html'">
+                    <!-- Note is plain text. This ensures a clickable link  -->
+                    <t t-set="tc_url" t-value="'%s/terms' % (price_sheet.get_base_url())"/>
+                    <em>Terms &amp; Conditions: <a href="/terms"><t t-esc="tc_url"/></a></em>
+                </t>
+                <t t-else="">
+                    <em t-field="price_sheet.note"/>
+                </t>
+            </section>
+
+            <section class="mt-5" t-if="price_sheet.payment_term_id">
+                <h3 class="">Payment terms</h3>
+                <hr class="mt-0 mb-1"/>
+                <span t-field="price_sheet.payment_term_id"/>
+            </section>
+        </div>
+    </template>
+
+    <template id="price_sheet_portal_content_totals_table">
+        <table class="table table-sm">
+            <t t-set="tax_totals" t-value="json.loads(price_sheet.tax_totals_json)"/>
+            <t t-call="account.document_tax_totals"/>
+        </table>
+    </template>
+</odoo>

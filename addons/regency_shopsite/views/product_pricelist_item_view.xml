@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="product_pricelist_item_form_view" model="ir.ui.view">
+        <field name="inherit_id" ref="product.product_pricelist_item_form_view"/>
+        <field name="model">product.pricelist.item</field>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='product_id']" position="after">
+                <field name="overlay_tmpl_id" options="{'no_create':1}" attrs="{
+                                    'invisible':[('applied_on', '!=', '4_overlay_template')],
+                                    'required':[('applied_on', '=', '4_overlay_template')]}"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="product_pricelist_item_form_view_from_overlay_tmpl" model="ir.ui.view">
+        <field name="name">product.pricelist.item.form.view.from.overlay.tmpl</field>
+        <field name="inherit_id" ref="product.product_pricelist_item_form_view"/>
+        <field name="model">product.pricelist.item</field>
+        <field name="mode">primary</field>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='pricelist_id']" position="attributes">
+                <attribute name="invisible">0</attribute>
+                <attribute name="groups">base.group_user</attribute>
+            </xpath>
+            <xpath expr="//field[@name='overlay_tmpl_id']" position="attributes">
+                <attribute name="invisible">1</attribute>
+                <attribute name="groups">base.group_user</attribute>
+            </xpath>
+            <xpath expr="//field[@name='applied_on']" position="attributes">
+                <attribute name="invisible">1</attribute>
+                <attribute name="groups">base.group_user</attribute>
+            </xpath>
+            <group name="pricelist_rule_related" position="attributes">
+                <attribute name="groups">base.group_user</attribute>
+            </group>
+        </field>
+    </record>
+</odoo>

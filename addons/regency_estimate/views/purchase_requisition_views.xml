@@ -1,0 +1,59 @@
+<?xml version="1.0"?>
+<odoo>
+    <data>
+
+        <record id="action_purchase_requisition_new" model="ir.actions.act_window">
+            <field name="name">Purchase Requisition</field>
+            <field name="res_model">purchase.requisition</field>
+            <field name="view_mode">form,tree,kanban</field>
+            <field name="domain">[('estimate_id', '=', active_id)]</field>
+            <field name="context">{'search_default_estimate_id': active_id, 'default_estimate_id': active_id}</field>
+        </record>
+
+
+        <record model="ir.ui.view" id="view_purchase_requisition_form">
+            <field name="name">purchase.requisition.form</field>
+            <field name="model">purchase.requisition</field>
+            <field name="inherit_id" ref="purchase_requisition.view_purchase_requisition_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='vendor_id']" position="after">
+                    <field name="estimate_id"/>
+                    <field name="customer_id"/>
+                </xpath>
+                <xpath expr="//field[@name='line_ids']/tree/field[@name='price_unit']" position="after">
+                    <button name="copy_item" type="object" class="fa fa-copy"/>
+                </xpath>
+                <xpath expr="//field[@name='line_ids']/tree/field[@name='product_id']" position="before">
+                    <field name="partner_id"/>
+                </xpath>
+            </field>
+        </record>
+
+        <record model="ir.ui.view" id="view_purchase_requisition_tree">
+            <field name="name">purchase.requisition.tree</field>
+            <field name="model">purchase.requisition</field>
+            <field name="inherit_id" ref="purchase_requisition.view_purchase_requisition_tree"/>
+            <field name="arch" type="xml">
+                <xpath expr="//tree" position="attributes">
+                    <attribute name="string">Purchase Requisitions</attribute>
+                </xpath>
+                <xpath expr="//field[@name='name']" position="after">
+                    <field name="estimate_id" optional="hide"/>
+                </xpath>
+                <xpath expr="//field[@name='user_id']" position="after">
+                    <field name="customer_id"/>
+                    <field name="product_ids" widget="many2many_tags"/>
+                </xpath>
+          </field>
+        </record>
+
+        <record id="purchase_requisition.action_purchase_requisition" model="ir.actions.act_window">
+            <field name="name">Purchase Requisitions</field>
+        </record>
+
+        <record id="purchase_requisition.menu_purchase_requisition_pro_mgt" model="ir.ui.menu">
+            <field name="name">Purchase Requisitions</field>
+        </record>
+
+    </data>
+</odoo>

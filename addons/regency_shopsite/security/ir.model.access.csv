@@ -1,0 +1,7 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_overlay_template,overlay.template,model_overlay_template,base.group_user,1,1,1,1
+access_overlay_template_portal,overlay.template,model_overlay_template,base.group_portal,1,0,0,0
+access_overlay_position,overlay.position,model_overlay_position,base.group_user,1,1,1,1
+access_overlay_position_portal,overlay.position,model_overlay_position,base.group_portal,1,0,0,0
+access_overlay_attribute_line,overlay_attribute_line,model_overlay_template_attribute_line,base.group_user,1,1,1,1
+access_overlay_product,overlay.product,model_overlay_product,base.group_user,1,1,1,1

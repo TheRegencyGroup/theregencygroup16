@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+
+    <record id="overlay_position_front" model="overlay.position">
+        <field name="name">Front</field>
+    </record>
+
+    <record id="overlay_position_back" model="overlay.position">
+        <field name="name">Back</field>
+    </record>
+
+</odoo>

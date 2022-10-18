@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="overlay_template_page" model="ir.ui.view">
+            <field name="name">Overlay Template Page</field>
+            <field name="type">qweb</field>
+            <field name="key">regency_shopsite.overlay_template_page</field>
+            <field name="arch" type="xml">
+                <t t-call="website.layout">
+                    <t t-set="pageName" t-value="'overlay_template_page'"/>
+                    <div id="wrap" class="oe_structure oe_empty orders_history">
+                        <div class="container-fluid">
+                            <div data-owl-widget="OverlayTemplatePageComponent"></div>
+                        </div>
+                    </div>
+                </t>
+            </field>
+        </record>
+    </data>
+</odoo>

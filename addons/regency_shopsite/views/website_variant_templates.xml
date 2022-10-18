@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="variants" inherit_id="sale.variants" priority="200">
+        <xpath expr="//t[contains(@t-if,'radio')]//div[hasclass('radio_input_value')]/span" position="replace">
+            <t t-if="ptav.attribute_id.id == request.env.ref('regency_shopsite.overlay_attribute').id">
+                <span t-field="ptav.product_attribute_value_id.overlay_template_id.name"/>
+            </t>
+            <t t-else="">
+                <span t-field="ptav.name"/>
+            </t>
+        </xpath>
+        <xpath expr="//t[contains(@t-if,'radio')]//li" position="attributes">
+            <attribute name="t-if">ptav.product_attribute_value_id.id != request.env.ref('regency_shopsite.none_overlay_attribute_value').id</attribute>
+        </xpath>
+        <xpath expr="//t[contains(@t-if,'radio')]//input" position="attributes">
+            <attribute name="t-att-data-regency-value-id">ptav.product_attribute_value_id.id</attribute>
+        </xpath>
+    </template>
+</odoo>

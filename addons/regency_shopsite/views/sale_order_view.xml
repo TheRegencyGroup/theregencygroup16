@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="sale_order_line_view_form_readonly" model="ir.ui.view">
+        <field name="model">sale.order.line</field>
+        <field name="inherit_id" ref="sale.sale_order_line_view_form_readonly"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='product_updatable']" position="after">
+                <group name="image_with_overlay_ids"
+                       string="Images with overlay"
+                       attrs="{'invisible': [('image_with_overlay_ids', '=', False)]}">
+                    <field name="image_with_overlay_ids"
+                           nolabel="1" readonly="1"
+                           class="o_website_sale_image_list"
+                           mode="kanban"/>
+                </group>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_order_form" model="ir.ui.view">
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//page[@name='order_lines']//tree//field[@name='product_id']" position="before">
+                <button name="action_open_sale_order_line_form" type="object" icon="fa-external-link"/>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

@@ -1,0 +1,372 @@
+from odoo import fields, models, api, Command, _, SUPERUSER_ID
+from odoo.tools.misc import get_lang
+
+PARTNER_ADDRESS_FIELDS_TO_SYNC = [
+    'street',
+    'street2',
+    'city',
+    'zip',
+    'state_id',
+    'country_id',
+]
+
+
+AVAILABLE_PRIORITIES = [
+    ('0', 'Low'),
+    ('1', 'Medium'),
+    ('2', 'High'),
+    ('3', 'Very High'),
+]
+
+
+class SaleEstimate(models.Model):
+    _name = 'sale.estimate'
+    _description = "Estimate"
+    _order = "id desc"
+    _inherit = ['mail.thread']
+
+    # Description
+    name = fields.Char(
+        'Estimate', index=True, required=True,
+        compute='_compute_name', readonly=False, store=True)
+    description = fields.Html('Notes')
+    company_id = fields.Many2one(
+        'res.company', string='Company', index=True,
+        compute='_compute_company_id', readonly=False, store=True)
+    user_id = fields.Many2one(
+        'res.users', string='Assignee', default=lambda self: self.env.user,
+        domain="[('share', '=', False)]",
+        check_company=True, index=True, tracking=True)
+    priority = fields.Selection(
+        AVAILABLE_PRIORITIES, string='Priority', index=True,
+        default=AVAILABLE_PRIORITIES[0][0])
+    stage_id = fields.Many2one(
+        'sale.estimate.stage', string='Stage', index=True, tracking=True,
+        group_expand='_read_group_stage_ids',
+        readonly=False, copy=False, ondelete='restrict')
+    tag_ids = fields.Many2many(
+        'crm.tag', 'estimate_tag_rel', 'estimate_id', 'tag_id', string='Tags',
+        help="Classify and analyze your estimates categories like: Training, Service")
+    color = fields.Integer('Color Index', default=0)
+    # Customer / contact
+    partner_id = fields.Many2one(
+        'res.partner', string='Customer', check_company=True, index=True, tracking=10,
+        domain="['|', ('company_id', '=', False), ('company_id', '=', company_id)]",
+        help="Linked partner (optional). Usually created when converting the lead. You can find a partner by its Name, TIN, Email or Internal Reference.")
+    contact_name = fields.Char(
+        'Contact Name', tracking=30,
+        compute='_compute_contact_name', readonly=False, store=True)
+    # Address fields
+    street = fields.Char('Street', compute='_compute_partner_address_values', readonly=False, store=True)
+    street2 = fields.Char('Street2', compute='_compute_partner_address_values', readonly=False, store=True)
+    zip = fields.Char('Zip', change_default=True, compute='_compute_partner_address_values', readonly=False,
+                      store=True)
+    city = fields.Char('City', compute='_compute_partner_address_values', readonly=False, store=True)
+    state_id = fields.Many2one(
+        "res.country.state", string='State',
+        compute='_compute_partner_address_values', readonly=False, store=True,
+        domain="[('country_id', '=?', country_id)]")
+    country_id = fields.Many2one(
+        'res.country', string='Country',
+        compute='_compute_partner_address_values', readonly=False, store=True)
+
+    opportunity_id = fields.Many2one('crm.lead')
+    product_lines = fields.One2many('sale.estimate.line', 'estimate_id')
+    purchase_agreement_count = fields.Integer(compute='_compute_purchase_agreement_data', string="Number of Purchase Agreements")
+    purchase_agreement_ids = fields.One2many('purchase.requisition', 'estimate_id', string='Purchase Agreements')
+    price_sheet_count = fields.Integer(compute='_compute_price_sheet_data',
+                                              string="Number of Price Sheets")
+    price_sheet_ids = fields.One2many('product.price.sheet', 'estimate_id', string='Price Sheets')
+    is_selected = fields.Boolean(compute="_compute_is_selected")
+
+    @api.depends('user_id')
+    def _compute_company_id(self):
+        """ Compute company_id coherency. """
+        for rec in self:
+            proposal = rec.company_id
+
+            # invalidate wrong configuration
+            if proposal:
+                # company not in responsible companies
+                if rec.user_id and proposal not in rec.user_id.company_ids:
+                    proposal = False
+
+            # propose a new company based on responsible
+            if not proposal:
+                if rec.user_id:
+                    proposal = rec.user_id.company_id & self.env.companies
+                else:
+                    proposal = False
+
+            # set a new company
+            if rec.company_id != proposal:
+                rec.company_id = proposal
+
+    @api.depends('partner_id')
+    def _compute_name(self):
+        for rec in self:
+            if not rec.name and rec.partner_id and rec.partner_id.name:
+                rec.name = _("%s's estimate") % rec.partner_id.name
+
+    @api.depends('partner_id')
+    def _compute_contact_name(self):
+        """ compute the new values when partner_id has changed """
+        for rec in self:
+            rec.update(rec._prepare_contact_name_from_partner(rec.partner_id))
+
+    def _prepare_contact_name_from_partner(self, partner):
+        contact_name = False if partner.is_company else partner.name
+        return {'contact_name': contact_name or self.contact_name}
+
+    @api.depends('partner_id')
+    def _compute_partner_address_values(self):
+        """ Sync all or none of address fields """
+        for rec in self:
+            rec.update(rec._prepare_address_values_from_partner(rec.partner_id))
+
+    def _prepare_address_values_from_partner(self, partner):
+        # Sync all address fields from partner, or none, to avoid mixing them.
+        if any(partner[f] for f in PARTNER_ADDRESS_FIELDS_TO_SYNC):
+            values = {f: partner[f] for f in PARTNER_ADDRESS_FIELDS_TO_SYNC}
+        else:
+            values = {f: self[f] for f in PARTNER_ADDRESS_FIELDS_TO_SYNC}
+        return values
+
+    @api.depends('product_lines', 'product_lines.selected')
+    def _compute_is_selected(self):
+        for rec in self:
+            rec.is_selected = all(rec.mapped('product_lines.selected'))
+
+    @api.depends('purchase_agreement_ids.state', 'purchase_agreement_ids')
+    def _compute_purchase_agreement_data(self):
+        for rec in self:
+            rec.purchase_agreement_count = len(rec.purchase_agreement_ids)
+
+    @api.depends('price_sheet_ids')
+    def _compute_price_sheet_data(self):
+        for rec in self:
+            rec.price_sheet_count = len(rec.price_sheet_ids)
+
+    def acton_select_all(self):
+        for rec in self:
+            rec.product_lines.write({'selected': True})
+            rec._compute_is_selected()
+
+    def acton_unselect_all(self):
+        for rec in self:
+            rec.product_lines.write({'selected': False})
+            rec._compute_is_selected()
+
+    def action_new_purchase_agreement(self):
+        action = self.env["ir.actions.actions"]._for_xml_id("regency_estimate.action_purchase_requisition_new")
+        selected_lines = self.product_lines.filtered(lambda l: l.selected)
+        action['context'] = {
+            'search_default_estimate_id': self.id,
+            'default_estimate_id': self.id,
+            'default_type_id': self.env.ref('purchase_requisition.type_multi').id,
+            'default_estimate_line_ids': [
+                Command.link(l.id) for l in selected_lines
+            ],
+            'default_line_ids': [
+                Command.create({
+                    'product_description_variants': p.name,
+                    'product_id': p.product_id.id,
+                    'product_qty': p.product_uom_qty,
+                    'product_uom_id': p.product_id.uom_id.id
+                }) for p in selected_lines]
+        }
+        selected_lines.write({'selected': False})
+        return action
+
+    def action_view_purchase_agreement(self):
+        action = self.env["ir.actions.actions"]._for_xml_id("purchase_requisition.action_purchase_requisition")
+        action['context'] = {
+            'default_estimate_id': self.id
+        }
+        action['domain'] = [('estimate_id', '=', self.id)]
+        if len(self.purchase_agreement_ids) == 1:
+            action['views'] = [(self.env.ref('purchase_requisition.view_purchase_requisition_form').id, 'form')]
+            action['res_id'] = self.purchase_agreement_ids.id
+        return action
+
+    def action_new_price_sheet(self):
+        action = self.env["ir.actions.actions"]._for_xml_id("regency_estimate.action_product_price_sheet_new")
+        confirmed_lines = self.purchase_agreement_ids.filtered(lambda a: a.state == 'done').mapped('line_ids')
+        preordered_products = self.product_lines.mapped(lambda l: (l.product_id, l.product_uom_qty))
+        new_lines = confirmed_lines.filtered(lambda l: (l.product_id, l.product_qty) not in preordered_products)
+        sheet_lines = []
+        for p in self.product_lines.sorted('sequence'):
+            seq = p.sequence
+            if p.display_type:
+                sheet_lines.append(Command.create({
+                    'name': p.name,
+                    'sequence': seq,
+                    'display_type': p.display_type
+                }))
+            else:
+                for line in confirmed_lines.filtered(lambda l: l.product_id == p.product_id
+                                                           and l.product_qty == p.product_uom_qty).sorted('product_qty'):
+                    sheet_lines.append(Command.create({
+                            'name': p.name,
+                            'sequence': seq,
+                            'product_id': p.product_id.id,
+                            'partner_id': line.partner_id.id,
+                            'min_quantity': line.product_qty,
+                            'vendor_price': line.price_unit,
+                            'price': line.price_unit * 1.6,
+                            'total': line.price_unit * 1.6 * line.product_qty,
+                            'display_type': p.display_type
+                        }))
+                    seq += 1
+        seq = self.product_lines.sorted('sequence')[-1].sequence
+        for l in new_lines:
+            sheet_lines.append(Command.create({
+                'name': l.product_description_variants,
+                'sequence': seq,
+                'product_id': l.product_id.id,
+                'partner_id': l.partner_id.id,
+                'min_quantity': l.product_qty,
+                'vendor_price': l.price_unit,
+                'price': l.price_unit * 1.6,
+                'total': l.price_unit * 1.6 * l.product_qty
+            }))
+            seq += 1
+
+        action['context'] = {
+            'search_default_estimate_id': self.id,
+            'default_estimate_id': self.id,
+            'default_item_ids': sheet_lines
+        }
+        return action
+
+    def action_view_price_sheet(self):
+        action = self.env["ir.actions.actions"]._for_xml_id("regency_estimate.action_product_price_sheet")
+        action['context'] = {
+            'default_estimate_id': self.id
+        }
+        action['domain'] = [('estimate_id', '=', self.id)]
+        if len(self.price_sheet_ids) == 1:
+            action['views'] = [(self.env.ref('regency_estimate.product_price_sheet_view_inherit').id, 'form')]
+            action['res_id'] = self.price_sheet_ids.id
+        return action
+
+    @api.model
+    def _read_group_stage_ids(self, stages, domain, order):
+        """ Read group customization in order to display all the stages in the
+            kanban view, even if they are empty
+        """
+        stage_ids = stages._search([], order=order, access_rights_uid=SUPERUSER_ID)
+        return stages.browse(stage_ids)
+
+
+class SaleEstimateLine(models.Model):
+    _name = 'sale.estimate.line'
+
+    name = fields.Text(string='Description', required=True)
+    sequence = fields.Integer("Sequence", default=10)
+    estimate_id = fields.Many2one('sale.estimate')
+    company_id = fields.Many2one(related='estimate_id.company_id')
+    product_id = fields.Many2one(
+        'product.product', string='Product', domain="[('sale_ok', '=', True), '|', ('company_id', '=', False), ('company_id', '=', company_id)]",
+        change_default=True, ondelete='restrict', check_company=True)  # Unrequired company
+    product_template_id = fields.Many2one(
+        'product.template', string='Product Template',
+        related="product_id.product_tmpl_id", domain=[('sale_ok', '=', True)], readonly=False, store=True)
+    product_custom_attribute_value_ids = fields.One2many('product.attribute.custom.value', 'estimate_product_line_id',
+                                                         string="Custom Values", copy=True)
+
+    # M2M holding the values of product.attribute with create_variant field set to 'no_variant'
+    # It allows keeping track of the extra_price associated to those attribute values and add them to the SO line description
+    product_no_variant_attribute_value_ids = fields.Many2many('product.template.attribute.value', string="Extra Values",
+                                                              ondelete='restrict')
+    is_configurable_product = fields.Boolean('Is the product configurable?',
+                                             related="product_template_id.has_configurable_attributes")
+    product_template_attribute_value_ids = fields.Many2many(related='product_id.product_template_attribute_value_ids',
+                                                            readonly=True)
+
+    product_uom_qty = fields.Float(string='Quantity', digits='Product Unit of Measure', required=True, default=1.0)
+    selected = fields.Boolean(default=False)
+    purchase_agreement_ids = fields.Many2many('purchase.requisition', 'sale_estimate_line_purchase_agreements_rel',
+                                     'estimate_line_id', 'purchase_agreement_id')
+    price_sheet_line_ids = fields.Many2many('product.price.sheet.line', 'product_price_sheet_line_sale_estimate_line_relation',
+                                            'sale_estimate_line_id', 'price_sheet_line_id')
+    display_type = fields.Selection([
+        ('line_section', "Section"),
+        ('line_note', "Note")], default=False, help="Technical field for UX purpose.")
+    comment = fields.Text('Comment')
+
+
+    @api.onchange('product_id')
+    def product_id_change(self):
+        self._update_description()
+
+    def _update_description(self):
+        if not self.product_id:
+            return
+        valid_values = self.product_id.product_tmpl_id.valid_product_template_attribute_line_ids.product_template_value_ids
+        # remove the is_custom values that don't belong to this template
+        for pacv in self.product_custom_attribute_value_ids:
+            if pacv.custom_product_template_attribute_value_id not in valid_values:
+                self.product_custom_attribute_value_ids -= pacv
+
+        # remove the no_variant attributes that don't belong to this template
+        for ptav in self.product_no_variant_attribute_value_ids:
+            if ptav._origin not in valid_values:
+                self.product_no_variant_attribute_value_ids -= ptav
+
+        product = self.product_id.with_context(
+            lang=get_lang(self.env, self.estimate_id.partner_id.lang).code,
+        )
+
+        self.update({'name': self.get_multiline_description_sale(product, self.product_template_attribute_value_ids)})
+
+    def get_multiline_description_sale(self, product, picked_attrs):
+        """ Compute a default multiline description for this product line.
+
+        In most cases the product description is enough but sometimes we need to append information that only
+        exists on the sale order line itself.
+        e.g:
+        - custom attributes and attributes that don't create variants, both introduced by the "product configurator"
+        - in event_sale we need to know specifically the sales order line as well as the product to generate the name:
+          the product is not sufficient because we also need to know the event_id and the event_ticket_id (both which belong to the sale order line).
+        """
+        # display the is_custom values
+        attrs_name = ''
+        for pacv in picked_attrs:
+            attrs_name += "\n" + pacv.with_context(lang=self.estimate_id.partner_id.lang).display_name
+        return product.get_product_multiline_description_sale() + attrs_name + self._get_multiline_description_variants()
+
+    def _get_multiline_description_variants(self):
+        """When using no_variant attributes or is_custom values, the product
+        itself is not sufficient to create the description: we need to add
+        information about those special attributes and values.
+
+        :return: the description related to special variant attributes/values
+        :rtype: string
+        """
+        if not self.product_custom_attribute_value_ids and not self.product_no_variant_attribute_value_ids:
+            return ""
+
+        name = "\n"
+
+        custom_ptavs = self.product_custom_attribute_value_ids.custom_product_template_attribute_value_id
+        no_variant_ptavs = self.product_no_variant_attribute_value_ids._origin
+
+        # display the no_variant attributes, except those that are also
+        # displayed by a custom (avoid duplicate description)
+        for ptav in (no_variant_ptavs - custom_ptavs):
+            name += "\n" + ptav.with_context(lang=self.estimate_id.partner_id.lang).display_name
+
+        # Sort the values according to _order settings, because it doesn't work for virtual records in onchange
+        custom_values = sorted(self.product_custom_attribute_value_ids,
+                               key=lambda r: (r.custom_product_template_attribute_value_id.id, r.id))
+        # display the is_custom values
+        for pacv in custom_values:
+            name += "\n" + pacv.with_context(lang=self.estimate_id.partner_id.lang).display_name
+
+        return name
+
+    def copy_item(self):
+        for rec in self:
+            rec.copy(default={})
+

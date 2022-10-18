@@ -1,0 +1,107 @@
+from odoo import fields, models, api
+from odoo.exceptions import UserError
+
+
+class ProductAttribute(models.Model):
+    _inherit = 'product.attribute'
+
+    _sql_constraints = [('name', 'unique(name)', 'Attribute name already exists!')]
+
+    @api.model
+    def _get_restricted_for_unlink(self):
+        return (
+            self.env.ref('regency_shopsite.overlay_attribute').id,
+            self.env.ref('regency_shopsite.color_attribute').id,
+            self.env.ref('regency_shopsite.size_attribute').id,
+        )
+
+    def unlink(self):
+        if self.env['ir.config_parameter'].sudo()\
+                .get_param('regency_shopsite.restricted_delete_default_attributes', '1') == '1':
+            if any(x in self._get_restricted_for_unlink() for x in self.ids):
+                raise UserError('Attribute is default!')
+        return super().unlink()
+
+
+class ProductAttributeValue(models.Model):
+    _inherit = 'product.attribute.value'
+
+    overlay_template_id = fields.Many2one('overlay.template', readonly=True)
+
+    def _check_overlay_template_id(self):
+        for rec in self:
+            if rec.overlay_template_id.exists():
+                raise UserError('Restricted! Attribute has overlay template!')
+
+    def write(self, values):
+        if 'overlay_template_id' in values:
+            self._check_overlay_template_id()
+        res = super(ProductAttributeValue, self).write(values)
+        return res
+
+    def unlink(self):
+        self._check_overlay_template_id()
+        return super(ProductAttributeValue, self).unlink()
+
+
+class ProductTemplateAttributeLine(models.Model):
+    _inherit = 'product.template.attribute.line'
+
+    def _compute_overlay_template_areas(self):
+        color_attribute_id = self.env.ref('regency_shopsite.color_attribute')
+        if color_attribute_id.id in self.mapped('attribute_id').ids:
+            overlay_template_ids = self.env['overlay.template'].search(
+                [('product_template_id', 'in', self.mapped('product_tmpl_id').ids)])
+            overlay_template_ids._compute_areas_json()
+
+    def _check_overlay_attribute(self):
+        overlay_attribute_id = self.env.ref('regency_shopsite.overlay_attribute')
+        if overlay_attribute_id.id in self.mapped('attribute_id').ids \
+                and not self._context.get('from_overlay_template'):
+            raise UserError('Overlay attribute line values possible to change only from overlay template')
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        res = super(ProductTemplateAttributeLine, self).create(vals_list)
+        res._check_overlay_attribute()
+        res._compute_overlay_template_areas()
+        return res
+
+    def write(self, values):
+        changed_value_ids = 'value_ids' in values
+        if changed_value_ids:
+            self._check_overlay_attribute()
+        res = super(ProductTemplateAttributeLine, self).write(values)
+        if changed_value_ids:
+            self._compute_overlay_template_areas()
+        return res
+
+    def unlink(self):
+        self._check_overlay_attribute()
+        return super(ProductTemplateAttributeLine, self).unlink()
+
+
+class ProductTemplateAttributeValue(models.Model):
+    _inherit = "product.template.attribute.value"
+
+    def _check_attribute_value_in_overlay_template(self):
+        overlay_attribute_id = self.env.ref('regency_shopsite.overlay_attribute')
+        for rec in self:
+            if not rec.product_tmpl_id.overlay_template_ids or rec.attribute_id.id == overlay_attribute_id.id:
+                continue
+            overlay_attribute_line_value_ids = rec.product_tmpl_id.overlay_template_ids\
+                .mapped('overlay_attribute_line_ids').mapped('value_ids')
+            if rec.product_attribute_value_id.id in overlay_attribute_line_value_ids.ids:
+                raise UserError(f'The attribute value "{rec.product_attribute_value_id.name}" is used in one of the '
+                                f'related overlay templates')
+
+    def unlink(self):
+        self._check_attribute_value_in_overlay_template()
+        return super(ProductTemplateAttributeValue, self).unlink()
+
+    def _get_combination_name(self):
+        """Exclude values from single value lines or from no_variant attributes."""
+        ptavs = self._without_no_variant_attributes().with_prefetch(self._prefetch_ids)
+        ptavs = ptavs._filter_single_value_lines().with_prefetch(self._prefetch_ids)
+        return ", ".join([ptav.product_attribute_value_id.overlay_template_id.name or ptav.name
+                          for ptav in ptavs])

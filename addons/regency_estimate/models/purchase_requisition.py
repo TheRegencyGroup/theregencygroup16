@@ -1,0 +1,105 @@
+from odoo import fields, models, api, Command
+
+
+class PurchaseRequisition(models.Model):
+    _inherit = 'purchase.requisition'
+
+    opportunity_id = fields.Many2one('crm.lead')
+    estimate_id = fields.Many2one('sale.estimate')
+    estimate_line_ids = fields.Many2many('sale.estimate.line', 'sale_estimate_line_purchase_agreements_rel',
+                                     'purchase_agreement_id', 'estimate_line_id')
+    color = fields.Integer('Color Index', compute='_compute_color')
+    customer_id = fields.Many2one(related='estimate_id.partner_id')
+    product_ids = fields.One2many('product.product', compute='_compute_product_ids')
+
+    def _compute_product_ids(self):
+        for rec in self:
+            rec.product_ids = self.env['product.product'].browse([line.product_id.id for line in rec.line_ids])
+
+    def _compute_color(self):
+        for rec in self:
+            if rec.state == 'in_progress':
+                rec.color = 7
+            elif rec.state == 'open':
+                rec.color = 3
+            elif rec.state == 'done':
+                rec.color = 10
+            else:
+                rec.color = 0
+
+    @api.depends('price_sheet_ids')
+    def _compute_price_sheet_data(self):
+        for lead in self:
+            lead.price_sheet_count = len(lead.price_sheet_ids)
+
+    def action_done(self):
+        """
+        Generate all purchase order based on selected lines, should only be called on one agreement at a time
+        """
+        # TODO: do we need this?
+        for requisition in self:
+            for requisition_line in requisition.line_ids:
+                requisition_line.supplier_info_ids.unlink()
+        self.write({'state': 'done'})
+
+    @api.depends('name', 'user_id')
+    def name_get(self):
+        res = []
+        for record in self:
+            name = record.name
+            if record.user_id:
+                name = record.user_id.name + ' ' + (name if name != 'New' else '#' + str(record.id))
+            res.append((record.id, name))
+        return res
+
+    @api.model
+    def create(self, vals):
+        res = super(PurchaseRequisition, self).create(vals)
+        for rec in res:
+            user_id = rec.user_id
+            if user_id:
+                rec.send_notification(user_id)
+        return res
+
+    def write(self, values):
+        res = super(PurchaseRequisition, self).write(values)
+        user_id = values.get('user_id')
+        if user_id:
+            for rec in self:
+                rec.send_notification(self.env['res.users'].browse(user_id))
+        return res
+
+    def send_notification(self, user_id, message=False):
+        if not message:
+            message = f'Purchase Requisition #' \
+                      f'<a href="/web#id={self.id}&amp;model={self._name}&amp;view_type=form">{self.name}</a>' \
+                      f' is assigned to you'
+        ch_obj = self.env['mail.channel']
+        ch_name = user_id.name + ', ' + self.env.user.name
+        ch = ch_obj.sudo().search([('name', 'ilike', str(ch_name))]) or ch_obj.sudo().search(
+            [('name', 'ilike', str(self.env.user.name + ', ' + user_id.name))])
+        if not ch and user_id != self.env.user:
+            ch = self.env['mail.channel'].create({
+                'name': user_id.name + ', ' + self.env.user.name,
+                'channel_partner_ids': [(4, user_id.partner_id.id)],
+                'public': 'private',
+                'channel_type': 'chat',
+            })
+        if ch:
+            ch.message_post(body=message, author_id=self.env.user.partner_id.id)
+
+    def action_in_progress(self):
+        super(PurchaseRequisition, self).action_in_progress()
+        self.send_notification(self.create_uid,
+                               message=f'User has confirmed Purchase Requisition #<a href="/web#id={self.id}&amp;'
+                                       f'model={self._name}&amp;view_type=form">{self.name}</a>')
+
+
+class PurchaseRequisitionLine(models.Model):
+    _inherit = 'purchase.requisition.line'
+
+    partner_id = fields.Many2one('res.partner', 'Vendor')
+
+    def copy_item(self):
+        for rec in self:
+            rec.copy()

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <template id="sale_order_portal_content_inherit_regency" name="Editable Quotation" inherit_id="sale_management.sale_order_portal_content_inherit_sale_management">
+
+        <xpath expr="//section[@id='details']//table[@id='sales_order_table']/thead/tr/th[last()]" position="after">
+            <th class="text-center"/>
+        </xpath>
+
+        <xpath expr="//section[@id='details']//t[@t-if='not line.display_type']/td[last()]" position="after">
+            <td>
+                <a class="btn btn-primary btn-block reorder_line" role="button" t-att-data-line-id="line.id">Reorder</a>
+            </td>
+        </xpath>
+
+    </template>
+
+</odoo>

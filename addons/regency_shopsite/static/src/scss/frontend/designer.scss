@@ -1,0 +1,140 @@
+.product_overlay_editor {
+  display: flex;
+  flex-direction: column;
+
+  .product_overlay_disabled {
+    pointer-events: none;
+    opacity: 0.5;
+  }
+
+  .product_overlay_editor_positions {
+
+    .product_overlay_position_editor {
+      display: flex;
+
+      .product_overlay_position_editor_tools {
+        padding-right: 5px;
+
+        input {
+          display: none;
+        }
+
+        label, button {
+          width: 40px;
+          height: 40px;
+          margin: 0 0 5px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border: none;
+          border-radius: 0.3rem;
+          background-color: theme-color('primary');
+          cursor: pointer;
+          outline: none;
+
+          &:hover {
+            background-color: darken(theme-color('primary'), 10);
+          }
+        }
+
+        i {
+          font-size: 25px;
+          line-height: 0;
+          color: #FFFFFF;
+        }
+
+        .product_overlay_position_remove_active_obj {
+          background-image: url(../../img/delete-icon.svg);
+          background-position: center;
+          background-size: 25px 25px;
+          background-repeat: no-repeat;
+        }
+      }
+
+      .product_overlay_position_container {
+        width: 500px;
+        height: 500px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        .product_overlay_position {
+          position: relative;
+
+          img {
+            width: 500px;
+            height: 500px;
+            object-fit: contain;
+            border: 1px solid theme-color('primary');
+            background-color: #ffffff;
+          }
+
+          .product_overlay_position_areas_container {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+
+            .product_overlay_area {
+              position: absolute;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  .product_overlay_editor_position_list {
+    margin-left: 45px;
+    margin-top: 10px;
+    display: flex;
+
+    &_item {
+      margin-right: 10px;
+      display: flex;
+      flex-direction: column;
+      background-color: #FFFFFF;
+      border: 1px solid theme-color('primary');
+      cursor: pointer;
+
+      &:last-child {
+        margin-right: 0;
+      }
+
+      &:hover {
+        border-color: darken(theme-color('primary'), 10);
+
+        span{
+          background-color: darken(theme-color('primary'), 10);
+        }
+      }
+
+      img {
+        width: 100px;
+        height: 100px;
+        object-fit: contain;
+      }
+
+      span {
+        width: 100%;
+        padding: 5px;
+        background-color: theme-color('primary');
+        font-size: 16px;
+        line-height: 19px;
+        color: #FFFFFF;
+        text-transform: uppercase;text-align: center;
+      }
+
+      &_selected {
+        box-shadow: 0 0 2px 2px transparentize(theme-color('primary'), 0.3);
+      }
+    }
+  }
+}
+
+li[data-attribute_name='Overlay'] {
+  .variant_custom_value {
+    display: none !important;
+  }
+}

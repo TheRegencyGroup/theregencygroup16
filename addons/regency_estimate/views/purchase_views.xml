@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<odoo>
+    <data>
+         <record id="sale_view_order_form_regency" model="ir.ui.view">
+            <field name="name">purchase.order.regency</field>
+            <field name="model">purchase.order</field>
+            <field name="inherit_id" ref="purchase.purchase_order_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//button[@id='bid_confirm']" position="replace">
+                    <button name="button_confirm" type="object" attrs="{'invisible': ['|', ('state', '!=', 'sent'), ('requisition_id', '!=', False), ] }" string="Confirm Order" class="oe_highlight" id="bid_confirm" data-hotkey="v"/>
+                    <button name="action_confirm_prices" type="object" attrs="{'invisible': ['|', ('state', 'not in', ['sent', 'draft']), ('requisition_id', '=', False), ] }" string="Confirm Prices" class="oe_highlight" id="prices_confirm" data-hotkey="v"/>
+                </xpath>
+                <xpath expr="//button[@id='draft_confirm']" position="replace">
+                     <button name="button_confirm" type="object" attrs="{'invisible': ['|', ('state', '!=', 'draft'), ('requisition_id', '!=', False), ] }" string="Confirm Order" id="draft_confirm"/>
+                </xpath>
+            </field>
+         </record>
+    </data>
+</odoo>

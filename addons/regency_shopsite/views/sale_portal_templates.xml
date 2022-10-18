@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="products_reorder" inherit_id="sale.sale_order_portal_template" name="ReorderProducts">
+        <xpath expr="//h2" position="after">
+            <a class="btn btn-primary btn-block mb8" role="button" id="reorder">Reorder</a>
+        </xpath>
+    </template>
+</odoo>

@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+      <record id="crm_lead_view_form" model="ir.ui.view">
+            <field name="name">crm.lead.form</field>
+            <field name="model">crm.lead</field>
+            <field name="inherit_id" ref="sale_crm.crm_case_form_view_oppor"/>
+             <field name="arch" type="xml">
+                <xpath expr="//button[@name='%(crm.crm_lead_lost_action)d']" position="replace">
+                </xpath>
+                <xpath expr="//button[@name='action_set_lost']" position="replace">
+                     <button name="%(crm.crm_lead_lost_action)d" string="Lost" data-hotkey="l" title="Mark as lost"
+                            type="action" context="{'default_lead_id': active_id}" attrs="{'invisible': [('active', '=', False),('probability', '&lt;', 100)]}"/>
+                </xpath>
+                <xpath expr="//widget[@name='web_ribbon']" position="after">
+                    <field name="contacted" invisible="1"/>
+                    <widget name="web_ribbon" title="Contacted" bg_color="bg-warning" attrs="{'invisible': ['|',('type', '=', 'opportunity'),'|',('contacted', '=', False),('active', '=', False)]}" />
+                </xpath>
+                <xpath expr="//field[@name='source_id']" position="replace"/>
+                <xpath expr="//group/group[@name='lead_partner']/field[@name='partner_id']" position="before">
+                    <field name="source_id"/>
+                </xpath>
+                <xpath expr="//group[@name='lead_priority']" position="after">
+                   <group name="opportunity_info" attrs="{'invisible': [('type', '=', 'opportunity')]}">
+                       <field name="lost_reason" attrs="{'invisible': [('active', '=', True)]}"/>
+                   </group>
+                </xpath>
+
+                 <xpath expr="//div[@id='probability']/.." position="replace"/>
+                 <xpath expr="//field[@name='lang_id']" position="replace"/>
+                 <xpath expr="//group[@name='lead_priority']/field[@name='priority']" position="replace"/>
+
+                 <xpath expr="//page[@name='extra']/group/group[last()]" position="after">
+                     <group string="Other">
+                         <div class="oe_edit_only d-flex align-items-center">
+                             <label for="probability"/>
+                             <button class="btn btn-link" name="action_set_automated_probability" type="object"
+                                     attrs="{'invisible': [('is_automated_probability', '=', True)]}">
+                                 <i class="fa fa-gear" role="img" title="Switch to automatic probability"
+                                    aria-label="Switch to automatic probability"/>
+                             </button>
+                             <small class="oe_grey h6 mb0"
+                                    attrs="{'invisible': [('is_automated_probability', '=', True)]}">
+                                 <field class="mb0" name="automated_probability" force_save="1"/> %
+                             </small>
+                         </div>
+                         <div id="probability" class="o_row d-flex">
+                             <field name="is_automated_probability" invisible="1"/>
+                             <field name="probability" widget="float" class="oe_inline"/>
+                             <span class="oe_grey"> %</span>
+                         </div>
+
+                         <field name="lang_id"/>
+                         <field name="priority" widget="priority"/>
+                     </group>
+                 </xpath>
+             </field>
+      </record>
+
+
+        <record id="crm_case_tree_view_leads" model="ir.ui.view">
+            <field name="name">crm.lead.tree.lead</field>
+            <field name="model">crm.lead</field>
+            <field name="inherit_id" ref="crm.crm_case_tree_view_leads"/>
+            <field name="arch" type="xml">
+                 <xpath expr="//field[@name='team_id']" position="after">
+                     <field name="contacted"/>
+                </xpath>
+            </field>
+        </record>
+
+</odoo>

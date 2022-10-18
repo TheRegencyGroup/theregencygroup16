@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="previous_prices_wizard_form" model="ir.ui.view">
+        <field name="name">previous.prices.wizard.form</field>
+        <field name="model">previous.prices.wizard</field>
+        <field name="arch" type="xml">
+            <form>
+            <field name="line_ids" readonly="1">
+                <tree>
+                    <field name="product_id"/>
+                    <field name="qty"/>
+                    <field name="price"/>
+                    <field name="date_order"/>
+                </tree>
+            </field>
+            <footer>
+                <button name="action_ok" string="Ok" type="object" default_focus="1" class="oe_highlight"/>
+            </footer>
+            </form>
+        </field>
+    </record>
+</odoo>

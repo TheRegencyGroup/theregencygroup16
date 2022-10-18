@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="res_partner_view_form" model="ir.ui.view">
+        <field name="name">regency.res.partner.view.form</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="arch" type="xml">
+
+            <xpath expr="//span[@name='address_name']" position="before">
+                <field name="dba_name"/>
+            </xpath>
+
+            <xpath expr="//field[@name='company_type']" position="after">
+                <group>
+                    <field name="contact_type" widget="radio" options="{'horizontal': true}"
+                           attrs="{'invisible': [('company_type', '!=', 'company')]}"/>
+                </group>
+            </xpath>
+
+
+            <xpath expr="//field[@name='phone']" position="after">
+                <field name="phone_extra"/>
+            </xpath>
+            <xpath expr="//field[@name='mobile']" position="after">
+                <field name="mobile_extra"/>
+            </xpath>
+
+            <xpath expr="//field[@name='website']" position="before">
+                <label for="other_phone" class="oe_inline"/>
+                <div class="o_row o_row_readonly">
+                    <field name="other_phone" widget="phone"/>
+                    <field name="other_phone_extra"/>
+                </div>
+            </xpath>
+
+            <xpath expr="//field[@name='category_id']" position="after">
+                <field name="cc_invoice" attrs="{'invisible': [('company_type', '=', 'company')]}"/>
+                <field name="on_hold"/>
+                <field name="default_shipping_percent"/>
+            </xpath>
+
+            <xpath expr="//field[@name='child_ids']" position="replace">
+                <field name="child_ids" context="{'default_is_company': False, 'default_company_type': 'person'}">
+                    <tree>
+                        <field name="name"/>
+                        <field name="email"/>
+                        <field name="type" string="Type"/>
+                        <field name="function"/>
+                        <field name="cc_invoice"/>
+                        <field name="is_company" invisible="1"/>
+                        <field name="company_type" invisible="1"/>
+                    </tree>
+                </field>
+            </xpath>
+
+            <xpath expr="//page[@name='internal_notes']" position="after">
+                <page name="associations" string="Associations">
+                    <field name="parent_ids" invisible="1"/>
+                    <field name="customer_association_ids">
+                        <tree editable="top">
+                            <field name="related_partner_id"></field>
+                            <field name="type"/>
+                            <field name="external_child_code"/>
+                            <field name="parent_partner_id" domain="[('id', '!=', parent.id), ('id', 'not in', parent.parent_ids)]"/>
+                            <field name="start_date"/>
+                            <field name="end_date"/>
+                        </tree>
+                    </field>
+                </page>
+                <page name="hotels" string="Hotels/Corporations" attrs="{'invisible': [('company_type', '!=', 'person')]}">
+                    <field name="hotel_ids" widget="many2many"/>
+                </page>
+                <page name="hotel_contacts" string="Hotel Contacts" attrs="{'invisible': [('company_type', '=', 'person')]}">
+                    <field name="hotel_contact_ids" widget="many2many"/>
+                </page>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_partner_tree" model="ir.ui.view">
+        <field name="name">regency.res.partner.tree</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='user_id']" position="after">
+                <field name="parent_ids" widget="many2many_tags"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="res_partner_view_search" model="ir.ui.view">
+        <field name="name">regency.res.partner.view.search</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_res_partner_filter"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='name']" position="replace">
+                <field name="name"
+                       filter_domain="['|', '|', '|', ('customer_association_ids.parent_partner_id.display_name', 'ilike', self), ('display_name', 'ilike', self), ('ref', '=', self), ('email', 'ilike', self)]"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="action_customers" model="ir.actions.act_window">
+        <field name="name">Customers</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">res.partner</field>
+        <field name="view_mode">kanban,tree,form,activity</field>
+        <field name="search_view_id" ref="base.view_res_partner_filter"/>
+        <field name="context">{'default_company_type': 'company', 'default_contact_type': 'customer'}</field>
+        <field name="domain">[('contact_type', '=', 'customer'), ('is_company', '=', True)]</field>
+    </record>
+
+    <record id="action_vendors" model="ir.actions.act_window">
+        <field name="name">Vendors</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">res.partner</field>
+        <field name="view_mode">kanban,tree,form,activity</field>
+        <field name="search_view_id" ref="base.view_res_partner_filter"/>
+        <field name="domain">[('contact_type', '=', 'vendor'), ('is_company', '=', True)]</field>
+        <field name="context">{'default_company_type': 'company', 'default_contact_type': 'vendor'}</field>
+    </record>
+
+    <menuitem id="res_partner_menu_customers"
+        name="Customers"
+        action="action_customers"
+        parent="contacts.res_partner_menu_contacts"
+        sequence="3"/>
+
+    <menuitem id="res_partner_menu_vendors"
+        name="Vendors"
+        action="action_vendors"
+        parent="contacts.res_partner_menu_contacts"
+        sequence="4"/>
+
+</odoo>

@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="res_partner_email_ext_tree_view" model="ir.ui.view">
+        <field name="name">res.partner.email.ext.tree</field>
+        <field name="model">res.partner.email.ext</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="email"/>
+                <field name="ext_customer_contact_id"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="res_partner_tags_ext_tree_view" model="ir.ui.view">
+        <field name="name">res.partner.tags.rel.ext.tree</field>
+        <field name="model">res.partner.tags.rel.ext</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="ext_customer_id"/>
+                <field name="ext_tag_id"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="action_partner_additional_emails" model="ir.actions.act_window">
+        <field name="name">Additional Emails</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">res.partner.email.ext</field>
+        <field name="view_mode">tree</field>
+    </record>
+
+       <record id="action_res_partner_tags_ext" model="ir.actions.act_window">
+        <field name="name">Tags Matching</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">res.partner.tags.rel.ext</field>
+        <field name="view_mode">tree</field>
+    </record>
+
+    <menuitem id="res_partner_menu_additional_emails"
+        name="Additional Imported Emails"
+        action="action_partner_additional_emails"
+        parent="contacts.res_partner_menu_config"
+        sequence="10"/>
+
+    <menuitem id="res_partner_menu_tags_matching"
+        name="Tags Matching"
+        action="action_res_partner_tags_ext"
+        parent="contacts.res_partner_menu_config"
+        sequence="10"/>
+
+
+</odoo>

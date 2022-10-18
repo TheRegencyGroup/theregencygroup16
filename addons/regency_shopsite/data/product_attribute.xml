@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+
+    <record id="overlay_attribute" model="product.attribute">
+        <field name="name">Overlay</field>
+        <field name="create_variant">dynamic</field>
+        <field name="display_type">radio</field>
+    </record>
+
+    <record id="color_attribute" model="product.attribute">
+        <field name="name">Color</field>
+        <field name="create_variant">always</field>
+        <field name="display_type">radio</field>
+    </record>
+
+    <record id="size_attribute" model="product.attribute">
+        <field name="name">Size</field>
+        <field name="create_variant">always</field>
+        <field name="display_type">radio</field>
+    </record>
+
+    <record id="customization_attribute" model="product.attribute">
+        <field name="name">Customization</field>
+        <field name="create_variant">dynamic</field>
+        <field name="display_type">radio</field>
+    </record>
+
+    <record id="no_customization_value" model="product.attribute.value">
+        <field name="name">No customization</field>
+        <field name="sequence">1</field>
+        <field name="attribute_id" ref="customization_attribute"/>
+    </record>
+
+    <record id="none_overlay_attribute_value" model="product.attribute.value">
+        <field name="name">None Overlay</field>
+        <field name="attribute_id" eval="ref('regency_shopsite.overlay_attribute')"/>
+    </record>
+
+</odoo>

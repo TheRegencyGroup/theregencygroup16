@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="overlay_position_tree_view" model="ir.ui.view">
+        <field name="name">overlay.position.view.tree</field>
+        <field name="model">overlay.position</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="overlay_position_form_view" model="ir.ui.view">
+        <field name="name">overlay.position.view.form</field>
+        <field name="model">overlay.position</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="overlay_position_action" model="ir.actions.act_window">
+        <field name="name">Overlay positions</field>
+        <field name="res_model">overlay.position</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <menuitem id="overlay_position_menuitem"
+              parent="sale.menu_sale_config"
+              action="overlay_position_action"/>
+
+</odoo>

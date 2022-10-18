@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<odoo>
+
+	<!-- PDF Report -->
+	<template id="inherit_template_report_saleorder_document"
+		inherit_id="sale.report_saleorder_document">
+
+		<xpath expr="//table[hasclass('o_main_table')]//th[1]" position="after">
+			<th class="text-left">Delivery Address</th>
+		</xpath>
+		<xpath expr="//tbody[hasclass('sale_tbody')]//t[@t-if='not line.display_type']//td[1]" position="after">
+			<td>
+				<span t-field="line.delivery_partner_id" />
+			</td>
+		</xpath>
+		<xpath expr="//t[@t-if='doc.partner_shipping_id != doc.partner_invoice_id']" position="replace">
+		</xpath>
+	</template>
+
+	<!-- Portal -->
+	<template id="inherit_sale_order_portal_content" inherit_id="sale.sale_order_portal_content">
+		<xpath expr="//table[@id='sales_order_table']//th[1]" position="after">
+			<th class="text-left">Delivery Address</th>
+		</xpath>
+		<xpath expr="//tbody[hasclass('sale_tbody')]//t[@t-if='not line.display_type']//td[1]" position="after">
+			<td>
+				<span t-field="line.delivery_partner_id" />
+			</td>
+		</xpath>
+		<xpath expr="//t[@t-if='sale_order.partner_shipping_id != sale_order.partner_invoice_id']" position="replace" />
+	</template>
+
+</odoo>
