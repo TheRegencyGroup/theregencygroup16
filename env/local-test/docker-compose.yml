@@ -1,0 +1,31 @@
+version: '2'
+services:
+  regency_test_web:
+    container_name: regency-test-web
+    image: regency_test_web
+    build: ../..
+    depends_on:
+      - regency_test_db
+    user: odoo
+    ports:
+      - "8019:8069"
+    volumes:
+      - ../../addons:/mnt/extra-addons
+      - ../../opsway/regency-enterprise:/mnt/opsway/regency-enterprise
+      - ./odoo-test.conf:/etc/odoo/odoo-test.conf
+    environment:
+      - HOST=regency-test-db
+      - USER=odoo
+      - PASSWORD=myodoo
+  regency_test_db:
+    container_name: regency-test-db
+    ports:
+      - "5445:5432"
+    image: postgres:14.5
+    environment:
+      - POSTGRES_USER=odoo
+      - POSTGRES_PASSWORD=myodoo
+      - POSTGRES_DB=postgres
+    volumes:
+      - /var/lib/postgresql/data
+
