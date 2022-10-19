@@ -344,6 +344,8 @@
                                 <span groups="account.group_show_line_subtotals_tax_included">Total Price</span>
                             </th>
                             <th class="text-center">Shipping options</th>
+                            <th class="text-center">Production Delay</th>
+                            <th class="text-center">Shipping Delay</th>
                             <th class="text-center">Order Type</th>
                         </tr>
                     </thead>
@@ -402,6 +404,12 @@
                                     <t t-if="line.insection_rownumber == 1">
                                            <td t-att-rowspan="line.insection_total_rows" class="text-center" id="shipping_options"><span t-field="line.shipping_options"/></td>
                                     </t>
+                                    <td>
+                                      <span t-field="line.production_lead_time"/>
+                                     </td>
+                                    <td>
+                                      <span t-field="line.shipping_lead_time"/>
+                                     </td>
                                     <td>
                                       <select  t-att-data-line-id="line.id" class="form-control js_price_sheet_selection_type">
                                             <option value="dropship" t-att-selected="line.consumption_type == 'dropship'">Dropship</option>
