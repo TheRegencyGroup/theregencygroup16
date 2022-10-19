@@ -28,7 +28,7 @@
                 </xpath>
                 <xpath expr="//group[@name='lead_priority']" position="after">
                    <group name="opportunity_info" attrs="{'invisible': [('type', '=', 'opportunity')]}">
-                       <field name="lost_reason" attrs="{'invisible': [('active', '=', True)]}"/>
+                       <field name="lost_reason_id" attrs="{'invisible': [('active', '=', True)]}"/>
                    </group>
                 </xpath>
 
