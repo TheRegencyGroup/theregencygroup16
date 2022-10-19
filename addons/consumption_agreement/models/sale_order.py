@@ -23,20 +23,6 @@ class SaleOrderLine(models.Model):
     qty_remaining = fields.Integer(related='consumption_agreement_line_id.qty_remaining')
     partner_id = fields.Many2one(related='order_id.partner_id')
 
-    @api.model
-    def create(self, vals):
-        res = super().create(vals)
-        res.link_overlay_to_product()
-        return res
-
-    def link_overlay_to_product(self):
-        for line in self:
-            attribute_ids = line.product_template_attribute_value_ids.mapped('attribute_id')
-            if self.env.ref('regency_shopsite.overlay_attribute') in attribute_ids and self.env.ref(
-                    'regency_shopsite.customization_attribute') in attribute_ids:
-                for overlay_product in line.product_template_id.overlay_template_ids.mapped('overlay_product_ids'):
-                    overlay_product.product_id = line.product_id.id
-
     @api.onchange('product_id')
     def product_id_change(self):
         super(SaleOrderLine, self).product_id_change()
