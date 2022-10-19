@@ -1,0 +1,4 @@
+[submodule "opsway/submodules/fe_owl_base"]
+	path = opsway/submodules/fe_owl_base
+	url = git@github.com:opsway/fe_owl_base.git
+	branch = v16.0.1.0
