@@ -2,22 +2,19 @@
 
 import { Overlay } from './overlay';
 
-const { Component } = owl;
-const { onMounted, onPatched, useState, useRef } = owl.hooks;
+const { Component, onMounted, onPatched, useState, useRef } = owl;
 
 const OVERLAY_AREAS_WIDGET_NAME = 'overlay_areas';
 const AREAS_TAB = 'areas_tab';
 const IMAGES_TAB = 'images_tab';
 
-export class OverlayAreasPositionComponent extends Component {
-    constructor(...args) {
-        super(...args);
-
+class OverlayAreasPositionComponent extends Component {
+    setup() {
         this.AREAS_TAB = AREAS_TAB;
         this.IMAGES_TAB = IMAGES_TAB;
 
-        onPatched(this.onPatched.bind(this));
-        onMounted(this.onMounted.bind(this));
+        onPatched(this.onPatched);
+        onMounted(this.onMounted);
 
         this.state = useState({
             imageLoad: false,
@@ -187,8 +184,8 @@ export class OverlayAreasPositionComponent extends Component {
         }
     }
 
-    onClickChangeColorImage(colorId, event) {
-        this.trigger('change-overlay-image', {
+    onClickChangeColorImage(colorId) {
+        this.props.changeOverlayImage({
             id: this.props.overlayPositionId,
             colorId,
         });
@@ -207,6 +204,11 @@ OverlayAreasPositionComponent.props = {
     areaList: Object,
     editMode: Boolean,
     colorImages: Object,
+    changeOverlayImage: Function,
 }
 
 OverlayAreasPositionComponent.template = 'overlay_areas_position'
+
+export {
+    OverlayAreasPositionComponent,
+}
