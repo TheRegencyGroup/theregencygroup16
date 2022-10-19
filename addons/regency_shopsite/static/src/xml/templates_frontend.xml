@@ -4,14 +4,14 @@
     <t t-name="product_overlay_editor" owl="1">
         <div class="product_overlay_editor">
             <div class="product_overlay_editor_positions">
-                <t t-foreach="Object.values(store.overlayPositions)" t-as="overlay_position" t-key="overlay_position.id">
+                <t t-foreach="Object.values(overlayPositions)" t-as="overlay_position" t-key="overlay_position.id">
                     <div t-att-class="{ 'd-none': state.selectedOverlayPositionId !== overlay_position.id }">
                         <ProductOverlayPositionComponent overlayPosition="overlay_position"/>
                     </div>
                 </t>
             </div>
             <div class="product_overlay_editor_position_list">
-                <t t-foreach="Object.values(store.overlayPositions)" t-as="overlay_position" t-key="overlay_position.id">
+                <t t-foreach="Object.values(overlayPositions)" t-as="overlay_position" t-key="overlay_position.id">
                     <div class="product_overlay_editor_position_list_item"
                          t-att-class="{ 'product_overlay_editor_position_list_item_selected': state.selectedOverlayPositionId === overlay_position.id }"
                          t-on-click="onClickSelectOverlayPosition(overlay_position.id)">
@@ -62,14 +62,14 @@
                 <ProductOverlayEditorComponent/>
             </div>
             <div>
-                <h1>Product: <t t-esc="store.data.productName"/></h1>
-                <h2>Overlay: <t t-esc="store.data.overlayTemplateName"/></h2>
+                <h1>Product: <t t-esc="store.productName"/></h1>
+                <h2>Overlay: <t t-esc="store.overlayTemplateName"/></h2>
                 <p>
                     Description:<br/>
-                    <t t-esc="store.data.productDescription"/>
+                    <t t-esc="store.productDescription"/>
                 </p>
                 <div>
-                    <t t-foreach="Object.values(store.data.attributeList)" t-as="attribute" t-key="attribute.id">
+                    <t t-foreach="Object.values(store.attributeList)" t-as="attribute" t-key="attribute.id">
                         <div>
                             <h2><t t-esc="attribute.name"/></h2>
                             <t t-foreach="Object.values(attribute.valueList)" t-as="value" t-key="value.id">

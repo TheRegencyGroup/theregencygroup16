@@ -1,5 +1,7 @@
 /** @odoo-module **/
 
+import { useStore } from "@fe_owl_base/js/main";
+import { OVERLAY_TEMPLATE_PAGE_KEY } from "./store";
 import {
     ELLIPSE_AREA_TYPE,
     RECTANGLE_AREA_TYPE,
@@ -8,11 +10,8 @@ import {
 import { RectangleArea } from './rectangle_area';
 import { EllipseArea } from './ellipse_area';
 import { TextArea } from './text_area';
-import {OVERLAY_TEMPLATE_PAGE_KEY} from "./store";
-import {env} from "../base/main";
 
-const { Component } = owl;
-const { onMounted, onPatched, useState, useStore, useRef } = owl.hooks;
+const { Component, onMounted, onPatched, useState, useRef } = owl;
 
 export class ProductOverlayPositionComponent extends Component {
     constructor(...args) {
@@ -21,15 +20,7 @@ export class ProductOverlayPositionComponent extends Component {
         onPatched(this.onPatched.bind(this));
         onMounted(this.onMounted.bind(this));
 
-        this.store = useStore(state => {
-            const selectedAttributeValues = state[OVERLAY_TEMPLATE_PAGE_KEY].selectedAttributeValues;
-            const colorAttributeId = state[OVERLAY_TEMPLATE_PAGE_KEY].data.colorAttributeId;
-            return {
-                colorValueId: selectedAttributeValues[colorAttributeId].valueId,
-            }
-        }, {
-            store: env.store,
-        });
+        this.store = useStore()[OVERLAY_TEMPLATE_PAGE_KEY];
 
         this.state = useState({
             imageSrc: null,

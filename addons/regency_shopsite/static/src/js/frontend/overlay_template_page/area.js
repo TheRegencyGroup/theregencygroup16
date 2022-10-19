@@ -6,7 +6,7 @@ import {
     TEXT_AREA_TYPE,
 } from '../../main';
 
-const { useState } = owl.hooks;
+const { useState } = owl;
 
 export class Area {
 

@@ -1,10 +1,9 @@
 /** @odoo-module **/
 
-import { env, addStore } from '../base/main';
-import Dialog from 'web.Dialog';
+import { Store } from '@fe_owl_base/js/main';
+import { patch } from "web.utils";
 
 const OVERLAY_TEMPLATE_PAGE_KEY = 'overlay_template_page_key';
-const CHANGE_ATTRIBUTE_VALUE_ACTION = 'change_attribute_value_action';
 
 const overlayTemplatePageData = PRELOADED_DATA?.OVERLAY_TEMPLATE_PAGE_DATA;
 if (overlayTemplatePageData) {
@@ -22,22 +21,28 @@ if (overlayTemplatePageData) {
         }
         return res;
     }
-    const actions = {
-        [CHANGE_ATTRIBUTE_VALUE_ACTION] ({state}, attributeId, valueId) {
-            state[OVERLAY_TEMPLATE_PAGE_KEY].selectedAttributeValues[attributeId].valueId = valueId;
-        },
-    };
-    const state = {
+
+    patch(Store.prototype, 'overlay_product_page', {
         [OVERLAY_TEMPLATE_PAGE_KEY]: {
-            data: overlayTemplatePageData,
+            ...overlayTemplatePageData,
             selectedAttributeValues: getSelectedAttributeValues(),
         },
-    };
-    addStore(actions, state);
+        get overlayPositions() {
+            return this[OVERLAY_TEMPLATE_PAGE_KEY].overlayTemplateAreasData?.overlayPositions || {};
+        },
+        get colorValueId() {
+            const selectedAttributeValues = this[OVERLAY_TEMPLATE_PAGE_KEY].selectedAttributeValues;
+            const colorAttributeId = this[OVERLAY_TEMPLATE_PAGE_KEY].colorAttributeId;
+            return {
+                colorValueId: selectedAttributeValues[colorAttributeId].valueId,
+            }
+        },
+        changeAttributeValueAction (attributeId, valueId) {
+            this[OVERLAY_TEMPLATE_PAGE_KEY].selectedAttributeValues[attributeId].valueId = valueId;
+        },
+    });
 }
 
 export {
     OVERLAY_TEMPLATE_PAGE_KEY,
-    CHANGE_ATTRIBUTE_VALUE_ACTION,
 }
-

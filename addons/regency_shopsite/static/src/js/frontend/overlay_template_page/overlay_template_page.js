@@ -1,35 +1,15 @@
 /** @odoo-module **/
 
-import { env, mountComponentAsWidget } from '../base/main';
-import {
-    OVERLAY_TEMPLATE_PAGE_KEY,
-    CHANGE_ATTRIBUTE_VALUE_ACTION,
-} from './store';
+import { mountComponentAsWidget, useStore } from '@fe_owl_base/js/main';
+import { OVERLAY_TEMPLATE_PAGE_KEY } from './store';
 import { ProductOverlayEditorComponent } from './product_overlay_editor';
 
-const { Component } = owl;
-const { useStore, useState, useDispatch } = owl.hooks;
+const { Component, useState } = owl;
 
 export class OverlayTemplatePageComponent extends Component {
-    constructor (...args) {
-        super(...args);
-
-        this.dispatch = useDispatch();
-
-        this.store = useStore(state => ({
-            data: state[OVERLAY_TEMPLATE_PAGE_KEY].data,
-            selectedAttributeValues: state[OVERLAY_TEMPLATE_PAGE_KEY].selectedAttributeValues,
-        }), {
-            store: env.store,
-        });
-
-        this.state = useState({
-
-        });
-    }
-
-    onChangeAttributeValue(attributeId, valueId, event) {
-        this.dispatch(CHANGE_ATTRIBUTE_VALUE_ACTION, attributeId, valueId);
+    setup() {
+        this.store = useStore()[OVERLAY_TEMPLATE_PAGE_KEY];
+        this.state = useState({});
     }
 }
 
