@@ -1,10 +1,9 @@
 {
     'name': 'Regency Shopsite',
-    'version': '15.0.0.2',
+    'version': '16.0.0.2',
     'author': 'OpsWay',
     'depends': [
         'website_sale',
-        'regency_contacts',
     ],
     'data': [
         'security/ir.model.access.csv',
@@ -14,7 +13,6 @@
         'data/ir_config_parameter.xml',
         'views/sale_order_view.xml',
         'views/web_layout.xml',
-        'views/website_product_page.xml',
         'views/website_cart_lines.xml',
         'views/website_variant_templates.xml',
         'views/website_overlay_template_page.xml',
@@ -27,19 +25,17 @@
     ],
     'assets': {
         'web.assets_frontend': [
-            'regency_shopsite/static/lib/*.js',
-            'regency_shopsite/static/src/js/main.js',
-            'regency_shopsite/static/src/js/frontend/**/*.js',
-            'regency_shopsite/static/src/js/frontend/**/**/*.js',
-            'regency_shopsite/static/src/scss/frontend/*.scss',
+            # 'regency_shopsite/static/lib/*.js',
+            # 'regency_shopsite/static/src/js/main.js',
+            # 'regency_shopsite/static/src/js/frontend/**/*.js',
+            # 'regency_shopsite/static/src/js/frontend/**/**/*.js',
+            # 'regency_shopsite/static/src/scss/frontend/*.scss',
         ],
         'web.assets_backend': [
             'regency_shopsite/static/lib/*.js',
             'regency_shopsite/static/src/js/main.js',
             'regency_shopsite/static/src/js/backend/*.js',
             'regency_shopsite/static/src/scss/backend/*.scss',
-        ],
-        'web.assets_qweb': [
             'regency_shopsite/static/src/xml/*.xml',
         ],
     },

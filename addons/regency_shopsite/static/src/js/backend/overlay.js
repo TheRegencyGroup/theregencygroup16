@@ -6,22 +6,17 @@ import {
     TEXT_AREA_TYPE,
 } from '../main';
 
-const { useState } = owl.hooks;
-
 const DEFAULT_TEXT_AREA_FONT_SIZE = 14;
 const DEFAULT_TEXT_AREA_NUMBER_LINES = 1;
 const DEFAULT_TEXT_FONT = 'Arial';
 
-export class Overlay {
-
+class Overlay {
     constructor(target, areaList) {
         this.canvas = new fabric.Canvas(target);
 
-        this.state = useState({
-            areaList: areaList || {},
-        });
+        this.areaList_ = areaList || {};
 
-        for (let area of Object.values(this.state.areaList)) {
+        for (let area of Object.values(this.areaList_)) {
             if (area.areaType === RECTANGLE_AREA_TYPE) {
                 area.object = this.createRectangle(area.index, area.data, false);
             } else if (area.areaType === ELLIPSE_AREA_TYPE) {
@@ -33,7 +28,7 @@ export class Overlay {
     }
 
     set selectable(state) {
-        for (let area of Object.values(this.state.areaList)) {
+        for (let area of Object.values(this.areaList_)) {
             area.object.selectable = state;
         }
     }
@@ -43,7 +38,7 @@ export class Overlay {
     }
 
     get areaList() {
-        return this.state.areaList;
+        return this.areaList_;
     }
 
     get sizeForNewArea() {
@@ -51,7 +46,7 @@ export class Overlay {
     }
 
     get newAreaIndex() {
-        let areaListKeys = Object.keys(this.state.areaList).map(e => parseInt(e));
+        let areaListKeys = Object.keys(this.areaList_).map(e => parseInt(e));
         return (areaListKeys.length ? Math.max(...areaListKeys) : 0) + 1;
     }
 
@@ -181,11 +176,11 @@ export class Overlay {
     onObjectModified(event) {
         let object = event.target;
         if (object.areaType === RECTANGLE_AREA_TYPE) {
-            this.state.areaList[object.areaIndex].data = this.getRectangleObjData(object);
+            this.areaList_[object.areaIndex].data = this.getRectangleObjData(object);
         } else if (object.areaType === ELLIPSE_AREA_TYPE) {
-            this.state.areaList[object.areaIndex].data = this.getEllipseObjData(object);
+            this.areaList_[object.areaIndex].data = this.getEllipseObjData(object);
         } else if (object.areaType === TEXT_AREA_TYPE) {
-            this.state.areaList[object.areaIndex].data = this.getTextObjData(object);
+            this.areaList_[object.areaIndex].data = this.getTextObjData(object);
         }
     }
 
@@ -196,7 +191,7 @@ export class Overlay {
     addRectangleArea() {
         let index = this.newAreaIndex;
         let object = this.createRectangle(index, {}, true);
-        this.state.areaList[index] = {
+        this.areaList_[index] = {
             object,
             index,
             areaType: RECTANGLE_AREA_TYPE,
@@ -207,7 +202,7 @@ export class Overlay {
     addEllipseArea() {
         let index = this.newAreaIndex;
         let object = this.createEllipse(index, {}, true);
-        this.state.areaList[index] = {
+        this.areaList_[index] = {
             object,
             index,
             areaType: ELLIPSE_AREA_TYPE,
@@ -218,7 +213,7 @@ export class Overlay {
     addTextArea() {
         let index = this.newAreaIndex;
         let object = this.createTextRectangle(index, {}, true);
-        this.state.areaList[index] = {
+        this.areaList_[index] = {
             object,
             index,
             areaType: TEXT_AREA_TYPE,
@@ -227,7 +222,7 @@ export class Overlay {
     }
 
     changeTextAreaFontSize(areaIndex, newFontSize) {
-        let area = this.state.areaList[areaIndex];
+        let area = this.areaList_[areaIndex];
         area.object.textAreaFontSize = newFontSize;
         area.object.set('height', this.getTextLineHeight(newFontSize, area.object.textAreaFont) * area.object.textAreaNumberOfLines);
         area.data = this.getTextObjData(area.object);
@@ -235,7 +230,7 @@ export class Overlay {
     }
 
     changeTextAreaNumberOfLines(areaIndex, newNumberOfLines) {
-        let area = this.state.areaList[areaIndex];
+        let area = this.areaList_[areaIndex];
         area.object.textAreaNumberOfLines = newNumberOfLines;
         area.object.set('height', newNumberOfLines * this.getTextLineHeight(area.object.textAreaFontSize, area.object.textAreaFont));
         area.data = this.getTextObjData(area.object);
@@ -243,7 +238,7 @@ export class Overlay {
     }
 
     changeTextAreaFont(areaIndex, font) {
-        let area = this.state.areaList[areaIndex];
+        let area = this.areaList_[areaIndex];
         area.object.textAreaFont = font;
         area.object.set('height', area.object.textAreaNumberOfLines * this.getTextLineHeight(area.object.textAreaFontSize, area.object.textAreaFont));
         area.data = this.getTextObjData(area.object);
@@ -252,23 +247,27 @@ export class Overlay {
 
     removeArea(areaIndex) {
         this.canvas.remove(this.getAreaObjectByIndex(areaIndex));
-        delete this.state.areaList[areaIndex];
+        delete this.areaList_[areaIndex];
     }
 
     selectArea(areaIndex) {
-        this.canvas.setActiveObject(this.state.areaList[areaIndex].object).renderAll();
+        this.canvas.setActiveObject(this.areaList_[areaIndex].object).renderAll();
     }
 
     highlightArea(areaIndex) {
-        for (let area of Object.values(this.state.areaList)) {
+        for (let area of Object.values(this.areaList_)) {
             area.object.set('fill', '#0000003D');
         }
-        this.state.areaList[areaIndex].object.set('fill', '#E5112473');
+        this.areaList_[areaIndex].object.set('fill', '#E5112473');
         this.canvas.renderAll();
     }
 
     destroy () {
         this.canvas.dispose();
-        this.state.areaList = {};
+        this.areaList_ = {};
     }
+}
+
+export {
+    Overlay,
 }

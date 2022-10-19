@@ -1,4 +1,12 @@
-.form_view_with_design_areas {
+.form_view_for_overlay_template {
+  .o_cp_pager {
+    display: none !important;
+  }
+
+  .o_form_button_create {
+    display: none !important;
+  }
+
   .o_form_sheet {
     min-width: 1275px;
   }
@@ -9,14 +17,23 @@
     }
   }
 
+  .o_field_overlay_areas {
+    width: 100%;
+    margin-top: -33px;
+    display: flex;
+    flex-direction: column;
+    align-items: end;
+  }
+
   .overlay_template_widget {
     width: 100%;
+    margin-top: 33px;
 
     .ot_areas_position {
       margin-top: 16px;
       display: flex;
       flex-direction: column;
-      border: 1px solid theme-color('primary');
+      border: 1px solid map-get($theme-colors, 'primary');
       background-color: #f6f7fa;
 
       &_header {
@@ -24,7 +41,7 @@
         display: flex;
         align-items: center;
         justify-content: space-between;
-        background-color: theme-color('primary');
+        background-color: map-get($theme-colors, 'primary');
         font-size: 18px;
         line-height: 18px;
         color: #FFFFFF;
@@ -73,7 +90,7 @@
               width: 500px;
               height: 500px;
               object-fit: contain;
-              border: 1px solid theme-color('primary');
+              border: 1px solid map-get($theme-colors, 'primary');
               background-color: #ffffff;
             }
 
@@ -95,7 +112,7 @@
               div {
                 display: flex;
                 flex-direction: column;
-                border: 1px solid theme-color('primary');
+                border: 1px solid map-get($theme-colors, 'primary');
                 background-color: #FFFFFF;
 
                 img {
@@ -108,7 +125,7 @@
                   width: 100%;
                   height: auto;
                   padding: 4px;
-                  background-color: theme-color('primary');
+                  background-color: map-get($theme-colors, 'primary');
                   color: #FFFFFF;
                   text-align: center;
                   text-transform: uppercase;
@@ -128,7 +145,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            border: 1px solid theme-color('primary');
+            border: 1px solid map-get($theme-colors, 'primary');
             background-color: #FFFFFF;
           }
 
@@ -146,7 +163,7 @@
               cursor: pointer;
 
               &_selected, &:hover {
-                background-color: theme-color('primary');
+                background-color: map-get($theme-colors, 'primary');
               }
 
               &_index {
@@ -201,7 +218,7 @@
                 border-left: 1px solid #f6f7fa;
 
                 &:hover {
-                  background-color: darken(theme-color('primary'), 10);
+                  background-color: darken(map-get($theme-colors, 'primary'), 10);
                 }
               }
             }
@@ -216,7 +233,7 @@
           .ot_images_tab_color_image_container {
             display: flex;
             flex-direction: column;
-            border: 1px solid theme-color('primary');
+            border: 1px solid map-get($theme-colors, 'primary');
 
             .ot_images_tab_color_image {
               position: relative;
@@ -249,7 +266,7 @@
 
             .ot_images_tab_color_image_name {
               padding: 8px;
-              background-color: theme-color('primary');
+              background-color: map-get($theme-colors, 'primary');
               font-size: 16px;
               line-height: 16px;
               font-weight: 500;
@@ -285,7 +302,7 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      background-color: theme-color('primary');
+      background-color: map-get($theme-colors, 'primary');
       color: #FFFFFF;
 
       span {
@@ -320,7 +337,7 @@
         width: 200px;
         height: 200px;
         object-fit: contain;
-        border: 1px solid theme-color('primary');
+        border: 1px solid map-get($theme-colors, 'primary');
         cursor: pointer;
         display: flex;
         flex-direction: column;
