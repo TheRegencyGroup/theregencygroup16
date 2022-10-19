@@ -1,6 +1,6 @@
 {
     'name': 'Regency CRM',
-    'version': '16.0.0.1',
+    'version': '15.0.0.7',
     'summary': '',
     'author': 'OpsWay',
     'description': "",
