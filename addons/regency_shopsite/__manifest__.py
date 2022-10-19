@@ -2,6 +2,7 @@
     'name': 'Regency Shopsite',
     'version': '16.0.0.2',
     'author': 'OpsWay',
+    'license': "Other proprietary",
     'depends': [
         'website_sale',
         'fe_owl_base',
