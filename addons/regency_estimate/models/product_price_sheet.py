@@ -137,7 +137,7 @@ class ProductPriceSheet(models.Model):
     def _prepare_supplier_info(self, partner, line, price, currency):
         # Prepare supplierinfo data when adding a product
         return {
-            'name': partner.id,
+            'partner_id': partner.id,
             'sequence': max(line.product_id.seller_ids.mapped('sequence')) + 1 if line.product_id.seller_ids else 1,
             'min_qty': line.min_quantity,
             'price': price,
@@ -149,7 +149,7 @@ class ProductPriceSheet(models.Model):
         for line in self.mapped('item_ids'):
             # Do not add a contact as a supplier
             partner = line.partner_id
-            if line.product_id and partner and partner not in line.product_id.seller_ids.mapped('name') and len(
+            if line.product_id and partner and partner not in line.product_id.seller_ids.mapped('partner_id') and len(
                     line.product_id.seller_ids) <= 10:
                 # Convert the price in the right currency.
                 currency = partner.property_purchase_currency_id or self.env.company.currency_id
@@ -317,10 +317,6 @@ class ProductPriceSheet(models.Model):
     def onchange_price(self):
         for rec in self:
             rec.total = rec.price * rec.min_quantity
-
-    def copy_item(self):
-        for rec in self:
-            rec.copy()
 
     def _compute_max_quantity(self):
         prev_rec = False

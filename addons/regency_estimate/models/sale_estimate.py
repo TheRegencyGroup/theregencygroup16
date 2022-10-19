@@ -163,7 +163,7 @@ class SaleEstimate(models.Model):
         action['context'] = {
             'search_default_estimate_id': self.id,
             'default_estimate_id': self.id,
-            'default_type_id': self.env.ref('purchase_requisition.type_multi').id,
+            'default_type_id': self.env.ref('regency_estimate.type_multi').id,
             'default_estimate_line_ids': [
                 Command.link(l.id) for l in selected_lines
             ],
@@ -365,8 +365,3 @@ class SaleEstimateLine(models.Model):
             name += "\n" + pacv.with_context(lang=self.estimate_id.partner_id.lang).display_name
 
         return name
-
-    def copy_item(self):
-        for rec in self:
-            rec.copy(default={})
-
