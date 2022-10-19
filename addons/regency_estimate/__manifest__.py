@@ -5,7 +5,7 @@
     'author': 'OpsWay',
     'description': "",
     'depends': [
-        'crm',
+        'sale_crm',
         'product_copy_template',
         'sale_product_configurator',
         'purchase_requisition',
