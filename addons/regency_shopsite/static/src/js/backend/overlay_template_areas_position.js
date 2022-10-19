@@ -1,8 +1,8 @@
 /** @odoo-module **/
 
-import { Overlay } from './overlay';
+import {Overlay} from './overlay';
 
-const { Component, onMounted, onPatched, useState, useRef } = owl;
+const {Component, onMounted, onPatched, useState, useRef} = owl;
 
 const OVERLAY_AREAS_WIDGET_NAME = 'overlay_areas';
 const AREAS_TAB = 'areas_tab';
@@ -35,6 +35,7 @@ class OverlayAreasPositionComponent extends Component {
 
     onMounted() {
         this.setImageOnloadCallback();
+        // TODO: implement proper solution
         this.updateCanvas(); //TEMPORARY!!!!!!!!!!!!!!!
         let image = this.getImageForOverlay();
         if (image) {
@@ -79,7 +80,7 @@ class OverlayAreasPositionComponent extends Component {
                 imageModel = image.imageModel;
             }
         }
-        this.state.currentData = { imageId, imageModel };
+        this.state.currentData = {imageId, imageModel};
     }
 
     getImageForOverlay() {
@@ -110,16 +111,16 @@ class OverlayAreasPositionComponent extends Component {
             this.overlay.destroy();
         }
         // if (this.imageRef.el) {
-            // this.canvasRef.el.width = this.imageRef.el.clientWidth;
-            // this.canvasRef.el.height = this.imageRef.el.clientHeight;
-            this.canvasRef.el.width = 500;
-            this.canvasRef.el.height = 500;
+        // this.canvasRef.el.width = this.imageRef.el.clientWidth;
+        // this.canvasRef.el.height = this.imageRef.el.clientHeight;
+        this.canvasRef.el.width = 500;
+        this.canvasRef.el.height = 500;
 
-            this.overlay = new Overlay(this.canvasRef.el, this.props.areaList);
-            this.overlay.selectable = this.props.editMode;
-            this.overlay.onSelectedArea = (areaIndex) => {
-                this.state.selectedAreaIndex = areaIndex;
-            };
+        this.overlay = new Overlay(this.canvasRef.el, this.props.areaList);
+        this.overlay.selectable = this.props.editMode;
+        this.overlay.onSelectedArea = (areaIndex) => {
+            this.state.selectedAreaIndex = areaIndex;
+        };
         // }
     }
 

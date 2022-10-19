@@ -1,12 +1,5 @@
 /** @odoo-module **/
 
-import {
-    ELLIPSE_AREA_TYPE,
-    RECTANGLE_AREA_TYPE,
-    TEXT_AREA_TYPE,
-} from '../../main';
-
-const { useState } = owl;
 
 export class Area {
 
@@ -20,13 +13,17 @@ export class Area {
         this.init();
     }
 
-    init() {}
+    init() {
+    }
 
-    get newImageObjectWidth() {}
+    get newImageObjectWidth() {
+    }
 
-    get newImageObjectHeight() {}
+    get newImageObjectHeight() {
+    }
 
-    getMaskObject() {}
+    getMaskObject() {
+    }
 
     createMask() {
         let object = this.getMaskObject();
@@ -111,11 +108,11 @@ export class Area {
         this.clipMask();
     }
 
-    removeActiveObject(){
+    removeActiveObject() {
         this.canvas.remove(this.canvas.getActiveObject());
     }
 
-    removeAllObjects(){
+    removeAllObjects() {
         this.canvas.clear();
         this.createMask();
         this.selectedArea();
@@ -125,7 +122,7 @@ export class Area {
         this.canvas.discardActiveObject().renderAll();
         this.removeMask();
         this.unselectedArea();
-        return await new Promise((resolve) => {
+        return new Promise((resolve) => {
             this.canvasEl.toBlob((blob) => {
                 this.createMask();
                 this.clipMask();
@@ -147,7 +144,8 @@ export class Area {
         });
     }
 
-    reInit() {}
+    reInit() {
+    }
 
     checkAreas() {
         let objects = this.canvas.getObjects();
@@ -156,7 +154,7 @@ export class Area {
         return !!objects.length;
     }
 
-    destroy () {
+    destroy() {
         this.canvas.dispose();
     }
 }

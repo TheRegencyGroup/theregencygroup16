@@ -1,11 +1,11 @@
 /** @odoo-module **/
 
-import { useStore } from '@fe_owl_base/js/main';
-import { OVERLAY_TEMPLATE_PAGE_KEY } from './store';
-import { ProductOverlayPositionComponent } from './product_overlay_position';
+import {useStore} from '@fe_owl_base/js/main';
+import {OVERLAY_TEMPLATE_PAGE_KEY} from './store';
+import {ProductOverlayPositionComponent} from './product_overlay_position';
 import Dialog from 'web.Dialog';
 
-const { Component, useRef, useState, onMounted } = owl;
+const {Component, useRef, useState, onMounted} = owl;
 
 export class ProductOverlayEditorComponent extends Component {
     setup() {

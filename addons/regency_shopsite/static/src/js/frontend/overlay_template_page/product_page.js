@@ -1,8 +1,8 @@
 /** @odoo-module **/
 
-import { registry, Widget } from 'web.public.widget';
+import {registry, Widget} from 'web.public.widget';
 import legacyEnv from "web.public_env";
-import { cartHandlerMixin, animateClone, updateCartNavBar } from 'website_sale.utils';
+import {cartHandlerMixin, animateClone, updateCartNavBar} from 'website_sale.utils';
 
 registry.ToggleOverlayEditor = Widget.extend({
     selector: '.toggle_product_overlay_editor_buttons',
@@ -11,12 +11,10 @@ registry.ToggleOverlayEditor = Widget.extend({
         'click button': 'onClickButton',
     },
 
-    onClickButton: function (event) {
+    onClickButton (event) {
         let btn = event.target;
         let showEditor = false
-        if (btn.classList.contains('toggle_product_overlay_editor')) {
-            showEditor = false;
-        } else if (btn.classList.contains('toggle_product_overlay_gallery')) {
+        if (btn.classList.contains('toggle_product_overlay_gallery')) {
             showEditor = true;
         }
         this.el.querySelector('.toggle_product_overlay_editor').classList.toggle('d-none', !showEditor);
@@ -35,11 +33,11 @@ registry.RegencyChangeProductAttribute = Widget.extend({
         'change li[data-attribute_name="Color"] .custom-radio input': '_onChangeColor',
     },
 
-    _onChangeOverlay: function (event) {
+    _onChangeOverlay (event) {
         legacyEnv.bus.trigger('change-overlay-attribute-value-id', parseInt(event.target.dataset.value_id));
     },
 
-    _onChangeColor: function (event) {
+    _onChangeColor (event) {
         legacyEnv.bus.trigger('change-color-attribute-value-id', parseInt(event.target.dataset.regencyValueId));
     },
 });
@@ -73,7 +71,7 @@ cartHandlerMixin._addToCartInPage = function (params) {
     }
 }
 
-function addToCart (ctx, params) {
+function addToCart(ctx, params) {
     params.force_create = true;
     return ctx._rpc({
         route: "/shop/cart/update_json",

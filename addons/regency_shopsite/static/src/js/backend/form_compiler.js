@@ -1,8 +1,8 @@
 /** @odoo-module **/
 
-import { FormCompiler } from '@web/views/form/form_compiler';
-import { OVERLAY_AREAS_WIDGET_NAME } from './overlay_template_areas';
-import { patch } from 'web.utils';
+import {FormCompiler} from '@web/views/form/form_compiler';
+import {OVERLAY_AREAS_WIDGET_NAME} from './overlay_template_areas';
+import {patch} from 'web.utils';
 
 patch(FormCompiler.prototype, 'regency_shopsite/static/src/js/backend/form_compiler', {
     compileSheet(el, params) {

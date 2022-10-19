@@ -1,17 +1,17 @@
 /** @odoo-module **/
 
-import { useStore } from "@fe_owl_base/js/main";
-import { OVERLAY_TEMPLATE_PAGE_KEY } from "./store";
+import {useStore} from "@fe_owl_base/js/main";
+import {OVERLAY_TEMPLATE_PAGE_KEY} from "./store";
 import {
     ELLIPSE_AREA_TYPE,
     RECTANGLE_AREA_TYPE,
     TEXT_AREA_TYPE,
 } from '../../main';
-import { RectangleArea } from './rectangle_area';
-import { EllipseArea } from './ellipse_area';
-import { TextArea } from './text_area';
+import {RectangleArea} from './rectangle_area';
+import {EllipseArea} from './ellipse_area';
+import {TextArea} from './text_area';
 
-const { Component, onMounted, onPatched, useState, useRef } = owl;
+const {Component, onMounted, onPatched, useState, useRef} = owl;
 
 export class ProductOverlayPositionComponent extends Component {
     constructor(...args) {
