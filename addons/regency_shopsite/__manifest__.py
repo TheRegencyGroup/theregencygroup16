@@ -6,6 +6,7 @@
     'depends': [
         'website_sale',
         'fe_owl_base',
+        'product',
     ],
     'data': [
         'security/ir.model.access.csv',
@@ -20,10 +21,11 @@
         'views/website_overlay_template_page.xml',
         'views/overlay_template_view.xml',
         'views/overlay_position_view.xml',
-        # 'views/product_pricelist_item_view.xml',
+        'views/product_pricelist_item_view.xml',
         'views/product_product.xml',
         'views/sale_portal_templates.xml',
-        'views/shopsite_catalog.xml'
+        'views/shopsite_catalog.xml',
+        'security/groups.xml',
     ],
     'assets': {
         'web.assets_frontend': [
