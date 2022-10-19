@@ -21,7 +21,7 @@ services:
   regency-db:
     container_name: regency-db
     ports:
-      - "5442:5432"
+      - "5542:5432"
     image: postgres:14.5
     environment:
       - POSTGRES_USER=odoo
