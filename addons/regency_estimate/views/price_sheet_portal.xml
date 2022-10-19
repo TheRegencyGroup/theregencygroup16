@@ -347,6 +347,7 @@
                             <th class="text-center">Production Delay</th>
                             <th class="text-center">Shipping Delay</th>
                             <th class="text-center">Order Type</th>
+                            <th/>
                         </tr>
                     </thead>
                     <tbody class="sale_tbody">
@@ -416,6 +417,11 @@
                                             <option t-if="line.allow_consumption_agreement" value="consumption" t-att-selected="line.consumption_type == 'consumption'">Consumption Agreement</option>
                                       </select>
                                      </td>
+                                    <td>
+                                        <a t-attf-href="/web/content/#{line.attachment_id.id}?download=true&amp;access_token=#{line.attachment_id.access_token}">
+                                            <i class="fa fa-paperclip"></i>
+                                        </a>
+                                    </td>
                                 </t>
                                 <t t-if="line.display_type == 'line_section'">
                                     <td colspan="99">
