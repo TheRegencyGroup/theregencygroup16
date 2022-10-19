@@ -1,7 +1,7 @@
 /** @odoo-module **/
 
-import { Store } from '@fe_owl_base/js/main';
-import { patch } from "web.utils";
+import {Store} from '@fe_owl_base/js/main';
+import {patch} from "web.utils";
 
 const OVERLAY_TEMPLATE_PAGE_KEY = 'overlay_template_page_key';
 
@@ -37,7 +37,7 @@ if (overlayTemplatePageData) {
                 colorValueId: selectedAttributeValues[colorAttributeId].valueId,
             }
         },
-        changeAttributeValueAction (attributeId, valueId) {
+        changeAttributeValueAction(attributeId, valueId) {
             this[OVERLAY_TEMPLATE_PAGE_KEY].selectedAttributeValues[attributeId].valueId = valueId;
         },
     });

@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import { Area } from './area';
+import {Area} from './area';
 
 export class TextArea extends Area {
     getMaskObject() {
@@ -57,7 +57,7 @@ export class TextArea extends Area {
         this.selectedArea();
     }
 
-    removeAllObjects(){
+    removeAllObjects() {
         this.textBox.text = '';
         this.selectedArea();
     }
