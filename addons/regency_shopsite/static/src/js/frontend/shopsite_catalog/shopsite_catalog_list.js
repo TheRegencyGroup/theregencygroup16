@@ -9,7 +9,7 @@ import { useStore, useState } from "@fe_owl_base/js/main";
 export class ShopsiteCatalogListComponent extends Component {
     setup() {
         this.store = useStore();
-        this.list = this.store.catalogList
+        this.list = this.store.catalogList.data
     }
 
     get productList() {
