@@ -1,3 +1,16 @@
+#wrapwrap {
+  overflow: unset;
+
+  main {
+    padding-top: 0 !important;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    overflow-y: auto;
+  }
+}
+
 .content {
   flex: 1;
   width: 100%;

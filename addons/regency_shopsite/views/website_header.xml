@@ -70,8 +70,8 @@
                                 </a>
 
                                 <a href="/my/home" class="header-menu-link">My account</a>
-                                <a href="" class="header-menu-link">About us</a>
-                                <a href="" class="header-menu-link">Contact us</a>
+                                <a href="/contactus" class="header-menu-link">About us</a>
+                                <a href="/contactus" class="header-menu-link">Contact us</a>
                             </div>
                         </div>
                     </div>
