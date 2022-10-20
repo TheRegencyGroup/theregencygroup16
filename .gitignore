@@ -77,7 +77,6 @@ conf/host.env
 conf/variables.env
 conf/credentials.env
 /env/regency/data
-/env/regency/data/.gitkeep
 
 # Dependency directories
 node_modules

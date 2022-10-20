@@ -12,6 +12,7 @@ services:
     volumes:
       - ../../addons:/mnt/extra-addons
       - ../../opsway/regency-enterprise:/mnt/opsway/regency-enterprise
+      - ../../opsway/submodules:/mnt/opsway/submodules
       - ./odoo.conf:/etc/odoo/odoo.conf
       - ./data:/var/lib/odoo
     environment:

@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import { env, addStore } from '../base/main';
+import { addStore } from '../base/main';
 
 const SHOPSITE_CATALOG_KEY = 'shopsite_catalog';
 
@@ -16,4 +16,3 @@ if (shopsiteCatalogData) {
 export {
     SHOPSITE_CATALOG_KEY,
 }
-

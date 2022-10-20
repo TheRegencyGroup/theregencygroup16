@@ -4,7 +4,7 @@ import {mountComponentAsWidget, env} from "../base/main";
 import {SHOPSITE_CATALOG_KEY} from "./store";
 
 const {Component} = owl;
-const {useStore, useState} = owl.hooks;
+const {useStore} = owl.hooks;
 
 
 class ShopsiteCatalogListComponent extends Component {

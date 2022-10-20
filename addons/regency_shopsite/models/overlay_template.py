@@ -16,7 +16,8 @@ class OverlayTemplate(models.Model):
     overlay_attribute_value_id = fields.Many2one('product.attribute.value',
                                                  compute='_compute_overlay_attribute_value_id',
                                                  compute_sudo=True)
-    overlay_attribute_value_ids = fields.One2many('product.attribute.value', 'overlay_template_id')
+    overlay_attribute_value_ids = fields.One2many('product.attribute.value', 'overlay_template_id',
+                                                  string="Overlay attribute values")
     product_variant_ids = fields.One2many('product.product', compute='_compute_product_variant_ids')
     sale_order_line_ids = fields.One2many('sale.order.line', 'overlay_template_id')
     overlay_position_ids = fields.Many2many('overlay.position', required=True, string='Positions', ondelete='restrict')
@@ -165,8 +166,8 @@ class OverlayTemplate(models.Model):
     def _create_overlay_attribute_value(self):
         overlay_attribute_id = self.env.ref('regency_shopsite.overlay_attribute')
         for rec in self:
-            ProductAttributeValue = self.env['product.attribute.value']
-            overlay_attribute_value_id = ProductAttributeValue.search([('overlay_template_id', '=', rec.id)], limit=1)
+            attr_value_model = self.env['product.attribute.value']
+            overlay_attribute_value_id = attr_value_model.search([('overlay_template_id', '=', rec.id)], limit=1)
             if not overlay_attribute_value_id:
                 overlay_attribute_value_id = self.env['product.attribute.value'].create({
                     'name': rec.id,
@@ -177,10 +178,11 @@ class OverlayTemplate(models.Model):
             product_overlay_attribute_line_id = rec.product_template_id.attribute_line_ids.filtered(
                 lambda x: x.attribute_id.id == overlay_attribute_id.id)
             if product_overlay_attribute_line_id:
-                product_overlay_attribute_line_id.with_context(from_overlay_template=True)\
+                product_overlay_attribute_line_id.with_context(from_overlay_template=True) \
                     .value_ids = [Command.link(overlay_attribute_value_id.id)]
             else:
-                product_overlay_attribute_line_id = self.env['product.template.attribute.line'].with_context(from_overlay_template=True).create({
+                product_overlay_attribute_line_id = self.env['product.template.attribute.line'].with_context(
+                    from_overlay_template=True).create({
                     'attribute_id': overlay_attribute_id.id,
                     'value_ids': [Command.link(overlay_attribute_value_id.id)],
                     'product_tmpl_id': rec.product_template_id.id,
@@ -195,7 +197,7 @@ class OverlayTemplate(models.Model):
             overlay_attribute_value_id = product_overlay_attribute_line_id.value_ids.filtered(
                 lambda x: x.overlay_template_id.id == rec.id)
             if len(product_overlay_attribute_line_id.value_ids) > 1:
-                product_overlay_attribute_line_id.with_context(from_overlay_template=True)\
+                product_overlay_attribute_line_id.with_context(from_overlay_template=True) \
                     .value_ids = [Command.unlink(overlay_attribute_value_id.id)]
                 product_overlay_attribute_line_id._update_product_template_attribute_values()
             else:
@@ -215,23 +217,23 @@ class OverlayTemplate(models.Model):
             self._clear_overlay_attribute_line_ids()
         return res
 
-    @api.model
+    @api.model_create_multi
     def create(self, vals):
-        res = super(OverlayTemplate, self).create(vals)
+        res = super().create(vals)
         res._create_overlay_attribute_value()
         return res
 
     def unlink(self):
         self._constrains_changes_if_has_sale()
         self._unlink_overlay_attribute_value()
-        return super(OverlayTemplate, self).unlink()
+        return super().unlink()
 
     @api.returns('self', lambda value: value.id)
     def copy(self, default=None):
         default = dict(default or {})
         if 'name' not in default:
             default['name'] = _("%s (Copy)") % self.name
-        return super(OverlayTemplate, self).copy(default=default)
+        return super().copy(default=default)
 
     def _get_product_template_attribute_value_id(self):
         self.ensure_one()

@@ -3,8 +3,9 @@ on:
   pull_request:
     branches:
       - 'main'
+      - 'master'
       - 'prod'
-    types: ['closed','opened','synchronize']
+    types: [ 'closed','opened','synchronize' ]
 jobs:
   odoo-tests:
     name: Odoo regency tests
@@ -29,6 +30,16 @@ jobs:
         options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
     steps:
       - uses: actions/checkout@v2
+      - name: Get submodules
+        env:
+          FE_OWL_BASE_SSH_KEY: ${{secrets.FE_OWL_BASE_SSH_KEY}}
+        shell: bash
+        run: |
+          mkdir -p $HOME/.ssh
+          echo "$FE_OWL_BASE_SSH_KEY" > $HOME/.ssh/id_rsa
+          chmod 600 $HOME/.ssh/id_rsa
+          export GIT_SSH_COMMAND="ssh -o StrictHostKeyChecking=no -i $HOME/.ssh/id_rsa"      
+          git submodule update --init --recursive -- opsway/submodules/fe_owl_base
       - name: preparing odoo
         run: |
           mv addons/* /mnt/extra-addons

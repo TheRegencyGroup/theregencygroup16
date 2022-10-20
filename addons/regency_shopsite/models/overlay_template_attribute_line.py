@@ -3,6 +3,7 @@ from odoo import fields, models, api
 
 class OverlayTemplateAttributeLine(models.Model):
     _name = 'overlay.template.attribute.line'
+    _description = "Overlay template attribute line"
     _rec_name = 'attribute_id'
 
     overlay_tmpl_id = fields.Many2one('overlay.template', string="Overlay Template", ondelete='cascade', required=True)
