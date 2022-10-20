@@ -97,7 +97,7 @@
                                         <field name="selected"/>
                                         <field
                                             name="product_id"
-                                            force_save="1"
+                                            invisible="1"
                                             context="{
                                                 'partner_id': parent.partner_id,
                                                 'quantity': product_uom_qty,
@@ -112,7 +112,7 @@
                                         />
                                         <field name="product_template_id"
                                             string="Product"
-                                            invisible="1"
+                                            force_save="1"
                                             context="{
                                                 'partner_id': parent.partner_id,
                                                 'quantity': product_uom_qty,
@@ -121,6 +121,7 @@
                                             }"
                                             options="{
                                                 'no_open': True,
+                                                'no_quick_create': True
                                             }"
                                             domain="['|',('allowed_partner_ids', '=', False),
                                                        ('allowed_partner_ids', 'in', parent.partner_id),
