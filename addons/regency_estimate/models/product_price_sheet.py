@@ -233,7 +233,7 @@ class ProductPriceSheet(models.Model):
 
 class ProductPriceSheet(models.Model):
     _name = 'product.price.sheet.line'
-    _order = 'price_sheet_id, sequence, id'
+    _order = 'product_id ASC, min_quantity ASC'
 
     price_sheet_id = fields.Many2one('product.price.sheet')
     name = fields.Char('Description')
