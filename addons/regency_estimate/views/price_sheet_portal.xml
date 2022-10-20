@@ -418,9 +418,11 @@
                                       </select>
                                      </td>
                                     <td>
-                                        <a t-attf-href="/web/content/#{line.attachment_id.id}?download=true&amp;access_token=#{line.attachment_id.access_token}">
-                                            <i class="fa fa-paperclip"></i>
-                                        </a>
+                                        <t t-if="line.attachment_id">
+                                            <a t-attf-href="/web/content/product.price.sheet.line/#{line.id}/attachment_id?download=true">
+                                                <i class="fa fa-paperclip"></i>
+                                            </a>
+                                        </t>
                                     </td>
                                 </t>
                                 <t t-if="line.display_type == 'line_section'">
