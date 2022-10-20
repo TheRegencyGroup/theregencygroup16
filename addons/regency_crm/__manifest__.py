@@ -12,8 +12,7 @@
     'category': 'Regency/CRM',
     'sequence': 10,
     'data': [
-        'views/crm_lead.xml',
-        'views/crm_stage.xml'
+        'views/crm_lead.xml'
     ],
     'installable': True,
     'application': True,

@@ -28,4 +28,3 @@ services:
       - POSTGRES_DB=postgres
     volumes:
       - /var/lib/postgresql/data
-

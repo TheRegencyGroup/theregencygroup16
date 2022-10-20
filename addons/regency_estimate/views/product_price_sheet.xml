@@ -89,6 +89,7 @@
                                       <field name="partner_id"/>
                                       <field name="allow_consumption_agreement"/>
                                       <button name="action_check_prices" type="object" class="fa fa-history"/>
+                                      <field name="attachment_id" widget="Many2onebutton" string="Attach a file"/>
                                   </tree>
                               </field>
                             </page>

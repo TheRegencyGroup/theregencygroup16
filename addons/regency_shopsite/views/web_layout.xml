@@ -4,16 +4,8 @@
         <xpath expr="//head/script[@id='web.layout.odooscript']" position="before">
             <script type="text/javascript">
                 const PRELOADED_DATA={};
-                const FE_OWL_BASE_TEMPLATE_VERSIONS=<t t-out="request.env['ir.module.module']._fe_template_versions()"/>;
-
-                PRELOADED_DATA.OVERLAY_TEMPLATE_PAGE_DATA = <t t-out="overlay_template_page_data or 'null'"/>
-
-                const FE_OWL_TEMPLATES = [];
-                FE_OWL_TEMPLATES.push('/regency_shopsite/static/src/xml/templates_frontend.xml');
-                FE_OWL_TEMPLATES.push('/regency_shopsite/static/src/js/frontend/shopsite_catalog/shopsite_catalog_list.xml');
-
+                PRELOADED_DATA.OVERLAY_TEMPLATE_PAGE_DATA=<t t-out="overlay_template_page_data or 'null'"/>
                 PRELOADED_DATA.SHOPSITE_CATALOG_DATA=<t t-out="shopsite_catalog_data or 'false'"/>;
-
             </script>
         </xpath>
     </template>

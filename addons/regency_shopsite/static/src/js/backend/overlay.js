@@ -262,7 +262,7 @@ class Overlay {
         this.canvas.renderAll();
     }
 
-    destroy () {
+    destroy() {
         this.canvas.dispose();
         this.areaList_ = {};
     }
