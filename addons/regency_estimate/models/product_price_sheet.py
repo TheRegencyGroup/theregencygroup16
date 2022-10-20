@@ -274,6 +274,7 @@ class ProductPriceSheet(models.Model):
     qty_range_str = fields.Char(compute='_compute_qty_range_str')
     insection_rownumber = fields.Integer(compute="_compute_insection_rownumber")
     insection_total_rows = fields.Integer(compute="_compute_insection_rownumber")
+    attachment_id = fields.Many2one('ir.attachment')
 
     @api.depends('min_quantity', 'max_quantity', 'sequence')
     def _compute_qty_range_str(self):
