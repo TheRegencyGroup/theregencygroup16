@@ -3,7 +3,7 @@
 import BasicModel from 'web.BasicModel';
 
 BasicModel.include({
-    setDirtyForce: function (recordID) {
+    setDirtyForce(recordID) {
         let record = this.localData[recordID];
         record._isDirty = true;
     },

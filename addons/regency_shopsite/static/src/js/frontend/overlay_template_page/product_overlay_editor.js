@@ -1,33 +1,20 @@
 /** @odoo-module **/
 
-import { env } from '../base/main';
-import { OVERLAY_TEMPLATE_PAGE_KEY } from './store';
+import { useStore } from '@fe_owl_base/js/main';
 import { ProductOverlayPositionComponent } from './product_overlay_position';
 import Dialog from 'web.Dialog';
 
-const { Component } = owl;
-const { useRef, useState, useStore, onMounted } = owl.hooks;
+const { Component, useRef, useState, onMounted } = owl;
 
 export class ProductOverlayEditorComponent extends Component {
-    constructor(...args) {
-        super(...args);
+    setup() {
 
         onMounted(this.onMounted.bind(this));
 
-        this.store = useStore(state => {
-            const data = state[OVERLAY_TEMPLATE_PAGE_KEY].data;
-            const selectedAttributeValues = state[OVERLAY_TEMPLATE_PAGE_KEY].selectedAttributeValues;
-            const colorAttributeId = data.colorAttributeId;
-            return {
-                overlayPositions: data.overlayTemplateAreasData?.overlayPositions || {},
-                selectedColorValueId: selectedAttributeValues[colorAttributeId].valueId,
-            }
-        }, {
-            store: env.store,
-        });
+        this.store = useStore();
 
         this.state = useState({
-            selectedOverlayPositionId: Object.values(this.store.overlayPositions)[0].id,
+            selectedOverlayPositionId: Object.values(this.store.otPage.overlayPositions)[0].id,
         });
 
         this.imageUploadRef = useRef('image_upload_ref');
@@ -80,7 +67,7 @@ export class ProductOverlayEditorComponent extends Component {
         if (!colorImages) {
             return false;
         }
-        let image = colorImages[this.store.selectedColorValueId];
+        let image = colorImages[this.store.otPage.selectedColorValueId];
         if (!image) {
             image = Object.values(colorImages).find(e => !!e.imageId && !!e.imageModel);
         }

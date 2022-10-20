@@ -57,7 +57,7 @@ export class TextArea extends Area {
         this.selectedArea();
     }
 
-    removeAllObjects(){
+    removeAllObjects() {
         this.textBox.text = '';
         this.selectedArea();
     }

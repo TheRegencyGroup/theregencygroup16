@@ -39,7 +39,7 @@ class OverlayAreasWidget extends Component {
     }
 
     onPatched() {
-        if ( this.currentRecordId !== this.props.record.__bm_handle__) {
+        if (this.currentRecordId !== this.props.record.__bm_handle__) {
             this.init();
         }
     }
@@ -60,7 +60,7 @@ class OverlayAreasWidget extends Component {
         this.currentOverlayColorAttributeValueIds = this.getOverlayAttributeColorValueIds();
     }
 
-    onChangeField (data) {
+    onChangeField(data) {
         const changedFields = Object.keys(data.changes || data);
         if (changedFields.includes(PRODUCT_TEMPLATE_ID_FIELD)) {
             this.checkChangeProductTemplateId();
@@ -197,7 +197,7 @@ class OverlayAreasWidget extends Component {
     }
 
     changeOverlayAreasImage({ id, colorId, }) {
-        this.state.showImageListForOverlayPosId = { id,  colorId };
+        this.state.showImageListForOverlayPosId = { id, colorId };
     }
 
     async commitChanges() {

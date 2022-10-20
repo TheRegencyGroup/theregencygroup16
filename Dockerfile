@@ -1,5 +1,4 @@
 FROM debian:bullseye-slim
-MAINTAINER Odoo S.A. <info@odoo.com>
 
 SHELL ["/bin/bash", "-xo", "pipefail", "-c"]
 
@@ -31,6 +30,8 @@ RUN apt-get update && \
         python3-xlrd \
         python3-xlwt \
         xz-utils \
+        git \
+        openssh-client \
     && curl -o wkhtmltox.deb -sSL https://github.com/wkhtmltopdf/wkhtmltopdf/releases/download/0.12.5/wkhtmltox_0.12.5-1.buster_amd64.deb \
     && echo 'ea8277df4297afc507c61122f3c349af142f31e5 wkhtmltox.deb' | sha1sum -c - \
     && apt-get install -y --no-install-recommends ./wkhtmltox.deb \
@@ -69,6 +70,8 @@ RUN pip3 install --upgrade pip
 # Third part libraries
 COPY requirements.txt /
 RUN pip3 install -r /requirements.txt
+COPY requirements-dev.txt /
+RUN pip3 install -r /requirements-dev.txt
 
 # Copy entrypoint script
 COPY env/entrypoint.sh /
@@ -77,9 +80,10 @@ COPY env/entrypoint.sh /
 RUN mkdir -p /mnt/extra-addons \
         && chown -R odoo /mnt/extra-addons
 RUN mkdir -p /mnt/opsway/regency-enterprise \
+        && mkdir -p /mnt/opsway/submodules \
         && chown -R odoo /mnt/opsway
 
-VOLUME ["/var/lib/odoo", "/mnt/extra-addons", "/mnt/opsway/regency-enterprise"]
+VOLUME ["/var/lib/odoo", "/mnt/extra-addons", "/mnt/opsway/regency-enterprise", "/mnt/opsway/submodules"]
 
 # Expose Odoo services
 EXPOSE 8069 8071
