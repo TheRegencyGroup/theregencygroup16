@@ -1,7 +1,7 @@
 import json
 
 from markupsafe import Markup
-from odoo import fields, models, api
+from odoo import fields, models, api, _
 from odoo.exceptions import UserError
 
 
@@ -55,3 +55,16 @@ class ProductTemplate(models.Model):
         if data:
             return Markup(json.dumps(data))
         return False
+
+    @api.onchange('attribute_line_ids')
+    def _onchange_attribute_line(self):
+        overlay_attr = self.env.ref('regency_shopsite.overlay_attribute')
+        customization_attr = self.env.ref('regency_shopsite.customization_attribute')
+
+        if {overlay_attr.id, customization_attr.id}.intersection(set(self.attribute_line_ids.ids)):
+            return {
+                'warning': {
+                    'title': _('Warning'),
+                    'message': _('Cannot add Overlay/Customization attribute manually.'),
+                }
+            }

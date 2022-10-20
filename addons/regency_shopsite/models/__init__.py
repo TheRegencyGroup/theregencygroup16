@@ -1,5 +1,4 @@
 from . import (
-    product_product,
     product_template,
     product_image,
     sale_order,
