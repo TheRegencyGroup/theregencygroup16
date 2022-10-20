@@ -24,8 +24,8 @@ class SaleOrderLine(models.Model):
     partner_id = fields.Many2one(related='order_id.partner_id')
 
     @api.onchange('product_id')
-    def product_id_change(self):
-        super(SaleOrderLine, self).product_id_change()
+    def _onchange_product_id_warning(self):
+        super(SaleOrderLine, self)._onchange_product_id_warning()
         self.consumption_agreement_line_id = self.env['consumption.agreement.line'].\
             search([('product_id', '=', self.product_id.id),
                     ('qty_remaining', '>', 0),
@@ -37,8 +37,8 @@ class SaleOrderLine(models.Model):
         self.price_unit = self.consumption_agreement_line_id.price_unit
 
     @api.onchange('product_uom', 'product_uom_qty')
-    def product_uom_change(self):
-        super(SaleOrderLine, self).product_uom_change()
+    def _compute_product_uom(self):
+        super(SaleOrderLine, self)._compute_product_uom()
         if self.consumption_agreement_line_id:
             self.price_unit = self.consumption_agreement_line_id.price_unit
 
