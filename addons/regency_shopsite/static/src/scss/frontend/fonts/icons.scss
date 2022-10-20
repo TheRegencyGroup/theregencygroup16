@@ -1,0 +1,51 @@
+@font-face {
+  font-family: 'icons';
+  src: url('../../../fonts/icons/icons.eot');
+  src: url('../../../fonts/icons/icons.eot#iefix') format('embedded-opentype'),
+  url('../../../fonts/icons/icons.ttf') format('truetype'),
+  url('../../../fonts/icons/icons.woff') format('woff'),
+  url('../../../fonts/icons/icons.svg#icons') format('svg');
+  font-weight: normal;
+  font-style: normal;
+  font-display: block;
+}
+
+@mixin icons {
+  font-family: 'icons' !important;
+  speak: never;
+  font-style: normal;
+  font-weight: normal;
+  font-variant: normal;
+  text-transform: none;
+  line-height: 1;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+[class^="icon-"], [class*=" icon-"] {
+  @include icons;
+}
+
+.icon-chevron-down:before {
+  content: "\e900";
+}
+
+.icon-chevron-top:before {
+  content: "\e901";
+}
+
+.icon-chevron-left:before {
+  content: "\e902";
+}
+
+.icon-chevron-right:before {
+  content: "\e903";
+}
+
+.icon-eye-off:before {
+  content: "\e904";
+}
+
+.icon-eye:before {
+  content: "\e905";
+}

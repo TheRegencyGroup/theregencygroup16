@@ -19,6 +19,7 @@
         'views/website_cart_lines.xml',
         'views/website_variant_templates.xml',
         'views/website_overlay_template_page.xml',
+        'views/website_header.xml',
         'views/overlay_template_view.xml',
         'views/overlay_position_view.xml',
         'views/product_pricelist_item_view.xml',
@@ -35,7 +36,14 @@
 
             'regency_shopsite/static/src/js/frontend/**/*.xml',
 
-            'regency_shopsite/static/src/scss/frontend/*.scss',
+            'regency_shopsite/static/src/scss/frontend/variables.scss',
+            'regency_shopsite/static/src/scss/frontend/fonts/*.scss',
+            'regency_shopsite/static/src/scss/frontend/base/mixins.scss',
+            'regency_shopsite/static/src/scss/frontend/base/*.scss',
+            'regency_shopsite/static/src/scss/frontend/layout/*.scss',
+            'regency_shopsite/static/src/scss/frontend/partials/*.scss',
+            # 'regency_shopsite/static/src/scss/frontend/vendors/*.scss',
+            'regency_shopsite/static/src/scss/frontend/designer.scss',
         ],
         'web.assets_backend': [
             'regency_shopsite/static/lib/*.js',

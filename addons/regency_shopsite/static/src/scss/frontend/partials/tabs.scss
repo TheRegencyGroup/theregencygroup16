@@ -1,0 +1,43 @@
+.tabs-links {
+  font-size: 48px;
+  line-height: 64px;
+  font-family: $font-family-secondary;
+  display: flex;
+  margin-bottom: 100px;
+}
+
+.tabs-link {
+  color: $grey40;
+  display: block;
+  position: relative;
+  padding-bottom: 18px;
+
+  &:hover {
+    color: $grey10;
+  }
+
+  + .tabs-link {
+    margin-left: 40px;
+  }
+
+  &.active {
+    color: $grey10;
+
+    &:after {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 2px;
+      border-top: 1px solid $grey10;
+    }
+  }
+}
+
+.tab-content {
+  display: none;
+
+  &.active {
+    display: block;
+  }
+}

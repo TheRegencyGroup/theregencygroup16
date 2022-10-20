@@ -1,0 +1,64 @@
+//Colors
+$black: #000;
+$grey10: #263238 !default;
+$grey20: #36474F !default;
+$grey30: #49606B !default;
+$grey40: #6E848F !default;
+$grey50: #93A3AB !default;
+$grey60: #BEC7CC !default;
+$grey70: #DBE0E3 !default;
+$grey80: #F0F2F3 !default;
+$grey90: #F7F8F9 !default;
+$white: #fff !default;
+
+$red: red !default;
+$green: green !default;
+
+
+$font-family-base: 'Raleway', Arial, sans-serif !default;
+$font-family-secondary: 'Playfair Display', 'Raleway', Arial, sans-serif !default;
+
+
+$variable-prefix: bs- !default;
+$prefix: $variable-prefix !default;
+
+$grid-columns: 12 !default;
+$grid-gutter-width: 40px !default;
+$grid-row-columns: 6 !default;
+
+$container-padding-x: $grid-gutter-width !default;
+
+// scss-docs-start grid-breakpoints
+$grid-breakpoints: (
+        xs: 0,
+        sm: 576px,
+        md: 768px,
+        lg: 992px,
+        xl: 1200px,
+        xxl: 1400px
+) !default;
+// scss-docs-end grid-breakpoints
+
+// scss-docs-start container-max-widths
+$container-max-widths: (
+        sm: 540px,
+        md: 720px,
+        lg: 960px,
+        xl: 1140px,
+        xxl: 1320px
+) !default;
+// scss-docs-end container-max-widths
+
+
+// scss-docs-start spacer-variables-maps
+$spacer: 1rem !default;
+$spacers: (
+        0: 0,
+        1: $spacer * .25,
+        2: $spacer * .5,
+        3: $spacer,
+        4: $spacer * 1.5,
+        5: $spacer * 3,
+) !default;
+// scss-docs-end spacer-variables-maps
+$gutters: $spacers !default;
