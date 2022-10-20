@@ -6,15 +6,14 @@
     'name': "One2Many Duplicate Records",
     'summary': """One2Many Duplicate Records""",
     'description': """This module helps you to duplicate records in One2many line for Quotation, Sale Order, Invoice etc.""",
-    'author': 'Candidroot Solutions Pvt. Ltd',
+    'author': 'Candidroot Solutions Pvt. Ltd, Sergey Chupryna',
     'category': 'Extra Tools',
-    'version': '16.0.0.1',
+    'version': '16.0.0.2',  # custom migration
     'depends': ['web'],
     'data': [],
     'assets': {
         'web.assets_backend':[
-            'web_one2many_duplicate_cr/static/src/js/list_editable_renderer.js',
-            'web_one2many_duplicate_cr/static/src/css/list_editable_renderer.css'
+            'web_one2many_duplicate_cr/static/src/**/*'
         ]
     },
     'images': ['static/description/banner.png'],
