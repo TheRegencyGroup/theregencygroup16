@@ -12,6 +12,12 @@ class ProductTemplate(models.Model):
     overlay_template_count = fields.Integer(compute='_compute_overlay_template_count')
     overlay_template_ids = fields.One2many('overlay.template', 'product_template_id')
 
+    @api.model_create_multi
+    def create(self, vals):
+        res = super().create(vals)
+        res._check_attribute_line()
+        return res
+
     @api.constrains('attribute_line_ids', 'is_fit_for_overlay')
     def _constrains_attribute_line_ids(self):
         color_attribute_id = self.env.ref('regency_shopsite.color_attribute')
@@ -38,6 +44,7 @@ class ProductTemplate(models.Model):
         res = super(ProductTemplate, self).write(vals)
         if any(x in ['image_1920', 'product_template_image_ids'] for x in vals):
             self._compute_overlay_template_areas()
+        self._check_attribute_line()
         return res
 
     def _get_overlay_templates(self):
@@ -56,15 +63,9 @@ class ProductTemplate(models.Model):
             return Markup(json.dumps(data))
         return False
 
-    @api.onchange('attribute_line_ids')
-    def _onchange_attribute_line(self):
+    def _check_attribute_line(self):
         overlay_attr = self.env.ref('regency_shopsite.overlay_attribute')
         customization_attr = self.env.ref('regency_shopsite.customization_attribute')
 
-        if {overlay_attr.id, customization_attr.id}.intersection(set(self.attribute_line_ids.ids)):
-            return {
-                'warning': {
-                    'title': _('Warning'),
-                    'message': _('Cannot add Overlay/Customization attribute manually.'),
-                }
-            }
+        if {overlay_attr.id, customization_attr.id}.intersection(set(self.attribute_line_ids.mapped('attribute_id.id'))):
+            raise UserError('Cannot add Overlay/Customization attribute manually.')
