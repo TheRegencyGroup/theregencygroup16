@@ -21,10 +21,9 @@ class OverlayProduct(models.Model):
         customization_attr = self.env.ref('regency_shopsite.customization_attribute')
         attr_value_model = self.env['product.attribute.value']
         attr_line_model = self.env['product.template.attribute.line']
-        no_customization_value = self.env.ref('regency_shopsite.no_customization_value').name
         for entry in self:
             pav = attr_value_model.create({
-                'name': f"{no_customization_value}: {entry.id}",
+                'name': f"{entry.id}",
                 'attribute_id': customization_attr.id,
                 'sequence': 1,
             })
