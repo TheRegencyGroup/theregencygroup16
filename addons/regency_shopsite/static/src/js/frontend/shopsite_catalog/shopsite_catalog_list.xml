@@ -3,7 +3,7 @@
 
     <t t-name="shopsite_catalog_list" owl="1">
         <div>
-            <t t-foreach="store.list" t-as="product" t-key="product_index">
+            <t t-foreach="Object.values(productList)" t-as="product" t-key="product_index">
                 <div>
                     <div>
                         <img t-att-src="product.main_image_url"/>

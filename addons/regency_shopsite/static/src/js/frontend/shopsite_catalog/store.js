@@ -1,18 +1,27 @@
 /** @odoo-module **/
 
-import { addStore } from '../base/main';
+import { extendStore } from '@fe_owl_base/js/main';
 
 const SHOPSITE_CATALOG_KEY = 'shopsite_catalog';
 
-const shopsiteCatalogData = PRELOADED_DATA.SHOPSITE_CATALOG_DATA;
+const shopsiteCatalogData = PRELOADED_DATA?.SHOPSITE_CATALOG_DATA;
+
 if (shopsiteCatalogData) {
-    const actions = {};
-    const state = {
-        [SHOPSITE_CATALOG_KEY]: shopsiteCatalogData,
-    };
-    addStore(actions, state);
+    class ShopsiteCatalogList {
+        constructor() {
+            for (let [key, value] of Object.entries(shopsiteCatalogData)) {
+                this[key] = value;
+            }
+        }
+    }
+
+    extendStore({
+            catalogList: new ShopsiteCatalogList()
+        }
+    )
 }
 
-export {
+export
+{
     SHOPSITE_CATALOG_KEY,
 }

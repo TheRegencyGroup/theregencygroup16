@@ -1,24 +1,20 @@
 /** @odoo-module **/
 
-import {mountComponentAsWidget, env} from "../base/main";
-import {SHOPSITE_CATALOG_KEY} from "./store";
+import { mountComponentAsWidget } from "@fe_owl_base/js/main";
 
-const {Component} = owl;
-const {useStore} = owl.hooks;
+const { Component } = owl;
+import { useStore, useState } from "@fe_owl_base/js/main";
 
 
-class ShopsiteCatalogListComponent extends Component {
-
-    constructor(...args) {
-        super(...args);
-        this.store = useStore(state => ({
-            list: state[SHOPSITE_CATALOG_KEY],
-        }), {
-            store: env.store,
-        });
+export class ShopsiteCatalogListComponent extends Component {
+    setup() {
+        this.store = useStore();
+        this.list = this.store.catalogList
     }
 
-
+    get productList() {
+            return this.list || [];
+        }
 }
 
 ShopsiteCatalogListComponent.template = 'shopsite_catalog_list';
