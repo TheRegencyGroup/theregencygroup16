@@ -64,8 +64,12 @@ class ProductTemplate(models.Model):
         return False
 
     def _check_attribute_line(self):
-        overlay_attr = self.env.ref('regency_shopsite.overlay_attribute')
-        customization_attr = self.env.ref('regency_shopsite.customization_attribute')
+        """
+        Check that changes made from product.template form using context in sale.product_template_action
+        """
+        if self.env.context.get('sale_multi_pricelist_product_template'):  #
+            overlay_attr = self.env.ref('regency_shopsite.overlay_attribute')
+            customization_attr = self.env.ref('regency_shopsite.customization_attribute')
 
-        if {overlay_attr.id, customization_attr.id}.intersection(set(self.attribute_line_ids.mapped('attribute_id.id'))):
-            raise UserError('Cannot add Overlay/Customization attribute manually.')
+            if {overlay_attr.id, customization_attr.id}.intersection(set(self.attribute_line_ids.mapped('attribute_id.id'))):
+                raise UserError('Cannot add Overlay/Customization attribute manually.')
