@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import {Area} from './area';
+import { Area } from './area';
 
 export class TextArea extends Area {
     getMaskObject() {

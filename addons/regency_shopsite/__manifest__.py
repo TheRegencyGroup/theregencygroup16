@@ -32,15 +32,19 @@
             'regency_shopsite/static/lib/*.js',
             'regency_shopsite/static/src/js/main.js',
             'regency_shopsite/static/src/js/frontend/overlay_template_page/*.js',
+
+            'regency_shopsite/static/src/js/frontend/**/*.xml',
+
             'regency_shopsite/static/src/scss/frontend/*.scss',
-            'regency_shopsite/static/src/xml/templates_frontend.xml',
         ],
         'web.assets_backend': [
             'regency_shopsite/static/lib/*.js',
             'regency_shopsite/static/src/js/main.js',
             'regency_shopsite/static/src/js/backend/*.js',
+
+            'regency_shopsite/static/src/js/backend/*.xml',
+
             'regency_shopsite/static/src/scss/backend/*.scss',
-            'regency_shopsite/static/src/xml/templates_backend.xml',
         ],
     },
     'category': 'Regency',

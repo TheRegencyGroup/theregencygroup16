@@ -1,17 +1,16 @@
 /** @odoo-module **/
 
-import {useStore} from "@fe_owl_base/js/main";
-import {OVERLAY_TEMPLATE_PAGE_KEY} from "./store";
+import { useStore } from "@fe_owl_base/js/main";
 import {
     ELLIPSE_AREA_TYPE,
     RECTANGLE_AREA_TYPE,
     TEXT_AREA_TYPE,
 } from '../../main';
-import {RectangleArea} from './rectangle_area';
-import {EllipseArea} from './ellipse_area';
-import {TextArea} from './text_area';
+import { RectangleArea } from './rectangle_area';
+import { EllipseArea } from './ellipse_area';
+import { TextArea } from './text_area';
 
-const {Component, onMounted, onPatched, useState, useRef} = owl;
+const { Component, onMounted, onPatched, useState, useRef } = owl;
 
 export class ProductOverlayPositionComponent extends Component {
     constructor(...args) {
@@ -20,7 +19,7 @@ export class ProductOverlayPositionComponent extends Component {
         onPatched(this.onPatched.bind(this));
         onMounted(this.onMounted.bind(this));
 
-        this.store = useStore()[OVERLAY_TEMPLATE_PAGE_KEY];
+        this.store = useStore();
 
         this.state = useState({
             imageSrc: null,
@@ -33,7 +32,7 @@ export class ProductOverlayPositionComponent extends Component {
         this.canvasContainerRef = useRef('canvas_container_ref');
 
         this.loadImage = false;
-        this.currentColorValueId = this.store.colorValueId;
+        this.currentColorValueId = this.store.otPage.selectedColorValueId;
     }
 
     onMounted() {
@@ -42,14 +41,14 @@ export class ProductOverlayPositionComponent extends Component {
     }
 
     onPatched() {
-        if (this.currentColorValueId !== this.store.colorValueId) {
-            this.currentColorValueId = this.store.colorValueId;
+        if (this.currentColorValueId !== this.store.otPage.selectedColorValueId) {
+            this.currentColorValueId = this.store.otPage.selectedColorValueId;
             this.state.imageSrc = this.getImageSrc();
         }
     }
 
     getColorImage() {
-        let image = this.props.overlayPosition.colorImages[this.store.colorValueId];
+        let image = this.props.overlayPosition.colorImages[this.store.otPage.selectedColorValueId];
         if (!image) {
             image = Object.values(this.props.overlayPosition.colorImages).find(e => !!e.imageId && !!e.imageModel)
         }

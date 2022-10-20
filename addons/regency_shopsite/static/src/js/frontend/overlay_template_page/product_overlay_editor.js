@@ -1,21 +1,20 @@
 /** @odoo-module **/
 
-import {useStore} from '@fe_owl_base/js/main';
-import {OVERLAY_TEMPLATE_PAGE_KEY} from './store';
-import {ProductOverlayPositionComponent} from './product_overlay_position';
+import { useStore } from '@fe_owl_base/js/main';
+import { ProductOverlayPositionComponent } from './product_overlay_position';
 import Dialog from 'web.Dialog';
 
-const {Component, useRef, useState, onMounted} = owl;
+const { Component, useRef, useState, onMounted } = owl;
 
 export class ProductOverlayEditorComponent extends Component {
     setup() {
 
         onMounted(this.onMounted.bind(this));
 
-        this.store = useStore()[OVERLAY_TEMPLATE_PAGE_KEY];
+        this.store = useStore();
 
         this.state = useState({
-            selectedOverlayPositionId: Object.values(this.store.overlayPositions)[0].id,
+            selectedOverlayPositionId: Object.values(this.store.otPage.overlayPositions)[0].id,
         });
 
         this.imageUploadRef = useRef('image_upload_ref');
@@ -68,7 +67,7 @@ export class ProductOverlayEditorComponent extends Component {
         if (!colorImages) {
             return false;
         }
-        let image = colorImages[this.store.colorValueId];
+        let image = colorImages[this.store.otPage.selectedColorValueId];
         if (!image) {
             image = Object.values(colorImages).find(e => !!e.imageId && !!e.imageModel);
         }

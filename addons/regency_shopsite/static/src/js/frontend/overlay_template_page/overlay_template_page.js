@@ -1,15 +1,18 @@
 /** @odoo-module **/
 
-import {mountComponentAsWidget, useStore} from '@fe_owl_base/js/main';
-import {OVERLAY_TEMPLATE_PAGE_KEY} from './store';
-import {ProductOverlayEditorComponent} from './product_overlay_editor';
+import { mountComponentAsWidget, useStore } from '@fe_owl_base/js/main';
+import { ProductOverlayEditorComponent } from './product_overlay_editor';
 
-const {Component, useState} = owl;
+const { Component, useState } = owl;
 
 export class OverlayTemplatePageComponent extends Component {
     setup() {
-        this.store = useStore()[OVERLAY_TEMPLATE_PAGE_KEY];
+        this.store = useStore();
         this.state = useState({});
+    }
+
+    onChangeAttributeValue(attributeId, valueId) {
+        this.store.otPage.changeAttributeValueAction(attributeId, valueId);
     }
 }
 
