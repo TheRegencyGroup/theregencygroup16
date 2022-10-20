@@ -1,0 +1,231 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates>
+
+    <t t-inherit="web.FormView" t-inherit-mode="extension" owl="1">
+        <xpath expr="//div[hasclass('o_form_view_container')]" position="attributes">
+            <attribute name="class" add="form_view_for_overlay_template" separator=" "/>
+        </xpath>
+    </t>
+
+    <t t-name="overlay_areas" owl="1">
+        <div class="d-flex">
+            <button t-if="!editMode"
+                    class="ot_edit_mode_btn btn btn-primary"
+                    t-on-click="onClickToEditMode">
+                Edit areas
+            </button>
+            <span style="height: 31px;"/>
+        </div>
+        <div class="overlay_template_widget">
+            <div class="ot_image_list_popup_overlay"
+                 t-att-class="{ 'd-none': !state.showImageListForOverlayPosId }"
+                 t-ref="image_list_popup">
+                <div class="ot_image_list_popup">
+                    <div class="ot_image_list_popup_header">
+                        <span>Select image</span>
+                        <i class="fa fa-close" t-on-click="onClickCloseImageListPopup"/>
+                    </div>
+                    <div class="ot_image_list_popup_content">
+                        <t t-foreach="filteredProductImageList" t-as="image" t-key="image.model + '_' + image.id">
+                            <img t-att-src="getProductImageSrc(image.id, image.model)"
+                                 class="ot_image_list_popup_content_item"
+                                 t-on-click="() => this.onClickImage(image.id, image.model)"/>
+                        </t>
+                        <div class="ot_image_list_popup_content_item" t-on-click="() => this.onClickImage(false, false)">
+                            <span class="fa fa-remove"/>
+                            Remove image
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <t t-foreach="Object.values(state.overlayPositions)" t-as="overlay_position" t-key="overlay_position.id">
+                <OverlayAreasPositionComponent overlayPositionId="overlay_position.id"
+                                               overlayPositionName="overlay_position.name"
+                                               productTemplateId="state.productTemplateId || 0"
+                                               areaList="overlay_position.areaList || {}"
+                                               colorImages="overlay_position.colorImages || {}"
+                                               editMode="editMode"
+                                               changeOverlayImage="(args) => this.changeOverlayAreasImage(args)"/>
+            </t>
+        </div>
+    </t>
+
+    <t t-name="overlay_areas_position" owl="1">
+        <div class="ot_areas_position">
+            <div class="ot_areas_position_header">
+                <t t-esc="props.overlayPositionName"/>
+                <div t-if="!!props.productTemplateId"
+                     class="ot_areas_position_header_tab_buttons">
+                    <button class="btn btn-secondary mx-2" t-on-click="onClickOpenAreasTab">
+                        <i class="fa fa-object-group mx-2"/>Areas
+                    </button>
+                    <button class="btn btn-secondary" t-on-click="onClickOpenImagesTab">
+                        <i class="fa fa-image mr-1"/>Images
+                    </button>
+                </div>
+            </div>
+            <div class="ot_areas_position_main" t-att-class="{ 'd-none': !props.productTemplateId }">
+                <div class="ot_areas_tab" t-att-class="{ 'ot_areas_tab_hide': state.activeTab !== AREAS_TAB }">
+                    <div t-if="props.editMode" class="ot_areas_position_tools">
+<!--                        <button class="btn btn-primary" t-on-click="onClickChangeImage">-->
+<!--                            <i class="fa fa-image"/>Change image-->
+<!--                        </button>-->
+                        <t t-if="!!state.imageSrc">
+                            <button class="btn btn-primary" t-on-click="onClickAddRectangleArea">
+                                <i class="fa fa-plus-circle"/>Rectangle
+                            </button>
+                            <button class="btn btn-primary" t-on-click="onClickAddEllipseArea">
+                                <i class="fa fa-plus-circle"/>Ellipse
+                            </button>
+                            <button class="btn btn-primary" t-on-click="onClickAddTextArea">
+                                <i class="fa fa-plus-circle"/>Text
+                            </button>
+                        </t>
+                    </div>
+                    <div class="ot_areas_position_editor" t-att-class="{ 'd-none': !state.imageSrc }">
+                        <img t-att-src="state.imageSrc || ''" t-ref="image_ref"/>
+                        <div class="ot_areas_position_canvas_container" t-ref="canvas_container_ref">
+                            <canvas t-ref="canvas_ref"/>
+                        </div>
+                        <div class="ot_areas_position_editor_color_switcher">
+                            <t t-foreach="Object.values(props.colorImages)" t-as="image" t-key="image.id">
+                                <div t-if="image.imageId and image.imageModel"
+                                     t-att-class="{ 'selected_color_image': (image.imageId === state.currentData.imageId and image.imageModel === state.currentData.imageModel) }"
+                                     t-on-click="() => this.onClickOverlayColorImage(image.id)">
+                                    <img t-att-src="getImageSrc(image.imageId, image.imageModel)"/>
+                                    <span><t t-esc="image.name"/></span>
+                                </div>
+                            </t>
+                        </div>
+                    </div>
+                    <t t-if="!state.imageSrc">
+                        <div class="ot_areas_position_non_image">
+                            Please select image to start editing
+                        </div>
+                    </t>
+                    <div class="ot_areas_position_area_list">
+                    <t t-foreach="overlay ? Object.values(overlay.areaList) : []" t-as="area"
+                       t-key="area.index">
+                        <div class="ot_areas_position_area_list_item" t-on-click="() => this.onClickAreaListItem(area.index)"
+                             t-att-class="{ 'ot_areas_position_area_list_item_selected': state.selectedAreaIndex === area.index }">
+                            <div class="ot_areas_position_area_list_item_index">
+                                <t t-esc="area.index"/>
+                            </div>
+                            <div class="ot_areas_position_area_list_item_data">
+                                <t t-if="area.areaType === 'rectangle'">
+                                    <div class="ot_areas_position_area_list_item_data_value">
+                                        <span>Width</span>
+                                        <input type="number" t-att-value="area.data.width"
+                                               t-att-disabled="!props.editMode"/>
+                                    </div>
+                                    <div class="ot_areas_position_area_list_item_data_value">
+                                        <span>Height</span>
+                                        <input type="number" t-att-value="area.data.height"
+                                               t-att-disabled="!props.editMode"/>
+                                    </div>
+                                </t>
+                                <t t-if="area.areaType === 'ellipse'">
+                                    <div class="ot_areas_position_area_list_item_data_value">
+                                        <span>Rx</span>
+                                        <input type="number" t-att-value="area.data.rx"
+                                               t-att-disabled="!props.editMode"/>
+                                    </div>
+                                    <div class="ot_areas_position_area_list_item_data_value">
+                                        <span>Ry</span>
+                                        <input type="number" t-att-value="area.data.ry"
+                                               t-att-disabled="!props.editMode"/>
+                                    </div>
+                                </t>
+                                <t t-if="area.areaType === 'text'">
+                                    <div class="ot_areas_position_area_list_item_data_value">
+                                        <span>Width</span>
+                                        <input type="number" t-att-value="area.data.width"
+                                               t-att-disabled="!props.editMode"/>
+                                    </div>
+                                    <div class="ot_areas_position_area_list_item_data_value">
+                                        <span>Font size</span>
+                                        <input type="number" t-att-value="area.data.fontSize"
+                                               t-att-disabled="!props.editMode"
+                                               t-on-change="() => this.onChangeTextFontSize(area.index)"/>
+                                    </div>
+                                    <div class="ot_areas_position_area_list_item_data_value">
+                                        <span>Lines</span>
+                                        <input type="number" t-att-value="area.data.numberOfLines"
+                                               t-att-disabled="!props.editMode"
+                                               t-on-change="() => this.onChangeTextNumberOfLines(area.index)"/>
+                                    </div>
+                                    <div class="ot_areas_position_area_list_item_data_value">
+                                        <span>Font</span>
+                                        <select t-att-disabled="!props.editMode"
+                                                t-on-change="() => this.onChangeTextFont(area.index)">
+                                            <option t-att-selected="area.data.font == 'Arial'" value="Arial">Arial</option>
+                                            <option t-att-selected="area.data.font == 'Times New Roman'" value="Times New Roman">Times New Roman</option>
+                                            <option t-att-selected="area.data.font == 'Lato'" value="Lato">Lato</option>
+                                            <option t-att-selected="area.data.font == 'Montserrat'" value="Montserrat">Montserrat</option>
+                                            <option t-att-selected="area.data.font == 'Open_Sans'" value="Open_Sans">Open_Sans</option>
+                                            <option t-att-selected="area.data.font == 'Oswald'" value="Oswald">Oswald</option>
+                                            <option t-att-selected="area.data.font == 'Raleway'" value="Raleway">Raleway</option>
+                                            <option t-att-selected="area.data.font == 'Roboto'" value="Roboto">Roboto</option>
+                                        </select>
+                                    </div>
+                                </t>
+                                <div class="ot_areas_position_area_list_item_data_value">
+                                    <span>X</span>
+                                    <input type="number" t-att-value="area.data.x"
+                                           t-att-disabled="!props.editMode"/>
+                                </div>
+                                <div class="ot_areas_position_area_list_item_data_value">
+                                    <span>Y</span>
+                                    <input type="number" t-att-value="area.data.y"
+                                           t-att-disabled="!props.editMode"/>
+                                </div>
+                                <div class="ot_areas_position_area_list_item_data_value">
+                                    <span>Angle</span>
+                                    <input type="number" t-att-value="area.data.angle"
+                                           t-att-disabled="!props.editMode"/>
+                                </div>
+                            </div>
+                            <div t-if="props.editMode"
+                                 class="ot_areas_position_area_list_item_remove"
+                                 t-on-click.stop="() => this.onClickRemoveArea(area.index)">
+                                <i class="fa fa-remove"/>
+                            </div>
+                        </div>
+                    </t>
+                </div>
+                </div>
+                <div class="ot_images_tab" t-att-class="{ 'd-none': state.activeTab !== IMAGES_TAB }">
+                    <t t-foreach="Object.values(props.colorImages)" t-as="color_image" t-key="color_image.id">
+                        <div class="ot_images_tab_color_image_container">
+                            <t t-set="imgSrc" t-value="getImageSrc(color_image.imageId, color_image.imageModel)"/>
+                            <div class="ot_images_tab_color_image">
+                                <button t-if="props.editMode"
+                                        class="btn btn-primary ot_images_tab_color_image_change_btn"
+                                        t-on-click="() => this.onClickChangeColorImage(color_image.id)">
+                                    <i class="fa fa-image"/>
+                                </button>
+                                <t t-if="imgSrc">
+                                    <img t-att-src="imgSrc"/>
+                                </t>
+                                <t t-else="">
+                                    <div class="ot_images_tab_color_image_none">
+                                        <span>Please select image</span>
+                                    </div>
+                                </t>
+                            </div>
+                            <div class="ot_images_tab_color_image_name">
+                                <t t-esc="color_image.name"/>
+                            </div>
+                        </div>
+                    </t>
+                </div>
+            </div>
+            <t t-if="props.productTemplateId === 0">
+                <div class="ot_areas_position_non_product">
+                    Please select product to start editing
+                </div>
+            </t>
+        </div>
+    </t>
+
+</templates>
