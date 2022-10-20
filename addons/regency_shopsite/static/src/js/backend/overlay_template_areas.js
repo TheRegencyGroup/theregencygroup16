@@ -1,12 +1,12 @@
 /** @odoo-module **/
 
-import {registry} from "@web/core/registry";
-import {standardFieldProps} from "@web/views/fields/standard_field_props";
-import {OverlayAreasPositionComponent} from "./overlay_template_areas_position";
-import {useBus} from "@web/core/utils/hooks";
+import { registry } from "@web/core/registry";
+import { standardFieldProps } from "@web/views/fields/standard_field_props";
+import { OverlayAreasPositionComponent } from "./overlay_template_areas_position";
+import { useBus } from "@web/core/utils/hooks";
 import legacyEnv from "web.env";
 
-const {Component, onMounted, onPatched, useRef, useState, useEnv} = owl;
+const { Component, onMounted, onPatched, useRef, useState, useEnv } = owl;
 
 const OVERLAY_AREAS_WIDGET_NAME = 'overlay_areas';
 const OVERLAY_AREAS_FIELD = 'areas_json';
@@ -196,8 +196,8 @@ class OverlayAreasWidget extends Component {
         return `${baseUrl}/web/image?model=${model}&id=${id}&field=image_512&unique=${this.productImageUnique}`;
     }
 
-    changeOverlayAreasImage({id, colorId,}) {
-        this.state.showImageListForOverlayPosId = {id, colorId};
+    changeOverlayAreasImage({ id, colorId, }) {
+        this.state.showImageListForOverlayPosId = { id, colorId };
     }
 
     async commitChanges() {

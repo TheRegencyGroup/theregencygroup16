@@ -1,8 +1,8 @@
 /** @odoo-module **/
 
-import {Overlay} from './overlay';
+import { Overlay } from './overlay';
 
-const {Component, onMounted, onPatched, useState, useRef} = owl;
+const { Component, onMounted, onPatched, useState, useRef } = owl;
 
 const OVERLAY_AREAS_WIDGET_NAME = 'overlay_areas';
 const AREAS_TAB = 'areas_tab';
@@ -80,7 +80,7 @@ class OverlayAreasPositionComponent extends Component {
                 imageModel = image.imageModel;
             }
         }
-        this.state.currentData = {imageId, imageModel};
+        this.state.currentData = { imageId, imageModel };
     }
 
     getImageForOverlay() {

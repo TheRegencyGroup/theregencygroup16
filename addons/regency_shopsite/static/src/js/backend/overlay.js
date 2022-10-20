@@ -90,7 +90,7 @@ class Overlay {
         return data;
     }
 
-    createRectangle(index, {width, height, x, y, angle}, select) {
+    createRectangle(index, { width, height, x, y, angle }, select) {
         let object = new fabric.Rect({
             width: width || this.sizeForNewArea,
             height: height || this.sizeForNewArea,
@@ -110,7 +110,7 @@ class Overlay {
         return object;
     }
 
-    createEllipse(index, {rx, ry, x, y, angle}, select) {
+    createEllipse(index, { rx, ry, x, y, angle }, select) {
         let defaultRadius = Math.floor(this.sizeForNewArea / 2);
         let object = new fabric.Ellipse({
             rx: rx || defaultRadius,
@@ -140,7 +140,7 @@ class Overlay {
         return tempTb.getScaledHeight();
     }
 
-    createTextRectangle(index, {width, fontSize, numberOfLines, font, x, y, angle}, select) {
+    createTextRectangle(index, { width, fontSize, numberOfLines, font, x, y, angle }, select) {
         fontSize = fontSize || DEFAULT_TEXT_AREA_FONT_SIZE;
         numberOfLines = numberOfLines || DEFAULT_TEXT_AREA_NUMBER_LINES;
         let object = new fabric.Rect({

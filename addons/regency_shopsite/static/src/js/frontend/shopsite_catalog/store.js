@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import {addStore} from '../base/main';
+import { addStore } from '../base/main';
 
 const SHOPSITE_CATALOG_KEY = 'shopsite_catalog';
 

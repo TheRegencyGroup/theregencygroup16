@@ -5,7 +5,7 @@ on:
       - 'main'
       - 'master'
       - 'prod'
-    types: ['closed','opened','synchronize']
+    types: [ 'closed','opened','synchronize' ]
 jobs:
   odoo-tests:
     name: Odoo regency tests

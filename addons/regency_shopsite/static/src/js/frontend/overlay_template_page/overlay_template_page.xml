@@ -4,14 +4,16 @@
     <t t-name="product_overlay_editor" owl="1">
         <div class="product_overlay_editor">
             <div class="product_overlay_editor_positions">
-                <t t-foreach="Object.values(store.otPage.overlayPositions)" t-as="overlay_position" t-key="overlay_position.id">
+                <t t-foreach="Object.values(store.otPage.overlayPositions)" t-as="overlay_position"
+                   t-key="overlay_position.id">
                     <div t-att-class="{ 'd-none': state.selectedOverlayPositionId !== overlay_position.id }">
                         <ProductOverlayPositionComponent overlayPosition="overlay_position"/>
                     </div>
                 </t>
             </div>
             <div class="product_overlay_editor_position_list">
-                <t t-foreach="Object.values(store.otPage.overlayPositions)" t-as="overlay_position" t-key="overlay_position.id">
+                <t t-foreach="Object.values(store.otPage.overlayPositions)" t-as="overlay_position"
+                   t-key="overlay_position.id">
                     <div class="product_overlay_editor_position_list_item"
                          t-att-class="{ 'product_overlay_editor_position_list_item_selected': state.selectedOverlayPositionId === overlay_position.id }"
                          t-on-click="() => this.onClickSelectOverlayPosition(overlay_position.id)">
