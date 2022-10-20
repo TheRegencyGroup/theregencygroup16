@@ -21,6 +21,7 @@
         'views/website_cart_lines.xml',
         'views/website_variant_templates.xml',
         'views/website_overlay_template_page.xml',
+        'views/website_shopsite_page_test.xml',
         'views/overlay_template_view.xml',
         'views/overlay_position_view.xml',
         'views/product_pricelist_item_view.xml',
