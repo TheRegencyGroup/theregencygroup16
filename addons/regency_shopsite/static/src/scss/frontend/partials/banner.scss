@@ -1,0 +1,39 @@
+.banner {
+  position: relative;
+  text-align: center;
+  padding: 28px;
+  background: url("../../../img/main-image.jpeg") center center no-repeat;
+  background-size: cover;
+  color: $white;
+
+  &:before {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    background: rgba($black, .5);
+    z-index: 1;
+  }
+
+  h2, .h2 {
+    margin: 0;
+    color: $white;
+  }
+}
+
+.banner-in {
+  position: relative;
+  z-index: 2;
+}
+
+.banner-logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  img {
+    height: 30px;
+  }
+}

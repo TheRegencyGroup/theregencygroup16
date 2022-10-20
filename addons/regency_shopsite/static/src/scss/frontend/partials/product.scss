@@ -1,0 +1,147 @@
+.product-top {
+  padding-bottom: 24px;
+  border-bottom: 1px solid $grey60;
+  margin-bottom: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-flow: row wrap;
+
+  .form-group {
+    margin: 0;
+  }
+}
+
+.product-top-left {
+  width: 530px;
+  @include media-breakpoint-down(xl) {
+    width: 430px;
+  }
+}
+
+.product-top-right {
+  width: 406px;
+  text-align: right;
+  display: flex;
+  justify-content: flex-end;
+
+  .btn {
+    + .btn {
+      margin-left: 12px;
+    }
+  }
+}
+
+.product-row {
+  display: flex;
+  justify-content: space-between;
+  flex-flow: row wrap;
+}
+
+.product-left {
+  width: 530px;
+  @include media-breakpoint-down(xl) {
+    width: 430px;
+  }
+}
+
+.product-right {
+  width: 406px;
+}
+
+.product-image {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 530px;
+  height: 530px;
+  margin-bottom: 20px;
+  background: $grey90;
+  @include media-breakpoint-down(xl) {
+    width: 430px;
+    height: 430px;
+  }
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+}
+
+.product-previews {
+  display: flex;
+  flex-flow: row wrap;
+  margin-bottom: 30px;
+  margin-left: -12px;
+}
+
+.product-preview {
+  width: 126px;
+  font-size: 16px;
+  line-height: 18px;
+  padding-bottom: 26px;
+  margin-left: 12px;
+  color: $grey10;
+  cursor: pointer;
+  text-align: center;
+
+  &.active {
+    .product-preview-image {
+      &:before {
+        content: "";
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: 0;
+        bottom: 0;
+        border: 1px solid $grey10;
+      }
+    }
+  }
+}
+
+.product-preview-image {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 126px;
+  height: 126px;
+  position: relative;
+  background: $grey90;
+  margin-bottom: 8px;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+}
+
+.product-text {
+  font-size: 14px;
+  line-height: 16px;
+  color: $grey50;
+
+  p {
+    margin-bottom: 16px;
+
+    &:last-child {
+      margin: 0;
+    }
+  }
+}
+
+.line {
+  border-top: 1px solid $grey60;
+  margin-top: 32px;
+  margin-bottom: 24px;
+}
+
+.product-group {
+  margin-bottom: 32px;
+
+  h3, .h3 {
+    margin-bottom: 16px;
+  }
+}

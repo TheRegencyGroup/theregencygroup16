@@ -1,0 +1,15 @@
+.footer {
+  flex: 0 auto;
+  width: 100%;
+  padding: 16px 0;
+  background: $grey90;
+  color: $grey30;
+  font-weight: 400;
+  font-size: 12px;
+  line-height: 14px;
+  text-align: center;
+
+  a {
+    color: $grey30;
+  }
+}

@@ -1,0 +1,83 @@
+.positions {
+  margin: 0 -12px;
+  display: flex;
+  flex-flow: row wrap;
+}
+
+.position {
+  padding: 0 12px 72px;
+  width: 33.33%;
+  min-width: 33.33%;
+  flex: 0 auto;
+  display: flex;
+  flex-direction: column;
+
+  &:hover {
+    .position-image {
+      img {
+        transform: scale(1.05);
+      }
+    }
+  }
+
+  h3, .h3 {
+    margin: 0;
+
+    a {
+      color: $grey10;
+
+      &:hover {
+        color: $black;
+      }
+    }
+  }
+}
+
+.position-image {
+  background: $grey90;
+  height: 392px;
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+  flex-grow: 0;
+  width: 100%;
+  overflow: hidden;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    transition: all .3s ease-in;
+  }
+}
+
+.position-text {
+  flex: 1;
+}
+
+.position-buttons {
+  flex: 0 auto;
+  margin-top: 20px;
+  display: flex;
+  align-items: center;
+
+  .btn {
+    + .btn {
+      margin-left: 12px;
+    }
+  }
+}
+
+.position-info {
+  color: $grey40;
+  font-size: 14px;
+  line-height: 16px;
+  margin-bottom: 4px;
+}
+
+.position-description {
+  color: $grey40;
+  font-size: 12px;
+  line-height: 14px;
+  margin-top: 4px;
+}
