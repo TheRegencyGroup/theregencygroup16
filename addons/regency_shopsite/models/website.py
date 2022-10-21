@@ -19,16 +19,17 @@ class Website(models.Model):
         if self.env.user._is_public():
             return None
 
-        order = request.website.sale_get_order()
-        if order and order.state != 'draft':
-            request.session['sale_order_id'] = None
-            order = request.website.sale_get_order()
+        # order = request.website.sale_get_order()
+        # if order and order.state != 'draft':
+        #     request.session['sale_order_id'] = None
+        #     order = request.website.sale_get_order()
+        #
+        # cart_data = {
+        #     'lineList': order.website_order_line.read([])
+        # }
+        #
+        # if preloaded:
+        #     return Markup(json.dumps(cart_data))
 
-        cart_data = {
-            'lineList': order.website_order_line.read([])
-        }
-
-        if preloaded:
-            return Markup(json.dumps(cart_data))
         cart_data = {}
         return cart_data
