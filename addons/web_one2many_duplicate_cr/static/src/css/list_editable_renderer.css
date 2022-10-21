@@ -1,0 +1,11 @@
+.o_list_renderer .o_list_table .o_list_record_copy button {
+    padding: 0px;
+    background: none;
+    border-style: none;
+    display: table-cell;
+    cursor: pointer;
+}
+
+.o_list_renderer .o_list_table .o_list_record_copy{
+    width: 1px;
+}

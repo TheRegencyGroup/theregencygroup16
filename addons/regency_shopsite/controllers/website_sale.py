@@ -12,6 +12,10 @@ from odoo.addons.website_sale.controllers.main import TableCompute, WebsiteSale
 
 class WebsiteSaleRegency(WebsiteSale):
 
+    @http.route(['/shopsite_test'], type='http', auth="user", website=True)
+    def shopsite_test(self, **kwargs):
+        return request.render('regency_shopsite.shopsite_page_test', {})
+
     @http.route(['/shop/cart/update_json'], type='json', auth="public", methods=['POST'], website=True, csrf=False)
     def cart_update_json(self, product_id, line_id=None, add_qty=None, set_qty=None, display=True, images_with_overlay=None, **kw):
         res = super().cart_update_json(product_id=product_id, line_id=line_id, add_qty=add_qty, set_qty=set_qty, display=display, **kw)

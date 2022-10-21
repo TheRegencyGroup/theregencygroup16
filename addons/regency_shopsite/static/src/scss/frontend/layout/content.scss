@@ -1,0 +1,26 @@
+#wrapwrap {
+  overflow: unset;
+
+  main {
+    padding-top: 0 !important;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    overflow-y: auto;
+  }
+}
+
+.content {
+  flex: 1;
+  width: 100%;
+  position: relative;
+  z-index: 2;
+  padding-top: 64px;
+  padding-bottom: 58px;
+}
+
+.content-in {
+  max-width: 1158px;
+  margin: 0 auto;
+}

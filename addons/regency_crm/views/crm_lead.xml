@@ -22,7 +22,7 @@
                 </xpath>
                 <xpath expr="//group[@name='lead_priority']" position="after">
                    <group name="opportunity_info" attrs="{'invisible': [('type', '=', 'opportunity')]}">
-                       <field name="lost_reason" attrs="{'invisible': [('active', '=', True)]}"/>
+                       <field name="lost_reason_id" attrs="{'invisible': [('active', '=', True)]}"/>
                    </group>
                 </xpath>
 
@@ -57,6 +57,57 @@
              </field>
       </record>
 
+     <record id="crm_lead_view_form" model="ir.ui.view">
+        <field name="name">crm.lead.form</field>
+        <field name="model">crm.lead</field>
+        <field name="inherit_id" ref="crm.crm_lead_view_form"/>
+         <field name="arch" type="xml">
+             <xpath expr="//group[@name='lead_priority']" position="after">
+                  <group name="number_of_keys">
+                      <field name="number_of_keys"/>
+                  </group>
+             </xpath>
+             <xpath expr="//page[@name='extra']/group/group[last()]" position="after">
+                  <group string="Avendra Data">
+                      <field name="avendra_id"/>
+                      <field name="account_number"/>
+                      <field name="brand"/>
+                      <field name="market_segment"/>
+                      <field name="no_open_actions"/>
+                      <field name="no_spend_issues"/>
+                      <field name="management_group"/>
+                      <field name="customer_supplier_status"/>
+                      <field name="customer_status"/>
+                      <field name="date_acknowledged"/>
+                      <field name="date_de_enrollment"/>
+                      <field name="avendra_account_name"/>
+                      <field name="avendra_account_address1"/>
+                      <field name="avendra_account_address2"/>
+                      <field name="avendra_account_date_setup"/>
+                      <field name="avendra_account_punchout_user_name"/>
+                  </group>
+             </xpath>
+         </field>
+     </record>
+
+     <record id="quick_create_opportunity_form" model="ir.ui.view">
+        <field name="inherit_id" ref="crm.quick_create_opportunity_form"/>
+        <field name="model">crm.lead</field>
+        <field name="priority">1100</field>
+        <field name="arch" type="xml">
+            <field name="email_from" position="attributes">
+                 <attribute name="required">1</attribute>
+            </field>
+            <field name="partner_id" position="after">
+                <field name="representative_name" widget="res_partner_many2one"
+                       string="Representative"
+                       domain="[('is_company', '!=', True), ('parent_id', '=', partner_id)]"/>
+            </field>
+            <field name="partner_id" position="attributes">
+                <attribute name="domain">[('is_company', '=', True)]</attribute>/>
+            </field>
+        </field>
+    </record>
 
         <record id="crm_case_tree_view_leads" model="ir.ui.view">
             <field name="name">crm.lead.tree.lead</field>

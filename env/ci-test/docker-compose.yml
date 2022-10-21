@@ -1,0 +1,20 @@
+version: '3'
+services:
+  web-ci-test:
+    image: odoo_regency_ci_test
+    build: ../..
+    depends_on:
+      - postgres
+    user: odoo
+    volumes:
+      - ../../addons:/mnt/extra-addons
+      - ./odoo.conf:/etc/odoo/odoo.conf
+    command: bash -c 'while !</dev/tcp/postgres/5432; do sleep 1; done; python3 -u /usr/bin/odoo --conf /etc/odoo/odoo.conf -i regency_init'
+  postgres:
+    image: postgres:14.5
+    ports:
+      - "5434:5432"
+    environment:
+      - POSTGRES_USER=odoo
+      - POSTGRES_PASSWORD=myodoo
+      - POSTGRES_DB=regency-ci-test

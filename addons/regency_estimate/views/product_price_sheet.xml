@@ -26,6 +26,7 @@
 <!--                                title="Create new quotation"/>-->
                         <button string="Confirm" name="action_confirm" type="object" class="oe_highlight"
                                 data-hotkey="q"
+                                attrs="{'invisible':[('state', '=', 'confirmed')]}"
                                 title="Confirm"/>
                         <field name="state" widget="statusbar" statusbar_visible="draft,confirmed"/>
                     </header>
@@ -59,7 +60,7 @@
                             <page name="pricelist" string="Price Sheet Items">
                               <field name="item_ids"  widget="section_and_note_one2many"
                                 mode="tree" >
-                                  <tree string="Price Sheet Items" editable="bottom">
+                                  <tree string="Price Sheet Items" editable="bottom" default_order='product_id asc, min_quantity asc'>
                                       <control>
                                         <create name="add_product_control" string="Add a product"/>
                                         <create name="add_section_control" string="Add a section" context="{'default_display_type': 'line_section'}"/>
@@ -88,7 +89,7 @@
                                       <field name="partner_id"/>
                                       <field name="allow_consumption_agreement"/>
                                       <button name="action_check_prices" type="object" class="fa fa-history"/>
-                                      <button name="copy_item" type="object" class="fa fa-copy"/>
+                                      <field name="attachment_id" string="Attach a file"/>
                                   </tree>
                               </field>
                             </page>

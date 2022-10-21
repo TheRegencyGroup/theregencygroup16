@@ -1,40 +1,38 @@
 /** @odoo-module **/
 
-import { env, mountComponentAsWidget } from '../base/main';
-import {
-    OVERLAY_TEMPLATE_PAGE_KEY,
-    CHANGE_ATTRIBUTE_VALUE_ACTION,
-} from './store';
-import { ProductOverlayEditorComponent } from './product_overlay_editor';
+import { mountComponentAsWidget, useStore } from '@fe_owl_base/js/main';
+import { ProductOverlayEditorComponent } from './product_overlay_editor/product_overlay_editor';
+import { AttributeSelector, ColorAttributeSelector } from './attribute_selector';
+import { PriceSelector } from './price_selector';
 
-const { Component } = owl;
-const { useStore, useState, useDispatch } = owl.hooks;
+const { Component, useState } = owl;
 
 export class OverlayTemplatePageComponent extends Component {
-    constructor (...args) {
-        super(...args);
-
-        this.dispatch = useDispatch();
-
-        this.store = useStore(state => ({
-            data: state[OVERLAY_TEMPLATE_PAGE_KEY].data,
-            selectedAttributeValues: state[OVERLAY_TEMPLATE_PAGE_KEY].selectedAttributeValues,
-        }), {
-            store: env.store,
-        });
-
-        this.state = useState({
-
-        });
+    setup() {
+        this.store = useStore();
+        this.state = useState({});
     }
 
-    onChangeAttributeValue(attributeId, valueId, event) {
-        this.dispatch(CHANGE_ATTRIBUTE_VALUE_ACTION, attributeId, valueId);
+    get sortedAttributeList() {
+        let initAttributeList = Object.values(this.store.otPage.attributeList);
+        let sizeAttributeId = this.store.otPage.sizeAttributeId;
+        let attributeList = initAttributeList.filter(e => this.store.otPage.colorAttributeId !== e.id);
+        if (this.store.otPage.attributeList[sizeAttributeId]) {
+            attributeList = attributeList.filter(e => this.store.otPage.sizeAttributeId !== e.id);
+            attributeList = [
+                this.store.otPage.attributeList[sizeAttributeId],
+                ...attributeList,
+            ];
+        }
+        return attributeList;
     }
 }
 
 OverlayTemplatePageComponent.components = {
     ProductOverlayEditorComponent,
+    AttributeSelector,
+    ColorAttributeSelector,
+    PriceSelector,
 };
 
 OverlayTemplatePageComponent.template = 'overlay_template_page';

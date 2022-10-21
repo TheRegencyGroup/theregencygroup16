@@ -35,12 +35,6 @@
                             <field name="name"/>
                             <field name="product_template_id"/>
                             <field name="overlay_attribute_value_id"/>
-                            <field name="overlay_product_ids"
-                                   attrs="{'invisible': [('overlay_attribute_value_id', '=', False)]}">
-                                <tree editable="top" delete="0">
-                                    <field name="product_tmpl_id"/>
-                                </tree>
-                            </field>
                         </group>
                     </group>
                     <notebook>
@@ -78,6 +72,14 @@
                                 </tree>
                             </field>
                         </page>
+                        <page string="Customized items" id="customized_items"
+                              attrs="{'invisible': [('overlay_attribute_value_id', '=', False)]}">
+                            <field name="overlay_product_ids">
+                                <tree editable="top" delete="0">
+                                    <field name="product_tmpl_id"/>
+                                </tree>
+                            </field>
+                        </page>
                     </notebook>
                 </sheet>
             </form>
@@ -90,8 +92,18 @@
         <field name="view_mode">tree,form</field>
     </record>
 
+    <record id="overlay_product_action" model="ir.actions.act_window">
+        <field name="name">Customized items</field>
+        <field name="res_model">overlay.product</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
     <menuitem id="overlay_template_menuitem"
               parent="sale.product_menu_catalog"
               action="overlay_template_action"/>
+
+    <menuitem id="overlay_product_menuitem"
+              parent="sale.product_menu_catalog"
+              action="overlay_product_action"/>
 
 </odoo>

@@ -1,43 +1,51 @@
 /** @odoo-module **/
 
-import { env, addStore } from '../base/main';
-import Dialog from 'web.Dialog';
-
-const OVERLAY_TEMPLATE_PAGE_KEY = 'overlay_template_page_key';
-const CHANGE_ATTRIBUTE_VALUE_ACTION = 'change_attribute_value_action';
+import { extendStore } from '@fe_owl_base/js/main';
 
 const overlayTemplatePageData = PRELOADED_DATA?.OVERLAY_TEMPLATE_PAGE_DATA;
 if (overlayTemplatePageData) {
-    function getSelectedAttributeValues() {
-        let res = {};
-        const attributeList = Object.values(overlayTemplatePageData.attributeList);
-        if (attributeList) {
-            res = attributeList.reduce((a, e) => ({
-                ...a,
-                [e.id]: {
-                    'attributeName': e.name,
-                    'valueId': e.selectedValueId,
-                }
-            }), {});
+    class OverlayTemplatePage {
+        constructor() {
+            for (let [key, value] of Object.entries(overlayTemplatePageData)) {
+                this[key] = value;
+            }
+            this.selectedAttributeValues = this.getSelectedAttributeValues();
+            this.selectedPriceId = this.priceList ? Object.values(this.priceList)[0].id : null;
         }
-        return res;
+
+        getSelectedAttributeValues() {
+            let res = {};
+            const attributeList = Object.values(overlayTemplatePageData.attributeList);
+            if (attributeList) {
+                res = attributeList.reduce((a, e) => ({
+                    ...a,
+                    [e.id]: {
+                        'attributeName': e.name,
+                        'valueId': e.selectedValueId,
+                    }
+                }), {});
+            }
+            return res;
+        }
+
+        get overlayPositions() {
+            return this.overlayTemplateAreasData?.overlayPositions || {};
+        }
+
+        get selectedColorValueId() {
+            const selectedAttributeValues = this.selectedAttributeValues;
+            const colorAttributeId = this.colorAttributeId;
+            return selectedAttributeValues[colorAttributeId].valueId;
+        }
+
+        changeAttributeValueAction(attributeId, valueId) {
+            this.selectedAttributeValues[attributeId].valueId = valueId;
+        }
+
+        changeSelectedPrice(priceId) {
+            this.selectedPriceId = priceId;
+        }
     }
-    const actions = {
-        [CHANGE_ATTRIBUTE_VALUE_ACTION] ({state}, attributeId, valueId) {
-            state[OVERLAY_TEMPLATE_PAGE_KEY].selectedAttributeValues[attributeId].valueId = valueId;
-        },
-    };
-    const state = {
-        [OVERLAY_TEMPLATE_PAGE_KEY]: {
-            data: overlayTemplatePageData,
-            selectedAttributeValues: getSelectedAttributeValues(),
-        },
-    };
-    addStore(actions, state);
-}
 
-export {
-    OVERLAY_TEMPLATE_PAGE_KEY,
-    CHANGE_ATTRIBUTE_VALUE_ACTION,
+    extendStore({ otPage: new OverlayTemplatePage() })
 }
-

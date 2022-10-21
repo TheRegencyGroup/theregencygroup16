@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="web_layout_script" inherit_id="web.frontend_layout" priority="200">
+        <xpath expr="//head/script[@id='web.layout.odooscript']" position="before">
+
+            <script type="text/javascript">
+                const PRELOADED_DATA={};
+                PRELOADED_DATA.OVERLAY_TEMPLATE_PAGE_DATA=<t t-out="overlay_template_page_data or 'null'"/>
+                PRELOADED_DATA.SHOPSITE_CATALOG_DATA=<t t-out="shopsite_catalog_data or 'false'"/>;
+                <t t-if="not request.env.user._is_public()">
+                    PRELOADED_DATA.CART_DATA=<t t-out="request.env['website']._get_cart_data(preloaded=True) or 'null'"/>;
+                </t>
+            </script>
+        </xpath>
+    </template>
+</odoo>

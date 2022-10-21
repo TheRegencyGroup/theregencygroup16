@@ -82,7 +82,7 @@ class PurchaseRequisition(models.Model):
             ch = self.env['mail.channel'].create({
                 'name': user_id.name + ', ' + self.env.user.name,
                 'channel_partner_ids': [(4, user_id.partner_id.id)],
-                'public': 'private',
+                # 'public': 'private',
                 'channel_type': 'chat',
             })
         if ch:
@@ -99,7 +99,3 @@ class PurchaseRequisitionLine(models.Model):
     _inherit = 'purchase.requisition.line'
 
     partner_id = fields.Many2one('res.partner', 'Vendor')
-
-    def copy_item(self):
-        for rec in self:
-            rec.copy()

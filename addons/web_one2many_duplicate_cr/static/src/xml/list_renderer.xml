@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<templates id="template" xml:space="preserve">
+    <t t-inherit="web.ListRenderer.RecordRow" t-inherit-mode="extension" owl="1">
+        <xpath expr="//t[@t-if='displayOptionalFields or hasX2ManyAction']" position="after">
+            <t t-if="isX2Many and activeActions.create">
+                <td class="o_list_record_copy text-center"
+                    t-on-keydown.synthetic="(ev) => this.onCellKeydown(ev, group, record)"
+                    t-on-click.stop="() => this.onCopyRecord(record)"
+                    tabindex="-1"
+                >
+                    <button class="fa fa-copy"
+                        name="copy"
+                        title="Copy row"
+                        aria-label="Copy row"
+                        tabindex="-1"
+                    />
+                </td>
+            </t>
+        </xpath>
+    </t>
+</templates>

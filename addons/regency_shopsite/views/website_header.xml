@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="template_header_default" inherit_id="website.template_header_default">
+        <xpath expr="//header[@id='top']" position="replace">
+            <div class="regency-top">
+                <header id="regency_header">
+                    <div class="container">
+                        <div class="header-in">
+                            <a href="" class="logo">
+                                <img src="/regency_shopsite/static/src/img/logo.png" alt=""/>
+                            </a>
+                            <div class="header-menu">
+                                <t t-if="not request.env.user._is_public()">
+                                    <div class="header-menu-select">
+                                        <a href="javascript: void(0);" class="header-menu-button">
+                                            <div class="header-menu-button-logo">
+                                                <img src="/regency_shopsite/static/src/img/logo-hotel.png" alt=""/>
+                                            </div>
+                                            <div class="header-menu-text">Thompson Hotels #2</div>
+                                            <div class="header-menu-select-arrow">
+                                                <span class="icon-chevron-down"></span>
+                                            </div>
+                                        </a>
+                                        <div class="header-menu-select-list">
+                                            <ul>
+                                                <li>
+                                                    <a href="javascript: void(0)" class="header-menu-select-position">
+                                                        <div class="header-menu-select-icon">
+                                                            <span class="icon-eye-off"></span>
+                                                        </div>
+                                                        <div class="header-menu-text">Switch hotel</div>
+                                                        <div class="header-menu-select-arrow">
+                                                            <span class="icon-chevron-right"></span>
+                                                        </div>
+                                                    </a>
+
+                                                    <div class="header-menu-select-sublist">
+                                                        <ul>
+                                                            <li><a href="">Thompson Hotels #1</a></li>
+                                                            <li class="active"><a href="">Thompson Hotels #2</a></li>
+                                                            <li><a href="">Thompson Hotels #3</a></li>
+                                                            <li><a href="">Thompson Hotels #4</a></li>
+                                                        </ul>
+                                                    </div>
+                                                </li>
+                                                <li>
+                                                    <a href="" class="header-menu-select-position">
+                                                        <div class="header-menu-select-icon">
+                                                            <span class="icon-eye-off"></span>
+                                                        </div>
+                                                        <div class="header-menu-text">Log out</div>
+                                                        <div class="header-menu-select-arrow"></div>
+                                                    </a>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+
+                                    <a href="" class="header-menu-button">
+                                        <div class="header-menu-button-icon">
+                                            <span class="icon-eye-off"></span>
+                                        </div>
+                                        <div>Orders</div>
+                                    </a>
+
+                                    <div data-owl-widget="HeaderCart"></div>
+
+                                    <a href="/my/home" class="header-menu-link">My account</a>
+                                </t>
+                                <a href="/contactus" class="header-menu-link">About us</a>
+                                <a href="/contactus" class="header-menu-link">Contact us</a>
+                            </div>
+                        </div>
+                    </div>
+                </header>
+            </div>
+        </xpath>
+    </template>
+</odoo>

@@ -1,23 +1,25 @@
 {
     'name': 'Regency Sales Estimates',
-    'version': '15.0.0.9',
+    'version': '16.0.0.1',
     'summary': '',
     'author': 'OpsWay',
     'description': "",
     'depends': [
-        'crm',
+        'sale_crm',
         'product_copy_template',
         'sale_product_configurator',
         'purchase_requisition',
         'consumption_agreement',
         'dr_many_tags_link',
         'sale_management'
+        # 'web_one2many_duplicate_cr'
     ],
     'category': 'Regency/Sales',
     'sequence': 10,
     'data': [
         'data/product_price_sheet.xml',
         'data/sale_estimate_stages.xml',
+        'data/purchase_requisition_data.xml',
         'security/ir.model.access.csv',
         'views/sale_estimate.xml',
         'views/sale_estimate_stage_views.xml',
@@ -31,6 +33,9 @@
         'views/price_sheet_portal.xml',
         'views/crm_lead.xml',
         'views/crm_stage.xml'
+    ],
+    'demo': [
+        'data/product_demo.xml',
     ],
     'assets': {
         'web.assets_frontend': [

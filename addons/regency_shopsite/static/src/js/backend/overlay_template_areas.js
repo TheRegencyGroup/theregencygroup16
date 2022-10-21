@@ -1,94 +1,176 @@
 /** @odoo-module **/
 
-import AbstractField from 'web.AbstractFieldOwl';
-import fieldRegistry from 'web.field_registry_owl';
-import { OverlayAreasPositionComponent } from './overlay_template_areas_position';
+import { registry } from "@web/core/registry";
+import { standardFieldProps } from "@web/views/fields/standard_field_props";
+import { OverlayAreasPositionComponent } from "./overlay_template_areas_position";
+import { useBus } from "@web/core/utils/hooks";
+import legacyEnv from "web.env";
 
-const { onMounted, onPatched, useState, useRef } = owl.hooks;
+const { Component, onMounted, onPatched, useRef, useState, useEnv } = owl;
 
 const OVERLAY_AREAS_WIDGET_NAME = 'overlay_areas';
+const OVERLAY_AREAS_FIELD = 'areas_json';
+const PRODUCT_TEMPLATE_ID_FIELD = 'product_template_id';
+const OVERLAY_POSITION_IDS_FIELD = 'overlay_position_ids';
+const OVERLAY_ATTRIBUTE_LINE_IDS_FIELD = 'overlay_attribute_line_ids';
+const ATTRIBUTE_VALUE_IDS = 'value_ids';
+const COLOR_ATTRIBUTE_NAME = 'Color';
 
-class OverlayAreasWidget extends AbstractField {
-    static supportedFieldTypes = ['char'];
-    static template = 'overlay_areas';
-    static components = { OverlayAreasPositionComponent };
+class OverlayAreasWidget extends Component {
+    setup() {
+        onPatched(this.onPatched);
+        onMounted(this.onMounted);
 
-    constructor(...args) {
-        super(...args);
-
-        onPatched(this.onPatched.bind(this));
-        onMounted(this.onMounted.bind(this));
-
-        this.valueObj = JSON.parse(this.value);
-
-        this.state = useState({
-            productTemplateId: this.valueObj.productTemplateId,
-            productImageList: this.valueObj.productImageList || [],
-            overlayPositions: this.valueObj.overlayPositions || {},
-            showImageListForOverlayPosId: false,
-        });
-
+        this.state = useState({});
         this.imageListPopupRef = useRef('image_list_popup');
 
-        this.productImageUnique = new Date().valueOf();
+        this.env = useEnv();
+        useBus(this.env.bus, "RELATIONAL_MODEL:WILL_SAVE_URGENTLY", this.commitChanges.bind(this));
+        useBus(this.env.bus, "RELATIONAL_MODEL:NEED_LOCAL_CHANGES", this.commitChanges.bind(this));
+        legacyEnv.bus.on("change-field", this, this.onChangeField.bind(this));
+
+        this.init();
     }
 
     onMounted() {
         let popup = this.imageListPopupRef.el;
         this.imageListPopupRef.el.remove();
         document.body.appendChild(popup);
-
-        window.onbeforeunload = () => {
-            this.reloadPage = true;
-        };
     }
 
     onPatched() {
-        let update = false;
-        this.valueObj = JSON.parse(this.value);
-        if (this.props.event) {
-            if (this.props.event.data.changes?.product_template_id !== undefined) {
-                this.state.productTemplateId = this.valueObj.productTemplateId;
-                this.state.productImageList = this.valueObj.productImageList;
-                this.productImageUnique = new Date().valueOf();
-                for (let overlayPosition of Object.values(this.state.overlayPositions)) {
-                    overlayPosition.areaList = {};
-                    for (let colorImage of Object.values(overlayPosition.colorImages)) {
-                        colorImage.imageId = false;
-                        colorImage.imageModel = false;
-                    }
+        if (this.currentRecordId !== this.props.record.__bm_handle__) {
+            this.init();
+        }
+    }
+
+    init() {
+        this.valueObj = JSON.parse(this.props.record.data[OVERLAY_AREAS_FIELD]);
+
+        this.state.productTemplateId = this.valueObj.productTemplateId;
+        this.state.productImageList = this.valueObj.productImageList || [];
+        this.state.overlayPositions = this.valueObj.overlayPositions || {};
+        this.state.showImageListForOverlayPosId = false;
+
+        this.productImageUnique = new Date().valueOf();
+
+        this.currentRecordId = this.props.record.__bm_handle__;
+        this.currentProductTemplateId = this.getProductTemplateId();
+        this.currentOverlayPositionIds = this.getOverlayPositionIds();
+        this.currentOverlayColorAttributeValueIds = this.getOverlayAttributeColorValueIds();
+    }
+
+    onChangeField(data) {
+        const changedFields = Object.keys(data.changes || data);
+        if (changedFields.includes(PRODUCT_TEMPLATE_ID_FIELD)) {
+            this.checkChangeProductTemplateId();
+        }
+        if (changedFields.includes(OVERLAY_POSITION_IDS_FIELD)) {
+            this.checkChangeOverlayPositionIds();
+        }
+        if (changedFields.includes(OVERLAY_ATTRIBUTE_LINE_IDS_FIELD)) {
+            this.checkChangeOverlayAttributeColorValueIds();
+        }
+    }
+
+    getProductTemplateId() {
+        const productTemplateIdField = this.props.record.data[PRODUCT_TEMPLATE_ID_FIELD];
+        return productTemplateIdField && productTemplateIdField.length
+            ? productTemplateIdField[0]
+            : null;
+    }
+
+    getOverlayPositionIds() {
+        const overlayPositionIdsField = this.props.record.data[OVERLAY_POSITION_IDS_FIELD];
+        return overlayPositionIdsField && overlayPositionIdsField.records.length
+            ? overlayPositionIdsField.records.map(e => e.data.id)
+            : [];
+    }
+
+    getOverlayAttributeColorValueIds() {
+        const overlayAttributeLineIdsField = this.props.record.data[OVERLAY_ATTRIBUTE_LINE_IDS_FIELD];
+        if (!overlayAttributeLineIdsField) {
+            return [];
+        }
+        const overlayColorAttributeLineIdField = overlayAttributeLineIdsField.records
+            .find(e => {
+                const attributeIdField = e.data.attribute_id;
+                if (!attributeIdField.length) {
+                    return false;
                 }
-            } else if (this.props.event.data.changes?.overlay_position_ids !== undefined) {
-                for (let overlayPosition of Object.values(this.valueObj.overlayPositions)) {
-                    if (!this.state.overlayPositions[overlayPosition.id]) {
-                        this.state.overlayPositions[overlayPosition.id] = overlayPosition;
-                    }
-                }
-                let removedOverlayPositionIds = Object.keys(this.state.overlayPositions)
-                    .filter(e => !Object.keys(this.valueObj.overlayPositions).includes(e));
-                for (let overlayPositionId of removedOverlayPositionIds) {
-                    delete this.state.overlayPositions[overlayPositionId];
-                }
-            } else if (this.props.event.data.changes?.overlay_attribute_line_ids !== undefined) {
-                for (let overlayPosition of Object.values(this.valueObj.overlayPositions)) {
-                    for (let colorImage of Object.values(overlayPosition.colorImages)) {
-                        if (!this.state.overlayPositions[overlayPosition.id].colorImages[colorImage.id]) {
-                            this.state.overlayPositions[overlayPosition.id].colorImages[colorImage.id] = colorImage;
-                        }
-                    }
-                    let removedColorIds = Object.keys(this.state.overlayPositions[overlayPosition.id].colorImages)
-                        .filter(e => !Object.keys(overlayPosition.colorImages).includes(e));
-                    for (let colorId of removedColorIds) {
-                        delete this.state.overlayPositions[overlayPosition.id].colorImages[colorId];
-                    }
+                return attributeIdField[1] === COLOR_ATTRIBUTE_NAME;
+            });
+        if (!overlayColorAttributeLineIdField) {
+            return [];
+        }
+        const overlayColorAttributeValueIdsField = overlayColorAttributeLineIdField[ATTRIBUTE_VALUE_IDS];
+        return overlayColorAttributeValueIdsField && overlayColorAttributeValueIdsField.records.length
+            ? overlayColorAttributeValueIdsField.records.map(e => e.data.id)
+            : [];
+    }
+
+    checkChangeProductTemplateId() {
+        const productTemplateId = this.getProductTemplateId();
+        if (this.currentProductTemplateId !== productTemplateId) {
+            this.currentProductTemplateId = productTemplateId;
+
+            this.valueObj = JSON.parse(this.props.record.data[OVERLAY_AREAS_FIELD]);
+            this.state.productTemplateId = this.valueObj.productTemplateId;
+            this.state.productImageList = this.valueObj.productImageList;
+            this.productImageUnique = new Date().valueOf();
+            for (let overlayPosition of Object.values(this.state.overlayPositions)) {
+                overlayPosition.areaList = {};
+                for (let colorImage of Object.values(overlayPosition.colorImages)) {
+                    colorImage.imageId = false;
+                    colorImage.imageModel = false;
                 }
             }
-            this.props.event.data.changes = null;
+        }
+    }
+
+    checkChangeOverlayPositionIds() {
+        const overlayPositionIds = this.getOverlayPositionIds();
+        if (JSON.stringify(this.currentOverlayPositionIds) !== JSON.stringify(overlayPositionIds)) {
+            this.currentOverlayPositionIds = overlayPositionIds;
+
+            this.valueObj = JSON.parse(this.props.record.data[OVERLAY_AREAS_FIELD]);
+            for (let overlayPosition of Object.values(this.valueObj.overlayPositions)) {
+                if (!this.state.overlayPositions[overlayPosition.id]) {
+                    this.state.overlayPositions[overlayPosition.id] = overlayPosition;
+                }
+            }
+            let removedOverlayPositionIds = Object.keys(this.state.overlayPositions)
+                .filter(e => !Object.keys(this.valueObj.overlayPositions).includes(e));
+            for (let overlayPositionId of removedOverlayPositionIds) {
+                delete this.state.overlayPositions[overlayPositionId];
+            }
+        }
+    }
+
+    checkChangeOverlayAttributeColorValueIds() {
+        const overlayColorAttributeValueIds = this.getOverlayAttributeColorValueIds();
+        if (JSON.stringify(this.currentOverlayColorAttributeValueIds) !== JSON.stringify(overlayColorAttributeValueIds)) {
+            this.currentOverlayColorAttributeValueIds = overlayColorAttributeValueIds;
+
+            this.valueObj = JSON.parse(this.props.record.data[OVERLAY_AREAS_FIELD]);
+            for (let overlayPosition of Object.values(this.valueObj.overlayPositions)) {
+                for (let colorImage of Object.values(overlayPosition.colorImages)) {
+                    if (!this.state.overlayPositions[overlayPosition.id].colorImages[colorImage.id]) {
+                        this.state.overlayPositions[overlayPosition.id].colorImages[colorImage.id] = colorImage;
+                    }
+                }
+                let removedColorIds = Object.keys(this.state.overlayPositions[overlayPosition.id].colorImages)
+                    .filter(e => !Object.keys(overlayPosition.colorImages).includes(e));
+                for (let colorId of removedColorIds) {
+                    delete this.state.overlayPositions[overlayPosition.id].colorImages[colorId];
+                }
+            }
         }
     }
 
     get editMode() {
-        return this.mode === 'edit';
+        // return this.props.record.mode === 'edit';
+        return this.env.model.root.isDirty;
     }
 
     get filteredProductImageList() {
@@ -114,14 +196,11 @@ class OverlayAreasWidget extends AbstractField {
         return `${baseUrl}/web/image?model=${model}&id=${id}&field=image_512&unique=${this.productImageUnique}`;
     }
 
-    changeOverlayAreasImage(event) {
-        this.state.showImageListForOverlayPosId = {
-            id: event.detail.id,
-            colorId: event.detail.colorId,
-        };
+    changeOverlayAreasImage({ id, colorId, }) {
+        this.state.showImageListForOverlayPosId = { id, colorId };
     }
 
-    commitChanges() {
+    async commitChanges() {
         if (!this.editMode) {
             return;
         }
@@ -131,7 +210,8 @@ class OverlayAreasWidget extends AbstractField {
             overlayPositions: {},
         }
         let OverlayAreasPositionComponents = Object.values(this.__owl__.children)
-            .filter(e => e.constructor.name === 'OverlayAreasPositionComponent');
+            .filter(e => e.component.constructor.name === 'OverlayAreasPositionComponent')
+            .map(e => e.component);
         for (let component of OverlayAreasPositionComponents) {
             let overlayPositionId = component.props.overlayPositionId;
             // if (!component.state.imageLoad) {
@@ -182,7 +262,7 @@ class OverlayAreasWidget extends AbstractField {
                 colorImages,
             };
         }
-        this._setValue(JSON.stringify(val));
+        this.props.update(JSON.stringify(val));
     }
 
     closeImageListPopup() {
@@ -192,6 +272,9 @@ class OverlayAreasWidget extends AbstractField {
     onClickImage(id, model, event) {
         let overlayPositionId = this.state.showImageListForOverlayPosId.id;
         let colorId = this.state.showImageListForOverlayPosId.colorId;
+        if (!overlayPositionId || !colorId) {
+            return;
+        }
         this.state.overlayPositions[overlayPositionId].colorImages[colorId].imageId = id;
         this.state.overlayPositions[overlayPositionId].colorImages[colorId].imageModel = model;
         this.state.overlayPositions[overlayPositionId].areaList = {};
@@ -201,9 +284,24 @@ class OverlayAreasWidget extends AbstractField {
     onClickCloseImageListPopup(event) {
         this.closeImageListPopup();
     }
+
+    onClickToEditMode(event) {
+        this.env.model.__bm__.setDirtyForce(this.props.record.__bm_handle__);
+        this.env.model.root.update();
+    }
 }
 
-fieldRegistry.add(OVERLAY_AREAS_WIDGET_NAME, OverlayAreasWidget);
+OverlayAreasWidget.props = {
+    ...standardFieldProps,
+};
+
+OverlayAreasWidget.supportedTypes = ["char"];
+OverlayAreasWidget.template = "overlay_areas";
+OverlayAreasWidget.components = {
+    OverlayAreasPositionComponent,
+};
+
+registry.category("fields").add(OVERLAY_AREAS_WIDGET_NAME, OverlayAreasWidget);
 
 export {
     OverlayAreasWidget,

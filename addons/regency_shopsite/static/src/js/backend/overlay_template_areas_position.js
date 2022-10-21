@@ -2,22 +2,19 @@
 
 import { Overlay } from './overlay';
 
-const { Component } = owl;
-const { onMounted, onPatched, useState, useRef } = owl.hooks;
+const { Component, onMounted, onPatched, useState, useRef } = owl;
 
 const OVERLAY_AREAS_WIDGET_NAME = 'overlay_areas';
 const AREAS_TAB = 'areas_tab';
 const IMAGES_TAB = 'images_tab';
 
-export class OverlayAreasPositionComponent extends Component {
-    constructor(...args) {
-        super(...args);
-
+class OverlayAreasPositionComponent extends Component {
+    setup() {
         this.AREAS_TAB = AREAS_TAB;
         this.IMAGES_TAB = IMAGES_TAB;
 
-        onPatched(this.onPatched.bind(this));
-        onMounted(this.onMounted.bind(this));
+        onPatched(this.onPatched);
+        onMounted(this.onMounted);
 
         this.state = useState({
             imageLoad: false,
@@ -38,6 +35,7 @@ export class OverlayAreasPositionComponent extends Component {
 
     onMounted() {
         this.setImageOnloadCallback();
+        // TODO: implement proper solution
         this.updateCanvas(); //TEMPORARY!!!!!!!!!!!!!!!
         let image = this.getImageForOverlay();
         if (image) {
@@ -113,16 +111,16 @@ export class OverlayAreasPositionComponent extends Component {
             this.overlay.destroy();
         }
         // if (this.imageRef.el) {
-            // this.canvasRef.el.width = this.imageRef.el.clientWidth;
-            // this.canvasRef.el.height = this.imageRef.el.clientHeight;
-            this.canvasRef.el.width = 500;
-            this.canvasRef.el.height = 500;
+        // this.canvasRef.el.width = this.imageRef.el.clientWidth;
+        // this.canvasRef.el.height = this.imageRef.el.clientHeight;
+        this.canvasRef.el.width = 500;
+        this.canvasRef.el.height = 500;
 
-            this.overlay = new Overlay(this.canvasRef.el, this.props.areaList);
-            this.overlay.selectable = this.props.editMode;
-            this.overlay.onSelectedArea = (areaIndex) => {
-                this.state.selectedAreaIndex = areaIndex;
-            };
+        this.overlay = new Overlay(this.canvasRef.el, this.props.areaList);
+        this.overlay.selectable = this.props.editMode;
+        this.overlay.onSelectedArea = (areaIndex) => {
+            this.state.selectedAreaIndex = areaIndex;
+        };
         // }
     }
 
@@ -187,8 +185,8 @@ export class OverlayAreasPositionComponent extends Component {
         }
     }
 
-    onClickChangeColorImage(colorId, event) {
-        this.trigger('change-overlay-image', {
+    onClickChangeColorImage(colorId) {
+        this.props.changeOverlayImage({
             id: this.props.overlayPositionId,
             colorId,
         });
@@ -207,6 +205,11 @@ OverlayAreasPositionComponent.props = {
     areaList: Object,
     editMode: Boolean,
     colorImages: Object,
+    changeOverlayImage: Function,
 }
 
 OverlayAreasPositionComponent.template = 'overlay_areas_position'
+
+export {
+    OverlayAreasPositionComponent,
+}

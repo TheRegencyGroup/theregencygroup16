@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="layout" inherit_id="website.layout" priority="200">
+        <xpath expr="//div[@id='wrapwrap']/main" position="inside">
+            <footer class="footer">
+                <div class="container">
+                    <a href="http://theregencygroup.net">© theregencygroup.net</a>
+                </div>
+            </footer>
+        </xpath>
+    </template>
+
+    <template id="footer_custom" inherit_id="website.layout" priority="100">
+        <xpath expr="//footer" position="replace">
+        </xpath>
+    </template>
+</odoo>

@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates>
+
+    <t t-name="overlay_template_page" owl="1">
+        <div class="content">
+            <div class="container">
+                <div class="content-in">
+
+                    <div class="path">
+                        <ul>
+                            <li><a href="">Recent products</a></li>
+                            <li>New customization</li>
+                        </ul>
+                    </div>
+
+                    <div class="product-top">
+                        <div class="product-top-left">
+                            <div class="form-group form-group-large">
+                                <label class="label">Listing name</label>
+                                <input type="text" name="" class="form-control" value="Jerusalem Marathon"/>
+                            </div>
+                        </div>
+                        <div class="product-top-right">
+                            <button class="btn btn-sm">Delete</button>
+                            <button class="btn btn-sm btn-dark minw100">Save</button>
+                        </div>
+                    </div>
+
+                    <div class="product-row">
+                        <div class="product-left">
+                            <ProductOverlayEditorComponent/>
+                            <div class="banner">
+                                <div class="banner-in">
+                                    <div class="banner-logo">
+                                        <img src="img/logo.png" alt=""/>
+                                    </div>
+                                    <h2>Bringing your Brand to Life</h2>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="product-right">
+                            <h1><t t-esc="store.otPage.productName"/></h1>
+                            <div class="product-text">
+                                <p><t t-esc="store.otPage.productDescription"/></p>
+                            </div>
+
+                            <div class="line"></div>
+
+                            <ColorAttributeSelector attributeId="store.otPage.colorAttributeId"/>
+                            <t t-foreach="sortedAttributeList" t-as="attribute" t-key="attribute.id">
+                                <AttributeSelector t-if="attribute.id" attributeId="attribute.id"/>
+                            </t>
+
+                            <div class="product-group">
+                                <div class="h3">Sections</div>
+
+                                <div class="form-set">
+                                    <div class="form-set-top">
+                                        <h3 class="form-set-title">Top logo</h3>
+                                        <div class="form-set-type">Text</div>
+                                    </div>
+                                    <div class="form-set-content">
+                                        <textarea class="form-control" placeholder="Add your text here"></textarea>
+                                    </div>
+                                </div>
+
+                                <div class="form-set">
+                                    <div class="form-set-top">
+                                        <h3 class="form-set-title">Main centered logo</h3>
+                                        <div class="form-set-type">Rectangle</div>
+                                    </div>
+                                    <div class="form-set-content">
+                                        <div class="upload">
+                                            <div class="upload-preview">
+                                                <span class="icon-eye-off"></span>
+                                            </div>
+                                            <div class="upload-text">
+                                                <div class="upload-text-title">Drop or upload image</div>
+                                                <div class="upload-text-subtitle">10x7 cm</div>
+                                            </div>
+                                            <div class="upload-buttons">
+                                                <button class="btn btn-sm btn-dark">
+                                                    <span class="icon-eye-off"></span>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="product-group">
+                                <div class="h3">Branding</div>
+                                <a href="" class="btn btn-block">
+                                    <span>Customize branding materials</span>
+                                    <span class="icon-eye-off"></span>
+                                </a>
+                            </div>
+
+                            <PriceSelector/>
+
+                            <a href="" class="btn btn-block btn-dark">
+                                <span>Add to cart</span>
+                                <span class="icon-eye-off"></span>
+                            </a>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </t>
+
+    <t t-name="overlay_template_page_attribute_selector" owl="1">
+        <div class="product-group">
+            <div class="h3"><t t-esc="attribute.name"/></div>
+            <div class="radio-simple-vals">
+                <t t-foreach="Object.values(attribute.valueList)" t-as="value" t-key="value.id">
+                    <label class="radio-simple-val">
+                        <input type="radio"
+                               t-att-name="attribute.name"
+                               t-att-checked="store.otPage.selectedAttributeValues[props.attributeId].valueId === value.id"
+                               t-on-change="() => this.onChangeAttributeValue(value.id)"
+                               class="ml-1 mr-3"/>
+                        <div class="radio-simple-val-in"><t t-esc="value.name"/></div>
+                    </label>
+                </t>
+            </div>
+        </div>
+    </t>
+
+    <t t-name="overlay_template_page_color_attribute_selector" owl="1">
+        <div class="product-group">
+            <div class="h3"><t t-esc="attribute.name"/></div>
+            <div class="radio-colors">
+                <t t-foreach="Object.values(attribute.valueList)" t-as="value" t-key="value.id">
+                    <label class="radio-color">
+                        <input type="radio"
+                               t-att-name="attribute.name"
+                               t-att-checked="store.otPage.selectedAttributeValues[props.attributeId].valueId === value.id"
+                               t-on-change="() => this.onChangeAttributeValue(value.id)"
+                               class="ml-1 mr-3"/>
+                        <div class="radio-color-in" t-attf-style="background: {{value.color}}"/>
+                    </label>
+                </t>
+            </div>
+        </div>
+    </t>
+
+    <t t-name="overlay_template_page_price_selector" owl="1">
+        <t t-if="priceList.length">
+            <div class="line"></div>
+            <div class="radio-lines">
+                <t t-foreach="priceList" t-as="price_item" t-key="price_item.id">
+                    <label class="radio-line">
+                        <input type="radio" name="number"
+                               t-att-checked="price_item.id === store.otPage.selectedPriceId"
+                               t-on-click="() => this.onChangePrice(price_item.id)"/>
+                        <div class="radio-line-in">
+                            <div class="radio-line-number"><t t-esc="price_item.quantity"/></div>
+                            <div class="radio-line-price">$<t t-esc="price_item.price"/></div>
+                        </div>
+                    </label>
+                </t>
+            </div>
+        </t>
+    </t>
+
+</templates>

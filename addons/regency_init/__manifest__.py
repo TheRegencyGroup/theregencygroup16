@@ -6,9 +6,13 @@
     'description': "",
     'website': '',
     'depends': [
-        'regency_contacts',
+        'stock',
         'consumption_agreement',
-        'regency_import'
+        'regency_import',
+        'regency_estimate',
+        'regency_crm',
+        'regency_hotel_template_relation',
+        'regency_shopsite'
     ],
     'category': 'Regency',
     'sequence': 5,

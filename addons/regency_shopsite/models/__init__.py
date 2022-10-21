@@ -1,7 +1,6 @@
 from . import (
-    product_product,
+    product_template,
     product_image,
-    ir_module_module,
     sale_order,
     overlay_template,
     overlay_position,
@@ -9,6 +8,6 @@ from . import (
     product_pricelist_item,
     product_attribute,
     website,
-    product_pricelist,
+    # product_pricelist,
     overlay_product
 )
