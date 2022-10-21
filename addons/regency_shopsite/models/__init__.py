@@ -9,5 +9,6 @@ from . import (
     product_attribute,
     website,
     # product_pricelist,
-    overlay_product
+    overlay_product,
+    res_users,
 )

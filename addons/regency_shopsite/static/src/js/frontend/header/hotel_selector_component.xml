@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates>
+    <t t-name="hotel_selector_component" owl="1">
+        <div t-if="store.header" t-att-class="{'header-menu-select':true,opened:this.state.isOpen}">
+            <a href="#" class="header-menu-button" t-on-click.prevent="onToggle">
+                <div class="header-menu-button-logo">
+                    <img src="/regency_shopsite/static/src/img/logo-hotel.png" alt=""/>
+                </div>
+                <div class="header-menu-text" t-esc="store.header.currentHotelName"/>
+                <div class="header-menu-select-arrow">
+                    <span class="icon-chevron-down"/>
+                </div>
+            </a>
+            <div class="header-menu-select-list">
+                <ul>
+                    <li>
+                        <a href="#" class="header-menu-select-position">
+                            <div class="header-menu-select-icon">
+                                <span class="icon-eye-off"/>
+                            </div>
+                            <div class="header-menu-text">Switch hotel</div>
+                            <div class="header-menu-select-arrow">
+                                <span class="icon-chevron-right"/>
+                            </div>
+                        </a>
+                        <div class="header-menu-select-sublist">
+                            <ul>
+                                <li>
+                                    <a href="#" t-foreach="Object.values(store.header.hotel_ids)" t-as="hotel"
+                                       t-key="hotel_idx" t-esc="hotel.name"
+                                       t-att-class="store.header.active_hotel_id===hotel.id?'active':''"
+                                       t-on-click.prevent="onSelect" t-att-data-id="hotel.id"/>
+                                </li>
+                            </ul>
+                        </div>
+                    </li>
+                    <li>
+                        <a href="#" class="header-menu-select-position">
+                            <div class="header-menu-select-icon">
+                                <span class="icon-eye-off"/>
+                            </div>
+                            <div class="header-menu-text">Log out</div>
+                            <div class="header-menu-select-arrow"/>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </t>
+</templates>

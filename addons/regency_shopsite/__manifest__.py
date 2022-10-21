@@ -1,12 +1,13 @@
 {
     'name': 'Regency Shopsite',
-    'version': '16.0.0.3',
+    'version': '16.0.0.4',
     'author': 'OpsWay',
     'license': "Other proprietary",
     'depends': [
         'website_sale',
         'fe_owl_base',
         'product',
+        'regency_contacts',
     ],
     'data': [
         'security/ir.model.access.csv',
@@ -35,6 +36,8 @@
             'regency_shopsite/static/lib/*.js',
             'regency_shopsite/static/src/js/main.js',
             'regency_shopsite/static/src/js/frontend/overlay_template_page/*.js',
+            'regency_shopsite/static/src/js/frontend/header/store.js',
+            'regency_shopsite/static/src/js/frontend/header/*.js',
 
             'regency_shopsite/static/src/js/frontend/**/*.xml',
 
@@ -58,6 +61,7 @@
         ],
     },
     'category': 'Regency',
+    'sequence': 5,
     'installable': True,
     'application': True,
     'auto_install': False,

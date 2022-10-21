@@ -6,6 +6,7 @@
                 const PRELOADED_DATA={};
                 PRELOADED_DATA.OVERLAY_TEMPLATE_PAGE_DATA=<t t-out="overlay_template_page_data or 'null'"/>
                 PRELOADED_DATA.SHOPSITE_CATALOG_DATA=<t t-out="shopsite_catalog_data or 'false'"/>;
+                PRELOADED_DATA.HEADER_DATA=<t t-out="request.env['website']._header_preloaded()"/>;
             </script>
         </xpath>
     </template>
