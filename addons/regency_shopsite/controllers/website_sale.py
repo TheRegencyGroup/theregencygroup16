@@ -3,12 +3,10 @@ import io
 import json
 
 import PIL.Image as Image
-from odoo.tools.image import image_data_uri
 from markupsafe import Markup
-from odoo import _, http, Command, api
+from odoo import _, http, api
 from odoo.http import request
-from odoo.addons.website_sale.controllers.main import TableCompute, WebsiteSale
-from typing import List, Dict
+from odoo.addons.website_sale.controllers.main import WebsiteSale
 
 DEFAULT_PRODUCT_QTY_PEAR_PAGE = 100
 
@@ -73,10 +71,11 @@ class WebsiteSaleRegency(WebsiteSale):
         page = kwargs.get('page', 1)
         limit = kwargs.get('limit', DEFAULT_PRODUCT_QTY_PEAR_PAGE)
         data = self.get_list_update(model=model, page=page, limit=limit)
-        options = {'page': page,
-                   'limit': limit,
-                   'model': model
-                   }
+        options = {
+            'page': page,
+            'limit': limit,
+            'model': model
+        }
         data.update(options)
         values = {'shopsite_catalog_data': Markup(json.dumps(data))}
         return request.render('regency_shopsite.shopsite_catalog', values)
@@ -86,9 +85,10 @@ class WebsiteSaleRegency(WebsiteSale):
     ], type='json', auth="user", website=True, methods=['POST'])
     def get_list_update(self, page, model, **kwargs):
         limit = kwargs.get('limit', DEFAULT_PRODUCT_QTY_PEAR_PAGE)
-        model_update_func_mapping = {'overlay.template': self._get_overlay_templates_data,
-                                     'overlay.product': self._get_overlay_products_data,
-                                     }
+        model_update_func_mapping = {
+            'overlay.template': self._get_overlay_templates_data,
+            'overlay.product': self._get_overlay_products_data,
+        }
         product_data = model_update_func_mapping[model](page=page, limit=limit)
         return product_data
 
@@ -104,15 +104,17 @@ class WebsiteSaleRegency(WebsiteSale):
         overlay_template_ids = overlay_data['product_ids']
         ot_data = []
         for ot in overlay_template_ids:
-            ot_val = {'name': ot.name,
-                      'main_image_url': ot.get_main_image_url(),
-                      'id': ot.id,
-                      }
+            ot_val = {
+                'name': ot.name,
+                'main_image_url': ot.get_main_image_url(),
+                'id': ot.id,
+            }
             ot_data.append(ot_val)
-        data = {'data': ot_data,
-                'count': overlay_data['full_count'],
-                'model': model,
-                }
+        data = {
+            'data': ot_data,
+            'count': overlay_data['full_count'],
+            'model': model,
+        }
         return data
 
     @api.model
@@ -128,9 +130,10 @@ class WebsiteSaleRegency(WebsiteSale):
     def _get_products(self, model, page=False, limit=False):
         env_model, domain = request.env[model], []
         offset = ((page or 1) - 1) * (limit or 0)
-        data = {'product_ids': env_model.search(domain, offset=offset, limit=limit),
-                'full_count': env_model.search_count(domain)
-                }
+        data = {
+            'product_ids': env_model.search(domain, offset=offset, limit=limit),
+            'full_count': env_model.search_count(domain)
+        }
         return data
 
     @http.route(['/shop/cart/reorder'], type='json', auth="public", methods=['POST'], website=True, csrf=False)
