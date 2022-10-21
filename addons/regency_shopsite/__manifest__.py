@@ -34,9 +34,10 @@
         'web.assets_frontend': [
             'regency_shopsite/static/lib/*.js',
             'regency_shopsite/static/src/js/main.js',
-            'regency_shopsite/static/src/js/frontend/overlay_template_page/*.js',
+            'regency_shopsite/static/src/js/frontend/overlay_template_page/**/*.js',
+            'regency_shopsite/static/src/js/frontend/cart/**/*.js',
 
-            'regency_shopsite/static/src/js/frontend/**/*.xml',
+            'regency_shopsite/static/src/js/frontend/**/**/*.xml',
 
             'regency_shopsite/static/src/scss/frontend/variables.scss',
             'regency_shopsite/static/src/scss/frontend/fonts/*.scss',
