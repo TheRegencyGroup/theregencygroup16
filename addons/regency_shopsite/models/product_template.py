@@ -75,11 +75,16 @@ class ProductTemplate(models.Model):
                 raise UserError('Cannot add Overlay/Customization attribute manually.')
 
     def open_pricelist_rules(self):
+        """
+        overridden to get price rules set on overlay template
+        """
         self.ensure_one()
         domain = ['|', '|',
                   ('product_tmpl_id', '=', self.id),
                   ('product_id', 'in', self.product_variant_ids.ids),
+                  # start custom logic
                   ('overlay_tmpl_id', 'in', self.overlay_template_ids.ids)]
+                  # end custom logic
         return {
             'name': _('Price Rules'),
             'view_mode': 'tree,form',
@@ -96,8 +101,13 @@ class ProductTemplate(models.Model):
         }
 
     def _compute_item_count(self):
+        """
+        overridden to get count of price rules set on overlay template
+        """
         for template in self:
             # Pricelist item count counts the rules applicable on current template or on its variants.
             template.pricelist_item_count = template.env['product.pricelist.item'].search_count([
                 '|', '|', ('product_tmpl_id', '=', template.id), ('product_id', 'in', template.product_variant_ids.ids),
+                # start custom logic
                 ('overlay_tmpl_id', 'in', self.overlay_template_ids.ids)])
+                # end custom logic
