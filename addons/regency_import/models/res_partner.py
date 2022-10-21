@@ -75,8 +75,8 @@ class ResPartner(models.Model):
                                                                  ('code', 'ilike', rec.ext_state)], limit=1)
     def after_import_update(self):
         all = self.search([])
-        # all.set_tags()
-        # self.search([('ext_salesrep_email', '!=', False)]).assign_sales_rep()
+        all.set_tags()
+        self.search([('ext_salesrep_email', '!=', False)]).assign_sales_rep()
         all.set_contact_type()
         all.set_cc_email()
         all.set_state()
