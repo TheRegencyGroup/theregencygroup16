@@ -27,7 +27,7 @@
                             <ul>
                                 <li>
                                     <a href="#" t-foreach="Object.values(store.header.hotel_ids)" t-as="hotel"
-                                       t-key="hotel_idx" t-esc="hotel.name"
+                                       t-key="hotel_index" t-esc="hotel.name"
                                        t-att-class="store.header.active_hotel_id===hotel.id?'active':''"
                                        t-on-click.prevent="onSelect" t-att-data-id="hotel.id"/>
                                 </li>

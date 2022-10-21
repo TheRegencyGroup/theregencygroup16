@@ -1,7 +1,7 @@
 /** @odoo-module **/
 
 import { mountComponentAsWidget, useStore } from '@fe_owl_base/js/main';
-
+import Dummy from './store'; // NOSONAR required to maintain correct loading order
 const { Component, useState } = owl;
 
 export class HotelSelectorComponent extends Component {
@@ -15,7 +15,8 @@ export class HotelSelectorComponent extends Component {
     }
 
     onSelect(e) {
-        console.log(e.currentTarget.dataset.id);
+        this.store.header.setActiveHotel(e.currentTarget.dataset.id);
+        this.state.isOpen = false;
     }
 }
 

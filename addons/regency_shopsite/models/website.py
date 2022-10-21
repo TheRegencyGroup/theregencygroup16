@@ -1,7 +1,7 @@
 import json
 
 from markupsafe import Markup
-from odoo import api, fields, models
+from odoo import api, models
 from odoo.http import request
 from odoo.osv import expression
 
@@ -30,7 +30,7 @@ class Website(models.Model):
             data = self.env['website'].browse(website)._header_preloaded_data()
         else:
             data = False
-        return Markup(dumps(data))
+        return Markup(json.dumps(data))
 
     @api.model
     def _get_cart_data(self, preloaded=False):
