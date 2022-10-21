@@ -16,5 +16,5 @@ if (cartData) {
         }
     }
 
-    extendStore({ cart: new Cart() })
+    extendStore({ key: 'cart', obj: new Cart })
 }

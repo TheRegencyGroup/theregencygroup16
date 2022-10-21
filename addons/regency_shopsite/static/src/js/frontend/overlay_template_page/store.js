@@ -48,5 +48,5 @@ if (overlayTemplatePageData) {
         }
     }
 
-    extendStore({ otPage: new OverlayTemplatePage() })
+    extendStore({ key: 'otPage', obj: new OverlayTemplatePage() })
 }
