@@ -1,8 +1,4 @@
-from itertools import chain
-
-from odoo import fields, models, api, _
-from odoo.exceptions import UserError
-from odoo.tools import formatLang
+from odoo import models
 
 
 class Pricelist(models.Model):
