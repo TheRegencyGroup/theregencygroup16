@@ -6,7 +6,7 @@ class CRMLead(models.Model):
 
     contacted = fields.Boolean(compute="_compute_contacted", store=True)
     representative_name = fields.Many2one('res.partner')
-    email_from = fields.Char(required=True)  # must be required
+    email_from = fields.Char()
     no_open_actions = fields.Integer(string='No. Open Actions')
     no_spend_issues = fields.Boolean(sting="No. Spend Issues")
     management_group = fields.Char(string="Management Group")
