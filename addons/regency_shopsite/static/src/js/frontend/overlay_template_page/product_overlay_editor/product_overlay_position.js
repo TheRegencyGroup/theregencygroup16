@@ -5,7 +5,7 @@ import {
     ELLIPSE_AREA_TYPE,
     RECTANGLE_AREA_TYPE,
     TEXT_AREA_TYPE,
-} from '../../main';
+} from '../../../main';
 import { RectangleArea } from './rectangle_area';
 import { EllipseArea } from './ellipse_area';
 import { TextArea } from './text_area';

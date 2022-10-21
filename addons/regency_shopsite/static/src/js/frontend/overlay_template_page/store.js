@@ -10,6 +10,7 @@ if (overlayTemplatePageData) {
                 this[key] = value;
             }
             this.selectedAttributeValues = this.getSelectedAttributeValues();
+            this.selectedPriceId = this.priceList ? Object.values(this.priceList)[0].id : null;
         }
 
         getSelectedAttributeValues() {
@@ -39,6 +40,10 @@ if (overlayTemplatePageData) {
 
         changeAttributeValueAction(attributeId, valueId) {
             this.selectedAttributeValues[attributeId].valueId = valueId;
+        }
+
+        changeSelectedPrice(priceId) {
+            this.selectedPriceId = priceId;
         }
     }
 
