@@ -73,3 +73,31 @@ class ProductTemplate(models.Model):
 
             if {overlay_attr.id, customization_attr.id}.intersection(set(self.attribute_line_ids.mapped('attribute_id.id'))):
                 raise UserError('Cannot add Overlay/Customization attribute manually.')
+
+    def open_pricelist_rules(self):
+        self.ensure_one()
+        domain = ['|', '|',
+                  ('product_tmpl_id', '=', self.id),
+                  ('product_id', 'in', self.product_variant_ids.ids),
+                  ('overlay_tmpl_id', 'in', self.overlay_template_ids.ids)]
+        return {
+            'name': _('Price Rules'),
+            'view_mode': 'tree,form',
+            'views': [(self.env.ref('product.product_pricelist_item_tree_view_from_product').id, 'tree'), (False, 'form')],
+            'res_model': 'product.pricelist.item',
+            'type': 'ir.actions.act_window',
+            'target': 'current',
+            'domain': domain,
+            'context': {
+                'default_product_tmpl_id': self.id,
+                'default_applied_on': '1_product',
+                'product_without_variants': self.product_variant_count == 1,
+            },
+        }
+
+    def _compute_item_count(self):
+        for template in self:
+            # Pricelist item count counts the rules applicable on current template or on its variants.
+            template.pricelist_item_count = template.env['product.pricelist.item'].search_count([
+                '|', '|', ('product_tmpl_id', '=', template.id), ('product_id', 'in', template.product_variant_ids.ids),
+                ('overlay_tmpl_id', 'in', self.overlay_template_ids.ids)])
