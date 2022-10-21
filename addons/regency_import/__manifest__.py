@@ -6,12 +6,14 @@
     'description': "",
     'website': '',
     'depends': [
-        'regency_contacts'
+        'regency_contacts',
+        'regency_crm'
     ],
     'data': [
         'data/ir_action_server.xml',
         'security/ir.model.access.csv',
-        'views/res_partner.xml'
+        'views/res_partner.xml',
+        'views/res_country.xml'
     ],
     'category': 'Regency',
     'sequence': 5,

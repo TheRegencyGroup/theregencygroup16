@@ -1,6 +1,7 @@
 /** @odoo-module **/
 
 import { extendStore } from '@fe_owl_base/js/main';
+import rpc from 'web.rpc';
 
 const overlayTemplatePageData = PRELOADED_DATA?.OVERLAY_TEMPLATE_PAGE_DATA;
 if (overlayTemplatePageData) {

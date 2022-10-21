@@ -3,7 +3,7 @@
 
     <t t-inherit="web.FormView" t-inherit-mode="extension" owl="1">
         <xpath expr="//div[hasclass('o_form_view_container')]" position="attributes">
-            <attribute name="class" add="form_view_for_overlay_template" separator=" "/>
+            <attribute name="t-att-class" add="model.root.resModel === 'overlay.template' ? 'form_view_for_overlay_template' : ''" separator=" "/>
         </xpath>
     </t>
 

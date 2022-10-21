@@ -34,7 +34,8 @@ class SaleOrderLine(models.Model):
                               ('agreement_id.allowed_partner_ids', 'in', self.partner_id.id)],
                    order='signed_date',
                    limit=1)
-        self.price_unit = self.consumption_agreement_line_id.price_unit
+        if self.consumption_agreement_line_id:
+            self.price_unit = self.consumption_agreement_line_id.price_unit
 
     @api.onchange('product_uom', 'product_uom_qty')
     def _compute_product_uom(self):

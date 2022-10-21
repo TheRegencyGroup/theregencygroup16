@@ -71,8 +71,8 @@ class ResPartner(models.Model):
         for rec in all:
             rec.state_id = self.env['res.country.state'].search([('country_id', '=', rec.country_id.id),
                                                                  '|',
-                                                                 ('name', 'ilike', rec.ext_state),
-                                                                 ('code', 'ilike', rec.ext_state)], limit=1)
+                                                                 ('name', '=ilike', rec.ext_state),
+                                                                 ('code', '=ilike', rec.ext_state)], limit=1)
     def after_import_update(self):
         all = self.search([])
         all.set_tags()

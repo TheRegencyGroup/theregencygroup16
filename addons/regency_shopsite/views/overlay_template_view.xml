@@ -64,8 +64,9 @@
                         </page>
                         <page string="Price Items" id="price_items">
                             <field name="price_item_ids" widget="one2many"
-                                   context="{'form_view_ref': 'regency_shopsite.product_pricelist_item_form_view_from_overlay_tmpl'}">
-                            <tree string="Price Items">
+                                   context="{'form_view_ref': 'regency_shopsite.product_pricelist_item_form_view_from_overlay_tmpl',
+                                    'default_applied_on': '4_overlay_template', 'default_overlay_tmpl_id': active_id}">
+                                <tree string="Price Items">
                                     <field name="pricelist_id"/>
                                     <field name="min_quantity"/>
                                     <field name="price"/>

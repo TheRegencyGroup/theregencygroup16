@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="res_country_form_view" model="ir.ui.view">
+        <field name="name">res.country.form</field>
+        <field name="model">res.country</field>
+        <field name="inherit_id" ref="base.view_country_form"/>
+        <field name="arch" type="xml">
+           <xpath expr="//field[@name='name']" position="after">
+                <field name="alternative_name"/>
+           </xpath>
+           <xpath expr="//field[@name='state_ids']/tree/field[@name='code']" position="after">
+                <field name="alternative_code"/>
+           </xpath>
+        </field>
+    </record>
+
+        <record id="view_country_state_form" model="ir.ui.view">
+        <field name="name">res.country.state.form</field>
+        <field name="model">res.country.state</field>
+        <field name="inherit_id" ref="base.view_country_state_form"/>
+        <field name="arch" type="xml">
+           <xpath expr="//field[@name='code']" position="after">
+                <field name="alternative_code"/>
+           </xpath>
+        </field>
+    </record>
+
+</odoo>

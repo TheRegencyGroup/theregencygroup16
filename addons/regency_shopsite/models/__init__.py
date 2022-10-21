@@ -8,7 +8,8 @@ from . import (
     product_pricelist_item,
     product_attribute,
     website,
-    # product_pricelist,
+    product_pricelist,
     overlay_product,
+    product_product,
     res_users,
 )
