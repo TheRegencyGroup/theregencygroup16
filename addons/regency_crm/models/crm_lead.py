@@ -7,6 +7,26 @@ class CRMLead(models.Model):
     contacted = fields.Boolean(compute="_compute_contacted", store=True)
     representative_name = fields.Many2one('res.partner')
     email_from = fields.Char(required=True)  # must be required
+    no_open_actions = fields.Integer(string='No. Open Actions')
+    no_spend_issues = fields.Boolean(sting="No. Spend Issues")
+    management_group = fields.Char(string="Management Group")
+    avendra_id = fields.Char(string="Avendra ID")
+    account_number = fields.Char(string="Pancake ID")
+    customer_supplier_status = fields.Char(string="Customer Supplier Status")
+    customer_status = fields.Char(string="Customer Status")
+    market_segment = fields.Char(string="Market Segment")
+    brand = fields.Char(string="Brand")
+    date_acknowledged = fields.Date(string="Date Acknowledged No Longer a Customer")
+    date_de_enrollment = fields.Date(string="De-Enrollment Date")
+    avendra_account_name = fields.Char(string="Account Name")
+    avendra_account_address1 = fields.Char(string="Account Address 1")
+    avendra_account_address2 = fields.Char(string="Account Address 2")
+    avendra_account_date_setup = fields.Date(string="Account Setup Date")
+    avendra_account_punchout_user_name = fields.Char(string="Account Punchout User Name")
+    number_of_keys = fields.Integer()
+
+
+
 
     @api.depends('message_ids')
     def _compute_contacted(self):

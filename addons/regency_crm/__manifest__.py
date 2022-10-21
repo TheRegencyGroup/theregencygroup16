@@ -1,13 +1,12 @@
 {
     'name': 'Regency CRM',
-    'version': '16.0.0.1',
+    'version': '16.0.0.2',
     'summary': '',
     'author': 'OpsWay',
     'description': "",
     'depends': [
         'sale_crm',
-        'utm',
-        'regency_estimate',
+        'utm'
     ],
     'category': 'Regency/CRM',
     'sequence': 10,
