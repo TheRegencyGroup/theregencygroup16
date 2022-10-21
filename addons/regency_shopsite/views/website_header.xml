@@ -13,14 +13,14 @@
                                 <t t-if="not request.env.user._is_public()">
                                     <div data-owl-widget="HotelSelectorComponent"/>
 
-                                    <a href="" class="header-menu-button">
+                                    <a href="/order_history" class="header-menu-button">
                                         <div class="header-menu-button-icon">
-                                            <span class="icon-eye-off"></span>
+                                            <span class="icon-eye-off"/>
                                         </div>
                                         <div>Orders</div>
                                     </a>
 
-                                    <div data-owl-widget="HeaderCart"></div>
+                                    <div data-owl-widget="HeaderCart"/>
 
                                     <a href="/my/home" class="header-menu-link">My account</a>
                                 </t>

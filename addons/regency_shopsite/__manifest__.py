@@ -29,6 +29,7 @@
         'views/product_product.xml',
         'views/sale_portal_templates.xml',
         'views/shopsite_catalog.xml',
+        'views/order_history.xml',
         'security/groups.xml',
     ],
     'assets': {

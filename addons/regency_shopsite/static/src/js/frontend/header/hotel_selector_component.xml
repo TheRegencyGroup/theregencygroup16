@@ -4,7 +4,8 @@
         <div t-if="store.header" t-att-class="{'header-menu-select':true,opened:this.state.isOpen}">
             <a href="#" class="header-menu-button" t-on-click.prevent="onToggle">
                 <div class="header-menu-button-logo">
-                    <img src="/regency_shopsite/static/src/img/logo-hotel.png" alt=""/>
+                    <img src="/regency_shopsite/static/src/img/logo-hotel.png"
+                         t-att-alt="store.header.currentHotelName"/>
                 </div>
                 <div class="header-menu-text" t-esc="store.header.currentHotelName"/>
                 <div class="header-menu-select-arrow">
@@ -35,7 +36,7 @@
                         </div>
                     </li>
                     <li>
-                        <a href="#" class="header-menu-select-position">
+                        <a href="/web/session/logout" class="header-menu-select-position">
                             <div class="header-menu-select-icon">
                                 <span class="icon-eye-off"/>
                             </div>

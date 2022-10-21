@@ -17,13 +17,15 @@ class WebsiteSaleRegency(WebsiteSale):
         return request.render('regency_shopsite.shopsite_page_test', {})
 
     @http.route(['/shopsite/cart/update_json'], type='json', auth="public", methods=['POST'], website=True, csrf=False)
-    def cart_update_json(self, overlay_template_id, attribute_list, qty, **kwargs):
+    def shopsite_cart_update_json(self, overlay_template_id, attribute_list, qty, **kwargs):
         product_id = 1
         self.cart_update_json(product_id=product_id, display=False)
 
     @http.route(['/shop/cart/update_json'], type='json', auth="public", methods=['POST'], website=True, csrf=False)
-    def cart_update_json(self, product_id, line_id=None, add_qty=None, set_qty=None, display=True, images_with_overlay=None, **kw):
-        res = super().cart_update_json(product_id=product_id, line_id=line_id, add_qty=add_qty, set_qty=set_qty, display=display, **kw)
+    def cart_update_json(self, product_id, line_id=None, add_qty=None, set_qty=None, display=True,
+                         images_with_overlay=None, **kw):
+        res = super().cart_update_json(product_id=product_id, line_id=line_id, add_qty=add_qty, set_qty=set_qty,
+                                       display=display, **kw)
         so_line_id = res.get('line_id', False)
         if so_line_id and images_with_overlay:
             so_line = request.env['sale.order.line'].browse(so_line_id)
@@ -31,7 +33,8 @@ class WebsiteSaleRegency(WebsiteSale):
                 if image_with_overlay['background_image_model'] == 'product.template':
                     back_image_id = so_line.product_template_id.image_1920
                 else:
-                    back_image_id = request.env['product.image'].browse(image_with_overlay['background_image_id']).image_1920
+                    back_image_id = request.env['product.image'].browse(
+                        image_with_overlay['background_image_id']).image_1920
                 back_image = Image.open(io.BytesIO(base64.b64decode(back_image_id)))
                 width = image_with_overlay['background_image_size']['width']
                 height = image_with_overlay['background_image_size']['height']
@@ -67,6 +70,11 @@ class WebsiteSaleRegency(WebsiteSale):
             'shopsite_catalog_data': Markup(json.dumps(self._get_overlay_templates_data()))
         }
         return request.render('regency_shopsite.shopsite_catalog', values)
+
+    @http.route("/order_history", type='http', auth="user", website=True)
+    def order_history(self, **kwargs):
+        values = {}
+        return request.render('regency_shopsite.order_history', values)
 
     @api.model
     def _get_overlay_templates_data(self) -> list:
