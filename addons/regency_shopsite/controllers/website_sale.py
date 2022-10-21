@@ -10,7 +10,7 @@ from odoo.http import request
 from odoo.addons.website_sale.controllers.main import TableCompute, WebsiteSale
 from typing import List, Dict
 
-DEFAULT_PRODUCT_QTY_PEAR_PAGE = 5
+DEFAULT_PRODUCT_QTY_PEAR_PAGE = 100
 
 
 class WebsiteSaleRegency(WebsiteSale):
@@ -61,22 +61,22 @@ class WebsiteSaleRegency(WebsiteSale):
         '/shop',
     ], type='http', auth="user", website=True, sitemap=WebsiteSale.sitemap_shop)
     def shop(self, **kwargs):
-        model = 'overlay.template'
+        model = kwargs.get('model', 'overlay.template')
         page = kwargs.get('page', 1)
         limit = kwargs.get('limit', DEFAULT_PRODUCT_QTY_PEAR_PAGE)
         data = self.get_list_update(model=model, page=page, limit=limit)
         options = {'page': page,
-                   'limit': limit
+                   'limit': limit,
+                   'model': model
                    }
-        data.update({'options': options})
+        data.update(options)
         values = {'shopsite_catalog_data': Markup(json.dumps(data))}
         return request.render('regency_shopsite.shopsite_catalog', values)
 
     @http.route([
         '/shop/list_update',
     ], type='json', auth="user", website=True, methods=['POST'])
-    def get_list_update(self, page, **kwargs):
-        model = 'overlay.template'  # TODO REG-149
+    def get_list_update(self, page, model, **kwargs):
         limit = kwargs.get('limit', DEFAULT_PRODUCT_QTY_PEAR_PAGE)
         model_update_func_mapping = {'overlay.template': self._get_overlay_templates_data,
                                      'overlay.product': self._get_overlay_products_data,
@@ -86,23 +86,29 @@ class WebsiteSaleRegency(WebsiteSale):
 
     @api.model
     def _get_overlay_templates_data(self, page, limit):
-        overlay_data = self._get_products('overlay.template', page, limit)
+        model = 'overlay.template'
+        overlay_data = self._get_products(model, page, limit)
         overlay_template_ids = overlay_data['product_ids']
         ot_data = []
         for ot in overlay_template_ids:
             ot_val = {'name': ot.name,
-                      'main_image_url': ot.get_main_image_url()
+                      'main_image_url': ot.get_main_image_url(),
+                      'id': ot.id,
                       }
             ot_data.append(ot_val)
         data = {'data': ot_data,
-                'count': overlay_data['full_count']
+                'count': overlay_data['full_count'],
+                'model': model,
                 }
         return data
 
     @api.model
     def _get_overlay_products_data(self, page, limit):
+        model = 'overlay.product'
         # TODO REG-149 add logic specific for overlay.product (call def _get_products)
-        data = self._get_overlay_templates_data(self, page, limit)
+        data = self._get_overlay_templates_data(page, limit)
+        data['data'] += data['data']
+        data.update({'model': model})
         return data
 
     @api.model

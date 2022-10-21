@@ -1,8 +1,6 @@
 /** @odoo-module **/
-
 import { extendStore } from '@fe_owl_base/js/main';
-
-const SHOPSITE_CATALOG_KEY = 'shopsite_catalog';
+import rpc from 'web.rpc';
 
 const shopsiteCatalogData = PRELOADED_DATA?.SHOPSITE_CATALOG_DATA;
 
@@ -13,15 +11,27 @@ if (shopsiteCatalogData) {
                 this[key] = value;
             }
         }
+
+        async updateShopsiteCatalogList(page, model) {
+            try {
+                let data = await rpc.query({
+                    route: '/shop/list_update',
+                    params: {
+                        page: page,
+                        model: model,
+                    },
+                });
+                console.log(data.data.length);
+                this.data = data.data;
+                this.page = page;
+                this.count = data.count;
+                this.model = model;
+            } catch (e) {
+                throw(e);
+            }
+        }
     }
 
-    extendStore({
-            catalogList: new ShopsiteCatalogList()
-        }
-    )
+    extendStore({ key: 'catalogList', obj: new ShopsiteCatalogList() })
 }
 
-export
-{
-    SHOPSITE_CATALOG_KEY,
-}

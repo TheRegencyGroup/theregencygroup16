@@ -3,17 +3,71 @@
 
     <t t-name="shopsite_catalog_list" owl="1">
         <div>
-            <t t-foreach="Object.values(productList)" t-as="product" t-key="product_index">
-                <div>
-                    <div>
-                        <img t-att-src="product.main_image_url"/>
-                    </div>
-                    <div t-esc="product.name"/>
-                    <br/>
-                </div>
+            <div class="content">
+                <div class="container">
+                    <div class="content-in">
 
-            </t>
+                        <div class="tabs">
+                            <div class="tabs-links">
+                                <span t-on-click="updateShopsiteItemsList" class="tabs-link active" data-rel="shopsite">
+                                    Shopsite items</span>
+                                <span t-on-click="updateShopsiteProductsList" class="tabs-link" data-rel="customized">Customized
+                                    items</span>
+                            </div>
+                            <div class="tabs-content">
+                                <div class="tab-content active" id="shopsite">
+                                    <div class="positions">
+                                        <t t-foreach="store.catalogList.data" t-as="product" t-key="product.id">
+                                            <div class="position">
+                                                <t t-if="itemModel === 'overlay.product'">
+                                                    <t t-call="overlay_product_item"/>
+                                                </t>
+                                                <t-else>
+                                                    <t t-call="overlay_template_item"/>
+                                                </t-else>
+
+                                            </div>
+                                        </t>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!--                <div>-->
+            <!--                    <ListPaginationComponent/>-->
+            <!--                </div>-->
+        </div>
+    </t>
+
+    <t t-name="overlay_template_item" owl="1">
+        <a href="" class="position-image">
+            <img t-att-src="product.main_image_url"
+                 alt=""/>
+        </a>
+        <div class="position-text">
+            <div class="position-info" t-esc="product.name"/>
+            <h3><a href="" t-esc="product.name"></a></h3>
+        </div>
+        <div class="position-buttons">
+            <a href="" class="btn btn-block">Start customizing</a>
+        </div>
+    </t>
+
+        <t t-name="overlay_product_item" owl="1">
+        <a href="" class="position-image">
+            <img t-att-src="product.main_image_url"
+                 alt=""/>
+        </a>
+        <div class="position-text">
+            <div class="position-info" t-esc="product.name"/>
+            <h3><a href="" t-esc="product.name"></a></h3>
+        </div>
+        <div class="position-buttons">
+            <a href="" class="btn btn-block">Start customizing</a>
         </div>
     </t>
 
 </templates>
+
