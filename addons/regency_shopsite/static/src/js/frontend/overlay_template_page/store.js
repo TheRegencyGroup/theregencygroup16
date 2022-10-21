@@ -10,7 +10,8 @@ if (overlayTemplatePageData) {
                 this[key] = value;
             }
             this.selectedAttributeValues = this.getSelectedAttributeValues();
-            this.selectedPriceId = this.priceList ? Object.values(this.priceList)[0].id : null;
+            const priceList = Object.values(this.priceList);
+            this.selectedPriceId = priceList.length ? priceList[0].id : null;
         }
 
         getSelectedAttributeValues() {
