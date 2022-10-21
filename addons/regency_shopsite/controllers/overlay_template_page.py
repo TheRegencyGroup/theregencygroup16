@@ -1,12 +1,11 @@
 import json
 
 from markupsafe import Markup
-from odoo import _, http, Command
+from odoo import http
 from odoo.http import request
 
 
 class OverlayTemplatePage(http.Controller):
-
     @http.route(['/shopsite/<model("overlay.template"):overlay_template_id>'], type='http', auth='user', website=True)
     def overlay_template_page(self, overlay_template_id, **kwargs):
         if not overlay_template_id or not overlay_template_id.exists():
