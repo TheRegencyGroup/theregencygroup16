@@ -15,7 +15,7 @@
         'data/product_attribute.xml',
         'data/ir_config_parameter.xml',
         'views/sale_order_view.xml',
-        'views/web_layout.xml',
+        'views/web_frontend_layout.xml',
         'views/website_header.xml',
         'views/website_footer.xml',
         'views/website_cart_lines.xml',
