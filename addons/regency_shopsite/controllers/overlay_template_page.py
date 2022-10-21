@@ -16,6 +16,15 @@ class OverlayTemplatePage(http.Controller):
         if not product_template_id or not product_template_id.exists():
             return request.render('website.page_404')
 
+        overlay_template_hotel_ids = overlay_template_id.hotel_ids
+        user_hotel_ids = request.env.user.hotel_ids
+        if not user_hotel_ids or not overlay_template_hotel_ids\
+                or not set(user_hotel_ids.ids).intersection(set(overlay_template_hotel_ids.ids)):
+            return request.render('website.page_404')
+
+        active_hotel_id = user_hotel_ids[0]
+        overlay_template_is_available_for_hotel = active_hotel_id.id in overlay_template_hotel_ids.ids
+
         overlay_attribute_id = request.env.ref('regency_shopsite.overlay_attribute')
         customization_attribute_id = request.env.ref('regency_shopsite.customization_attribute')
         color_attribute_id = request.env.ref('regency_shopsite.color_attribute')
@@ -59,17 +68,21 @@ class OverlayTemplatePage(http.Controller):
                 'selectedValueId': selected_value_id,
             }
 
-        overlay_template_price_item_ids = overlay_template_id.price_item_ids
-        overlay_template_price_item_ids = overlay_template_price_item_ids.sorted(key='min_quantity')
-        price_list = {
-            x['id']: {
-                'id': x['id'],
-                'price': x['fixed_price'],
-                'quantity': x['min_quantity'],
-            } for x in overlay_template_price_item_ids.read(['id', 'fixed_price', 'min_quantity'])
-        }
+        price_list = {}
+        if overlay_template_is_available_for_hotel:
+            overlay_template_price_item_ids = overlay_template_id.price_item_ids\
+                .filtered(lambda x: x.pricelist_id.id == active_hotel_id.property_product_pricelist.id)
+            overlay_template_price_item_ids = overlay_template_price_item_ids.sorted(key='min_quantity')
+            price_list = {
+                x['id']: {
+                    'id': x['id'],
+                    'price': x['fixed_price'],
+                    'quantity': x['min_quantity'],
+                } for x in overlay_template_price_item_ids.read(['id', 'fixed_price', 'min_quantity'])
+            }
 
         overlay_template_page_data = {
+            'overlayTemplateIsAvailableForActiveHotel': overlay_template_is_available_for_hotel,
             'overlayTemplateName': overlay_template_id.name,
             'productName': product_template_id.name,
             'productDescription': product_template_id.description_sale,
