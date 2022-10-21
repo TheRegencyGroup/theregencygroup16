@@ -10,6 +10,8 @@ if (overlayTemplatePageData) {
                 this[key] = value;
             }
             this.selectedAttributeValues = this.getSelectedAttributeValues();
+            const priceList = Object.values(this.priceList);
+            this.selectedPriceId = priceList.length ? priceList[0].id : null;
         }
 
         getSelectedAttributeValues() {
@@ -40,7 +42,11 @@ if (overlayTemplatePageData) {
         changeAttributeValueAction(attributeId, valueId) {
             this.selectedAttributeValues[attributeId].valueId = valueId;
         }
+
+        changeSelectedPrice(priceId) {
+            this.selectedPriceId = priceId;
+        }
     }
 
-    extendStore({ otPage: new OverlayTemplatePage() })
+    extendStore({ key: 'otPage', obj: new OverlayTemplatePage() })
 }

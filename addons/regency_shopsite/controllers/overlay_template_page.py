@@ -18,7 +18,7 @@ class OverlayTemplatePage(http.Controller):
         overlay_attribute_id = request.env.ref('regency_shopsite.overlay_attribute')
         customization_attribute_id = request.env.ref('regency_shopsite.customization_attribute')
         color_attribute_id = request.env.ref('regency_shopsite.color_attribute')
-        size_attribute_id = request.env.ref('regency_shopsite.color_attribute')
+        size_attribute_id = request.env.ref('regency_shopsite.size_attribute')
 
         overlay_template_attribute_ids = overlay_template_id.overlay_attribute_line_ids.mapped('attribute_id')
         product_template_attribute_ids = product_template_id.attribute_line_ids.mapped('attribute_id')
@@ -48,7 +48,8 @@ class OverlayTemplatePage(http.Controller):
                 x['id']: {
                     'id': x['id'],
                     'name': x['name'],
-                } for x in value_ids.read(['id', 'name'])
+                    'color': x['html_color'],
+                } for x in value_ids.read(['id', 'name', 'html_color'])
             }
             attribute_list[attribute_id.id] = {
                 'id': attribute_id.id,
@@ -56,6 +57,16 @@ class OverlayTemplatePage(http.Controller):
                 'valueList': values,
                 'selectedValueId': selected_value_id,
             }
+
+        overlay_template_price_item_ids = overlay_template_id.price_item_ids
+        overlay_template_price_item_ids = overlay_template_price_item_ids.sorted(key='min_quantity')
+        price_list = {
+            x['id']: {
+                'id': x['id'],
+                'price': x['fixed_price'],
+                'quantity': x['min_quantity'],
+            } for x in overlay_template_price_item_ids.read(['id', 'fixed_price', 'min_quantity'])
+        }
 
         overlay_template_page_data = {
             'overlayTemplateName': overlay_template_id.name,
@@ -65,6 +76,7 @@ class OverlayTemplatePage(http.Controller):
             'overlayTemplateAreasData': json.loads(overlay_template_id.areas_json),
             'colorAttributeId': color_attribute_id.id,
             'sizeAttributeId': size_attribute_id.id,
+            'priceList': price_list,
         }
 
         return request.render('regency_shopsite.overlay_template_page', {

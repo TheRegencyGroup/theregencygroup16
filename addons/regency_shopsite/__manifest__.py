@@ -16,7 +16,7 @@
         'data/product_attribute.xml',
         'data/ir_config_parameter.xml',
         'views/sale_order_view.xml',
-        'views/web_layout.xml',
+        'views/web_frontend_layout.xml',
         'views/website_header.xml',
         'views/website_footer.xml',
         'views/website_cart_lines.xml',
@@ -38,8 +38,10 @@
             'regency_shopsite/static/src/js/frontend/overlay_template_page/*.js',
             'regency_shopsite/static/src/js/frontend/header/store.js',
             'regency_shopsite/static/src/js/frontend/header/*.js',
+            'regency_shopsite/static/src/js/frontend/overlay_template_page/**/*.js',
+            'regency_shopsite/static/src/js/frontend/cart/**/*.js',
 
-            'regency_shopsite/static/src/js/frontend/**/*.xml',
+            'regency_shopsite/static/src/js/frontend/**/**/*.xml',
 
             'regency_shopsite/static/src/scss/frontend/variables.scss',
             'regency_shopsite/static/src/scss/frontend/fonts/*.scss',

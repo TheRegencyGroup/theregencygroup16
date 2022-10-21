@@ -178,14 +178,14 @@ button, input, textarea {
 }
 
 
-.checkbox-btns {
+.checkbox-btns, .radio-simple-vals {
   display: flex;
   align-items: center;
   flex-flow: row wrap;
   margin: 0 0 0 -12px;
 }
 
-.checkbox-btn {
+.checkbox-btn, .radio-simple-val {
   overflow: hidden;
   margin: 0 0 0 12px;
   cursor: pointer;
@@ -198,14 +198,14 @@ button, input, textarea {
     top: -20px;
 
     &:checked {
-      + .checkbox-btn-in {
+      + .checkbox-btn-in, + .radio-simple-val-in {
         border-color: $grey10;
       }
     }
   }
 }
 
-.checkbox-btn-in {
+.radio-simple-val-in {
   padding: 6px;
   min-width: 32px;
   height: 32px;
@@ -222,6 +222,7 @@ button, input, textarea {
 
 .radio-lines {
   margin: 0 0 24px;
+  font-family: 'Raleway', sans-serif;
 }
 
 .radio-line {
