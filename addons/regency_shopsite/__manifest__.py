@@ -7,6 +7,7 @@
         'website_sale',
         'fe_owl_base',
         'product',
+        'regency_contacts',
     ],
     'data': [
         'security/ir.model.access.csv',
@@ -28,12 +29,14 @@
         'views/product_product.xml',
         'views/sale_portal_templates.xml',
         'views/shopsite_catalog.xml',
+        'views/order_history.xml',
         'security/groups.xml',
     ],
     'assets': {
         'web.assets_frontend': [
             'regency_shopsite/static/lib/*.js',
             'regency_shopsite/static/src/js/main.js',
+            'regency_shopsite/static/src/js/frontend/header/*.js',
             'regency_shopsite/static/src/js/frontend/overlay_template_page/**/*.js',
             'regency_shopsite/static/src/js/frontend/cart/**/*.js',
             'regency_shopsite/static/src/js/frontend/shopsite_catalog/*.js',
@@ -61,6 +64,7 @@
         ],
     },
     'category': 'Regency',
+    'sequence': 5,
     'installable': True,
     'application': True,
     'auto_install': False,

@@ -8,7 +8,7 @@ class CRMLead(models.Model):
     representative_name = fields.Many2one('res.partner')
     email_from = fields.Char()
     no_open_actions = fields.Integer(string='No. Open Actions')
-    no_spend_issues = fields.Boolean(sting="No. Spend Issues")
+    no_spend_issues = fields.Boolean(string="No. Spend Issues")
     management_group = fields.Char(string="Management Group")
     avendra_id = fields.Char(string="Avendra ID")
     account_number = fields.Char(string="Account Number")
