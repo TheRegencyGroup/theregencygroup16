@@ -12,19 +12,28 @@ if (headerData) {
     class Store {
         constructor() {
             for (let [key, value] of Object.entries(headerData)) {
-                this[key] = value;
+                let _key = '_' + key;
+                this[_key] = value;
+                Object.defineProperty(this, key, {
+                    get() {
+                        return this[_key];
+                    },
+                    set() {
+                        throw new Error("Use action to change store values");
+                    }
+                });
             }
-            this.hotel_ids = this.hotel_ids.reduce((acc, x) => {
+            this._hotels = this._hotels.reduce((acc, x) => {
                 acc[x.id] = x;
                 return acc;
             }, {});
         }
 
         get currentHotelName() {
-            if (!this.active_hotel_id || !this.hotel_ids[this.active_hotel_id]) {
+            if (!this.activeHotel || !this.hotels[this.activeHotel]) {
                 return "";
             }
-            return this.hotel_ids[this.active_hotel_id].name;
+            return this.hotels[this.activeHotel].name;
         }
 
         _updateActiveHotel = () => {
@@ -32,14 +41,14 @@ if (headerData) {
                 route: "/user/active_hotel",
                 method: "POST",
                 params: {
-                    hotel: this.active_hotel_id,
+                    hotel: this.activeHotel,
                 },
             });
         }
 
         setActiveHotel(value) {
             value = parseInt(value);
-            this.active_hotel_id = value;
+            this._activeHotel = value;
             dropPrevious.exec(this._updateActiveHotel);
         }
     }

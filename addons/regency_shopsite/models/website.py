@@ -18,8 +18,8 @@ class Website(models.Model):
         user_id = self.env['res.users'].browse(self.env.uid)
         hotel_id = user_id._active_hotel_id()
         data = {
-            'active_hotel_id': hotel_id.id if hotel_id else False,
-            'hotel_ids': user_id.hotel_ids.read(['id', 'name']),
+            'activeHotel': hotel_id.id if hotel_id else False,
+            'hotels': user_id.hotel_ids.read(['id', 'name']),
         }
         return data
 
