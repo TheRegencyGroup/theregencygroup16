@@ -36,3 +36,11 @@ class OverlayProduct(models.Model):
                     'attribute_id': customization_attr.id,
                     'value_ids': [Command.link(pav.id)]
                 })
+
+    def get_main_image_url(self):
+        # TODO REG-149 (change to get image from required logic)
+        self.ensure_one()
+        pt = self.overlay_template_id.product_template_id
+        model, id_, image_field = pt._name, pt.id, 'image_256'
+        url = f'/web/image?model={model}&id={id_}&field={image_field}'
+        return url
