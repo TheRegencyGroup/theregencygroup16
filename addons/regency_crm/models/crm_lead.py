@@ -11,7 +11,7 @@ class CRMLead(models.Model):
     no_spend_issues = fields.Boolean(sting="No. Spend Issues")
     management_group = fields.Char(string="Management Group")
     avendra_id = fields.Char(string="Avendra ID")
-    account_number = fields.Char(string="Pancake ID")
+    account_number = fields.Char(string="Account Number")
     customer_supplier_status = fields.Char(string="Customer Supplier Status")
     customer_status = fields.Char(string="Customer Status")
     market_segment = fields.Char(string="Market Segment")
@@ -24,9 +24,6 @@ class CRMLead(models.Model):
     avendra_account_date_setup = fields.Date(string="Account Setup Date")
     avendra_account_punchout_user_name = fields.Char(string="Account Punchout User Name")
     number_of_keys = fields.Integer()
-
-
-
 
     @api.depends('message_ids')
     def _compute_contacted(self):
