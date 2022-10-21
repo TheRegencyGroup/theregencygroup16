@@ -1,7 +1,8 @@
 /** @odoo-module **/
 
-import {mountComponentAsWidget, useStore} from '@fe_owl_base/js/main';
-import {OverlayTemplatePageComponent} from "../overlay_template_page/overlay_template_page";
+import './store';
+import { mountComponentAsWidget, useStore } from '@fe_owl_base/js/main';
+import { OverlayTemplatePageComponent } from "../overlay_template_page/overlay_template_page";
 
 const { Component } = owl;
 

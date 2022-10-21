@@ -1,3 +1,15 @@
+.product-unavailable {
+  .product-add-to-cart {
+    opacity: 0.5;
+    pointer-events: none;
+    user-select: none;
+  }
+
+  .product-unavailable-message {
+    display: block;
+  }
+}
+
 .product-top {
   padding-bottom: 24px;
   border-bottom: 1px solid $grey60;
@@ -48,6 +60,20 @@
 
 .product-right {
   width: 406px;
+}
+
+.product-unavailable-message {
+  display: none;
+  margin-top: 10px;
+  font-family: 'Raleway', sans-serif;
+  font-size: 14px;
+  line-height: 17px;
+  color: $grey10;
+
+  sup {
+    top: 3px;
+    font-size: 22px;
+  }
 }
 
 .product-image {

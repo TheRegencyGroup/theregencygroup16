@@ -25,11 +25,10 @@ class Website(models.Model):
             order = request.website.sale_get_order()
 
         cart_data = {
-            'lineList': order.website_order_line.read([])
+            'lineList': order.website_order_line.read(['id'])
         }
 
         if preloaded:
             return Markup(json.dumps(cart_data))
 
-        cart_data = {}
         return cart_data
