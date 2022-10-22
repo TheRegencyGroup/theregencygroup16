@@ -4,6 +4,8 @@ from markupsafe import Markup
 from odoo import http
 from odoo.http import request
 
+OVERLAY_PRODUCT_ID_URL_PARAMETER = 'op'
+
 
 class OverlayTemplatePage(http.Controller):
     @http.route(['/shopsite/<model("overlay.template"):overlay_template_id>'], type='http', auth='user', website=True)
@@ -21,7 +23,7 @@ class OverlayTemplatePage(http.Controller):
                 or not set(user_hotel_ids.ids).intersection(set(overlay_template_hotel_ids.ids)):
             return request.render('website.page_404')
 
-        active_hotel_id = user_hotel_ids[0]
+        active_hotel_id = request.env.user._active_hotel_id()
         overlay_template_is_available_for_hotel = active_hotel_id.id in overlay_template_hotel_ids.ids
 
         overlay_attribute_id = request.env.ref('regency_shopsite.overlay_attribute')
@@ -80,9 +82,27 @@ class OverlayTemplatePage(http.Controller):
                 } for x in overlay_template_price_item_ids.read(['id', 'fixed_price', 'min_quantity'])
             }
 
+        overlay_product_id = False
+        product_id = False
+        url_overlay_product_id = kwargs.get(OVERLAY_PRODUCT_ID_URL_PARAMETER, False)
+        if url_overlay_product_id:
+            try:
+                url_overlay_product_id = int(url_overlay_product_id)
+                overlay_product_id = request.env['overlay.product'].sudo().search(
+                    [('id', '=', url_overlay_product_id), ('overlay_template_id', '=', overlay_template_id.id)])
+            except (ValueError, TypeError):
+                pass
+        if overlay_product_id:
+            product_id = overlay_product_id.product_id
+
         overlay_template_page_data = {
+            'overlayProductId': overlay_product_id.id if overlay_product_id else False,
+            'productId': product_id.id if product_id else False,
+            'overlayProductName': overlay_product_id.name if overlay_product_id else False,
             'overlayTemplateIsAvailableForActiveHotel': overlay_template_is_available_for_hotel,
+            'overlayTemplateId': overlay_template_id.id,
             'overlayTemplateName': overlay_template_id.name,
+            'productTemplateId': product_template_id.id,
             'productName': product_template_id.name,
             'productDescription': product_template_id.description_sale,
             'attributeList': attribute_list,
@@ -90,6 +110,9 @@ class OverlayTemplatePage(http.Controller):
             'colorAttributeId': color_attribute_id.id,
             'sizeAttributeId': size_attribute_id.id,
             'priceList': price_list,
+            'options': {
+                'overlayProductIdUrlParameter': OVERLAY_PRODUCT_ID_URL_PARAMETER,
+            }
         }
 
         return request.render('regency_shopsite.overlay_template_page', {

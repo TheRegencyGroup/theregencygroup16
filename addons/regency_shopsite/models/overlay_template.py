@@ -173,7 +173,6 @@ class OverlayTemplate(models.Model):
                     'name': rec.id,
                     'attribute_id': overlay_attribute_id.id,
                     'overlay_template_id': rec.id,
-                    'is_custom': True,
                 })
             product_overlay_attribute_line_id = rec.product_template_id.attribute_line_ids.filtered(
                 lambda x: x.attribute_id.id == overlay_attribute_id.id)

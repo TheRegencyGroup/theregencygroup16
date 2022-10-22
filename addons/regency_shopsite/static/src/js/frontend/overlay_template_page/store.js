@@ -13,6 +13,8 @@ if (overlayTemplatePageData) {
             this.selectedAttributeValues = this.getSelectedAttributeValues();
             const priceList = Object.values(this.priceList);
             this.selectedPriceId = priceList.length ? priceList[0].id : null;
+
+            this.#checkOverlayProductIdUrlParameter();
         }
 
         getSelectedAttributeValues() {
@@ -40,12 +42,67 @@ if (overlayTemplatePageData) {
             return selectedAttributeValues[colorAttributeId].valueId;
         }
 
+        get hasOverlayProductId() {
+            return !!this.overlayProductId;
+        }
+
+        #checkOverlayProductIdUrlParameter() {
+            if (!this.hasOverlayProductId) {
+                let url = new URL(window.location.href);
+                let paramKey = this.options?.overlayProductIdUrlParameter;
+                if (url.searchParams.get(paramKey)) {
+                    url.searchParams.delete(paramKey);
+                    window.history.replaceState(null, null, url);
+                }
+            }
+        }
+
+        updateOverlayProductIdUrlParameter() {
+            if (this.hasOverlayProductId) {
+                let url = new URL(window.location.href);
+                let paramKey = this.options?.overlayProductIdUrlParameter;
+                url.searchParams.set(paramKey, this.overlayProductId);
+                window.history.replaceState(null, null, url);
+            }
+        }
+
         changeAttributeValueAction(attributeId, valueId) {
-            this.selectedAttributeValues[attributeId].valueId = valueId;
+            if (this.selectedAttributeValues[attributeId].valueId !== valueId) {
+                this.selectedAttributeValues[attributeId].valueId = valueId;
+            }
         }
 
         changeSelectedPrice(priceId) {
             this.selectedPriceId = priceId;
+        }
+
+        getCustomizedData() {
+            return {
+                overlayTemplateId: this.overlayTemplateId,
+                attributeList: Object.entries(this.selectedAttributeValues)
+                    .map(e => ({ 'attribute_id': parseInt(e[0]), value_id: e[1].valueId })),
+                quantity: this.priceList[this.selectedPriceId].quantity,
+            };
+        }
+
+        async saveOverlayProduct(overlayProductName) {
+            let data = this.getCustomizedData();
+            try {
+                let res = await rpc.query({
+                    route: '/shopsite/overlay_product/save',
+                    params: {
+                        overlay_template_id: data.overlayTemplateId,
+                        attribute_list: data.attributeList,
+                        overlay_product_name: overlayProductName,
+                    },
+                });
+                if (res) {
+                    Object.assign(this, res);
+                    this.updateOverlayProductIdUrlParameter();
+                }
+            } catch (e) {
+                console.log(e)
+            }
         }
     }
 

@@ -16,14 +16,24 @@
 
                     <div class="product-top">
                         <div class="product-top-left">
-                            <div class="form-group form-group-large">
+                            <div class="form-group form-group-large"
+                                 t-att-class="{ 'filled': state.nameInputIsFilled }">
                                 <label class="label">Listing name</label>
-                                <input type="text" name="" class="form-control" value="Jerusalem Marathon"/>
+                                <input type="text" name="" class="form-control"
+                                       t-ref="name_input"
+                                       t-att-disabled="store.otPage.hasOverlayProductId"
+                                       t-att-value="store.otPage.overlayProductName"
+                                       t-on-focusin="onInputNameFocusin"
+                                       t-on-focusout="onInputNameFocusout"/>
                             </div>
                         </div>
                         <div class="product-top-right">
-                            <button class="btn btn-sm">Delete</button>
-                            <button class="btn btn-sm btn-dark minw100">Save</button>
+<!--                            <button class="btn btn-sm">Delete</button>-->
+                            <button t-if="!store.otPage.hasOverlayProductId"
+                                    class="btn btn-sm btn-dark minw100"
+                                    t-on-click="onClickSaveCustomization">
+                                Save
+                            </button>
                         </div>
                     </div>
 
@@ -91,10 +101,11 @@
 
                             <PriceSelector/>
 
-                            <a class="btn btn-block btn-dark product-add-to-cart">
+                            <button class="btn btn-block btn-dark product-add-to-cart"
+                               t-on-click="onClickAddToCart">
                                 <span>Add to cart</span>
                                 <span class="icon-eye-off"></span>
-                            </a>
+                            </button>
                             <span class="product-unavailable-message">
                                 <sup>*</sup>This product is unavailable for selected hotel
                             </span>
@@ -111,10 +122,11 @@
             <div class="h3"><t t-esc="attribute.name"/></div>
             <div class="radio-simple-vals">
                 <t t-foreach="Object.values(attribute.valueList)" t-as="value" t-key="value.id">
-                    <label class="radio-simple-val">
+                    <t t-set="is_checked" t-value="store.otPage.selectedAttributeValues[props.attributeId].valueId === value.id"/>
+                    <label t-if="is_checked || (!is_checked and !store.otPage.hasOverlayProductId)" class="radio-simple-val">
                         <input type="radio"
                                t-att-name="attribute.name"
-                               t-att-checked="store.otPage.selectedAttributeValues[props.attributeId].valueId === value.id"
+                               t-att-checked="is_checked"
                                t-on-change="() => this.onChangeAttributeValue(value.id)"
                                class="ml-1 mr-3"/>
                         <div class="radio-simple-val-in"><t t-esc="value.name"/></div>
@@ -129,10 +141,11 @@
             <div class="h3"><t t-esc="attribute.name"/></div>
             <div class="radio-colors">
                 <t t-foreach="Object.values(attribute.valueList)" t-as="value" t-key="value.id">
-                    <label class="radio-color">
+                    <t t-set="is_checked" t-value="store.otPage.selectedAttributeValues[props.attributeId].valueId === value.id"/>
+                    <label t-if="is_checked || (!is_checked and !store.otPage.hasOverlayProductId)" class="radio-color">
                         <input type="radio"
                                t-att-name="attribute.name"
-                               t-att-checked="store.otPage.selectedAttributeValues[props.attributeId].valueId === value.id"
+                               t-att-checked="is_checked"
                                t-on-change="() => this.onChangeAttributeValue(value.id)"
                                class="ml-1 mr-3"/>
                         <div class="radio-color-in" t-attf-style="background: {{value.color}}"/>
