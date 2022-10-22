@@ -1,5 +1,6 @@
 /** @odoo-module **/
 
+import './store';
 import { mountComponentAsWidget, useStore } from '@fe_owl_base/js/main';
 import { ProductOverlayEditorComponent } from './product_overlay_editor/product_overlay_editor';
 import { AttributeSelector, ColorAttributeSelector } from './attribute_selector';

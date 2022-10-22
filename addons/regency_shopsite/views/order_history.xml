@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="order_history" model="ir.ui.view">
+            <field name="name">Order History</field>
+            <field name="type">qweb</field>
+            <field name="key">regency_shopsite.order_history</field>
+            <field name="arch" type="xml">
+                <t t-call="website.layout">
+                    <div>
+                        Order History placeholder
+                    </div>
+                </t>
+            </field>
+        </record>
+    </data>
+</odoo>

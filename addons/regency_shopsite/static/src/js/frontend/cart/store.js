@@ -1,6 +1,7 @@
 /** @odoo-module **/
 
 import { extendStore } from '@fe_owl_base/js/main';
+import rpc from 'web.rpc';
 
 const cartData = PRELOADED_DATA?.CART_DATA;
 if (cartData) {
@@ -11,7 +12,7 @@ if (cartData) {
             }
         }
 
-        addToCart() {
+        async addToCart({ overlayTemplateId, attributeList, quantity}) {
 
         }
     }

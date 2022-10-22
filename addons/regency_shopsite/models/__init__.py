@@ -11,4 +11,5 @@ from . import (
     product_pricelist,
     overlay_product,
     product_product,
+    res_users,
 )
