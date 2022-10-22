@@ -9,9 +9,11 @@
 
                         <div class="tabs">
                             <div class="tabs-links">
-                                <span t-on-click="updateShopsiteItemsList" class="tabs-link active" data-rel="shopsite">
+                                <span t-on-click="updateShopsiteItemsList" class="tabs-link active" data-rel="shopsite"
+                                      t-attf-class="{{ (itemModel  === 'overlay.template') ? 'active' : '' }}">
                                     Shopsite items</span>
-                                <span t-on-click="updateShopsiteProductsList" class="tabs-link" data-rel="customized">
+                                <span t-on-click="updateShopsiteProductsList" class="tabs-link" data-rel="customized"
+                                      t-attf-class="row {{ (itemModel  === 'overlay.product') ? 'active' : '' }}">
                                     Customized
                                     items</span>
                             </div>
@@ -20,11 +22,11 @@
                                     <div class="positions">
                                         <t t-foreach="itemList" t-as="product" t-key="product.id">
                                             <div class="position">
-                                                <t t-if="itemModel === 'overlay.product'">
-                                                    <t t-call="overlay_product_item"/>
+                                                <t t-if="itemModel === 'overlay.template'">
+                                                    <t t-call="overlay_template_item"/>
                                                 </t>
                                                 <t t-else="">
-                                                    <t t-call="overlay_template_item"/>
+                                                    <t t-call="overlay_product_item"/>
                                                 </t>
 
                                             </div>
