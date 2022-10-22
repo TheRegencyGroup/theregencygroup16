@@ -12,7 +12,7 @@ export class AttributeSelector extends Component {
 
     get attribute() {
         return this.store.otPage.attributeList[this.props.attributeId];
-    };
+    }
 
     onChangeAttributeValue(valueId) {
         this.store.otPage.changeAttributeValueAction(this.props.attributeId, valueId);

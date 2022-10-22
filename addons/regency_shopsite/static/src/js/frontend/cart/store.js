@@ -12,8 +12,39 @@ if (cartData) {
             }
         }
 
-        async addToCart({ overlayTemplateId, attributeList, quantity}) {
-
+        async addOverlayToCart({ overlayTemplateId, attributeList, quantity, overlayProductId , overlayProductName, overlayAreaList }) {
+            try {
+                let params = {
+                    qty: quantity,
+                };
+                if (!!overlayProductId) {
+                    params = {
+                        ...params,
+                        overlay_product_id: overlayProductId,
+                    };
+                } else {
+                    params = {
+                        ...params,
+                        overlay_template_id: overlayTemplateId,
+                        attribute_list: attributeList,
+                        overlay_product_name: overlayProductName,
+                        overlay_area_list: overlayAreaList,
+                    };
+                }
+                let res = await rpc.query({
+                    route: '/shopsite/cart/update_json',
+                    params,
+                });
+                if (res && res.cartData) {
+                    Object.assign(this, res.cartData);
+                }
+                if (res && res.overlayProductData) {
+                    return res.overlayProductData;
+                }
+                return false;
+            } catch (e) {
+                console.log(e)
+            }
         }
     }
 

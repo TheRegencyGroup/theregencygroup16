@@ -1,6 +1,5 @@
 /** @odoo-module **/
 
-
 export class Area {
 
     constructor(data, parent, areaIndex) {
@@ -8,22 +7,21 @@ export class Area {
         this.parent = parent;
         this.areaIndex = areaIndex;
 
+        this.imageObjectList = {};
+        this.imageObjectIndex = 1;
+
         this.createCanvas();
         this.createMask();
         this.init();
     }
 
-    init() {
-    }
+    init() {}
 
-    get newImageObjectWidth() {
-    }
+    get newImageObjectWidth() {}
 
-    get newImageObjectHeight() {
-    }
+    get newImageObjectHeight() {}
 
-    getMaskObject() {
-    }
+    getMaskObject() {}
 
     createMask() {
         let object = this.getMaskObject();
@@ -106,6 +104,15 @@ export class Area {
         this.canvas.centerObject(object);
         this.canvas.add(object);
         this.clipMask();
+
+        let imageSplit = image.src.split(',');
+        this.imageObjectList[this.imageObjectIndex] = {
+            index: this.imageObjectIndex,
+            image: imageSplit[1],
+            imageFormat: imageSplit[0].split('/')[1].split(';')[0],
+            object,
+        };
+        this.imageObjectIndex += 1;
     }
 
     removeActiveObject() {
@@ -118,41 +125,58 @@ export class Area {
         this.selectedArea();
     }
 
-    async getOverlayImagesData() {
+    getOverlayImagesData() {
         this.canvas.discardActiveObject().renderAll();
-        this.removeMask();
         this.unselectedArea();
-        return new Promise((resolve) => {
-            this.canvasEl.toBlob((blob) => {
-                this.createMask();
-                this.clipMask();
-                this.selectedArea();
-                this.reInit();
-                let reader = new FileReader();
-                reader.onloadend = () => {
-                    let base64data = reader.result;
-                    resolve({
-                        data: base64data.split(',')[1],
-                        size: {
-                            x: this.data.boundRect.x,
-                            y: this.data.boundRect.y,
-                        },
-                    });
-                }
-                reader.readAsDataURL(blob);
+
+        let res = [];
+        for (let imageObj of Object.values(this.imageObjectList)) {
+            res.push({
+                index: imageObj.index,
+                image: imageObj.image,
+                imageFormat: imageObj.imageFormat,
+                objectData: {
+                    width: Math.ceil(imageObj.object.getScaledWidth()),
+                    height: Math.ceil(imageObj.object.getScaledHeight()),
+                    x: Math.ceil(imageObj.object.left),
+                    y: Math.ceil(imageObj.object.top),
+                    angle: Math.ceil(imageObj.object.angle),
+                },
             });
-        });
+        }
+        return res;
+
+        // return new Promise((resolve) => {
+        //     this.canvasEl.toBlob((blob) => {
+        //         this.createMask();
+        //         this.clipMask();
+        //         this.selectedArea();
+        //         this.reInit();
+        //         let reader = new FileReader();
+        //         reader.onloadend = () => {
+        //             let base64data = reader.result;
+        //             resolve({
+        //                 data: base64data.split(',')[1],
+        //                 size: {
+        //                     x: this.data.boundRect.x,
+        //                     y: this.data.boundRect.y,
+        //                 },
+        //             });
+        //         }
+        //         reader.readAsDataURL(blob);
+        //     });
+        // });
     }
 
     reInit() {
     }
 
-    checkAreas() {
-        let objects = this.canvas.getObjects();
-        objects = objects.filter(e => !e.isAreaMask);
-        objects = objects.filter(e => !e.isTextArea || (!!e.isTextArea && !!e.text));
-        return !!objects.length;
-    }
+    // checkAreas() {
+    //     let objects = this.canvas.getObjects();
+    //     objects = objects.filter(e => !e.isAreaMask);
+    //     objects = objects.filter(e => !e.isTextArea || (!!e.isTextArea && !!e.text));
+    //     return !!objects.length;
+    // }
 
     destroy() {
         this.canvas.dispose();

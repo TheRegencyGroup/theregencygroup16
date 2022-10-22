@@ -1,8 +1,13 @@
 /** @odoo-module **/
 
 import { Area } from './area';
+import { RECTANGLE_AREA_TYPE } from '../../../main';
 
 export class RectangleArea extends Area {
+    init() {
+        this.areaType = RECTANGLE_AREA_TYPE;
+    }
+
     get newImageObjectWidth() {
         return Math.ceil(this.data.width / 2);
     }

@@ -1,8 +1,13 @@
 /** @odoo-module **/
 
 import { Area } from './area';
+import { ELLIPSE_AREA_TYPE } from '../../../main';
 
 export class EllipseArea extends Area {
+    init() {
+        this.areaType = ELLIPSE_AREA_TYPE;
+    }
+
     get newImageObjectWidth() {
         return this.data.rx;
     }

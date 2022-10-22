@@ -5,3 +5,5 @@ access_overlay_position,overlay.position,model_overlay_position,base.group_user,
 access_overlay_position_portal,overlay.position,model_overlay_position,base.group_portal,1,0,0,0
 access_overlay_attribute_line,overlay_attribute_line,model_overlay_template_attribute_line,base.group_user,1,1,1,1
 access_overlay_product,overlay.product,model_overlay_product,base.group_user,1,1,1,1
+access_overlay_product_image,overlay.product.image,model_overlay_product_image,base.group_user,1,1,1,1
+access_overlay_product_area_image,overlay.product.area.image,model_overlay_product_area_image,base.group_user,1,1,1,1
