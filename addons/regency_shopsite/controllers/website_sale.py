@@ -88,7 +88,7 @@ class WebsiteSaleRegency(WebsiteSale):
     def _get_overlay_templates_data(self, page, limit):
         model = 'overlay.template'
         overlay_data = self._get_products(model, page, limit)
-        overlay_template_ids = overlay_data['product_ids']
+        overlay_template_ids, full_count = overlay_data['product_ids'], overlay_data['full_count']
         ot_data = []
         for ot in overlay_template_ids:
             ot_val = {'name': ot.name,
@@ -97,7 +97,7 @@ class WebsiteSaleRegency(WebsiteSale):
                       }
             ot_data.append(ot_val)
         data = {'data': ot_data,
-                'count': overlay_data['full_count'],
+                'count': full_count,
                 'model': model,
                 }
         return data
@@ -105,10 +105,21 @@ class WebsiteSaleRegency(WebsiteSale):
     @api.model
     def _get_overlay_products_data(self, page, limit):
         model = 'overlay.product'
-        # TODO REG-149 add logic specific for overlay.product (call def _get_products)
-        data = self._get_overlay_templates_data(page, limit)
-        data['data'] += data['data']
-        data.update({'model': model})
+        overlay_data = self._get_products(model, page, limit)
+        overlay_product_ids, full_count = overlay_data['product_ids'], overlay_data['full_count']
+        op_data = []
+        for op in overlay_product_ids:
+            op_val = {'name': op.name,
+                      'template_name': op.overlay_template_id.name,
+                      'description': op.get_description(),
+                      'main_image_url': op.get_main_image_url(),
+                      'id': op.id,
+                      }
+            op_data.append(op_val)
+        data = {'data': op_data,
+                'count': full_count,
+                'model': model,
+                }
         return data
 
     @api.model

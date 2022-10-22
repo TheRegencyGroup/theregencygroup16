@@ -11,7 +11,8 @@
                             <div class="tabs-links">
                                 <span t-on-click="updateShopsiteItemsList" class="tabs-link active" data-rel="shopsite">
                                     Shopsite items</span>
-                                <span t-on-click="updateShopsiteProductsList" class="tabs-link" data-rel="customized">Customized
+                                <span t-on-click="updateShopsiteProductsList" class="tabs-link" data-rel="customized">
+                                    Customized
                                     items</span>
                             </div>
                             <div class="tabs-content">
@@ -22,9 +23,9 @@
                                                 <t t-if="itemModel === 'overlay.product'">
                                                     <t t-call="overlay_product_item"/>
                                                 </t>
-                                                <t-else>
+                                                <t t-else="">
                                                     <t t-call="overlay_template_item"/>
-                                                </t-else>
+                                                </t>
 
                                             </div>
                                         </t>
@@ -47,25 +48,30 @@
                  alt=""/>
         </a>
         <div class="position-text">
-            <div class="position-info" t-esc="product.name"/>
-            <h3><a href="" t-esc="product.name"></a></h3>
+            <!--            <div class="position-info" t-esc="product.name"/> TODO del?-->
+            <h3><a href="" t-esc="product.name"></a></h3> <!-- TODO add product cart URL-->
+
         </div>
         <div class="position-buttons">
             <a href="" class="btn btn-block">Start customizing</a>
         </div>
     </t>
 
-        <t t-name="overlay_product_item" owl="1">
+    <t t-name="overlay_product_item" owl="1">
         <a href="" class="position-image">
             <img t-att-src="product.main_image_url"
                  alt=""/>
         </a>
+
         <div class="position-text">
-            <div class="position-info" t-esc="product.name"/>
-            <h3><a href="" t-esc="product.name"></a></h3>
+            <div class="position-info" t-esc="product.template_name"/>
+            <h3><a href="" t-esc="product.name"/></h3> <!-- TODO add product cart URL-->
+            <div class="position-description" t-esc="product.description"/>
         </div>
+
         <div class="position-buttons">
-            <a href="" class="btn btn-block">Start customizing</a>
+            <a href="" class="btn btn-block">Add to cart</a>
+            <a href="" class="btn">Edit</a>
         </div>
     </t>
 
