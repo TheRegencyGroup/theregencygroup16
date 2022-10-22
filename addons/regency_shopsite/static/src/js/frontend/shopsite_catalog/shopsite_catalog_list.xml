@@ -36,9 +36,9 @@
                     </div>
                 </div>
             </div>
-            <!--                <div>-->
-            <!--                    <ListPaginationComponent/>-->
-            <!--                </div>-->
+            <div>
+                <ListPaginationComponent/>
+            </div>
         </div>
     </t>
 

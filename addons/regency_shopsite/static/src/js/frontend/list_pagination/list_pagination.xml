@@ -2,27 +2,25 @@
 <templates>
 
     <t t-name="list_pagination" owl="1">
-        <t t-set="numberOfPages" t-value="this.numberOfPages"/>
-        <t t-set="currentPage" t-value="this.currentPage"/>
         <t t-if="numberOfPages gt 1">
             <div class="mt-4 mb-5 pagination_buttons">
                 <ul class="pagination m-0">
-                    <li class="page-item" t-att-class="{'disabled': this.isFirstCurrentPage}"
+                    <li class="page-item" t-att-class="{'disabled': isFirstCurrentPage}"
                         t-on-click="() => this.onClickPageBtn(currentPage - 1)">
                         <a role="button" class="page-link">Prev</a>
                     </li>
                     <t t-if="numberOfPages lte 7">
                         <t t-foreach="arrayFromRange(1, numberOfPages)" t-as="pageNumber" t-key="pageNumber.id">
                             <t t-call="page_button">
-                                <t t-set="currentPage" t-value="currentPage"/>
+                                <t t-set="curPage" t-value="currentPage"/>
                                 <t t-set="pageNumber" t-value="pageNumber"/>
                             </t>
                         </t>
                     </t>
                     <t t-else="">
-                        <t t-foreach="leftPages()" t-as="pageNumber" t-key="pageNumber.id" >
+                        <t t-foreach="leftPages()" t-as="pageNumber" t-key="pageNumber.id">
                             <t t-call="page_button">
-                                <t t-set="currentPage" t-value="currentPage"/>
+                                <t t-set="curPage" t-value="currentPage"/>
                                 <t t-set="pageNumber" t-value="pageNumber"/>
                             </t>
                         </t>
@@ -31,7 +29,7 @@
                         <t t-if="centerPages()">
                             <t t-foreach="centerPages()" t-as="pageNumber" t-key="pageNumber.id">
                                 <t t-call="page_button">
-                                    <t t-set="currentPage" t-value="currentPage"/>
+                                    <t t-set="curPage" t-value="currentPage"/>
                                     <t t-set="pageNumber" t-value="pageNumber"/>
                                 </t>
                             </t>
@@ -40,12 +38,12 @@
 
                         <t t-foreach="rightPages()" t-as="pageNumber" t-key="pageNumber.id">
                             <t t-call="page_button">
-                                <t t-set="currentPage" t-value="currentPage"/>
+                                <t t-set="curPage" t-value="currentPage"/>
                                 <t t-set="pageNumber" t-value="pageNumber"/>
                             </t>
                         </t>
                     </t>
-                    <li class="page-item" t-att-class="{'disabled': this.isLastCurrentPage}"
+                    <li class="page-item" t-att-class="{'disabled': isLastCurrentPage}"
                         t-on-click="() => this.onClickPageBtn(currentPage + 1)">
                         <a role="button" class="page-link">Next</a>
                     </li>
@@ -60,7 +58,7 @@
     <t t-name="page_button" owl="1">
         <li class="page-item"
             t-att-class="{
-                'active': currentPage === pageNumber,
+                'active': curPage === pageNumber,
             }">
             <a role="button" class="page-link"
                t-on-click="() => this.onClickPageBtn(pageNumber)">

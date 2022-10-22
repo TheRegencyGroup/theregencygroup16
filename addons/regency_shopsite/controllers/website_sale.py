@@ -8,7 +8,7 @@ from odoo import _, http, api
 from odoo.http import request
 from odoo.addons.website_sale.controllers.main import WebsiteSale
 
-DEFAULT_PRODUCT_QTY_PEAR_PAGE = 100
+DEFAULT_PRODUCT_QTY_PEAR_PAGE = 6
 
 
 class WebsiteSaleRegency(WebsiteSale):
@@ -90,6 +90,7 @@ class WebsiteSaleRegency(WebsiteSale):
             'overlay.product': self._get_overlay_products_data,
         }
         product_data = model_update_func_mapping[model](page=page, limit=limit)
+        product_data.update({'limit': limit})
         return product_data
 
     @http.route("/order_history", type='http', auth="user", website=True)
