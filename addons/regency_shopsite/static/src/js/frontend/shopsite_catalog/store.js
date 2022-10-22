@@ -5,14 +5,14 @@ import rpc from 'web.rpc';
 const shopsiteCatalogData = PRELOADED_DATA?.SHOPSITE_CATALOG_DATA;
 
 if (shopsiteCatalogData) {
-    class ShopsiteCatalogList {
+    class ShopsiteCatalogListData {
         constructor() {
             for (let [key, value] of Object.entries(shopsiteCatalogData)) {
                 this[key] = value;
             }
         }
 
-        async updateShopsiteCatalogList(page, model) {
+        async updateListData(page, model) {
             try {
                 let data = await rpc.query({
                     route: '/shop/list_update',
@@ -31,7 +31,6 @@ if (shopsiteCatalogData) {
             }
         }
     }
-
-    extendStore({ key: 'catalogList', obj: new ShopsiteCatalogList() })
+    extendStore({ key: 'catalogData', obj: new ShopsiteCatalogListData() })
 }
 
