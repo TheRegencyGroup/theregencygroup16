@@ -12,7 +12,7 @@ if (cartData) {
             }
         }
 
-        async addOverlayToCart({ overlayTemplateId, attributeList, quantity, overlayProductId , overlayProductName }) {
+        async addOverlayToCart({ overlayTemplateId, attributeList, quantity, overlayProductId , overlayProductName, overlayAreaList }) {
             try {
                 let params = {
                     qty: quantity,
@@ -28,16 +28,20 @@ if (cartData) {
                         overlay_template_id: overlayTemplateId,
                         attribute_list: attributeList,
                         overlay_product_name: overlayProductName,
+                        overlay_area_list: overlayAreaList,
                     };
                 }
                 let res = await rpc.query({
                     route: '/shopsite/cart/update_json',
                     params,
                 });
-                if (res) {
-                    Object.assign(this, res);
+                if (res && res.cartData) {
+                    Object.assign(this, res.cartData);
                 }
-
+                if (res && res.overlayProductData) {
+                    return res.overlayProductData;
+                }
+                return false;
             } catch (e) {
                 console.log(e)
             }

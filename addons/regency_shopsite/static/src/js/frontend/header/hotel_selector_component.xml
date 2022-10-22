@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates>
     <t t-name="hotel_selector_component" owl="1">
-        <div t-if="store.header" t-att-class="{'header-menu-select':true,opened:this.state.isOpen}">
+        <div t-if="store.hotelSelector" t-att-class="{'header-menu-select':true,opened:this.state.isOpen}">
             <a href="#" class="header-menu-button" t-on-click.prevent="onToggle">
                 <div class="header-menu-button-logo">
                     <img src="/regency_shopsite/static/src/img/logo-hotel.png"
-                         t-att-alt="store.header.currentHotelName"/>
+                         t-att-alt="store.hotelSelector.currentHotelName"/>
                 </div>
-                <div class="header-menu-text" t-esc="store.header.currentHotelName"/>
+                <div class="header-menu-text" t-esc="store.hotelSelector.currentHotelName"/>
                 <div class="header-menu-select-arrow">
                     <span class="icon-chevron-down"/>
                 </div>
@@ -27,9 +27,9 @@
                         <div class="header-menu-select-sublist">
                             <ul>
                                 <li>
-                                    <a href="#" t-foreach="Object.values(store.header.hotels)" t-as="hotel"
+                                    <a href="#" t-foreach="Object.values(store.hotelSelector.hotels)" t-as="hotel"
                                        t-key="hotel_index" t-esc="hotel.name"
-                                       t-att-class="store.header.activeHotel===hotel.id?'active':''"
+                                       t-att-class="store.hotelSelector.activeHotel===hotel.id?'active':''"
                                        t-on-click.prevent="onSelect" t-att-data-id="hotel.id"/>
                                 </li>
                             </ul>

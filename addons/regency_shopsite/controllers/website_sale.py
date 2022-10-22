@@ -11,6 +11,8 @@ from odoo.exceptions import ValidationError
 from odoo.http import request
 from odoo.addons.website_sale.controllers.main import WebsiteSale
 
+from odoo.addons.regency_shopsite.controllers.overlay_template_page import OverlayTemplatePage
+
 DEFAULT_PRODUCT_QTY_PEAR_PAGE = 6
 
 
@@ -20,61 +22,12 @@ class WebsiteSaleRegency(WebsiteSale):
     def shopsite_test(self, **kwargs):
         return request.render('regency_shopsite.shopsite_page_test', {})
 
-    @classmethod
-    def create_overlay_product(cls, overlay_template_id, attribute_list, overlay_product_name):
-        overlay_template_id = request.env['overlay.template'].browse(overlay_template_id).exists()
-        if not overlay_template_id:
-            raise ValidationError('Overlay template does not exists!')
-        product_template_id = overlay_template_id.product_template_id
-
-        product_template_attribute_value_ids = []
-        for attribute in attribute_list:
-            attribute_id = attribute['attribute_id']
-            product_template_attribute_line_id = product_template_id.attribute_line_ids \
-                .filtered(lambda x: x.attribute_id.id == attribute_id)
-            if not product_template_attribute_line_id:
-                raise ValidationError(f'Attribute with id "{attribute_id}" does not exists in the product!')
-            value_id = attribute['value_id']
-            product_template_attribute_value_id = product_template_attribute_line_id.product_template_value_ids \
-                .filtered(lambda x: x.product_attribute_value_id.id == value_id)
-            if not product_template_attribute_line_id:
-                raise ValidationError(f'Attribute value with id "{attribute_id}" does not exists in the product!')
-            product_template_attribute_value_ids.append(product_template_attribute_value_id.id)
-
-        overlay_attribute_id = request.env.ref('regency_shopsite.overlay_attribute')
-        product_template_overlay_attribute_value_id = product_template_id.attribute_line_ids \
-            .filtered(lambda x: x.attribute_id.id == overlay_attribute_id.id) \
-            .product_template_value_ids \
-            .filtered(lambda x: x.product_attribute_value_id.overlay_template_id.id == overlay_template_id.id)
-        if not product_template_overlay_attribute_value_id:
-            raise ValidationError(f'Product {product_template_id.name} does not have overlay attribute!')
-        product_template_attribute_value_ids.append(product_template_overlay_attribute_value_id.id)
-
-        overlay_product_id = request.env['overlay.product'].sudo().create({
-            'name': overlay_product_name,
-            'overlay_template_id': overlay_template_id.id,
-            'product_template_attribute_value_ids': [Command.set(product_template_attribute_value_ids)],
-        })
-        return overlay_product_id, product_template_attribute_value_ids
-
-    @http.route(['/shopsite/overlay_product/save'], type='json', auth='user', methods=['POST'], website=True,
-                csrf=False)
-    def overlay_product_save(self, overlay_template_id, attribute_list, overlay_product_name, **kwargs):
-        overlay_product_id, product_template_attribute_value_ids = self.create_overlay_product(overlay_template_id,
-                                                                                               attribute_list,
-                                                                                               overlay_product_name)
-        return {
-            'overlayProductId': overlay_product_id.id if overlay_product_id else False,
-            'overlayProductName': overlay_product_id.name if overlay_product_id else False,
-        }
-
     @http.route(['/shopsite/cart/update_json'], type='json', auth='user', methods=['POST'], website=True, csrf=False)
     def shopsite_cart_update_json(self, qty, overlay_template_id=None, attribute_list=None, overlay_product_id=None,
-                                  overlay_product_name=None, **kwargs):
+                                  overlay_product_name=None, overlay_area_list=None, **kwargs):
         if not overlay_product_id:
-            overlay_product_id, product_template_attribute_value_ids = self.create_overlay_product(overlay_template_id,
-                                                                                                   attribute_list,
-                                                                                                   overlay_product_name)
+            overlay_product_id, product_template_attribute_value_ids = OverlayTemplatePage.create_overlay_product(
+                overlay_template_id, attribute_list, overlay_product_name, overlay_area_list)
         else:
             overlay_product_id = request.env['overlay.product'].sudo().browse(overlay_product_id).exists()
             if not overlay_product_id:
@@ -98,8 +51,11 @@ class WebsiteSaleRegency(WebsiteSale):
         else:
             product_id = overlay_product_id.product_id
 
-        self.cart_update_json(product_id=product_id, add_qty=qty, display=False)
-        return request.website._get_cart_data()
+        self.cart_update_json(product_id=product_id.id, add_qty=qty, display=False)
+        return {
+            'cartData': request.website._get_cart_data(),
+            'overlayProductData': OverlayTemplatePage.get_overlay_product_data(overlay_product_id),
+        }
 
     # @http.route(['/shop/cart/update_json'], type='json', auth="public", methods=['POST'], website=True, csrf=False)
     # def cart_update_json(self, product_id, line_id=None, add_qty=None, set_qty=None, display=True,

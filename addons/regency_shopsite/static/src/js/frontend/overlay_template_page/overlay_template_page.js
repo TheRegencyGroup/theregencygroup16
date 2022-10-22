@@ -5,8 +5,9 @@ import { mountComponentAsWidget, useStore } from '@fe_owl_base/js/main';
 import { ProductOverlayEditorComponent } from './product_overlay_editor/product_overlay_editor';
 import { AttributeSelector, ColorAttributeSelector } from './attribute_selector';
 import { PriceSelector } from './price_selector';
+import env from 'web.public_env';
 
-const { Component, useState, onPatched, useRef } = owl;
+const { Component, useState, useRef } = owl;
 
 export class OverlayTemplatePageComponent extends Component {
     setup() {
@@ -16,6 +17,8 @@ export class OverlayTemplatePageComponent extends Component {
         });
 
         this.inputNameRef = useRef('name_input');
+
+        env.bus.on('active-hotel-changed', null, this.onChangedActiveHotel.bind(this))
     }
 
     get sortedAttributeList() {
@@ -30,6 +33,12 @@ export class OverlayTemplatePageComponent extends Component {
             ];
         }
         return attributeList;
+    }
+
+    get OverlayEditor() {
+        return Object.values(this.__owl__.children)
+            .find(e => e.component.constructor.name === 'ProductOverlayEditorComponent')
+            .component;
     }
 
     onInputNameFocusin() {
@@ -48,7 +57,7 @@ export class OverlayTemplatePageComponent extends Component {
         this.store.otPage.saveOverlayProduct(name).catch();
     }
 
-    onClickAddToCart() {
+    async onClickAddToCart() {
         if (!this.store.otPage.overlayTemplateIsAvailableForActiveHotel) {
             return;
         }
@@ -61,12 +70,25 @@ export class OverlayTemplatePageComponent extends Component {
             };
         } else {
             let name = this.inputNameRef.el.value.trim();
-            if (!name) {
+            let overlayAreaList = this.OverlayEditor.getOverlayAreaList();
+            if (!name || !overlayAreaList) {
                 return;
             }
-            data.overlayProductName = name;
+            data = {
+                ...data,
+                overlayProductName: name,
+                overlayAreaList,
+            }
         }
-        this.store.cart.addOverlayToCart(data).catch();
+        let res = await this.store.cart.addOverlayToCart(data);
+        if (res) {
+            this.store.otPage.updateOverlayProductData(res);
+        }
+    }
+
+    onChangedActiveHotel() {
+        let activeHotelId = this.store.hotelSelector?.activeHotel;
+        this.store.otPage.updatePriceList(activeHotelId).catch();
     }
 }
 

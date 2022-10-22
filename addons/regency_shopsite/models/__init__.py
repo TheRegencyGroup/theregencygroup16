@@ -12,4 +12,6 @@ from . import (
     overlay_product,
     product_product,
     res_users,
+    overlay_product_image,
+    overlay_product_area_image,
 )

@@ -3,34 +3,33 @@
 import { useStore } from '@fe_owl_base/js/main';
 import { ProductOverlayPositionComponent } from './product_overlay_position';
 import Dialog from 'web.Dialog';
+import env from 'web.public_env';
 
 const { Component, useRef, useState, onMounted } = owl;
 
 export class ProductOverlayEditorComponent extends Component {
     setup() {
-
         onMounted(this.onMounted.bind(this));
 
         this.store = useStore();
-
         this.state = useState({
             selectedOverlayPositionId: Object.values(this.store.otPage.overlayPositions)[0].id,
         });
 
         this.imageUploadRef = useRef('image_upload_ref');
+
+        env.bus.on('get-overlay-editor-data', null, this.getOverlayAreaList.bind(this));
     }
 
     async onMounted() {
 
     }
 
-    async getOverlayImagesData(id, callback, event) {
-        if (id !== this.props.overlayAttributeValueId) {
-            return;
-        }
+    getOverlayAreaList() {
         let overlayPositionComponents = Object.values(this.__owl__.children)
-            .filter(e => e.constructor.name === 'ProductOverlayPositionComponent');
-        let data = [];
+            .filter(e => e.component.constructor.name === 'ProductOverlayPositionComponent')
+            .map(e => e.component);
+        let data = {};
         for (let component of overlayPositionComponents) {
             let overlayPosition = component.props.overlayPosition;
             let image = component.getColorImage();
@@ -43,22 +42,28 @@ export class ProductOverlayEditorComponent extends Component {
                 background_image_id: image.imageId,
                 background_image_model: image.imageModel,
             }
-            let areaList = [];
+            let areaList = {};
             for (let area of Object.values(component.areas)) {
-                if (!area.checkAreas()) {
-                    Dialog.alert(null, 'All overlay areas must be filled!');
+                let areaData = area.getOverlayImagesData();
+                if (!areaData.length) {
+                    alert('Empty!')
                     return;
                 }
-                areaList.push(await area.getOverlayImagesData());
+                areaList[area.areaIndex] = {
+                    'index': area.areaIndex,
+                    'type': area.areaType,
+                    'data': areaData,
+                };
             }
-            if (areaList.length) {
-                imageData.images = areaList;
-            }
-            data.push(imageData);
+            // if (areaList.length) {
+            //     imageData.images = areaList;
+            // }
+            data[overlayPosition.id] = {
+                overlayPositionId: overlayPosition.id,
+                areaList,
+            };
         }
-        if (data.length) {
-            callback(data);
-        }
+        return data;
     }
 
     getImageSrc(colorImages) {

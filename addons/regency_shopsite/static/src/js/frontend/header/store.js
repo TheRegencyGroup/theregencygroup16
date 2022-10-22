@@ -4,14 +4,14 @@ import { extendStore } from '@fe_owl_base/js/main';
 import Concurrency from 'web.concurrency';
 import env from 'web.public_env';
 
-const headerData = PRELOADED_DATA?.HEADER_DATA;
+const hotelSelectorData = PRELOADED_DATA?.HEADER_DATA;
 
-if (headerData) {
+if (hotelSelectorData) {
     const dropPrevious = new Concurrency.MutexedDropPrevious();
 
-    class Store {
+    class HotelSelector {
         constructor() {
-            for (let [key, value] of Object.entries(headerData)) {
+            for (let [key, value] of Object.entries(hotelSelectorData)) {
                 let _key = '_' + key;
                 this[_key] = value;
                 Object.defineProperty(this, key, {
@@ -43,6 +43,8 @@ if (headerData) {
                 params: {
                     hotel: this.activeHotel,
                 },
+            }).then(() => {
+                env.bus.trigger('active-hotel-changed');
             });
         }
 
@@ -53,5 +55,5 @@ if (headerData) {
         }
     }
 
-    extendStore({ key: 'header', obj: new Store() });
+    extendStore({ key: 'hotelSelector', obj: new HotelSelector() });
 }

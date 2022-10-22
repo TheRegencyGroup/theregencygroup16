@@ -1,6 +1,7 @@
 /** @odoo-module **/
 
 import { Area } from './area';
+import { TEXT_AREA_TYPE } from '../../../main';
 
 export class TextArea extends Area {
     getMaskObject() {
@@ -14,6 +15,8 @@ export class TextArea extends Area {
     }
 
     init() {
+        this.areaType = TEXT_AREA_TYPE;
+
         let object = new fabric.Textbox('', {
             width: this.data.width,
             top: this.data.y - this.data.boundRect.y,

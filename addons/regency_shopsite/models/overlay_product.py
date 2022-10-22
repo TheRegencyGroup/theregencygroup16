@@ -15,6 +15,9 @@ class OverlayProduct(models.Model):
                                                    compute_sudo=True)
     customize_attribute_value_ids = fields.One2many('product.attribute.value', 'overlay_product_id')
     product_template_attribute_value_ids = fields.Many2many('product.template.attribute.value')
+    overlay_product_image_ids = fields.One2many('overlay.product.image', 'overlay_product_id', readonly=True)
+    overlay_product_area_image_ids = fields.One2many('overlay.product.area.image', 'overlay_product_id', readonly=True)
+    area_list_json = fields.Char(readonly=True)
 
     @api.depends('customize_attribute_value_ids')
     def _compute_customize_attribute_value_id(self):
