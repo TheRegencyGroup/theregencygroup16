@@ -34,8 +34,8 @@ export class ShopsiteCatalogListComponent extends Component {
     }
 }
 
-// ShopsiteCatalogListComponent.components = {
-//     // ListPaginationComponent,
-// }
+ShopsiteCatalogListComponent.components = {
+    ListPaginationComponent,
+}
 ShopsiteCatalogListComponent.template = 'shopsite_catalog_list';
 mountComponentAsWidget('ShopsiteCatalogListComponent', ShopsiteCatalogListComponent).catch();

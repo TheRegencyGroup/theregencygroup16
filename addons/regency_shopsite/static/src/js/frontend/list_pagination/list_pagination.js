@@ -1,47 +1,51 @@
 /** @odoo-module **/
 import "./store";
-import { CHANGE_PAGE } from './store.js';
 
-const { Component, useState } = owl;
-const FIRST_PAGE = 1
+const { Component, UseState } = owl;
 import { useStore } from "@fe_owl_base/js/main";
+
+const FIRST_PAGE = 1
 
 export class ListPaginationComponent extends Component {
     setup() {
         this.store = useStore();
-        this.list = this.store.catalogList.data;
-        this.count = this.store.catalogList.count;
-        this.limit = this.store.catalogList.limit;
-        this.currentPage = this.store.catalogList.page;
-        this.numberOfPages = this.calcNumberOfPages();
-        this.updateList = this.store.catalogList.updateShopsiteCatalogList;
-
     }
 
-    get isFirstCurrentPage(){
+    get numberOfPages() {
+        return this.store.catalogData.numberOfPages
+    }
+
+    get model() {
+        return this.store.catalogData.model
+    }
+
+    get currentPage() {
+        return this.store.catalogData.page;
+    }
+
+    get count() {
+        return this.store.catalogData.count;
+    }
+
+    get limit() {
+        return this.store.catalogData.limit;
+    }
+
+    get isFirstCurrentPage() {
         return this.currentPage === FIRST_PAGE
     }
-    get isLastCurrentPage(){
+
+    get isLastCurrentPage() {
         return this.currentPage === this.numberOfPages
     }
 
     onClickPageBtn(pageNumber, event) {
-        let isNotOutOfRange = pageNumber > 0 || pageNumber <= this.numberOfPages
+        let isNotOutOfRange = pageNumber > 0 && pageNumber <= this.numberOfPages
         if (isNotOutOfRange) {
             this.changePage(pageNumber, () => {
                 scrollListToTop();
             })
         }
-    }
-
-    calcNumberOfPages() {
-        let listCount = this.count;
-        let listLimit = this.limit;
-        let numbers = Math.floor(listCount / listLimit);
-        if (listCount % listLimit > 0) {
-            numbers++;
-        }
-        return numbers;
     }
 
     leftPages() {
@@ -73,7 +77,7 @@ export class ListPaginationComponent extends Component {
     }
 
     async changePage(pageNumber, callback) {
-        await this.updateList(pageNumber);
+        await this.store.catalogData.updateListData(pageNumber, this.model);
         if (callback) {
             callback();
         }
@@ -98,7 +102,7 @@ ListPaginationComponent.props = {
 
 ListPaginationComponent.template = 'list_pagination';
 
-function scrollListToTop () {
+function scrollListToTop() {
     let list = document.querySelector('#wrap');
     if (list) {
         list.scrollIntoView({ block: 'start', behavior: 'auto' });
