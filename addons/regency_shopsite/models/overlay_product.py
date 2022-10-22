@@ -46,13 +46,12 @@ class OverlayProduct(models.Model):
         return url
 
     def get_description(self):
-        # TODO REG-149 (change to get image from required logic)
         self.ensure_one()
-        date = self.create_date or self.write_date or ''
-        user = 'Zev J'
+        date = self.create_date or self.write_date or ''  # TODO REG-149 (change to date from required logic)
+        user = 'Zev J'  # TODO REG-149 (change to user from required logic)
         date_str, user_str = '', ''
         if date:
-            date_str = date.strftime('%b %d, %Y,' )
+            date_str = date.strftime('%b %d, %Y,')
         if user:
             user_str = f'by {user}'
         res = f'Updated {date_str} by {user_str}'.strip(' ,')

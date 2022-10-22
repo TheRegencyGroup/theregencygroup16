@@ -1,43 +1,36 @@
 /** @odoo-module **/
 import "./store";
 import { mountComponentAsWidget } from "@fe_owl_base/js/main";
+const { useState } = owl
 
-const { Component, onPatched } = owl;
+const { Component } = owl;
 import { useStore } from "@fe_owl_base/js/main";
 import { ListPaginationComponent } from "../list_pagination/list_pagination";
 
 
 export class ShopsiteCatalogListComponent extends Component {
     setup() {
-        onPatched(this.onPatched.bind(this))
         this.store = useStore();
-        this.limit = this.store.catalogList.limit;
-        this.count = this.store.catalogList.count;
-        this.updateList = this.store.catalogList.updateShopsiteCatalogList;
-
     }
 
     get itemList() {
-        return this.store.catalogList.data || [];
+        return this.store.catalogData.data || [];
     }
 
     get itemModel() {
-        return this.store.catalogList.model;
+        return this.store.catalogData.model;
     }
 
     get currentPage() {
-        return this.store.catalogList.page;
+        return this.store.catalogData.page;
     }
 
-    onPatched() {
-        console.log(this.productList)
-    }
     updateShopsiteItemsList (){
-        this.updateList(1, 'overlay.template')
+        this.store.catalogData.updateListData(1, 'overlay.template')
     }
 
     updateShopsiteProductsList (){
-        this.updateList(1, 'overlay.product')
+        this.store.catalogData.updateListData(1, 'overlay.product')
     }
 }
 

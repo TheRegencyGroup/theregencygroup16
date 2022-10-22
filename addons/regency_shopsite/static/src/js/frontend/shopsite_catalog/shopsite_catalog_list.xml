@@ -18,7 +18,7 @@
                             <div class="tabs-content">
                                 <div class="tab-content active" id="shopsite">
                                     <div class="positions">
-                                        <t t-foreach="store.catalogList.data" t-as="product" t-key="product.id">
+                                        <t t-foreach="itemList" t-as="product" t-key="product.id">
                                             <div class="position">
                                                 <t t-if="itemModel === 'overlay.product'">
                                                     <t t-call="overlay_product_item"/>
