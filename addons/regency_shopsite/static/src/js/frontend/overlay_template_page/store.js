@@ -13,7 +13,7 @@ if (overlayTemplatePageData) {
             this.selectedAttributeValues = this.getSelectedAttributeValues();
             this.selectedPriceId = this.getSelectedPriceId();
 
-            this.#checkOverlayProductIdUrlParameter();
+            this._checkOverlayProductIdUrlParameter();
         }
 
         get overlayPositions() {
@@ -50,7 +50,7 @@ if (overlayTemplatePageData) {
             return priceList.length ? priceList[0].id : null;
         }
 
-        #checkOverlayProductIdUrlParameter() {
+        _checkOverlayProductIdUrlParameter() {
             if (!this.hasOverlayProductId) {
                 let url = new URL(window.location.href);
                 let paramKey = this.options?.overlayProductIdUrlParameter;
@@ -61,7 +61,7 @@ if (overlayTemplatePageData) {
             }
         }
 
-        updateOverlayProductIdUrlParameter() {
+        _updateOverlayProductIdUrlParameter() {
             if (this.hasOverlayProductId) {
                 let url = new URL(window.location.href);
                 let paramKey = this.options?.overlayProductIdUrlParameter;
@@ -93,7 +93,7 @@ if (overlayTemplatePageData) {
             let data = this.getCustomizedData();
             try {
                 let res = await rpc.query({
-                    route: '/shopsite/overlay_template/save',
+                    route: '/shop/overlay_template/save',
                     params: {
                         overlay_template_id: data.overlayTemplateId,
                         attribute_list: data.attributeList,
@@ -103,7 +103,7 @@ if (overlayTemplatePageData) {
                 });
                 if (res) {
                     Object.assign(this, res);
-                    this.updateOverlayProductIdUrlParameter();
+                    this._updateOverlayProductIdUrlParameter();
                 }
             } catch (e) {
                 console.log(e)
@@ -116,7 +116,7 @@ if (overlayTemplatePageData) {
             }
             try {
                 let res = await rpc.query({
-                    route: '/shopsite/overlay_template/price_list',
+                    route: '/shop/overlay_template/price_list',
                     params: {
                         overlay_template_id: this.overlayTemplateId,
                     },
@@ -132,7 +132,7 @@ if (overlayTemplatePageData) {
 
         async updateOverlayProductData(data) {
             Object.assign(this, data);
-            this.updateOverlayProductIdUrlParameter();
+            this._updateOverlayProductIdUrlParameter();
         }
     }
 

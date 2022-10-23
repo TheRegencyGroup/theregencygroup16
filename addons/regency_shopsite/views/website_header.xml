@@ -13,7 +13,7 @@
                                 <t t-if="not request.env.user._is_public()">
                                     <div data-owl-widget="HotelSelectorComponent"/>
 
-                                    <a href="/order_history" class="header-menu-button">
+                                    <a href="/my/orders" class="header-menu-button">
                                         <div class="header-menu-button-icon">
                                             <span class="icon-eye-off"/>
                                         </div>

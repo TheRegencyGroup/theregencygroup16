@@ -18,7 +18,7 @@ export class OverlayTemplatePageComponent extends Component {
 
         this.inputNameRef = useRef('name_input');
 
-        env.bus.on('active-hotel-changed', null, this.onChangedActiveHotel.bind(this))
+        env.bus.on('active-hotel-changed', null, this.onChangedActiveHotel.bind(this));
     }
 
     get sortedAttributeList() {

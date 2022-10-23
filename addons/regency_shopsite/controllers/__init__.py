@@ -1,1 +1,6 @@
-from . import website_sale, overlay_template_page, user
+from . import (
+    website_sale,
+    overlay_template_page,
+    user,
+    shop_catalog,
+)

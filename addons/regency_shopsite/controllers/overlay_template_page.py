@@ -7,7 +7,7 @@ from odoo import http, Command
 from odoo.exceptions import ValidationError
 from odoo.http import request
 
-OVERLAY_PRODUCT_ID_URL_PARAMETER = 'op'
+from odoo.addons.regency_shopsite.const import OVERLAY_PRODUCT_ID_URL_PARAMETER
 
 
 class OverlayTemplatePage(http.Controller):
@@ -113,7 +113,7 @@ class OverlayTemplatePage(http.Controller):
 
         return overlay_product_id, product_template_attribute_value_ids
 
-    @http.route(['/shopsite/<model("overlay.template"):overlay_template_id>'], type='http', auth='user', website=True)
+    @http.route(['/shop/<model("overlay.template"):overlay_template_id>'], type='http', auth='user', website=True)
     def overlay_template_page(self, overlay_template_id, **kwargs):
         if not overlay_template_id or not overlay_template_id.exists():
             return request.render('website.page_404')
@@ -226,7 +226,7 @@ class OverlayTemplatePage(http.Controller):
             'overlay_template_page_data': Markup(json.dumps(overlay_template_page_data)),
         })
 
-    @http.route(['/shopsite/overlay_template/save'], type='json', auth='user', methods=['POST'], website=True,
+    @http.route(['/shop/overlay_template/save'], type='json', auth='user', methods=['POST'], website=True,
                 csrf=False)
     def overlay_product_save(self, overlay_template_id, attribute_list, overlay_product_name, overlay_area_list,
                              **kwargs):
@@ -234,7 +234,7 @@ class OverlayTemplatePage(http.Controller):
             overlay_template_id, attribute_list, overlay_product_name, overlay_area_list)
         return self.get_overlay_product_data(overlay_product_id)
 
-    @http.route(['/shopsite/overlay_template/price_list'], type='json', auth='user', methods=['POST'], website=True)
+    @http.route(['/shop/overlay_template/price_list'], type='json', auth='user', methods=['POST'], website=True)
     def overlay_template_price_list(self, overlay_template_id, **kwargs):
         overlay_template_id = request.env['overlay.template'].sudo().browse(overlay_template_id).exists()
         if not overlay_template_id or not self._overlay_template_is_available_for_user(overlay_template_id):
