@@ -49,9 +49,9 @@ class WebsiteSaleRegency(WebsiteSale):
             if not product_id:
                 raise ValidationError('Error when created product variant!')
         else:
-            product_id = overlay_product_id.product_id
+            product_id = overlay_product_id.product_id.id
 
-        self.cart_update_json(product_id=product_id.id, add_qty=qty, display=False)
+        self.cart_update_json(product_id=product_id, add_qty=qty, display=False)
         return {
             'cartData': request.website._get_cart_data(),
             'overlayProductData': OverlayTemplatePage.get_overlay_product_data(overlay_product_id),
