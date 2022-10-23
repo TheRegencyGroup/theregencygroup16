@@ -46,8 +46,8 @@ export class ProductOverlayEditorComponent extends Component {
             for (let area of Object.values(component.areas)) {
                 let areaData = area.getOverlayImagesData();
                 if (!areaData.length) {
-                    alert('Empty!')
-                    return;
+                    alert('All area must be filled!');
+                    return false;
                 }
                 areaList[area.areaIndex] = {
                     'index': area.areaIndex,

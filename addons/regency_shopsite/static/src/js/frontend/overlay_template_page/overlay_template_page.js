@@ -52,9 +52,17 @@ export class OverlayTemplatePageComponent extends Component {
     onClickSaveCustomization() {
         let name = this.inputNameRef.el.value.trim();
         if (!name) {
+            alert('Listing name is empty!');
             return;
         }
-        this.store.otPage.saveOverlayProduct(name).catch();
+        let overlayAreaList = this.OverlayEditor.getOverlayAreaList();
+        if (!overlayAreaList) {
+            return;
+        }
+        this.store.otPage.saveOverlayProduct({
+            overlayProductName: name,
+            overlayAreaList,
+        }).catch();
     }
 
     async onClickAddToCart() {
@@ -70,8 +78,12 @@ export class OverlayTemplatePageComponent extends Component {
             };
         } else {
             let name = this.inputNameRef.el.value.trim();
+            if (!name) {
+                alert('Listing name is empty!')
+                return;
+            }
             let overlayAreaList = this.OverlayEditor.getOverlayAreaList();
-            if (!name || !overlayAreaList) {
+            if (!overlayAreaList) {
                 return;
             }
             data = {
