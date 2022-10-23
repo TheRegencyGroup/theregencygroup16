@@ -1,6 +1,6 @@
 import json
 
-from odoo.addons.http_routing.models.ir_http import slug, unslug
+from odoo.addons.http_routing.models.ir_http import slug
 from odoo.exceptions import ValidationError
 from odoo import fields, models, api, Command, _
 
@@ -30,6 +30,8 @@ class OverlayTemplate(models.Model):
     overlay_product_ids = fields.One2many('overlay.product', 'overlay_template_id')
     price_item_ids = fields.One2many('product.pricelist.item', 'overlay_tmpl_id', copy=True)
     display_name = fields.Char(compute='_compute_display_name')
+    hotel_ids = fields.Many2many('res.partner', 'hotel_template_rel', 'template_id', 'hotel_id', string='Hotels',
+                                 domain=[('company_type', '=', 'company'), ('contact_type', '=', 'customer')])
 
     def _compute_display_name(self):
         for rec in self:
@@ -137,13 +139,6 @@ class OverlayTemplate(models.Model):
             rec.product_image_ids = [Command.set(product_image_ids)]
             rec.use_product_template_image = use_product_template_image
 
-    def get_main_image_url(self):
-        self.ensure_one()
-        pt = self.product_template_id
-        model, id_, image_field = pt._name, pt.id, 'image_256'
-        url = f'/web/image?model={model}&id={id_}&field={image_field}'
-        return url
-
     @api.depends('overlay_attribute_value_ids')
     def _compute_overlay_attribute_value_id(self):
         for rec in self:
@@ -240,6 +235,10 @@ class OverlayTemplate(models.Model):
         product_template_value_id = product_template_value_ids.filtered(
             lambda x: x.product_attribute_value_id.id == self.overlay_attribute_value_id.id)
         return product_template_value_id
+
+    def _shop_catalog_image_url(self):
+        self.ensure_one()
+        return f'/web/image?model={self.product_template_id._name}&id={self.product_template_id.id}&field=image_512'
 
     def show_on_website(self):
         self.ensure_one()

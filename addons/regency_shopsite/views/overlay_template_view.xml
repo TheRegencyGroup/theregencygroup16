@@ -62,6 +62,11 @@
                             </div>
                             <field name="product_variant_ids" widget="many2many_tags" groups="base.group_no_one"/>
                         </page>
+                        <page string="Hotels" id="hotels">
+                            <group>
+                                <field name="hotel_ids" widget="many2many_tags"/>
+                            </group>
+                        </page>
                         <page string="Price Items" id="price_items">
                             <field name="price_item_ids" widget="one2many"
                                    context="{'form_view_ref': 'regency_shopsite.product_pricelist_item_form_view_from_overlay_tmpl',

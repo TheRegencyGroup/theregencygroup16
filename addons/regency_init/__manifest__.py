@@ -11,7 +11,6 @@
         'regency_import',
         'regency_estimate',
         'regency_crm',
-        'regency_hotel_template_relation',
         'regency_shopsite'
     ],
     'category': 'Regency',

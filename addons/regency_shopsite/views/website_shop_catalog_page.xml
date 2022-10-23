@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <template id="shop_catalog_page">
+        <t t-call="website.layout">
+            <div>
+                <div data-owl-widget="ShopCatalog"></div>
+            </div>
+        </t>
+    </template>
+
+</odoo>

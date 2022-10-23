@@ -1,114 +1,80 @@
 /** @odoo-module **/
-import "./store";
 
-const { Component, UseState } = owl;
-import { useStore } from "@fe_owl_base/js/main";
+const { Component, useState } = owl;
 
-const FIRST_PAGE = 1
+const MAX_PAGE_NUMBERS = 7;
+const PAGE_OFFSET = 2;
 
-export class ListPaginationComponent extends Component {
+export class ListPagination extends Component {
     setup() {
-        this.store = useStore();
+        this.PREV_PAGE = 'prev';
+        this.NEXT_PAGE = 'next';
+
+        this.state = useState({
+            maxPageNumbers: MAX_PAGE_NUMBERS,
+            pageOffset: PAGE_OFFSET,
+        });
     }
 
     get numberOfPages() {
-        return this.store.catalogData.numberOfPages
-    }
-
-    get model() {
-        return this.store.catalogData.model
-    }
-
-    get currentPage() {
-        return this.store.catalogData.page;
-    }
-
-    get count() {
-        return this.store.catalogData.count;
-    }
-
-    get limit() {
-        return this.store.catalogData.limit;
-    }
-
-    get isFirstCurrentPage() {
-        return this.currentPage === FIRST_PAGE
-    }
-
-    get isLastCurrentPage() {
-        return this.currentPage === this.numberOfPages
-    }
-
-    onClickPageBtn(pageNumber, event) {
-        let isNotOutOfRange = pageNumber > 0 && pageNumber <= this.numberOfPages
-        if (isNotOutOfRange) {
-            this.changePage(pageNumber, () => {
-                scrollListToTop();
-            })
+        let total = this.props.totalItemsNumber;
+        let limit = this.props.listLimit;
+        let numberOfPages = Math.floor(total / limit);
+        if (total % limit > 0) {
+            numberOfPages++;
         }
+        return numberOfPages;
     }
 
-    leftPages() {
+    get leftPages() {
         let pages = [1];
-        if (this.store.currentPage <= this.props.pageOffset * 2) {
-            pages = this.arrayFromRange(1, this.store.currentPage + this.props.pageOffset);
+        if (this.props.currentPage <= this.state.pageOffset * 2) {
+            pages = this.arrayFromRange(1, this.props.currentPage + this.state.pageOffset);
         }
         return pages;
     }
 
-    centerPages() {
+    get centerPages() {
         let pages = false;
-        if (this.store.currentPage > this.props.pageOffset * 2 && this.store.currentPage <= this.store.numberOfPages - this.props.pageOffset * 2) {
-            pages = this.arrayFromRange(this.store.currentPage - this.props.pageOffset, this.store.currentPage + this.props.pageOffset);
+        if (this.props.currentPage > this.state.pageOffset * 2 && this.props.currentPage <= this.numberOfPages - this.state.pageOffset * 2) {
+            pages = this.arrayFromRange(this.props.currentPage - this.state.pageOffset, this.props.currentPage + this.state.pageOffset);
         }
         return pages;
     }
 
-    rightPages() {
-        let pages = [this.store.numberOfPages];
-        if (this.store.currentPage > this.store.numberOfPages - this.props.pageOffset * 2) {
-            pages = this.arrayFromRange(this.store.currentPage - this.props.pageOffset, this.store.numberOfPages);
+    get rightPages() {
+        let pages = [this.numberOfPages];
+        if (this.props.currentPage > this.numberOfPages - this.state.pageOffset * 2) {
+            pages = this.arrayFromRange(this.props.currentPage - this.state.pageOffset, this.numberOfPages);
         }
         return pages;
     }
 
-    arrayFromRange(min, max) {
-        return Array.from({ length: max - min + 1 }, (a, e) => e + min);
+    arrayFromRange (min, max) {
+        return Array.from({ length: max - min + 1 },(a,e) => e + min);
     }
 
-    async changePage(pageNumber, callback) {
-        await this.store.catalogData.updateListData(pageNumber, this.model);
-        if (callback) {
-            callback();
+    onClickPageBtn(pageNumber) {
+        let page;
+        if (pageNumber === this.PREV_PAGE) {
+            page = this.props.currentPage - 1;
+        } else if (pageNumber === this.NEXT_PAGE) {
+            page = this.props.currentPage + 1;
+        } else {
+            page = pageNumber;
         }
+        if (!page || page === this.props.currentPage || page < 1 || page > this.numberOfPages) {
+            return;
+        }
+        this.props.changePage(page)
     }
 }
 
-ListPaginationComponent.defaultProps = {
-    pageOffset: 2,
-    localPagination: false,
-}
-ListPaginationComponent.props = {
-    listKey: {
-        type: String,
-    },
-    pageOffset: {
-        type: Number,
-    },
-    localPagination: {
-        type: Boolean,
-    },
+ListPagination.props = {
+    totalItemsNumber: Number,
+    listLimit: Number,
+    currentPage: Number,
+    changePage: Function,
 }
 
-ListPaginationComponent.template = 'list_pagination';
-
-function scrollListToTop() {
-    let list = document.querySelector('#wrap');
-    if (list) {
-        list.scrollIntoView({ block: 'start', behavior: 'auto' });
-    }
-}
-
-export {
-    scrollListToTop
-}
+ListPagination.template = 'list_pagination';

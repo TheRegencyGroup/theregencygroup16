@@ -32,7 +32,7 @@ if (cartData) {
                     };
                 }
                 let res = await rpc.query({
-                    route: '/shopsite/cart/update_json',
+                    route: '/shop/cart/update_json/overlay',
                     params,
                 });
                 if (res && res.cartData) {

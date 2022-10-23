@@ -18,11 +18,7 @@ DEFAULT_PRODUCT_QTY_PEAR_PAGE = 6
 
 class WebsiteSaleRegency(WebsiteSale):
 
-    @http.route(['/shopsite_test'], type='http', auth="user", website=True)
-    def shopsite_test(self, **kwargs):
-        return request.render('regency_shopsite.shopsite_page_test', {})
-
-    @http.route(['/shopsite/cart/update_json'], type='json', auth='user', methods=['POST'], website=True, csrf=False)
+    @http.route(['/shop/cart/update_json/overlay'], type='json', auth='user', methods=['POST'], website=True, csrf=False)
     def shopsite_cart_update_json(self, qty, overlay_template_id=None, attribute_list=None, overlay_product_id=None,
                                   overlay_product_name=None, overlay_area_list=None, **kwargs):
         if not overlay_product_id:
@@ -99,88 +95,12 @@ class WebsiteSaleRegency(WebsiteSale):
     #     return res
 
     @http.route([
-        '/shop',
-    ], type='http', auth="user", website=True, sitemap=WebsiteSale.sitemap_shop)
-    def shop(self, **kwargs):
-        model = kwargs.get('model', 'overlay.template')
-        page = kwargs.get('page', 1)
-        limit = kwargs.get('limit', DEFAULT_PRODUCT_QTY_PEAR_PAGE)
-        data = self.get_list_update(model=model, page=page, limit=limit)
-        options = {
-            'page': page,
-            'limit': limit,
-            'model': model
-        }
-        data.update(options)
-        values = {'shopsite_catalog_data': Markup(json.dumps(data))}
-        return request.render('regency_shopsite.shopsite_catalog', values)
-
-    @http.route([
-        '/shop/list_update',
-    ], type='json', auth="user", website=True, methods=['POST'])
-    def get_list_update(self, page, model, **kwargs):
-        limit = kwargs.get('limit', DEFAULT_PRODUCT_QTY_PEAR_PAGE)
-        model_update_func_mapping = {
-            'overlay.template': self._get_overlay_templates_data,
-            'overlay.product': self._get_overlay_products_data,
-        }
-        product_data = model_update_func_mapping[model](page=page, limit=limit)
-        product_data.update({'limit': limit})
-        return product_data
-
-    @http.route("/order_history", type='http', auth="user", website=True)
-    def order_history(self, **kwargs):
-        values = {}
-        return request.render('regency_shopsite.order_history', values)
-
-    @api.model
-    def _get_overlay_templates_data(self, page, limit):
-        model = 'overlay.template'
-        overlay_data = self._get_products(model, page, limit)
-        overlay_template_ids, full_count = overlay_data['product_ids'], overlay_data['full_count']
-        ot_data = []
-        for ot in overlay_template_ids:
-            ot_val = {
-                'name': ot.name,
-                'main_image_url': ot.get_main_image_url(),
-                'id': ot.id,
-            }
-            ot_data.append(ot_val)
-        data = {'data': ot_data,
-                'count': full_count,
-                'model': model,
-                }
-        return data
-
-    @api.model
-    def _get_overlay_products_data(self, page, limit):
-        model = 'overlay.product'
-        overlay_data = self._get_products(model, page, limit)
-        overlay_product_ids, full_count = overlay_data['product_ids'], overlay_data['full_count']
-        op_data = []
-        for op in overlay_product_ids:
-            op_val = {'name': op.name,
-                      'template_name': op.overlay_template_id.name,
-                      'description': op.get_description(),
-                      'main_image_url': op.get_main_image_url(),
-                      'id': op.id,
-                      }
-            op_data.append(op_val)
-        data = {'data': op_data,
-                'count': full_count,
-                'model': model,
-                }
-        return data
-
-    @api.model
-    def _get_products(self, model, page=False, limit=False):
-        env_model, domain = request.env[model], []
-        offset = ((page or 1) - 1) * (limit or 0)
-        data = {
-            'product_ids': env_model.search(domain, offset=offset, limit=limit),
-            'full_count': env_model.search_count(domain)
-        }
-        return data
+        '/shop/page/<int:page>',
+        '/shop/category/<model("product.public.category"):category>',
+        '/shop/category/<model("product.public.category"):category>/page/<int:page>',
+    ], type='http', auth='user')
+    def shop(self, **post):
+        return request.render('website.page_404')
 
     @http.route(['/shop/cart/reorder'], type='json', auth="public", methods=['POST'], website=True, csrf=False)
     def reorder_so(self, sale_order_line_id, **kw):

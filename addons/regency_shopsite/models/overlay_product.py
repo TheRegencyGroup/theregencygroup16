@@ -8,6 +8,7 @@ class OverlayProduct(models.Model):
     overlay_template_id = fields.Many2one('overlay.template')
     product_tmpl_id = fields.Many2one(string="Product template", related='overlay_template_id.product_template_id',
                                       store=True)
+    hotel_ids = fields.Many2many(related='overlay_template_id.hotel_ids')
     name = fields.Char()
     product_id = fields.Many2one('product.product')
     customize_attribute_value_id = fields.Many2one('product.attribute.value',
@@ -54,22 +55,6 @@ class OverlayProduct(models.Model):
                     'value_ids': [Command.link(pav.id)]
                 })
 
-    def get_main_image_url(self):
-        # TODO REG-149 (change to get image from required logic)
+    def _shop_catalog_image_url(self):
         self.ensure_one()
-        pt = self.overlay_template_id.product_template_id
-        model, id_, image_field = pt._name, pt.id, 'image_256'
-        url = f'/web/image?model={model}&id={id_}&field={image_field}'
-        return url
-
-    def get_description(self):
-        self.ensure_one()
-        date = self.create_date or self.write_date or ''  # TODO REG-149 (change to date from required logic)
-        user = 'Zev J'  # TODO REG-149 (change to user from required logic)
-        date_str, user_str = '', ''
-        if date:
-            date_str = date.strftime('%b %d, %Y,')
-        if user:
-            user_str = f'by {user}'
-        res = f'Updated {date_str} by {user_str}'.strip(' ,')
-        return res if user or date else ''
+        return f'/web/image?model={self.product_tmpl_id._name}&id={self.product_tmpl_id.id}&field=image_512'
