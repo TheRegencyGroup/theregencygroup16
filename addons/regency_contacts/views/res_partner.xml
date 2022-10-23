@@ -56,15 +56,13 @@
 
             <xpath expr="//page[@name='internal_notes']" position="after">
                 <page name="associations" string="Associations">
-                    <field name="parent_ids" invisible="1"/>
-                    <field name="customer_association_ids">
+<!--                    <field name="parent_ids" invisible="1"/>-->
+                    <field name="association_ids" widget="many2many">
                         <tree editable="top">
-                            <field name="related_partner_id"></field>
-                            <field name="type"/>
-                            <field name="external_child_code"/>
-                            <field name="parent_partner_id" domain="[('id', '!=', parent.id), ('id', 'not in', parent.parent_ids)]"/>
-                            <field name="start_date"/>
-                            <field name="end_date"/>
+<!--                            <field name="type"/>-->
+                            <field name="association_type"/>
+                            <field name="left_partner_id"/>
+                            <field name="right_partner_id"/>
                         </tree>
                     </field>
                 </page>
@@ -78,28 +76,28 @@
         </field>
     </record>
 
-    <record id="view_partner_tree" model="ir.ui.view">
-        <field name="name">regency.res.partner.tree</field>
-        <field name="model">res.partner</field>
-        <field name="inherit_id" ref="base.view_partner_tree"/>
-        <field name="arch" type="xml">
-            <xpath expr="//field[@name='user_id']" position="after">
-                <field name="parent_ids" widget="many2many_tags"/>
-            </xpath>
-        </field>
-    </record>
+<!--    <record id="view_partner_tree" model="ir.ui.view">-->
+<!--        <field name="name">regency.res.partner.tree</field>-->
+<!--        <field name="model">res.partner</field>-->
+<!--        <field name="inherit_id" ref="base.view_partner_tree"/>-->
+<!--        <field name="arch" type="xml">-->
+<!--            <xpath expr="//field[@name='user_id']" position="after">-->
+<!--                <field name="parent_ids" widget="many2many_tags"/>-->
+<!--            </xpath>-->
+<!--        </field>-->
+<!--    </record>-->
 
-    <record id="res_partner_view_search" model="ir.ui.view">
-        <field name="name">regency.res.partner.view.search</field>
-        <field name="model">res.partner</field>
-        <field name="inherit_id" ref="base.view_res_partner_filter"/>
-        <field name="arch" type="xml">
-            <xpath expr="//field[@name='name']" position="replace">
-                <field name="name"
-                       filter_domain="['|', '|', '|', ('customer_association_ids.parent_partner_id.display_name', 'ilike', self), ('display_name', 'ilike', self), ('ref', '=', self), ('email', 'ilike', self)]"/>
-            </xpath>
-        </field>
-    </record>
+<!--    <record id="res_partner_view_search" model="ir.ui.view">-->
+<!--        <field name="name">regency.res.partner.view.search</field>-->
+<!--        <field name="model">res.partner</field>-->
+<!--        <field name="inherit_id" ref="base.view_res_partner_filter"/>-->
+<!--        <field name="arch" type="xml">-->
+<!--            <xpath expr="//field[@name='name']" position="replace">-->
+<!--                <field name="name"-->
+<!--                       filter_domain="['|', '|', '|', ('customer_association_ids.parent_partner_id.display_name', 'ilike', self), ('display_name', 'ilike', self), ('ref', '=', self), ('email', 'ilike', self)]"/>-->
+<!--            </xpath>-->
+<!--        </field>-->
+<!--    </record>-->
 
     <record id="action_customers" model="ir.actions.act_window">
         <field name="name">Customers</field>

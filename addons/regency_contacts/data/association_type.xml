@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="0">
+        <record id="owner_owned_by" model="association.type">
+            <field name="name">Owner to Owned by</field>
+            <field name="left_to_right_name">Owner</field>
+            <field name="right_to_left_name">Owned by</field>
+        </record>
+
+        <record id="owned_by_owner" model="association.type">
+            <field name="name">Owned by to Owner</field>
+            <field name="left_to_right_name">Owned by</field>
+            <field name="right_to_left_name">Owner</field>
+        </record>
+    </data>
+</odoo>

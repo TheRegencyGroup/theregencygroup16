@@ -1,12 +1,13 @@
-from odoo import fields, models
-from odoo.exceptions import UserError
+from odoo import api, fields, models
 
 
 class ResPartner(models.Model):
     _inherit = 'res.partner'
 
-    customer_association_ids = fields.One2many('customer.association', 'related_partner_id')
-    parent_ids = fields.One2many('res.partner', compute='_compute_parent_ids')
+    association_ids = fields.Many2many('customer.association', 'contact_association_rel', 'partner_id',
+                                       'association_id', compute='_compute_association_ids',
+                                       inverse='_inverse_association_ids',
+                                       precompute=True, store=True)
     contact_type = fields.Selection([
         ('customer', 'Customer'),
         ('vendor', 'Vendor')
@@ -24,14 +25,20 @@ class ResPartner(models.Model):
     hotel_ids = fields.Many2many('res.partner', 'contact_hotel_rel', 'hotel_id', 'contact_id',
                                 domain=[('is_company', '=', True), ('contact_type', '=', 'customer')])
 
-    def _compute_parent_ids(self):
+    @api.depends('association_ids')
+    def _compute_association_ids(self):
         for partner in self:
-            partner.parent_ids = partner.customer_association_ids.mapped('parent_partner_id')
-            
-    def unlink(self):
-        customer_association_ids = self.env['customer.association'].search([('parent_partner_id', 'in', self.ids)])
-        if bool(customer_association_ids):
-            raise UserError("Restrict to delete. Contact(s): %s set as parent contact." % ', '.join(
-                customer_association_ids.mapped('parent_partner_id.name')))
+            partner.association_ids = partner.association_ids
 
-        return super(ResPartner, self).unlink()
+    # @api.onchange('association_ids')
+    def _inverse_association_ids(self):
+        for partner in self:
+            if self.env.context.get('stop_inverse'):
+                break
+            partner.association_ids = partner.association_ids
+            right_asct_type = self.env['association.type'].search(
+                [('right_to_left_name', '=', partner.association_ids.association_type.left_to_right_name)])
+            partner.association_ids.right_partner_id.with_context({'stop_inverse': True}).association_ids = [
+                (0, 0, {'left_partner_id': partner.association_ids.right_partner_id.id, 'right_partner_id': partner.id,
+                        'association_type': right_asct_type.id})
+            ]

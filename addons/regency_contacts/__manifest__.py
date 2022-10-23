@@ -11,7 +11,8 @@
     'sequence': 10,
     'data': [
         'security/ir.model.access.csv',
-        'views/res_partner.xml'
+        'views/res_partner.xml',
+        'data/association_type.xml'
     ],
     'installable': True,
     'application': True,
