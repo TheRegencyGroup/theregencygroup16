@@ -56,10 +56,8 @@
 
             <xpath expr="//page[@name='internal_notes']" position="after">
                 <page name="associations" string="Associations">
-<!--                    <field name="parent_ids" invisible="1"/>-->
-                    <field name="association_ids" widget="many2many">
+                    <field name="association_ids" widget="one2many">
                         <tree editable="top">
-<!--                            <field name="type"/>-->
                             <field name="association_type"/>
                             <field name="left_partner_id"/>
                             <field name="right_partner_id"/>

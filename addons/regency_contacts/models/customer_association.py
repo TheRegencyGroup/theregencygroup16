@@ -4,18 +4,18 @@ from odoo import fields, models
 class CustomerAssociation(models.Model):
     _name = 'customer.association'
 
-    # CUSTOMER_ASSOCIATION_TYPE = [
-    #     ('ownership', 'Ownership'),
-    #     ('asset_management', 'Asset Management'),
-    #     ('hotel_management', 'Hotel Management'),
-    #     ('brand_management', 'Brand Management'),
-    #     ('producer', 'Producer')
-    # ]
-    #
-    # type = fields.Selection(CUSTOMER_ASSOCIATION_TYPE)
     association_type = fields.Many2one('association.type')
     left_partner_id = fields.Many2one('res.partner')
     right_partner_id = fields.Many2one('res.partner')
+
+    def unlink(self):
+        """
+        Find related customer association and unlink it.
+        :return:
+        """
+        # TODO: find possibility trigger unlink from association tab
+        res = super().unlink()
+        return res
 
 
 class AssociationType(models.Model):

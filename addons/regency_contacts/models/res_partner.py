@@ -30,7 +30,6 @@ class ResPartner(models.Model):
         for partner in self:
             partner.association_ids = partner.association_ids
 
-    # @api.onchange('association_ids')
     def _inverse_association_ids(self):
         for partner in self:
             if self.env.context.get('stop_inverse'):
@@ -42,3 +41,15 @@ class ResPartner(models.Model):
                 (0, 0, {'left_partner_id': partner.association_ids.right_partner_id.id, 'right_partner_id': partner.id,
                         'association_type': right_asct_type.id})
             ]
+
+    def unlink(self):
+        # TODO: constrain if res partner delete with customer association?
+        return super().unlink()
+
+    def write(self, vals):
+        prev_association_ids = self.association_ids
+        res = super().write(vals)
+
+        # TODO: make unlink for the second association here
+        removed_association_ids = self.association_ids - prev_association_ids
+        return res
