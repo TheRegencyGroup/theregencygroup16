@@ -4,7 +4,7 @@
     <t t-name="header_cart" owl="1">
         <a href="/shop/cart" class="header-menu-button">
             <div class="header-menu-button-icon">
-                <span class="icon-eye-off"></span>
+                <span class="icon-cart"></span>
             </div>
             <div class="header-menu-button-number"><t t-esc="cartItemsNumber"/></div>
         </a>
