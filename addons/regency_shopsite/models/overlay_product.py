@@ -36,18 +36,6 @@ class OverlayProduct(models.Model):
         res._create_attribute_value()
         return res
 
-    @api.model
-    def _compute_updated_by(self) -> object:
-        user = self.env['res.users'].browse(self._context.get('uid'))
-        return user.partner_id if user else self.env['res.partner']
-
-    def _compute_last_update_date(self):
-        is_updated_by_partner = self._compute_updated_by()
-        if is_updated_by_partner:
-            return self.write_date or fields.Datetime.now()  # 'Datetime.now' used for default on creation
-        else:
-            return False
-
     def write(self, vals):
         vals.update({'updated_by': self._compute_updated_by(),
                      'last_updated_date': self._compute_last_update_date()})
@@ -86,3 +74,26 @@ class OverlayProduct(models.Model):
             image_model = self.product_tmpl_id._name
             image_field = 'image_512'
         return f'/web/image?model={image_model}&id={image_id}&field={image_field}'
+
+    def _get_last_updated_str(self) -> str:
+        self.ensure_one()
+        date = self.last_updated_date
+        user_name = self.updated_by.name
+        if date or user_name:
+            date_str = fields.Datetime.context_timestamp(self, date).strftime(' %b %d, %Y,') if date else ''
+            name_str = f'by {user_name}' if user_name else ''
+            return f'Updated{date_str} {name_str}'.strip(' ,')
+        else:
+            return ''
+        
+    def _compute_last_update_date(self):
+        is_updated_by_partner = self._compute_updated_by()
+        if is_updated_by_partner:
+            return self.write_date or fields.Datetime.now()  # 'Datetime.now' used for default on creation
+        else:
+            return False
+
+    @api.model
+    def _compute_updated_by(self) -> object:
+        user = self.env['res.users'].browse(self._context.get('uid'))
+        return user.partner_id if user else self.env['res.partner']
