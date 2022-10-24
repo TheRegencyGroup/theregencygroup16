@@ -245,5 +245,5 @@ class OverlayTemplate(models.Model):
         return {
             'type': 'ir.actions.act_url',
             'target': 'new',
-            'url': f'/shopsite/{slug(self)}',
+            'url': f'/shop/{slug(self)}',
         }
