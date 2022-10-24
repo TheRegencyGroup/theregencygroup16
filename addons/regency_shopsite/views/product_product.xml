@@ -10,6 +10,10 @@
                         <field name="is_fit_for_overlay"/>
                         <label for="is_fit_for_overlay"/>
                     </span>
+                    <span class="d-inline-block">
+                        <field name="website_published"/>
+                        <label for="website_published" string="Website publish"/>
+                    </span>
                 </xpath>
                 <xpath expr="//div[hasclass('oe_button_box')]" position="inside">
                     <button name="%(regency_shopsite.overlay_templates_for_product_template_action)d" type="action"

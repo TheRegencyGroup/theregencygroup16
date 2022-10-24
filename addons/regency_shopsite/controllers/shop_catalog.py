@@ -42,27 +42,26 @@ class ShopCatalog(http.Controller):
 
     @classmethod
     def _get_shop_catalog_data(cls, catalog_tab, page=1, limit=SHOP_CATALOG_ITEM_LIMIT):
-        data = []
+        catalog_item_list = []
+        catalog_items_total = 0
         catalog_model = 'overlay.template'
         if catalog_tab in [OVERLAY_TEMPLATE_CATALOG_TAB_KEY, OVERLAY_PRODUCT_CATALOG_TAB_KEY]:
             catalog_model = SHOP_CATALOG_TAB_MODELS[catalog_tab]
 
         active_hotel_id = request.env.user._active_hotel_id()
-        if not active_hotel_id:
-            return data
-
-        domain = [('hotel_ids', 'in', active_hotel_id.id)]
-        catalog_items_total = request.env[catalog_model].sudo().search_count(domain)
-        order = DEFAULT_SHOP_CATALOG_TAB_SORT[catalog_tab]
-        offset = (page - 1) * limit
-        if offset >= catalog_items_total:
-            page = 1
-            offset = 0
-        catalog_item_ids = request.env[catalog_model].sudo().search(domain, offset=offset, limit=limit, order=order)
-        if catalog_tab == OVERLAY_PRODUCT_CATALOG_TAB_KEY:
-            catalog_item_list = cls._prepare_overlay_product_data(catalog_item_ids)
-        else:
-            catalog_item_list = cls._prepare_overlay_template_data(catalog_item_ids)
+        if active_hotel_id:
+            domain = [('hotel_ids', 'in', active_hotel_id.id)]
+            catalog_items_total = request.env[catalog_model].sudo().search_count(domain)
+            order = DEFAULT_SHOP_CATALOG_TAB_SORT[catalog_tab]
+            offset = (page - 1) * limit
+            if offset >= catalog_items_total:
+                page = 1
+                offset = 0
+            catalog_item_ids = request.env[catalog_model].sudo().search(domain, offset=offset, limit=limit, order=order)
+            if catalog_tab == OVERLAY_PRODUCT_CATALOG_TAB_KEY:
+                catalog_item_list = cls._prepare_overlay_product_data(catalog_item_ids)
+            else:
+                catalog_item_list = cls._prepare_overlay_template_data(catalog_item_ids)
             
         return {
             'itemList': catalog_item_list,
