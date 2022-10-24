@@ -122,7 +122,7 @@ class CRMLead(models.Model):
 
     @api.model_create_multi
     def create(self, vals_list):
-        res = super(CRMLead, self).create(vals_list)
+        res = super().create(vals_list)
         for rec in res:
             rec.representative_name.parent_id = rec.partner_id
         return res
