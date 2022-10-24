@@ -236,7 +236,7 @@ class OverlayTemplate(models.Model):
             lambda x: x.product_attribute_value_id.id == self.overlay_attribute_value_id.id)
         return product_template_value_id
 
-    def _shop_catalog_image_url(self):
+    def _preview_image_url(self):
         self.ensure_one()
         return f'/web/image?model={self.product_template_id._name}&id={self.product_template_id.id}&field=image_512'
 

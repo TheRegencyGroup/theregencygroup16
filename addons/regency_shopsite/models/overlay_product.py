@@ -55,6 +55,14 @@ class OverlayProduct(models.Model):
                     'value_ids': [Command.link(pav.id)]
                 })
 
-    def _shop_catalog_image_url(self):
+    def _preview_image_url(self):
         self.ensure_one()
-        return f'/web/image?model={self.product_tmpl_id._name}&id={self.product_tmpl_id.id}&field=image_512'
+        if self.overlay_product_image_ids:
+            image_model = self.overlay_product_image_ids._name
+            image_id = self.overlay_product_image_ids[0].id
+            image_field = 'image'
+        else:
+            image_id = self.product_tmpl_id.id
+            image_model = self.product_tmpl_id._name
+            image_field = 'image_512'
+        return f'/web/image?model={image_model}&id={image_id}&field={image_field}'

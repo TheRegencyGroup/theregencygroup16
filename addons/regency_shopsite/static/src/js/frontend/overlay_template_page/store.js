@@ -30,6 +30,10 @@ if (overlayTemplatePageData) {
             return !!this.overlayProductId;
         }
 
+        get hasPriceList() {
+            return this.priceList && Object.values(this.priceList).length;
+        }
+
         getSelectedAttributeValues() {
             let res = {};
             const attributeList = Object.values(overlayTemplatePageData.attributeList);
@@ -89,7 +93,7 @@ if (overlayTemplatePageData) {
             };
         }
 
-        async saveOverlayProduct({ overlayProductName, overlayAreaList }) {
+        async saveOverlayProduct({ overlayProductName, overlayAreaList, previewImagesData }) {
             let data = this.getCustomizedData();
             try {
                 let res = await rpc.query({
@@ -99,6 +103,7 @@ if (overlayTemplatePageData) {
                         attribute_list: data.attributeList,
                         overlay_product_name: overlayProductName,
                         overlay_area_list: overlayAreaList,
+                        preview_images_data: previewImagesData,
                     },
                 });
                 if (res) {

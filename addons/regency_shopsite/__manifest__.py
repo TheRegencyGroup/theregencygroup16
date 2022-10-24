@@ -1,6 +1,6 @@
 {
     'name': 'Regency Shopsite',
-    'version': '16.0.0.7',
+    'version': '16.0.0.8',
     'author': 'OpsWay',
     'license': "Other proprietary",
     'depends': [

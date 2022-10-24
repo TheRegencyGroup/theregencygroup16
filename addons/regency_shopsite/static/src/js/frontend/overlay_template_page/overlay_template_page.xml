@@ -4,8 +4,7 @@
     <t t-name="overlay_template_page" owl="1">
         <div class="content">
             <div class="container">
-                <div class="content-in"
-                     t-att-class="{ 'product-unavailable': !store.otPage.overlayTemplateIsAvailableForActiveHotel }">
+                <div class="content-in">
 
                     <div class="path">
                         <ul>
@@ -51,8 +50,9 @@
                         </div>
                         <div class="product-right">
                             <h1><t t-esc="store.otPage.productName"/></h1>
-                            <div class="product-text">
-                                <p><t t-esc="store.otPage.productDescription"/></p>
+                            <t t-set="productDescription" t-value="store.otPage.productDescription"/>
+                            <div t-if="productDescription" class="product-text">
+                                <p><t t-esc="productDescription"/></p>
                             </div>
 
                             <div class="line"></div>
@@ -102,11 +102,13 @@
                             <PriceSelector/>
 
                             <button class="btn btn-block btn-dark product-add-to-cart"
-                               t-on-click="onClickAddToCart">
+                                    t-att-class="{ 'product-add-to-cart-disabled': !store.otPage.overlayTemplateIsAvailableForActiveHotel || !store.otPage.hasPriceList }"
+                                    t-on-click="onClickAddToCart">
                                 <span>Add to cart</span>
                                 <span class="icon-eye-off"></span>
                             </button>
-                            <span class="product-unavailable-message">
+                            <span t-if="!store.otPage.overlayTemplateIsAvailableForActiveHotel"
+                                  class="product-unavailable-message">
                                 <sup>*</sup>This product is unavailable for selected hotel
                             </span>
                         </div>

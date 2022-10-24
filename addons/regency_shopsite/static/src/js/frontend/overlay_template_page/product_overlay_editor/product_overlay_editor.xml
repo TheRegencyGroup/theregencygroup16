@@ -11,7 +11,8 @@
                     </div>
                 </t>
             </div>
-            <div class="product_overlay_editor_position_list">
+            <div class="product_overlay_editor_position_list"
+                 t-attf-style="margin-left: {{store.otPage.hasOverlayProductId ? 0 : 45}}px;">
                 <t t-foreach="Object.values(store.otPage.overlayPositions)" t-as="overlay_position"
                    t-key="overlay_position.id">
                     <div class="product_overlay_editor_position_list_item"
@@ -29,7 +30,7 @@
 
     <t t-name="product_overlay_position" owl="1">
         <div class="product_overlay_position_editor">
-            <div class="product_overlay_position_editor_tools">
+            <div t-if="!store.otPage.hasOverlayProductId" class="product_overlay_position_editor_tools">
                 <label t-att-class="{ 'product_overlay_disabled': !state.selectedAreaIndex }"
                        t-attf-for="upload_area_image_{{props.overlayPosition.id}}"
                        title="Upload image">

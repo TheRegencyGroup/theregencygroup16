@@ -15,6 +15,8 @@ export class Area {
         this.createMask();
         this.init();
         this.initAreaObjects()
+
+        this.enablePointerEvents(false);
     }
 
     init() {}
@@ -189,27 +191,32 @@ export class Area {
             });
         }
         return res;
+    }
 
-        // return new Promise((resolve) => {
-        //     this.canvasEl.toBlob((blob) => {
-        //         this.createMask();
-        //         this.clipMask();
-        //         this.selectedArea();
-        //         this.reInit();
-        //         let reader = new FileReader();
-        //         reader.onloadend = () => {
-        //             let base64data = reader.result;
-        //             resolve({
-        //                 data: base64data.split(',')[1],
-        //                 size: {
-        //                     x: this.data.boundRect.x,
-        //                     y: this.data.boundRect.y,
-        //                 },
-        //             });
-        //         }
-        //         reader.readAsDataURL(blob);
-        //     });
-        // });
+    async getPreviewImageData() {
+        this.canvas.discardActiveObject().renderAll();
+        this.removeMask();
+        this.unselectedArea();
+        return new Promise((resolve) => {
+            this.canvasEl.toBlob((blob) => {
+                this.createMask();
+                this.clipMask();
+                this.selectedArea();
+                this.reInit();
+                let reader = new FileReader();
+                reader.onloadend = () => {
+                    let base64data = reader.result;
+                    resolve({
+                        data: base64data.split(',')[1],
+                        size: {
+                            x: this.data.boundRect.x,
+                            y: this.data.boundRect.y,
+                        },
+                    });
+                }
+                reader.readAsDataURL(blob);
+            });
+        });
     }
 
     reInit() {
@@ -221,6 +228,10 @@ export class Area {
     //     objects = objects.filter(e => !e.isTextArea || (!!e.isTextArea && !!e.text));
     //     return !!objects.length;
     // }
+
+    enablePointerEvents(state) {
+        this.canvas.upperCanvasEl.style.pointerEvents = state ? 'all' : 'none';
+    }
 
     destroy() {
         this.canvas.dispose();

@@ -12,7 +12,7 @@ if (cartData) {
             }
         }
 
-        async addOverlayToCart({ overlayTemplateId, attributeList, quantity, overlayProductId , overlayProductName, overlayAreaList }) {
+        async addOverlayToCart({ overlayTemplateId, attributeList, quantity, overlayProductId , overlayProductName, overlayAreaList, previewImagesData }) {
             try {
                 let params = {
                     qty: quantity,
@@ -29,6 +29,7 @@ if (cartData) {
                         attribute_list: attributeList,
                         overlay_product_name: overlayProductName,
                         overlay_area_list: overlayAreaList,
+                        preview_images_data: previewImagesData,
                     };
                 }
                 let res = await rpc.query({

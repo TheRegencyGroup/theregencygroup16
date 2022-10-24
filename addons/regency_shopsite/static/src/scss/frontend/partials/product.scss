@@ -1,15 +1,3 @@
-.product-unavailable {
-  .product-add-to-cart {
-    opacity: 0.5;
-    pointer-events: none;
-    user-select: none;
-  }
-
-  .product-unavailable-message {
-    display: block;
-  }
-}
-
 .product-top {
   padding-bottom: 24px;
   border-bottom: 1px solid $grey60;
@@ -52,7 +40,8 @@
 }
 
 .product-left {
-  width: 530px;
+  //width: 530px;
+  width: fit-content;
   @include media-breakpoint-down(xl) {
     width: 430px;
   }
@@ -62,8 +51,16 @@
   width: 406px;
 }
 
+.product-add-to-cart {
+  &.product-add-to-cart-disabled {
+    opacity: 0.5;
+    pointer-events: none;
+    user-select: none;
+  }
+}
+
 .product-unavailable-message {
-  display: none;
+  display: block;
   margin-top: 10px;
   font-family: 'Raleway', sans-serif;
   font-size: 14px;

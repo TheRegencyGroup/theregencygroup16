@@ -49,24 +49,34 @@ export class OverlayTemplatePageComponent extends Component {
         this.state.nameInputIsFilled = !!this.inputNameRef.el.value;
     }
 
-    onClickSaveCustomization() {
+    async getDataForSaveCustomization() {
         let name = this.inputNameRef.el.value.trim();
         if (!name) {
-            alert('Listing name is empty!');
-            return;
+            alert('Listing name is empty!')
+            return false;
         }
         let overlayAreaList = this.OverlayEditor.getOverlayAreaList();
         if (!overlayAreaList) {
-            return;
+            return false;
+        }
+        let previewImagesData = await this.OverlayEditor.getPreviewImagesData();
+        return { name, overlayAreaList, previewImagesData }
+    }
+
+    async onClickSaveCustomization() {
+        const customData = await this.getDataForSaveCustomization();
+        if (!customData) {
+            return false;
         }
         this.store.otPage.saveOverlayProduct({
-            overlayProductName: name,
-            overlayAreaList,
+            overlayProductName: customData.name,
+            overlayAreaList: customData.overlayAreaList,
+            previewImagesData: customData.previewImagesData,
         }).catch();
     }
 
     async onClickAddToCart() {
-        if (!this.store.otPage.overlayTemplateIsAvailableForActiveHotel) {
+        if (!this.store.otPage.overlayTemplateIsAvailableForActiveHotel || !this.store.otPage.hasPriceList) {
             return;
         }
         let data = this.store.otPage.getCustomizedData();
@@ -77,19 +87,15 @@ export class OverlayTemplatePageComponent extends Component {
                 overlayProductId,
             };
         } else {
-            let name = this.inputNameRef.el.value.trim();
-            if (!name) {
-                alert('Listing name is empty!')
-                return;
-            }
-            let overlayAreaList = this.OverlayEditor.getOverlayAreaList();
-            if (!overlayAreaList) {
-                return;
+            const customData = await this.getDataForSaveCustomization();
+            if (!customData) {
+                return false;
             }
             data = {
                 ...data,
-                overlayProductName: name,
-                overlayAreaList,
+                overlayProductName: customData.name,
+                overlayAreaList: customData.overlayAreaList,
+                previewImagesData: customData.previewImagesData,
             }
         }
         let res = await this.store.cart.addOverlayToCart(data);

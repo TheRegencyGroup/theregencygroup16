@@ -3,8 +3,8 @@
 
     <t t-name="list_pagination" owl="1">
         <t t-if="numberOfPages gt 1">
-            <div class="pagination_buttons">
-                <ul class="pagination m-0">
+            <div class="pagination-container">
+                <ul class="pagination">
                     <li class="page-item"
                         t-att-class="{ 'disabled': props.currentPage === 1 }"
                         t-on-click="() => this.onClickPageBtn(PREV_PAGE)">

@@ -66,6 +66,36 @@ export class ProductOverlayEditorComponent extends Component {
         return data;
     }
 
+    async getPreviewImagesData() {
+        let overlayPositionComponents = Object.values(this.__owl__.children)
+            .filter(e => e.component.constructor.name === 'ProductOverlayPositionComponent')
+            .map(e => e.component);
+        let data = [];
+        for (let component of overlayPositionComponents) {
+            let overlayPosition = component.props.overlayPosition;
+            let image = component.getColorImage();
+            let imageData = {
+                position_name: overlayPosition.name,
+                overlayPositionId: overlayPosition.id,
+                background_image_size: {
+                    width: overlayPosition.canvasSize.width,
+                    height: overlayPosition.canvasSize.height,
+                },
+                background_image_id: image.imageId,
+                background_image_model: image.imageModel,
+            }
+            let areaList = [];
+            for (let area of Object.values(component.areas)) {
+                areaList.push(await area.getPreviewImageData());
+            }
+            if (areaList.length) {
+                imageData.images = areaList;
+            }
+            data.push(imageData);
+        }
+        return data;
+    }
+
     getImageSrc(colorImages) {
         let baseUrl = window.location.origin;
         let timestamp = new Date().valueOf();
