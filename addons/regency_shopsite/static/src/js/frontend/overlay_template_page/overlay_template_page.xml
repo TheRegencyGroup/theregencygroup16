@@ -8,7 +8,7 @@
 
                     <div class="path">
                         <ul>
-                            <li><a href="">
+                            <li><a href="#" onclick="history.back();">
                                     Recent products
                                 </a></li>
                             <li>New customization</li>

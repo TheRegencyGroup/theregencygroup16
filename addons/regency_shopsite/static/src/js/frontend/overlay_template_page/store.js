@@ -89,7 +89,7 @@ if (overlayTemplatePageData) {
                 overlayTemplateId: this.overlayTemplateId,
                 attributeList: Object.entries(this.selectedAttributeValues)
                     .map(e => ({ 'attribute_id': parseInt(e[0]), value_id: e[1].valueId })),
-                quantity: this.priceList[this.selectedPriceId].quantity,
+                quantity: this.hasPriceList ? this.priceList[this.selectedPriceId].quantity : null,
             };
         }
 
