@@ -8,11 +8,11 @@
                 <xpath expr="//sheet[@name='product_form']//div[@name='options']" position="inside">
                     <span class="d-inline-block">
                         <field name="is_fit_for_overlay"/>
-                        <label for="is_fit_for_overlay" string="Website publish"/>
+                        <label for="is_fit_for_overlay"/>
                     </span>
                     <span class="d-inline-block">
                         <field name="website_published"/>
-                        <label for="website_published"/>
+                        <label for="website_published" string="Website publish"/>
                     </span>
                 </xpath>
                 <xpath expr="//div[hasclass('oe_button_box')]" position="inside">
