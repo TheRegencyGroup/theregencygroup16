@@ -12,5 +12,77 @@
             <field name="left_to_right_name">Owned by</field>
             <field name="right_to_left_name">Owner</field>
         </record>
+
+        <record id="asset_management_company" model="association.type">
+            <field name="name">Asset Management Company to Controlled by Asset Management Company</field>
+            <field name="left_to_right_name">Asset Management Company</field>
+            <field name="right_to_left_name">Controlled by Asset Management Company</field>
+        </record>
+
+        <record id="controlled_by_asset_management_company" model="association.type">
+            <field name="name">Controlled by Asset Management Company to Asset Management Company</field>
+            <field name="left_to_right_name">Controlled by Asset Management Company</field>
+            <field name="right_to_left_name">Asset Management Company</field>
+        </record>
+
+        <record id="hotel_management_company" model="association.type">
+            <field name="name">Hotel Management Company to Controlled by Hotel Management Company</field>
+            <field name="left_to_right_name">Hotel Management Company</field>
+            <field name="right_to_left_name">Controlled by Hotel Management Company</field>
+        </record>
+
+        <record id="controlled_by_hotel_management_company" model="association.type">
+            <field name="name">Controlled by Hotel Management Company to Hotel Management Company</field>
+            <field name="left_to_right_name">Controlled by Hotel Management Company</field>
+            <field name="right_to_left_name">Hotel Management Company</field>
+        </record>
+
+        <record id="brand_management_company" model="association.type">
+            <field name="name">Brand Management Company to Controlled by Brand Management Company</field>
+            <field name="left_to_right_name">Brand Management Company</field>
+            <field name="right_to_left_name">Controlled by Brand Management Company</field>
+        </record>
+
+        <record id="controlled_by_brand_management_company" model="association.type">
+            <field name="name">Controlled by Brand Management Company to Brand Management Company</field>
+            <field name="left_to_right_name">Controlled by Brand Management Company</field>
+            <field name="right_to_left_name">Brand Management Company</field>
+        </record>
+
+        <record id="producer_company" model="association.type">
+            <field name="name">Producer Company to Controlled by Producer Company</field>
+            <field name="left_to_right_name">Producer Company</field>
+            <field name="right_to_left_name">Controlled by Producer Company</field>
+        </record>
+
+        <record id="controlled_by_producer_company" model="association.type">
+            <field name="name">Controlled by Producer Company to Producer Company</field>
+            <field name="left_to_right_name">Controlled by Producer Company</field>
+            <field name="right_to_left_name">Producer Company</field>
+        </record>
+
+        <record id="procurement_partner" model="association.type">
+            <field name="name">Procurement Partner to Controlled by Procurement Partner</field>
+            <field name="left_to_right_name">Procurement Partner</field>
+            <field name="right_to_left_name">Controlled by Procurement Partner</field>
+        </record>
+
+        <record id="controlled_by_procurement_partner" model="association.type">
+            <field name="name">Controlled by Procurement Partner to Procurement Partner</field>
+            <field name="left_to_right_name">Controlled by Procurement Partner</field>
+            <field name="right_to_left_name">Procurement Partner</field>
+        </record>
+
+        <record id="contact_person" model="association.type">
+            <field name="name">Contact Person to Contact Company</field>
+            <field name="left_to_right_name">Contact Person</field>
+            <field name="right_to_left_name">Contact Company</field>
+        </record>
+
+        <record id="contact_company" model="association.type">
+            <field name="name">Contact Company to Contact Person</field>
+            <field name="left_to_right_name">Contact Company</field>
+            <field name="right_to_left_name">Contact Person</field>
+        </record>
     </data>
 </odoo>

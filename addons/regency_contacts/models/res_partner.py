@@ -8,6 +8,7 @@ class ResPartner(models.Model):
                                        'association_id', compute='_compute_association_ids',
                                        inverse='_inverse_association_ids',
                                        precompute=True, store=True)
+    association_partner_ids = fields.One2many('res.partner', compute='_compute_association_partner_ids')
     contact_type = fields.Selection([
         ('customer', 'Customer'),
         ('vendor', 'Vendor')
@@ -28,28 +29,42 @@ class ResPartner(models.Model):
     @api.depends('association_ids')
     def _compute_association_ids(self):
         for partner in self:
-            partner.association_ids = partner.association_ids
+            partner.association_ids = partner.association_ids + partner
 
     def _inverse_association_ids(self):
         for partner in self:
             if self.env.context.get('stop_inverse'):
                 break
             partner.association_ids = partner.association_ids
-            right_asct_type = self.env['association.type'].search(
-                [('right_to_left_name', '=', partner.association_ids.association_type.left_to_right_name)])
-            partner.association_ids.right_partner_id.with_context({'stop_inverse': True}).association_ids = [
-                (0, 0, {'left_partner_id': partner.association_ids.right_partner_id.id, 'right_partner_id': partner.id,
-                        'association_type': right_asct_type.id})
-            ]
 
-    def unlink(self):
-        # TODO: constrain if res partner delete with customer association?
-        return super().unlink()
+            # Link left partner to right partner
+            for association in partner.association_ids:
+                right_asct_type = self.env['association.type'].search(
+                    [('right_to_left_name', '=', association.association_type.left_to_right_name)])
+                association.right_partner_id.with_context({'stop_inverse': True}).association_ids = [
+                    (0, 0, {'left_partner_id': association.right_partner_id.id, 'right_partner_id': partner.id,
+                            'association_type': right_asct_type.id})
+                ]
+
+    def _compute_association_partner_ids(self):
+        for partner in self:
+            partner.association_partner_ids = partner.association_ids.mapped('right_partner_id')
 
     def write(self, vals):
         prev_association_ids = self.association_ids
         res = super().write(vals)
-
-        # TODO: make unlink for the second association here
-        removed_association_ids = self.association_ids - prev_association_ids
+        self._unlink_associations(prev_association_ids)
         return res
+
+    def _unlink_associations(self, prev_association_ids):
+        associations_to_delete = prev_association_ids - self.association_ids
+        associations_from_right_side_to_delete = self.env['customer.association']
+        for association in associations_to_delete:
+            right_asct_type = self.env['association.type'].search(
+                [('right_to_left_name', '=', association.association_type.left_to_right_name)])
+            related_association_id = self.env['customer.association'].search(
+                [('right_partner_id', '=', self.id), ('association_type', '=', right_asct_type.id)])
+            if related_association_id:
+                associations_from_right_side_to_delete += related_association_id
+        (associations_to_delete + associations_from_right_side_to_delete).unlink()
+

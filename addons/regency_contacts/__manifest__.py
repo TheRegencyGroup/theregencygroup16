@@ -12,6 +12,7 @@
     'data': [
         'security/ir.model.access.csv',
         'views/res_partner.xml',
+        'views/customer_association.xml',
         'data/association_type.xml'
     ],
     'installable': True,
