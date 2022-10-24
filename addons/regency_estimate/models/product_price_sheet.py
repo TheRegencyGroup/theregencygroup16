@@ -204,6 +204,7 @@ class ProductPriceSheet(models.Model):
         self.ensure_one()
         order = self.env['sale.order'].create({'access_token': self.access_token,
                                        'partner_id': self.partner_id.id,
+                                       'estimate_id': lines_to_order.price_sheet_id.estimate_id.id,
                                        'price_sheet_id': self.id,
                                        'order_line': [
                                             Command.create({
