@@ -2,6 +2,7 @@ import base64
 import io
 import json
 
+import PIL.Image as Image
 from markupsafe import Markup
 from odoo import http, Command
 from odoo.exceptions import ValidationError
@@ -28,7 +29,7 @@ class OverlayTemplatePage(http.Controller):
 
         price_list = {}
         if overlay_template_is_available_for_hotel:
-            overlay_template_price_item_ids = overlay_template_id.price_item_ids\
+            overlay_template_price_item_ids = overlay_template_id.price_item_ids \
                 .filtered(lambda x: x.pricelist_id.id == active_hotel_id.property_product_pricelist.id)
             overlay_template_price_item_ids = overlay_template_price_item_ids.sorted(key='min_quantity')
             price_list = {
@@ -48,7 +49,47 @@ class OverlayTemplatePage(http.Controller):
         }
 
     @classmethod
-    def create_overlay_product(cls, overlay_template_id, attribute_list, overlay_product_name, overlay_area_list):
+    def _create_overlay_product_preview_images(cls, overlay_product_id, preview_images_data):
+        for image_with_overlay in preview_images_data:
+            overlay_position_id = request.env['overlay.position'].sudo().browse(
+                image_with_overlay['overlayPositionId']).exists()
+            if not overlay_position_id:
+                continue
+            if image_with_overlay['background_image_model'] == 'product.template':
+                back_image_id = overlay_product_id.product_tmpl_id.image_1920
+            else:
+                back_image_id = request.env['product.image'].browse(
+                    image_with_overlay['background_image_id']).image_1920
+            back_image = Image.open(io.BytesIO(base64.b64decode(back_image_id)))
+            width = image_with_overlay['background_image_size']['width']
+            height = image_with_overlay['background_image_size']['height']
+            delta_x = 0
+            delta_y = 0
+            if back_image.width >= back_image.height:
+                height = int(width * (back_image.height / back_image.width))
+                delta_y = int((image_with_overlay['background_image_size']['height'] - height) / 2)
+            else:
+                width = int(height * (back_image.width / back_image.height))
+                delta_x = int((image_with_overlay['background_image_size']['width'] - width) / 2)
+            back_image = back_image.resize((width, height))
+            for image_data in image_with_overlay['images']:
+                image = Image.open(io.BytesIO(base64.b64decode(image_data['data'].encode())))
+                x = image_data['size']['x'] - delta_x
+                y = image_data['size']['y'] - delta_y
+                back_image.paste(image, (int(x), int(y)), image)
+
+            result_image = io.BytesIO()
+            back_image.save(result_image, format='PNG')
+
+            request.env['overlay.product.image'].sudo().create({
+                'image': base64.b64encode(result_image.getvalue()),
+                'overlay_position_id': overlay_position_id.id,
+                'overlay_product_id': overlay_product_id.id,
+            })
+
+    @classmethod
+    def create_overlay_product(cls, overlay_template_id, attribute_list, overlay_product_name, overlay_area_list,
+                               preview_images_data):
         overlay_template_id = request.env['overlay.template'].browse(overlay_template_id).exists()
         if not overlay_template_id:
             raise ValidationError('Overlay template does not exists!')
@@ -82,6 +123,8 @@ class OverlayTemplatePage(http.Controller):
             'overlay_template_id': overlay_template_id.id,
             'product_template_attribute_value_ids': [Command.set(product_template_attribute_value_ids)],
         })
+
+        cls._create_overlay_product_preview_images(overlay_product_id, preview_images_data)
 
         for item in overlay_area_list.values():
             overlay_position_id = item.get('overlayPositionId', False)
@@ -221,7 +264,6 @@ class OverlayTemplatePage(http.Controller):
                 'productId': product_id.id,
             })
 
-
         return request.render('regency_shopsite.overlay_template_page', {
             'overlay_template_page_data': Markup(json.dumps(overlay_template_page_data)),
         })
@@ -229,9 +271,9 @@ class OverlayTemplatePage(http.Controller):
     @http.route(['/shop/overlay_template/save'], type='json', auth='user', methods=['POST'], website=True,
                 csrf=False)
     def overlay_product_save(self, overlay_template_id, attribute_list, overlay_product_name, overlay_area_list,
-                             **kwargs):
+                             preview_images_data, **kwargs):
         overlay_product_id, product_template_attribute_value_ids = self.create_overlay_product(
-            overlay_template_id, attribute_list, overlay_product_name, overlay_area_list)
+            overlay_template_id, attribute_list, overlay_product_name, overlay_area_list, preview_images_data)
         return self.get_overlay_product_data(overlay_product_id)
 
     @http.route(['/shop/overlay_template/price_list'], type='json', auth='user', methods=['POST'], website=True)
@@ -240,5 +282,5 @@ class OverlayTemplatePage(http.Controller):
         if not overlay_template_id or not self._overlay_template_is_available_for_user(overlay_template_id):
             return False
         return {
-            'priceList':  self._get_overlay_template_price_list(overlay_template_id),
+            'priceList': self._get_overlay_template_price_list(overlay_template_id),
         }

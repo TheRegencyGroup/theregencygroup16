@@ -25,10 +25,10 @@
             <tbody>
                 <t t-foreach="website_sale_order.website_order_line" t-as="line">
                     <tr t-att-class="'optional_product info' if line.linked_line_id else None">
-                        <t t-if="line.image_with_overlay_ids">
+                        <t t-if="line.product_id.overlay_product_id">
                             <td align="center" t-if="line.product_id.product_tmpl_id" class='td-img'>
                                 <span>
-                                    <img t-att-src="image_data_uri(line.image_with_overlay_ids[0].image_1920)"
+                                    <img t-att-src="line.product_id.overlay_product_id._preview_image_url()"
                                          class="img o_image_64_max rounded" t-att-alt="line.name_short"/>
                                 </span>
                             </td>
@@ -144,10 +144,10 @@
         <t t-if="website_sale_order and website_sale_order.website_order_line">
             <t t-foreach="website_sale_order.website_order_line" t-as="line">
                 <div class="form-row mb8 cart_line">
-                    <t t-if="line.image_with_overlay_ids">
+                    <t t-if="line.product_id.overlay_product_id">
                         <div class="col-3 text-center">
                             <span>
-                                <img t-att-src="image_data_uri(line.image_with_overlay_ids[0].image_1920)" class="img o_image_64_max rounded mb-2 img-fluid" t-att-alt="line.name_short"/>
+                                <img t-att-src="line.product_id.overlay_product_id._preview_image_url()" class="img o_image_64_max rounded mb-2 img-fluid" t-att-alt="line.name_short"/>
                             </span>
                         </div>
                     </t>
@@ -207,10 +207,10 @@
                         </thead>
                         <tbody>
                             <tr t-foreach="website_sale_order.website_order_line" t-as="line">
-                                <t t-if="line.image_with_overlay_ids">
+                                <t t-if="line.product_id.overlay_product_id">
                                     <td class='td-img text-center' t-if="line.product_id.product_tmpl_id">
                                         <span>
-                                            <img t-att-src="image_data_uri(line.image_with_overlay_ids[0].image_1920)" class="img o_image_64_max rounded" t-att-alt="line.name_short"/>
+                                            <img t-att-src="line.product_id.overlay_product_id._preview_image_url()" class="img o_image_64_max rounded" t-att-alt="line.name_short"/>
                                         </span>
                                     </td>
                                 </t>

@@ -20,7 +20,7 @@ class ShopCatalog(http.Controller):
                 'overlayTemplateId': rec.id,
                 'overlayTemplateName': rec.name,
                 'productName': rec.product_template_id.name,
-                'imageUrl': rec._shop_catalog_image_url(),
+                'imageUrl': rec._preview_image_url(),
                 'url': f'/shop/{slug(rec)}',
             })
         return res
@@ -35,7 +35,7 @@ class ShopCatalog(http.Controller):
                 'overlayTemplateId': rec.overlay_template_id.id,
                 'overlayTemplateName': rec.overlay_template_id.name,
                 'productName': rec.product_tmpl_id.name,
-                'imageUrl': rec._shop_catalog_image_url(),
+                'imageUrl': rec._preview_image_url(),
                 'url': f'/shop/{slug(rec.overlay_template_id)}?{OVERLAY_PRODUCT_ID_URL_PARAMETER}={rec.id}',
             })
         return res

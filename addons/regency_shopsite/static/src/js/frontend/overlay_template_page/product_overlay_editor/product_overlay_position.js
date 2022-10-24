@@ -33,6 +33,7 @@ export class ProductOverlayPositionComponent extends Component {
 
         this.loadImage = false;
         this.currentColorValueId = this.store.otPage.selectedColorValueId;
+        this.currentOverlayProductId = this.store.otPage.overlayProductId;
     }
 
     onMounted() {
@@ -44,6 +45,12 @@ export class ProductOverlayPositionComponent extends Component {
         if (this.currentColorValueId !== this.store.otPage.selectedColorValueId) {
             this.currentColorValueId = this.store.otPage.selectedColorValueId;
             this.state.imageSrc = this.getImageSrc();
+        }
+        if (this.currentOverlayProductId !== this.store.otPage.overlayProductId) {
+            this.currentOverlayProductId = this.store.otPage.overlayProductId;
+            for (let area of Object.values(this.areas)) {
+                area.enablePointerEvents(!this.store.otPage.hasOverlayProductId);
+            }
         }
     }
 
@@ -121,6 +128,7 @@ export class ProductOverlayPositionComponent extends Component {
                 }
                 if (area) {
                     area.onSelectedArea(this.onSelectedArea.bind(this));
+                    area.enablePointerEvents(!this.store.otPage.hasOverlayProductId);
                     this.areas[areaData.index] = area;
                 }
             }
