@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="template_header_default" inherit_id="website.template_header_default">
+        <xpath expr="//header[@id='top']" position="replace">
+            <div class="regency-top">
+                <header id="regency_header">
+                    <div class="container">
+                        <div class="header-in">
+                            <a href="" class="logo">
+                                <img src="/regency_shopsite/static/src/img/logo.png" alt=""/>
+                            </a>
+                            <div class="header-menu">
+                                <t t-if="not request.env.user._is_public()">
+                                    <div data-owl-widget="HotelSelectorComponent"/>
+
+                                    <a href="/my/orders" class="header-menu-button">
+                                        <div class="header-menu-button-icon">
+                                            <span class="icon-eye-off"/>
+                                        </div>
+                                        <div>Orders</div>
+                                    </a>
+
+                                    <div data-owl-widget="HeaderCart"/>
+
+                                    <a href="/my/home" class="header-menu-link">My account</a>
+                                </t>
+                                <a href="/aboutus" class="header-menu-link">About us</a>
+                                <a href="/contactus" class="header-menu-link">Contact us</a>
+                            </div>
+                        </div>
+                    </div>
+                </header>
+            </div>
+        </xpath>
+    </template>
+</odoo>

@@ -10,7 +10,7 @@
     <record id="color_attribute" model="product.attribute">
         <field name="name">Color</field>
         <field name="create_variant">always</field>
-        <field name="display_type">radio</field>
+        <field name="display_type">color</field>
     </record>
 
     <record id="size_attribute" model="product.attribute">

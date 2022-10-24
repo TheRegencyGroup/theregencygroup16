@@ -2,6 +2,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  border-radius: 0;
   border: 1px solid $grey70;
   font-size: 16px;
   line-height: 18px;
@@ -11,6 +12,7 @@
   transition: .5s linear ease-in;
   padding: 16px 29px;
   background: $white;
+  font-family: 'Raleway', sans-serif;
   &:hover {
     background: $grey10;
     border-color: $grey10;

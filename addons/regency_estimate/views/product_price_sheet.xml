@@ -60,7 +60,7 @@
                             <page name="pricelist" string="Price Sheet Items">
                               <field name="item_ids"  widget="section_and_note_one2many"
                                 mode="tree" >
-                                  <tree string="Price Sheet Items" editable="bottom">
+                                  <tree string="Price Sheet Items" editable="bottom" default_order='product_id asc, min_quantity asc'>
                                       <control>
                                         <create name="add_product_control" string="Add a product"/>
                                         <create name="add_section_control" string="Add a section" context="{'default_display_type': 'line_section'}"/>

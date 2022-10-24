@@ -204,6 +204,7 @@ class ProductPriceSheet(models.Model):
         self.ensure_one()
         order = self.env['sale.order'].create({'access_token': self.access_token,
                                        'partner_id': self.partner_id.id,
+                                       'estimate_id': lines_to_order.price_sheet_id.estimate_id.id,
                                        'price_sheet_id': self.id,
                                        'order_line': [
                                             Command.create({
@@ -233,7 +234,7 @@ class ProductPriceSheet(models.Model):
 
 class ProductPriceSheet(models.Model):
     _name = 'product.price.sheet.line'
-    _order = 'price_sheet_id, sequence, id'
+    _order = 'product_id ASC, min_quantity ASC'
 
     price_sheet_id = fields.Many2one('product.price.sheet')
     name = fields.Char('Description')

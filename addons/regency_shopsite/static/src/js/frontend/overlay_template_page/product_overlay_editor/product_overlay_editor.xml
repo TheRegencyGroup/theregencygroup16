@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates>
+
+    <t t-name="product_overlay_editor" owl="1">
+        <div class="product_overlay_editor">
+            <div class="product_overlay_editor_positions">
+                <t t-foreach="Object.values(store.otPage.overlayPositions)" t-as="overlay_position"
+                   t-key="overlay_position.id">
+                    <div t-att-class="{ 'd-none': state.selectedOverlayPositionId !== overlay_position.id }">
+                        <ProductOverlayPositionComponent overlayPosition="overlay_position"/>
+                    </div>
+                </t>
+            </div>
+            <div class="product_overlay_editor_position_list">
+                <t t-foreach="Object.values(store.otPage.overlayPositions)" t-as="overlay_position"
+                   t-key="overlay_position.id">
+                    <div class="product_overlay_editor_position_list_item"
+                         t-att-class="{ 'product_overlay_editor_position_list_item_selected': state.selectedOverlayPositionId === overlay_position.id }"
+                         t-on-click="() => this.onClickSelectOverlayPosition(overlay_position.id)">
+                        <img t-att-src="getImageSrc(overlay_position.colorImages)"/>
+                        <span>
+                            <t t-esc="overlay_position.name"/>
+                        </span>
+                    </div>
+                </t>
+            </div>
+        </div>
+    </t>
+
+    <t t-name="product_overlay_position" owl="1">
+        <div class="product_overlay_position_editor">
+            <div class="product_overlay_position_editor_tools">
+                <label t-att-class="{ 'product_overlay_disabled': !state.selectedAreaIndex }"
+                       t-attf-for="upload_area_image_{{props.overlayPosition.id}}"
+                       title="Upload image">
+                    <i class="fa fa-upload"/>
+                </label>
+                <input type="file"
+                       t-attf-id="upload_area_image_{{props.overlayPosition.id}}"
+                       t-on-change="onChangeUploadImage"
+                       t-ref="image_upload_ref"/>
+                <button class="product_overlay_position_remove_active_obj"
+                        t-att-class="{ 'product_overlay_disabled': !state.selectedAreaIndex }"
+                        t-on-click="onClickRemoveActiveObject"
+                        title="Remove active object"/>
+                <button t-att-class="{ 'product_overlay_disabled': !state.selectedAreaIndex }"
+                        t-on-click="onClickRemoveAllObjects"
+                        title="Remove all objects">
+                    <i class="fa fa-close"/>
+                </button>
+            </div>
+            <div class="product_overlay_position_container">
+                <div class="product_overlay_position">
+                    <img t-att-src="state.imageSrc" t-ref="image_ref"/>
+                    <div class="product_overlay_position_areas_container" t-ref="canvas_container_ref"/>
+                </div>
+            </div>
+        </div>
+    </t>
+
+</templates>

@@ -27,6 +27,7 @@ class ProductAttributeValue(models.Model):
     _inherit = 'product.attribute.value'
 
     overlay_template_id = fields.Many2one('overlay.template', readonly=True)
+    overlay_product_id = fields.Many2one('overlay.product', readonly=True)
 
     def _check_overlay_template_id(self):
         for rec in self:

@@ -1,4 +1,4 @@
-.o_list_view .o_list_table .o_list_record_copy button {
+.o_list_renderer .o_list_table .o_list_record_copy button {
     padding: 0px;
     background: none;
     border-style: none;
@@ -6,6 +6,6 @@
     cursor: pointer;
 }
 
-.o_list_view .o_list_table .o_list_record_copy{
+.o_list_renderer .o_list_table .o_list_record_copy{
     width: 1px;
 }

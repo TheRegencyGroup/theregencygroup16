@@ -78,6 +78,12 @@ class SaleEstimate(models.Model):
                                               string="Number of Price Sheets")
     price_sheet_ids = fields.One2many('product.price.sheet', 'estimate_id', string='Price Sheets')
     is_selected = fields.Boolean(compute="_compute_is_selected")
+    sale_order_ids = fields.One2many('sale.order', 'estimate_id', string='Sale Orders')
+    sale_order_count = fields.Integer(compute='_compute_sale_order_count')
+
+    def _compute_sale_order_count(self):
+        for rec in self:
+            rec.sale_order_count = len(rec.sale_order_ids)
 
     @api.depends('user_id')
     def _compute_company_id(self):
@@ -178,6 +184,25 @@ class SaleEstimate(models.Model):
         selected_lines.write({'selected': False})
         return action
 
+    def action_new_sale_order(self):
+        action = self.env["ir.actions.actions"]._for_xml_id("sale.action_orders")
+        action['views'] = [(self.env.ref('sale.view_order_form').id, 'form')]
+        action['target'] = 'new'
+        selected_lines = self.product_lines.filtered(lambda l: l.selected)
+        action['context'] = {
+            'default_partner_id': self.partner_id.id,
+            'default_estimate_id': self.id,
+            'default_order_line': [
+                Command.create({
+                    'name': p.product_id.name,
+                    'product_uom_qty': p.product_uom_qty,
+                    'product_id': p.product_id.id,
+                    'price_unit': p.product_id.list_price,
+                }) for p in selected_lines]
+        }
+        selected_lines.write({'selected': False})
+        return action
+
     def action_view_purchase_agreement(self):
         action = self.env["ir.actions.actions"]._for_xml_id("purchase_requisition.action_purchase_requisition")
         action['context'] = {
@@ -187,6 +212,17 @@ class SaleEstimate(models.Model):
         if len(self.purchase_agreement_ids) == 1:
             action['views'] = [(self.env.ref('purchase_requisition.view_purchase_requisition_form').id, 'form')]
             action['res_id'] = self.purchase_agreement_ids.id
+        return action
+
+    def action_view_sale_order(self):
+        action = self.env["ir.actions.actions"]._for_xml_id("sale.action_orders")
+        action['context'] = {
+            'default_estimate_id': self.id
+        }
+        action['domain'] = [('estimate_id', '=', self.id)]
+        if len(self.sale_order_ids) == 1:
+            action['views'] = [(self.env.ref('sale.view_order_form').id, 'form')]
+            action['res_id'] = self.sale_order_ids.id
         return action
 
     def action_new_price_sheet(self):

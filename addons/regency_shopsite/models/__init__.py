@@ -8,6 +8,11 @@ from . import (
     product_pricelist_item,
     product_attribute,
     website,
-    # product_pricelist,
-    overlay_product
+    product_pricelist,
+    overlay_product,
+    product_product,
+    res_users,
+    res_partner,
+    overlay_product_image,
+    overlay_product_area_image,
 )
