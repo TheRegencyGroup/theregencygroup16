@@ -15,7 +15,7 @@ class ProductTemplate(models.Model):
     @api.model_create_multi
     def create(self, vals):
         res = super().create(vals)
-        res._check_attribute_line()
+        res._check_attribute_line(res.attribute_line_ids)
         return res
 
     @api.constrains('attribute_line_ids', 'is_fit_for_overlay')
@@ -41,10 +41,11 @@ class ProductTemplate(models.Model):
     def write(self, vals):
         if 'image_1920' in vals:
             self._check_image_in_overlay_template()
+        prev_attribute_line_ids = self.attribute_line_ids
         res = super(ProductTemplate, self).write(vals)
         if any(x in ['image_1920', 'product_template_image_ids'] for x in vals):
             self._compute_overlay_template_areas()
-        self._check_attribute_line()
+        self._check_attribute_line(self.attribute_line_ids - prev_attribute_line_ids)
         return res
 
     def _get_overlay_templates(self):
@@ -63,16 +64,22 @@ class ProductTemplate(models.Model):
             return Markup(json.dumps(data))
         return False
 
-    def _check_attribute_line(self):
+    def _check_attribute_line(self, attribute_line_ids):
         """
         Check that changes made from product.template form using context in sale.product_template_action
         """
         if self.env.context.get('sale_multi_pricelist_product_template'):  #
             overlay_attr = self.env.ref('regency_shopsite.overlay_attribute')
             customization_attr = self.env.ref('regency_shopsite.customization_attribute')
+            attribute_ids = attribute_line_ids.mapped('attribute_id')
 
-            if {overlay_attr.id, customization_attr.id}.intersection(set(self.attribute_line_ids.mapped('attribute_id.id'))):
-                raise UserError('Cannot add Overlay/Customization attribute manually.')
+            if overlay_attr in attribute_ids:
+                raise UserError('Cannot add Overlay attribute manually.')
+
+            if customization_attr in attribute_ids:
+                ptal = attribute_line_ids.filtered(lambda f: f.attribute_id == customization_attr).product_template_value_ids
+                if self.env.ref('regency_shopsite.no_customization_value') != ptal.mapped('product_attribute_value_id'):
+                    raise UserError('Cannot add Customization attribute manually.')
 
     def open_pricelist_rules(self):
         """
