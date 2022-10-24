@@ -119,3 +119,10 @@ class CRMLead(models.Model):
         res = super(CRMLead, self)._message_post_after_hook(message, msg_vals)
         self._compute_contacted()
         return res
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        res = super(CRMLead, self).create(vals_list)
+        for rec in res:
+            rec.representative_name.parent_id = rec.partner_id
+        return res
