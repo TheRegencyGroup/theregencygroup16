@@ -1,6 +1,18 @@
 from odoo import fields, models, api
 
 
+class SaleOrder(models.Model):
+    _inherit = 'sale.order'
+
+    def _prepare_order_line_values(self, product_id, quantity, linked_line_id=False, no_variant_attribute_values=None,
+                                   product_custom_attribute_values=None, **kwargs):
+        result = super()._prepare_order_line_values(product_id, quantity, linked_line_id, no_variant_attribute_values,
+                                                    product_custom_attribute_values, **kwargs)
+        if 'delivery_partner_id' in kwargs:
+            result['delivery_partner_id'] = kwargs['delivery_partner_id']
+        return result
+
+
 class SaleOrderLine(models.Model):
     _inherit = 'sale.order.line'
 
