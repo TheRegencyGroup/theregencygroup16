@@ -29,7 +29,7 @@ class ResPartner(models.Model):
     @api.depends('association_ids')
     def _compute_association_ids(self):
         for partner in self:
-            partner.association_ids = partner.association_ids + partner
+            partner.association_ids = partner.association_ids
 
     def _inverse_association_ids(self):
         for partner in self:
