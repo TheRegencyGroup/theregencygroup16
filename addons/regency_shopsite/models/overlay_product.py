@@ -19,8 +19,8 @@ class OverlayProduct(models.Model):
     overlay_product_image_ids = fields.One2many('overlay.product.image', 'overlay_product_id', readonly=True)
     overlay_product_area_image_ids = fields.One2many('overlay.product.area.image', 'overlay_product_id', readonly=True)
     area_list_json = fields.Char(readonly=True)
-    last_updated_date = fields.Datetime(readonly=True, default=lambda self: self._compute_last_update_date())
-    updated_by = fields.Many2one('res.partner', readonly=True, default=lambda self: self._compute_updated_by())
+    last_updated_date = fields.Datetime(readonly=True)
+    updated_by = fields.Many2one('res.partner', readonly=True)
 
     @api.depends('customize_attribute_value_ids')
     def _compute_customize_attribute_value_id(self):
@@ -88,13 +88,10 @@ class OverlayProduct(models.Model):
     def _update_vals_with_last_updated_date(self, write_vals: dict) -> dict:
         write_vals.update({'updated_by': self._compute_updated_by(),
                            'last_updated_date': self._compute_last_update_date()})
-        
+
     def _compute_last_update_date(self):
         is_updated_by_partner = self._compute_updated_by()
-        if is_updated_by_partner:
-            return self.write_date or fields.Datetime.now()  # 'Datetime.now' used for default on creation
-        else:
-            return False
+        return self.write_date if is_updated_by_partner else False
 
     @api.model
     def _compute_updated_by(self) -> object:
