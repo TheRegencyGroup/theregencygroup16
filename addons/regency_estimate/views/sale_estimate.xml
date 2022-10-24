@@ -190,7 +190,7 @@
                         domain="[('share', '=', False)]"/>
                     <field name="tag_ids" optional="hide" widget="many2many_tags" options="{'color_field': 'color'}"/>
                     <field name="priority" optional="hide"/>
-                    <field name="company_id" groups="base.group_multi_company" optional="show"/>
+                    <field name="company_id" optional="show"/>
                 </tree>
             </field>
        </record>
