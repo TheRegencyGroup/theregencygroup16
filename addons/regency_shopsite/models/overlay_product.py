@@ -37,8 +37,7 @@ class OverlayProduct(models.Model):
         return res
 
     def write(self, vals):
-        vals.update({'updated_by': self._compute_updated_by(),
-                     'last_updated_date': self._compute_last_update_date()})
+        self._update_vals_with_last_updated_date(vals)
         res = super(OverlayProduct, self).write(vals)
         return res
 
@@ -85,6 +84,10 @@ class OverlayProduct(models.Model):
             return f'Updated{date_str} {name_str}'.strip(' ,')
         else:
             return ''
+
+    def _update_vals_with_last_updated_date(self, write_vals: dict) -> dict:
+        write_vals.update({'updated_by': self._compute_updated_by(),
+                           'last_updated_date': self._compute_last_update_date()})
         
     def _compute_last_update_date(self):
         is_updated_by_partner = self._compute_updated_by()
