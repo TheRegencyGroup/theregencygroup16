@@ -76,6 +76,7 @@ class ProductTemplate(models.Model):
             if overlay_attr in attribute_ids:
                 raise UserError('Cannot add Overlay attribute manually.')
 
+
             if customization_attr in attribute_ids:
                 ptal = attribute_line_ids.filtered(lambda f: f.attribute_id == customization_attr).product_template_value_ids
                 if self.env.ref('regency_shopsite.no_customization_value') != ptal.mapped('product_attribute_value_id'):
