@@ -15,7 +15,7 @@
 
                                     <a href="/my/orders" class="header-menu-button">
                                         <div class="header-menu-button-icon">
-                                            <span class="icon-eye-off"/>
+                                            <span class="icon-orders"/>
                                         </div>
                                         <div>Orders</div>
                                     </a>
