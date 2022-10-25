@@ -6,6 +6,7 @@ class SaleOrder(models.Model):
     _inherit = 'sale.order'
 
     price_sheet_id = fields.Many2one('product.price.sheet')
+    estimate_id = fields.Many2one('sale.estimate')
 
     def has_to_be_signed(self, include_draft=False):
         return super(SaleOrder, self).has_to_be_signed(include_draft=True)

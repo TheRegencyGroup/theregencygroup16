@@ -62,10 +62,16 @@
                             </div>
                             <field name="product_variant_ids" widget="many2many_tags" groups="base.group_no_one"/>
                         </page>
+                        <page string="Hotels" id="hotels">
+                            <group>
+                                <field name="hotel_ids" widget="many2many_tags"/>
+                            </group>
+                        </page>
                         <page string="Price Items" id="price_items">
                             <field name="price_item_ids" widget="one2many"
-                                   context="{'form_view_ref': 'regency_shopsite.product_pricelist_item_form_view_from_overlay_tmpl'}">
-                            <tree string="Price Items">
+                                   context="{'form_view_ref': 'regency_shopsite.product_pricelist_item_form_view_from_overlay_tmpl',
+                                    'default_applied_on': '4_overlay_template', 'default_overlay_tmpl_id': active_id}">
+                                <tree string="Price Items">
                                     <field name="pricelist_id"/>
                                     <field name="min_quantity"/>
                                     <field name="price"/>
@@ -74,11 +80,7 @@
                         </page>
                         <page string="Customized items" id="customized_items"
                               attrs="{'invisible': [('overlay_attribute_value_id', '=', False)]}">
-                            <field name="overlay_product_ids">
-                                <tree editable="top" delete="0">
-                                    <field name="product_tmpl_id"/>
-                                </tree>
-                            </field>
+                            <field name="overlay_product_ids" context="{'default_overlay_template_id': id}"/>
                         </page>
                     </notebook>
                 </sheet>

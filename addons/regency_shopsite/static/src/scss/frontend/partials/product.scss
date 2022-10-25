@@ -40,7 +40,8 @@
 }
 
 .product-left {
-  width: 530px;
+  //width: 530px;
+  width: fit-content;
   @include media-breakpoint-down(xl) {
     width: 430px;
   }
@@ -48,6 +49,28 @@
 
 .product-right {
   width: 406px;
+}
+
+.product-add-to-cart {
+  &.product-add-to-cart-disabled {
+    opacity: 0.5;
+    pointer-events: none;
+    user-select: none;
+  }
+}
+
+.product-unavailable-message {
+  display: block;
+  margin-top: 10px;
+  font-family: 'Raleway', sans-serif;
+  font-size: 14px;
+  line-height: 17px;
+  color: $grey10;
+
+  sup {
+    top: 3px;
+    font-size: 22px;
+  }
 }
 
 .product-image {

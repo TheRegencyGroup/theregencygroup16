@@ -11,8 +11,8 @@
         'purchase_requisition',
         'consumption_agreement',
         'dr_many_tags_link',
-        'sale_management'
-        # 'web_one2many_duplicate_cr'
+        'sale_management',
+        'web_one2many_duplicate_cr'
     ],
     'category': 'Regency/Sales',
     'sequence': 10,

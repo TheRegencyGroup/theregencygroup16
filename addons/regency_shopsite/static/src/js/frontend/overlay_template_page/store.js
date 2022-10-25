@@ -1,6 +1,7 @@
 /** @odoo-module **/
 
 import { extendStore } from '@fe_owl_base/js/main';
+import rpc from 'web.rpc';
 
 const overlayTemplatePageData = PRELOADED_DATA?.OVERLAY_TEMPLATE_PAGE_DATA;
 if (overlayTemplatePageData) {
@@ -10,7 +11,27 @@ if (overlayTemplatePageData) {
                 this[key] = value;
             }
             this.selectedAttributeValues = this.getSelectedAttributeValues();
-            this.selectedPriceId = this.priceList ? Object.values(this.priceList)[0].id : null;
+            this.selectedPriceId = this.getSelectedPriceId();
+
+            this._checkOverlayProductIdUrlParameter();
+        }
+
+        get overlayPositions() {
+            return this.overlayTemplateAreasData?.overlayPositions || {};
+        }
+
+        get selectedColorValueId() {
+            const selectedAttributeValues = this.selectedAttributeValues;
+            const colorAttributeId = this.colorAttributeId;
+            return selectedAttributeValues[colorAttributeId].valueId;
+        }
+
+        get hasOverlayProductId() {
+            return !!this.overlayProductId;
+        }
+
+        get hasPriceList() {
+            return this.priceList && Object.values(this.priceList).length;
         }
 
         getSelectedAttributeValues() {
@@ -28,24 +49,97 @@ if (overlayTemplatePageData) {
             return res;
         }
 
-        get overlayPositions() {
-            return this.overlayTemplateAreasData?.overlayPositions || {};
+        getSelectedPriceId() {
+            const priceList = Object.values(this.priceList);
+            return priceList.length ? priceList[0].id : null;
         }
 
-        get selectedColorValueId() {
-            const selectedAttributeValues = this.selectedAttributeValues;
-            const colorAttributeId = this.colorAttributeId;
-            return selectedAttributeValues[colorAttributeId].valueId;
+        _checkOverlayProductIdUrlParameter() {
+            if (!this.hasOverlayProductId) {
+                let url = new URL(window.location.href);
+                let paramKey = this.options?.overlayProductIdUrlParameter;
+                if (url.searchParams.get(paramKey)) {
+                    url.searchParams.delete(paramKey);
+                    window.history.replaceState(null, null, url);
+                }
+            }
+        }
+
+        _updateOverlayProductIdUrlParameter() {
+            if (this.hasOverlayProductId) {
+                let url = new URL(window.location.href);
+                let paramKey = this.options?.overlayProductIdUrlParameter;
+                url.searchParams.set(paramKey, this.overlayProductId);
+                window.history.replaceState(null, null, url);
+            }
         }
 
         changeAttributeValueAction(attributeId, valueId) {
-            this.selectedAttributeValues[attributeId].valueId = valueId;
+            if (this.selectedAttributeValues[attributeId].valueId !== valueId) {
+                this.selectedAttributeValues[attributeId].valueId = valueId;
+            }
         }
 
         changeSelectedPrice(priceId) {
             this.selectedPriceId = priceId;
         }
+
+        getCustomizedData() {
+            return {
+                overlayTemplateId: this.overlayTemplateId,
+                attributeList: Object.entries(this.selectedAttributeValues)
+                    .map(e => ({ 'attribute_id': parseInt(e[0]), value_id: e[1].valueId })),
+                quantity: this.hasPriceList ? this.priceList[this.selectedPriceId].quantity : null,
+            };
+        }
+
+        async saveOverlayProduct({ overlayProductName, overlayAreaList, previewImagesData }) {
+            let data = this.getCustomizedData();
+            try {
+                let res = await rpc.query({
+                    route: '/shop/overlay_template/save',
+                    params: {
+                        overlay_template_id: data.overlayTemplateId,
+                        attribute_list: data.attributeList,
+                        overlay_product_name: overlayProductName,
+                        overlay_area_list: overlayAreaList,
+                        preview_images_data: previewImagesData,
+                    },
+                });
+                if (res) {
+                    Object.assign(this, res);
+                    this._updateOverlayProductIdUrlParameter();
+                }
+            } catch (e) {
+                console.log(e)
+            }
+        }
+
+        async updatePriceList(activeHotelId) {
+            if (activeHotelId) {
+                this.overlayTemplateIsAvailableForActiveHotel = this.overlayTemplateHotelIds.includes(activeHotelId);
+            }
+            try {
+                let res = await rpc.query({
+                    route: '/shop/overlay_template/price_list',
+                    params: {
+                        overlay_template_id: this.overlayTemplateId,
+                    },
+                });
+                if (res) {
+                    Object.assign(this, res);
+                    this.selectedPriceId = this.getSelectedPriceId();
+                }
+            } catch (e) {
+                console.log(e)
+            }
+        }
+
+        async updateOverlayProductData(data) {
+            Object.assign(this, data);
+            this._updateOverlayProductIdUrlParameter();
+        }
     }
 
-    extendStore({ otPage: new OverlayTemplatePage() })
+    extendStore({ key: 'otPage', obj: new OverlayTemplatePage() })
 }

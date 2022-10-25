@@ -12,12 +12,6 @@ class ProductTemplate(models.Model):
     overlay_template_count = fields.Integer(compute='_compute_overlay_template_count')
     overlay_template_ids = fields.One2many('overlay.template', 'product_template_id')
 
-    @api.model_create_multi
-    def create(self, vals):
-        res = super().create(vals)
-        res._check_attribute_line()
-        return res
-
     @api.constrains('attribute_line_ids', 'is_fit_for_overlay')
     def _constrains_attribute_line_ids(self):
         color_attribute_id = self.env.ref('regency_shopsite.color_attribute')
@@ -41,10 +35,10 @@ class ProductTemplate(models.Model):
     def write(self, vals):
         if 'image_1920' in vals:
             self._check_image_in_overlay_template()
+        prev_attribute_line_ids = self.attribute_line_ids
         res = super(ProductTemplate, self).write(vals)
         if any(x in ['image_1920', 'product_template_image_ids'] for x in vals):
             self._compute_overlay_template_areas()
-        self._check_attribute_line()
         return res
 
     def _get_overlay_templates(self):
@@ -63,13 +57,40 @@ class ProductTemplate(models.Model):
             return Markup(json.dumps(data))
         return False
 
-    def _check_attribute_line(self):
+    def open_pricelist_rules(self):
         """
-        Check that changes made from product.template form using context in sale.product_template_action
+        overridden to get price rules set on overlay template
         """
-        if self.env.context.get('sale_multi_pricelist_product_template'):  #
-            overlay_attr = self.env.ref('regency_shopsite.overlay_attribute')
-            customization_attr = self.env.ref('regency_shopsite.customization_attribute')
+        self.ensure_one()
+        domain = ['|', '|',
+                  ('product_tmpl_id', '=', self.id),
+                  ('product_id', 'in', self.product_variant_ids.ids),
+                  # start custom logic
+                  ('overlay_tmpl_id', 'in', self.overlay_template_ids.ids)]
+                  # end custom logic
+        return {
+            'name': _('Price Rules'),
+            'view_mode': 'tree,form',
+            'views': [(self.env.ref('product.product_pricelist_item_tree_view_from_product').id, 'tree'), (False, 'form')],
+            'res_model': 'product.pricelist.item',
+            'type': 'ir.actions.act_window',
+            'target': 'current',
+            'domain': domain,
+            'context': {
+                'default_product_tmpl_id': self.id,
+                'default_applied_on': '1_product',
+                'product_without_variants': self.product_variant_count == 1,
+            },
+        }
 
-            if {overlay_attr.id, customization_attr.id}.intersection(set(self.attribute_line_ids.mapped('attribute_id.id'))):
-                raise UserError('Cannot add Overlay/Customization attribute manually.')
+    def _compute_item_count(self):
+        """
+        overridden to get count of price rules set on overlay template
+        """
+        for template in self:
+            # Pricelist item count counts the rules applicable on current template or on its variants.
+            template.pricelist_item_count = template.env['product.pricelist.item'].search_count([
+                '|', '|', ('product_tmpl_id', '=', template.id), ('product_id', 'in', template.product_variant_ids.ids),
+                # start custom logic
+                ('overlay_tmpl_id', 'in', self.overlay_template_ids.ids)])
+                # end custom logic

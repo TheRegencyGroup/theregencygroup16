@@ -1,29 +1,56 @@
 /** @odoo-module **/
 
-
 export class Area {
 
-    constructor(data, parent, areaIndex) {
+    constructor(data, parent, areaIndex, areaObjectData) {
         this.data = data;
         this.parent = parent;
         this.areaIndex = areaIndex;
+        this.areaObjectData = areaObjectData;
+
+        this.imageObjectList = {};
+        this.imageObjectIndex = 1;
 
         this.createCanvas();
         this.createMask();
         this.init();
+        this.initAreaObjects()
+
+        this.enablePointerEvents(false);
     }
 
-    init() {
+    init() {}
+
+    initAreaObjects() {
+        if (this.areaObjectData && this.areaObjectData.length) {
+            this.imageObjectIndex = Math.max(...this.areaObjectData.map(e => e.index));
+            let promises = []
+            for (let imageObj of this.areaObjectData) {
+                promises.push(new Promise(resolve => {
+                    const image = new Image();
+                    image.onload = () => {
+                        resolve({
+                            image,
+                            index: imageObj.index,
+                            data: imageObj.objectData,
+                        })
+                    };
+                    image.src = imageObj.imageUrl;
+                }));
+            }
+            Promise.all(promises).then((res) => {
+                for (let obj of res) {
+                    this.addImageObject(obj);
+                }
+            });
+        }
     }
 
-    get newImageObjectWidth() {
-    }
+    get newImageObjectWidth() {}
 
-    get newImageObjectHeight() {
-    }
+    get newImageObjectHeight() {}
 
-    getMaskObject() {
-    }
+    getMaskObject() {}
 
     createMask() {
         let object = this.getMaskObject();
@@ -96,29 +123,77 @@ export class Area {
         this.canvas.renderAll();
     }
 
-    addImageObject(image) {
+    addImageObject({ image, imgIndex, data }) {
         const object = new fabric.Image(image, {});
-        if (image.width >= image.height) {
-            object.scaleToWidth(this.newImageObjectWidth);
-        } else {
-            object.scaleToHeight(this.newImageObjectHeight);
+        let objIndex = imgIndex;
+        if (!objIndex) {
+            objIndex = this.imageObjectIndex;
+            this.imageObjectIndex += 1;
         }
-        this.canvas.centerObject(object);
+        object.objIndex = objIndex;
+        if (!data) {
+            if (image.width >= image.height) {
+                object.scaleToWidth(this.newImageObjectWidth);
+            } else {
+                object.scaleToHeight(this.newImageObjectHeight);
+            }
+            this.canvas.centerObject(object);
+        } else {
+            object.scaleToWidth(data.width);
+            object.scaleToHeight(data.height);
+            object.left = data.x;
+            object.top = data.y;
+            object.angle = data.angle;
+        }
+
+        let imageSplit = image.src.split(',');
+        this.imageObjectList[objIndex] = {
+            index: objIndex,
+            image: imageSplit[1],
+            imageFormat: imageSplit[0].split('/')[1].split(';')[0],
+            object,
+        };
         this.canvas.add(object);
         this.clipMask();
     }
 
     removeActiveObject() {
-        this.canvas.remove(this.canvas.getActiveObject());
+        let activeObj = this.canvas.getActiveObject();
+        delete this.imageObjectList[activeObj.objIndex];
+        this.canvas.remove(activeObj);
     }
 
     removeAllObjects() {
         this.canvas.clear();
         this.createMask();
         this.selectedArea();
+        this.imageObjectList = {};
+        this.imageObjectIndex = 1;
     }
 
-    async getOverlayImagesData() {
+    getOverlayImagesData() {
+        this.canvas.discardActiveObject().renderAll();
+        this.unselectedArea();
+
+        let res = [];
+        for (let imageObj of Object.values(this.imageObjectList)) {
+            res.push({
+                index: imageObj.index,
+                image: imageObj.image,
+                imageFormat: imageObj.imageFormat,
+                objectData: {
+                    width: Math.ceil(imageObj.object.getScaledWidth()),
+                    height: Math.ceil(imageObj.object.getScaledHeight()),
+                    x: Math.ceil(imageObj.object.left),
+                    y: Math.ceil(imageObj.object.top),
+                    angle: Math.ceil(imageObj.object.angle),
+                },
+            });
+        }
+        return res;
+    }
+
+    async getPreviewImageData() {
         this.canvas.discardActiveObject().renderAll();
         this.removeMask();
         this.unselectedArea();
@@ -147,11 +222,15 @@ export class Area {
     reInit() {
     }
 
-    checkAreas() {
-        let objects = this.canvas.getObjects();
-        objects = objects.filter(e => !e.isAreaMask);
-        objects = objects.filter(e => !e.isTextArea || (!!e.isTextArea && !!e.text));
-        return !!objects.length;
+    // checkAreas() {
+    //     let objects = this.canvas.getObjects();
+    //     objects = objects.filter(e => !e.isAreaMask);
+    //     objects = objects.filter(e => !e.isTextArea || (!!e.isTextArea && !!e.text));
+    //     return !!objects.length;
+    // }
+
+    enablePointerEvents(state) {
+        this.canvas.upperCanvasEl.style.pointerEvents = state ? 'all' : 'none';
     }
 
     destroy() {

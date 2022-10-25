@@ -14,7 +14,7 @@ class PurchaseRequisition(models.Model):
 
     def _compute_product_ids(self):
         for rec in self:
-            rec.product_ids = self.env['product.product'].browse([line.product_id.id for line in rec.line_ids])
+            rec.product_ids = self.env['product.product'].browse(set([line.product_id.id for line in rec.line_ids]))
 
     def _compute_color(self):
         for rec in self:

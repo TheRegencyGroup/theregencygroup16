@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="overlay_product_form_view" model="ir.ui.view">
+        <field name="name">overlay.product.view.form</field>
+        <field name="model">overlay.product</field>
+        <field name="arch" type="xml">
+            <form>
+                <group>
+                    <group>
+                        <field name="overlay_template_id"/>
+                        <field name="name"/>
+                        <field name="customize_attribute_value_id" string="Attribute value"/>
+                    </group>
+                    <group>
+                        <field name="product_tmpl_id"/>
+                        <field name="product_id" readonly="1"/>
+                    </group>
+                </group>
+            </form>
+        </field>
+    </record>
+</odoo>

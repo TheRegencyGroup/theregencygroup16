@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates>
+
+    <t t-name="list_pagination" owl="1">
+        <t t-if="numberOfPages gt 1">
+            <div class="pagination-container">
+                <ul class="pagination">
+                    <li class="page-item"
+                        t-att-class="{ 'disabled': props.currentPage === 1 }"
+                        t-on-click="() => this.onClickPageBtn(PREV_PAGE)">
+                        <a role="button" class="page-link"><span class="icon-chevron-left"/></a>
+                    </li>
+                    <t t-if="numberOfPages lte state.maxPageNumbers">
+                        <t t-foreach="arrayFromRange(1, numberOfPages)" t-as="pageNumber" t-key="pageNumber_index">
+                            <t t-call="page_button">
+                                <t t-set="currentPage" t-value="props.currentPage"/>
+                                <t t-set="page" t-value="pageNumber"/>
+                            </t>
+                        </t>
+                    </t>
+                    <t t-else="">
+                        <t t-foreach="leftPages" t-as="pageNumber" t-key="pageNumber_index">
+                            <t t-call="page_button">
+                                <t t-set="currentPage" t-value="props.currentPage"/>
+                                <t t-set="page" t-value="pageNumber"/>
+                            </t>
+                        </t>
+                        <li class="page-item disabled"> ... </li>
+
+                        <t t-if="centerPages">
+                            <t t-foreach="centerPages" t-as="pageNumber" t-key="pageNumber_index">
+                                <t t-call="page_button">
+                                    <t t-set="currentPage" t-value="props.currentPage"/>
+                                    <t t-set="page" t-value="pageNumber"/>
+                                </t>
+                            </t>
+                            <li class="page-item disabled"> ... </li>
+                        </t>
+
+                        <t t-foreach="rightPages" t-as="pageNumber" t-key="pageNumber_index">
+                            <t t-call="page_button">
+                                <t t-set="currentPage" t-value="props.currentPage"/>
+                                <t t-set="page" t-value="pageNumber"/>
+                            </t>
+                        </t>
+                    </t>
+                    <li class="page-item"
+                        t-att-class="{ 'disabled': props.currentPage === numberOfPages }"
+                        t-on-click="() => this.onClickPageBtn(NEXT_PAGE)">
+                        <a role="button" class="page-link"><span class="icon-chevron-right"/></a>
+                    </li>
+                </ul>
+            </div>
+        </t>
+        <t t-else="">
+            <div></div>
+        </t>
+    </t>
+
+    <t t-name="page_button" owl="1">
+        <li class="page-item"
+            t-att-class="{ 'active': currentPage === page }">
+            <a role="button" class="page-link"
+               t-on-click="() => this.onClickPageBtn(page)">
+                <t t-esc="page"/>
+            </a>
+        </li>
+    </t>
+
+</templates>

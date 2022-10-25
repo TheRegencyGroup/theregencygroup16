@@ -8,7 +8,7 @@ class CRMLead(models.Model):
     representative_name = fields.Many2one('res.partner')
     email_from = fields.Char()
     no_open_actions = fields.Integer(string='No. Open Actions')
-    no_spend_issues = fields.Boolean(sting="No. Spend Issues")
+    no_spend_issues = fields.Boolean(string="No. Spend Issues")
     management_group = fields.Char(string="Management Group")
     avendra_id = fields.Char(string="Avendra ID")
     account_number = fields.Char(string="Account Number")
@@ -118,4 +118,11 @@ class CRMLead(models.Model):
     def _message_post_after_hook(self, message, msg_vals):
         res = super(CRMLead, self)._message_post_after_hook(message, msg_vals)
         self._compute_contacted()
+        return res
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        res = super().create(vals_list)
+        for rec in res:
+            rec.representative_name.parent_id = rec.partner_id
         return res

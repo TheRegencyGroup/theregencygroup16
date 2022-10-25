@@ -33,6 +33,7 @@ export class ProductOverlayPositionComponent extends Component {
 
         this.loadImage = false;
         this.currentColorValueId = this.store.otPage.selectedColorValueId;
+        this.currentOverlayProductId = this.store.otPage.overlayProductId;
     }
 
     onMounted() {
@@ -45,6 +46,16 @@ export class ProductOverlayPositionComponent extends Component {
             this.currentColorValueId = this.store.otPage.selectedColorValueId;
             this.state.imageSrc = this.getImageSrc();
         }
+        if (this.currentOverlayProductId !== this.store.otPage.overlayProductId) {
+            this.currentOverlayProductId = this.store.otPage.overlayProductId;
+            for (let area of Object.values(this.areas)) {
+                area.enablePointerEvents(!this.store.otPage.hasOverlayProductId);
+            }
+        }
+    }
+
+    get overlayPositionId() {
+        return this.props.overlayPosition.id;
     }
 
     getColorImage() {
@@ -56,8 +67,6 @@ export class ProductOverlayPositionComponent extends Component {
     }
 
     getImageSrc() {
-        let baseUrl = window.location.origin;
-        let timestamp = new Date().valueOf();
         if (!this.props.overlayPosition.colorImages) {
             return false;
         }
@@ -68,8 +77,14 @@ export class ProductOverlayPositionComponent extends Component {
             id = image.imageId;
             model = image.imageModel;
         }
+        return this.computeImageSrc(id, model, 'image_512');
+    }
+
+    computeImageSrc(id, model, imageField) {
+        let baseUrl = window.location.origin;
+        let timestamp = new Date().valueOf();
         return (id && model)
-            ? `${baseUrl}/web/image?model=${model}&id=${id}&field=image_512&unique=${timestamp}`
+            ? `${baseUrl}/web/image?model=${model}&id=${id}&field=${imageField}&unique=${timestamp}`
             : false;
     }
 
@@ -90,17 +105,30 @@ export class ProductOverlayPositionComponent extends Component {
         //     this.overlay.destroy();
         // }
         if (this.canvasContainerRef.el) {
+            let areaObjectData;
+            if (this.store.otPage.overlayProductAreaList) {
+                areaObjectData = this.store.otPage.overlayProductAreaList[this.overlayPositionId];
+            }
             for (let areaData of Object.values(this.props.overlayPosition.areaList)) {
                 let area;
+                let areaObjList = [];
+                if (areaObjectData) {
+                    areaObjList = areaObjectData.areaList[areaData.index].data;
+                    for (let obj of areaObjList) {
+                        let imageId = this.store.otPage.overlayProductAreaImageList[this.overlayPositionId][areaData.index][obj.index];
+                        obj.imageUrl = this.computeImageSrc(imageId, this.store.otPage.overlayProductAreaImageModel, 'image');
+                    }
+                }
                 if (areaData.areaType === RECTANGLE_AREA_TYPE) {
-                    area = new RectangleArea(areaData.data, this.canvasContainerRef.el, areaData.index);
+                    area = new RectangleArea(areaData.data, this.canvasContainerRef.el, areaData.index, areaObjList);
                 } else if (areaData.areaType === ELLIPSE_AREA_TYPE) {
-                    area = new EllipseArea(areaData.data, this.canvasContainerRef.el, areaData.index);
+                    area = new EllipseArea(areaData.data, this.canvasContainerRef.el, areaData.index, areaObjList);
                 } else if (areaData.areaType === TEXT_AREA_TYPE) {
-                    area = new TextArea(areaData.data, this.canvasContainerRef.el, areaData.index);
+                    area = new TextArea(areaData.data, this.canvasContainerRef.el, areaData.index, areaObjList);
                 }
                 if (area) {
                     area.onSelectedArea(this.onSelectedArea.bind(this));
+                    area.enablePointerEvents(!this.store.otPage.hasOverlayProductId);
                     this.areas[areaData.index] = area;
                 }
             }
@@ -126,7 +154,7 @@ export class ProductOverlayPositionComponent extends Component {
             const image = new Image();
             image.src = ev.target.result;
             image.onload = () => {
-                this.areas[this.state.selectedAreaIndex].addImageObject(image);
+                this.areas[this.state.selectedAreaIndex].addImageObject({ image });
                 event.target.value = '';
             };
         };

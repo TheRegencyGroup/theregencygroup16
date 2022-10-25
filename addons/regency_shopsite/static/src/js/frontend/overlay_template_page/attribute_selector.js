@@ -1,5 +1,6 @@
 /** @odoo-module **/
 
+import './store';
 import { useStore } from '@fe_owl_base/js/main';
 
 const { Component } = owl;
@@ -11,7 +12,7 @@ export class AttributeSelector extends Component {
 
     get attribute() {
         return this.store.otPage.attributeList[this.props.attributeId];
-    };
+    }
 
     onChangeAttributeValue(valueId) {
         this.store.otPage.changeAttributeValueAction(this.props.attributeId, valueId);

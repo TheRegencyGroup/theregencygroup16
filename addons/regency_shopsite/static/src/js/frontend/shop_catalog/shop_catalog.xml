@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates>
+
+    <t t-name="shop_catalog" owl="1">
+        <div class="content">
+            <div class="container">
+                <div class="content-in">
+                    <div class="tabs">
+                        <div class="tabs-links">
+                            <a class="tabs-link"
+                               t-att-class="{ 'active': isOverlayTemplateTab }"
+                               t-on-click="onClicKOverlayTemplateTab">
+                                Shopsite items
+                            </a>
+                            <a class="tabs-link"
+                               t-att-class="{ 'active': isOverlayProductTab }"
+                               t-on-click="onClickOverlayProductTab">
+                                Customized items
+                            </a>
+                        </div>
+                        <div class="tabs-content">
+                            <div class="tab-content active">
+                                <div class="positions">
+                                    <t t-foreach="store.shopCatalog.itemList" t-as="item" t-key="item.url">
+                                        <ShopCatalogOverlayTemplateItem t-if="isOverlayTemplateTab" itemData="item"/>
+                                        <ShopCatalogOverlayProductItem t-if="isOverlayProductTab" itemData="item"/>
+                                    </t>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <ListPagination totalItemsNumber="store.shopCatalog.totalItemsNumber"
+                                listLimit="store.shopCatalog.itemsLimit"
+                                currentPage="store.shopCatalog.currentPage"
+                                changePage="(e) => this.onChangeListPaginationPage(e)"/>
+            </div>
+        </div>
+    </t>
+
+    <t t-name="shop_catalog_overlay_template_item" owl="1">
+        <div class="position">
+            <a t-att-href="item.url" class="position-image">
+                <img t-att-src="item.imageUrl" alt=""/>
+            </a>
+
+            <div class="position-text">
+<!--                <div class="position-info"><t t-esc="item.productName"/></div>-->
+                <h3><a href=""><t t-esc="item.overlayTemplateName"/></a></h3>
+            </div>
+
+            <div class="position-buttons">
+                <a t-att-href="item.url" class="btn btn-block">Start customizing</a>
+            </div>
+        </div>
+    </t>
+
+    <t t-name="shop_catalog_overlay_product_item" owl="1">
+        <div class="position">
+            <a t-att-href="item.url" class="position-image">
+                <img t-att-src="item.imageUrl" alt=""/>
+            </a>
+
+            <div class="position-text">
+                <div class="position-info"><t t-esc="item.overlayTemplateName"/></div>
+                <h3><a t-att-href="item.url"><t t-esc="item.overlayProductName"/></a></h3>
+                <div class="position-description"><t t-esc="item.lastUpdatedStr"/></div>
+            </div>
+
+            <div class="position-buttons">
+                <a href="" class="btn btn-block">Add to cart</a>
+                <a href="" class="btn">Edit</a>
+            </div>
+        </div>
+    </t>
+
+</templates>
+
