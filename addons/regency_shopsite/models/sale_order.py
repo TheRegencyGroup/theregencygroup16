@@ -50,16 +50,24 @@ class SaleOrderLine(models.Model):
 
     @api.depends('product_id', 'product_uom', 'product_uom_qty', 'price_list_id')
     def _compute_pricelist_item_id(self):
+        """
+        overridden to get price rule for each sale order line from line.price_list_id if set,
+        if not set, standard behaviour
+        added price_list_id to depends list
+        """
         for line in self:
             if not line.product_id or line.display_type or not line.order_id.pricelist_id:
                 line.pricelist_item_id = False
-            else:
+            # start custom logic
+            elif line.price_list_id:
                 line.pricelist_item_id = line.price_list_id._get_product_rule(
                     line.product_id,
                     line.product_uom_qty or 1.0,
                     uom=line.product_uom,
-                    date=line.order_id.date_order,
-                ) if line.price_list_id else line.order_id.pricelist_id._get_product_rule(
+                    date=line.order_id.date_order)
+            # end custom logic
+            else:
+                line.pricelist_item_id = line.order_id.pricelist_id._get_product_rule(
                     line.product_id,
                     line.product_uom_qty or 1.0,
                     uom=line.product_uom,
@@ -68,6 +76,9 @@ class SaleOrderLine(models.Model):
 
     @api.depends('product_id', 'product_uom', 'product_uom_qty', 'price_list_id')
     def _compute_price_unit(self):
+        """
+        overridden to add price_list_id to depends list
+        """
         for line in self:
             # check if there is already invoiced amount. if so, the price shouldn't change as it might have been
             # manually edited
