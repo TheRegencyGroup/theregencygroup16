@@ -117,9 +117,8 @@
                  <xpath expr="//field[@name='team_id']" position="after">
                      <field name="contacted"/>
                 </xpath>
-                <field name="company_id" position="attributes">
-                    <attribute name="groups">
-                    </attribute>
+                <field name="company_id" position="replace">
+                    <field name="company_id" optional="show"/>
                 </field>
             </field>
         </record>
