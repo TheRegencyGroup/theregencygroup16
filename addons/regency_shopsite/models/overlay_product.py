@@ -8,6 +8,7 @@ class OverlayProduct(models.Model):
     overlay_template_id = fields.Many2one('overlay.template')
     product_tmpl_id = fields.Many2one(string="Product template", related='overlay_template_id.product_template_id',
                                       store=True)
+    website_published = fields.Boolean(related='product_tmpl_id.website_published')
     hotel_ids = fields.Many2many(related='overlay_template_id.hotel_ids')
     name = fields.Char()
     product_id = fields.Many2one('product.product')
