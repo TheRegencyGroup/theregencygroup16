@@ -17,7 +17,7 @@
                     <li>
                         <a href="#" class="header-menu-select-position">
                             <div class="header-menu-select-icon">
-                                <span class="icon-eye-off"/>
+                                <span class="icon-account"/>
                             </div>
                             <div class="header-menu-text">Switch hotel</div>
                             <div class="header-menu-select-arrow">
@@ -38,7 +38,7 @@
                     <li>
                         <a href="/web/session/logout" class="header-menu-select-position">
                             <div class="header-menu-select-icon">
-                                <span class="icon-eye-off"/>
+                                <span class="icon-logout"/>
                             </div>
                             <div class="header-menu-text">Log out</div>
                             <div class="header-menu-select-arrow"/>

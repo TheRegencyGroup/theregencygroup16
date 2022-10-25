@@ -1,5 +1,7 @@
 /** @odoo-module **/
 
+const SVG_IMAGE_EXTENSION = 'svg';
+
 export class Area {
 
     constructor(data, parent, areaIndex, areaObjectData) {
@@ -26,8 +28,16 @@ export class Area {
             this.imageObjectIndex = Math.max(...this.areaObjectData.map(e => e.index));
             let promises = []
             for (let imageObj of this.areaObjectData) {
-                promises.push(new Promise(resolve => {
+                promises.push(new Promise(async resolve => {
                     const image = new Image();
+                    if (imageObj.imageFormat.includes(SVG_IMAGE_EXTENSION)) {
+                        let res = await fetch(imageObj.imageUrl);
+                        const svg = await res.text();
+                        const blob = new Blob([svg], { type: 'image/svg+xml' });
+                        image.src = URL.createObjectURL(blob);
+                    } else {
+                        image.src = imageObj.imageUrl;
+                    }
                     image.onload = () => {
                         resolve({
                             image,
@@ -35,7 +45,6 @@ export class Area {
                             data: imageObj.objectData,
                         })
                     };
-                    image.src = imageObj.imageUrl;
                 }));
             }
             Promise.all(promises).then((res) => {

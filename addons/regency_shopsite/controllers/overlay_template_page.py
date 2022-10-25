@@ -5,6 +5,7 @@ import json
 import PIL.Image as Image
 from markupsafe import Markup
 from odoo import http, Command
+from odoo.fields import Datetime
 from odoo.exceptions import ValidationError
 from odoo.http import request
 
@@ -122,6 +123,8 @@ class OverlayTemplatePage(http.Controller):
             'name': overlay_product_name,
             'overlay_template_id': overlay_template_id.id,
             'product_template_attribute_value_ids': [Command.set(product_template_attribute_value_ids)],
+            'last_updated_date': Datetime.now(),
+            'updated_by_id':  request.env.user.id
         })
 
         cls._create_overlay_product_preview_images(overlay_product_id, preview_images_data)
@@ -161,11 +164,12 @@ class OverlayTemplatePage(http.Controller):
         if not overlay_template_id or not overlay_template_id.exists():
             return request.render('website.page_404')
 
-        product_template_id = overlay_template_id.product_template_id
-        if not product_template_id or not product_template_id.exists():
+        if not self._overlay_template_is_available_for_user(overlay_template_id):
             return request.render('website.page_404')
 
-        if not self._overlay_template_is_available_for_user(overlay_template_id):
+        overlay_template_id = overlay_template_id.sudo()
+        product_template_id = overlay_template_id.product_template_id
+        if not product_template_id or not product_template_id.exists():
             return request.render('website.page_404')
 
         active_hotel_id = request.env.user._active_hotel_id()

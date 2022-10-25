@@ -7,9 +7,9 @@
 
 {
     'name': "Sale Multi Delivery Address",
-    'version': '15.0.1.0',
+    'version': '16.0.1.0',
     'category': 'Sales',
-    'author': 'Equick ERP',
+    'author': 'Equick ERP, OpsWay',
     'summary': """sale multiple delivery address sale order multiple delivery address for sale multi delivery multi picking sale multi picking sale different delivery address sale multi address sales multi address sale multiple address""",
     'description': """
         This module allow user to select different delivery address on Sales order lines.
@@ -21,8 +21,9 @@
     'price': 14,
     'currency': 'EUR',
     'website': "",
-    'data': ['views/sale_view.xml',
-             'views/sale_report_template.xml'
+    'data': [
+        'views/sale_view.xml',
+        'views/sale_report_template.xml',
     ],
     'images': ['static/description/main_screenshot.png'],
     'installable': True,

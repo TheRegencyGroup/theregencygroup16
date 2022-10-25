@@ -64,7 +64,7 @@
             <div class="position-text">
                 <div class="position-info"><t t-esc="item.overlayTemplateName"/></div>
                 <h3><a t-att-href="item.url"><t t-esc="item.overlayProductName"/></a></h3>
-                <div class="position-description">Updated Sep 21, 2022, by Zev J</div>
+                <div class="position-description"><t t-esc="lastUpdatedDescription"/></div>
             </div>
 
             <div class="position-buttons">

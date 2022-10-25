@@ -3,6 +3,7 @@ import json
 from odoo.addons.http_routing.models.ir_http import slug
 from markupsafe import Markup
 from odoo import http
+from odoo.fields import Datetime
 from odoo.http import request
 
 from odoo.addons.regency_shopsite.const import SHOP_CATALOG_ITEM_LIMIT, OVERLAY_PRODUCT_CATALOG_TAB_KEY, \
@@ -37,32 +38,33 @@ class ShopCatalog(http.Controller):
                 'productName': rec.product_tmpl_id.name,
                 'imageUrl': rec._preview_image_url(),
                 'url': f'/shop/{slug(rec.overlay_template_id)}?{OVERLAY_PRODUCT_ID_URL_PARAMETER}={rec.id}',
+                'updatedByName': rec.updated_by_id.partner_id.name or '',
+                'lastUpdatedDate': Datetime.to_string(rec.last_updated_date),
             })
         return res
 
     @classmethod
     def _get_shop_catalog_data(cls, catalog_tab, page=1, limit=SHOP_CATALOG_ITEM_LIMIT):
-        data = []
+        catalog_item_list = []
+        catalog_items_total = 0
         catalog_model = 'overlay.template'
         if catalog_tab in [OVERLAY_TEMPLATE_CATALOG_TAB_KEY, OVERLAY_PRODUCT_CATALOG_TAB_KEY]:
             catalog_model = SHOP_CATALOG_TAB_MODELS[catalog_tab]
 
         active_hotel_id = request.env.user._active_hotel_id()
-        if not active_hotel_id:
-            return data
-
-        domain = [('hotel_ids', 'in', active_hotel_id.id)]
-        catalog_items_total = request.env[catalog_model].sudo().search_count(domain)
-        order = DEFAULT_SHOP_CATALOG_TAB_SORT[catalog_tab]
-        offset = (page - 1) * limit
-        if offset >= catalog_items_total:
-            page = 1
-            offset = 0
-        catalog_item_ids = request.env[catalog_model].sudo().search(domain, offset=offset, limit=limit, order=order)
-        if catalog_tab == OVERLAY_PRODUCT_CATALOG_TAB_KEY:
-            catalog_item_list = cls._prepare_overlay_product_data(catalog_item_ids)
-        else:
-            catalog_item_list = cls._prepare_overlay_template_data(catalog_item_ids)
+        if active_hotel_id:
+            domain = [('hotel_ids', 'in', active_hotel_id.id), ('website_published', '=', True)]
+            catalog_items_total = request.env[catalog_model].sudo().search_count(domain)
+            order = DEFAULT_SHOP_CATALOG_TAB_SORT[catalog_tab]
+            offset = (page - 1) * limit
+            if offset >= catalog_items_total:
+                page = 1
+                offset = 0
+            catalog_item_ids = request.env[catalog_model].sudo().search(domain, offset=offset, limit=limit, order=order)
+            if catalog_tab == OVERLAY_PRODUCT_CATALOG_TAB_KEY:
+                catalog_item_list = cls._prepare_overlay_product_data(catalog_item_ids)
+            else:
+                catalog_item_list = cls._prepare_overlay_template_data(catalog_item_ids)
             
         return {
             'itemList': catalog_item_list,

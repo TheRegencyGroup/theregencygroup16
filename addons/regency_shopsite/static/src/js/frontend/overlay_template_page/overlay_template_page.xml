@@ -8,7 +8,9 @@
 
                     <div class="path">
                         <ul>
-                            <li><a href="">Recent products</a></li>
+                            <li><a href="#" onclick="history.back();">
+                                    Recent products
+                                </a></li>
                             <li>New customization</li>
                         </ul>
                     </div>
@@ -83,7 +85,7 @@
                                     <div class="form-set-content">
                                         <div class="upload">
                                             <div class="upload-preview">
-                                                <span class="icon-eye-off"></span>
+                                                <span class="icon-image"></span>
                                             </div>
                                             <div class="upload-text">
                                                 <div class="upload-text-title">Drop or upload image</div>
@@ -91,7 +93,7 @@
                                             </div>
                                             <div class="upload-buttons">
                                                 <button class="btn btn-sm btn-dark">
-                                                    <span class="icon-eye-off"></span>
+                                                    <span class="icon-upload"></span>
                                                 </button>
                                             </div>
                                         </div>
@@ -105,7 +107,7 @@
                                     t-att-class="{ 'product-add-to-cart-disabled': !store.otPage.overlayTemplateIsAvailableForActiveHotel || !store.otPage.hasPriceList }"
                                     t-on-click="onClickAddToCart">
                                 <span>Add to cart</span>
-                                <span class="icon-eye-off"></span>
+                                <span class="icon-cart"></span>
                             </button>
                             <span t-if="!store.otPage.overlayTemplateIsAvailableForActiveHotel"
                                   class="product-unavailable-message">

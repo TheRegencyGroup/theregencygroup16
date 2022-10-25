@@ -8,6 +8,7 @@ class OverlayProduct(models.Model):
     overlay_template_id = fields.Many2one('overlay.template', required=True)
     product_tmpl_id = fields.Many2one(string="Product template", related='overlay_template_id.product_template_id',
                                       store=True)
+    website_published = fields.Boolean(related='product_tmpl_id.website_published')
     hotel_ids = fields.Many2many(related='overlay_template_id.hotel_ids')
     name = fields.Char()
     product_id = fields.Many2one('product.product')
@@ -19,6 +20,8 @@ class OverlayProduct(models.Model):
     overlay_product_image_ids = fields.One2many('overlay.product.image', 'overlay_product_id', readonly=True)
     overlay_product_area_image_ids = fields.One2many('overlay.product.area.image', 'overlay_product_id', readonly=True)
     area_list_json = fields.Char(readonly=True)
+    last_updated_date = fields.Datetime(readonly=True)
+    updated_by_id = fields.Many2one('res.users', readonly=True)
 
     @api.depends('customize_attribute_value_ids')
     def _compute_customize_attribute_value_id(self):
@@ -33,6 +36,7 @@ class OverlayProduct(models.Model):
         res = super().create(vals)
         res._create_attribute_value()
         return res
+
 
     def _create_attribute_value(self):
         customization_attr = self.env.ref('regency_shopsite.customization_attribute')

@@ -1,6 +1,6 @@
 {
     'name': 'Regency Shopsite',
-    'version': '16.0.0.8',
+    'version': '16.0.0.9',
     'author': 'OpsWay',
     'license': "Other proprietary",
     'depends': [
@@ -8,6 +8,7 @@
         'fe_owl_base',
         'product',
         'regency_contacts',
+        'eq_sale_multi_delivery_address',
     ],
     'data': [
         'security/ir.model.access.csv',
