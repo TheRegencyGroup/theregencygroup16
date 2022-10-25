@@ -19,8 +19,8 @@ class OverlayProduct(models.Model):
     overlay_product_image_ids = fields.One2many('overlay.product.image', 'overlay_product_id', readonly=True)
     overlay_product_area_image_ids = fields.One2many('overlay.product.area.image', 'overlay_product_id', readonly=True)
     area_list_json = fields.Char(readonly=True)
-    last_updated_date = fields.Datetime(readonly=True, default=lambda self: self._compute_last_update_date())
-    updated_by = fields.Many2one('res.partner', readonly=True, default=lambda self: self._compute_updated_by())
+    last_updated_date = fields.Datetime(readonly=True)
+    updated_by = fields.Many2one('res.partner', readonly=True)
 
     @api.depends('customize_attribute_value_ids')
     def _compute_customize_attribute_value_id(self):
@@ -36,10 +36,6 @@ class OverlayProduct(models.Model):
         res._create_attribute_value()
         return res
 
-    def write(self, vals):
-        self._update_vals_with_last_updated_date(vals)
-        res = super(OverlayProduct, self).write(vals)
-        return res
 
     def _create_attribute_value(self):
         customization_attr = self.env.ref('regency_shopsite.customization_attribute')
@@ -73,30 +69,3 @@ class OverlayProduct(models.Model):
             image_model = self.product_tmpl_id._name
             image_field = 'image_512'
         return f'/web/image?model={image_model}&id={image_id}&field={image_field}'
-
-    def _get_last_updated_str(self) -> str:
-        self.ensure_one()
-        date = self.last_updated_date
-        user_name = self.updated_by.name
-        if date or user_name:
-            date_str = fields.Datetime.context_timestamp(self, date).strftime(' %b %d, %Y,') if date else ''
-            name_str = f'by {user_name}' if user_name else ''
-            return f'Updated{date_str} {name_str}'.strip(' ,')
-        else:
-            return ''
-
-    def _update_vals_with_last_updated_date(self, write_vals: dict) -> dict:
-        write_vals.update({'updated_by': self._compute_updated_by(),
-                           'last_updated_date': self._compute_last_update_date()})
-        
-    def _compute_last_update_date(self):
-        is_updated_by_partner = self._compute_updated_by()
-        if is_updated_by_partner:
-            return self.write_date or fields.Datetime.now()  # 'Datetime.now' used for default on creation
-        else:
-            return False
-
-    @api.model
-    def _compute_updated_by(self) -> object:
-        user = self.env['res.users'].browse(self._context.get('uid'))
-        return user.partner_id if user else self.env['res.partner']
