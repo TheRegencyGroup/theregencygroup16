@@ -276,6 +276,7 @@ class ProductPriceSheet(models.Model):
     insection_rownumber = fields.Integer(compute="_compute_insection_rownumber")
     insection_total_rows = fields.Integer(compute="_compute_insection_rownumber")
     attachment_id = fields.Binary('File', attachment=True)
+    attachment_name = fields.Char()
 
     @api.depends('min_quantity', 'max_quantity', 'sequence')
     def _compute_qty_range_str(self):
