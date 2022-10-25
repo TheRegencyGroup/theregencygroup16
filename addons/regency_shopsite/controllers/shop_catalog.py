@@ -37,7 +37,7 @@ class ShopCatalog(http.Controller):
                 'overlayTemplateName': rec.overlay_template_id.name,
                 'productName': rec.product_tmpl_id.name,
                 'imageUrl': rec._preview_image_url(),
-                'url': f'/shop/{slug(rec.overlay_template_id)}?{OVERLAY_PRODUCT_ID_URL_PARAMETER}={rec.id}',
+                'url': rec.url,
                 'updatedByName': rec.updated_by_id.partner_id.name or '',
                 'lastUpdatedDate': Datetime.to_string(rec.last_updated_date),
             })
