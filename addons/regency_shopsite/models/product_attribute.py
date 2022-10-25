@@ -64,22 +64,15 @@ class ProductTemplateAttributeLine(models.Model):
     @api.model_create_multi
     def create(self, vals_list):
         res = super(ProductTemplateAttributeLine, self).create(vals_list)
-        res._check_overlay_attribute()
         res._compute_overlay_template_areas()
         return res
 
     def write(self, values):
         changed_value_ids = 'value_ids' in values
-        if changed_value_ids:
-            self._check_overlay_attribute()
         res = super(ProductTemplateAttributeLine, self).write(values)
         if changed_value_ids:
             self._compute_overlay_template_areas()
         return res
-
-    def unlink(self):
-        self._check_overlay_attribute()
-        return super(ProductTemplateAttributeLine, self).unlink()
 
 
 class ProductTemplateAttributeValue(models.Model):
@@ -106,3 +99,20 @@ class ProductTemplateAttributeValue(models.Model):
         ptavs = ptavs._filter_single_value_lines().with_prefetch(self._prefetch_ids)
         return ", ".join([ptav.product_attribute_value_id.overlay_template_id.name or ptav.name
                           for ptav in ptavs])
+
+    @api.constrains('product_attribute_value_id')
+    def _check_correct_attribute_value(self):
+        """
+        Restrict values changes in the product not from the overlay template.
+        """
+        for ptav in self:
+            if self.env.context.get('sale_multi_pricelist_product_template'):
+                overlay_attribute_id = self.env.ref('regency_shopsite.overlay_attribute')
+                none_overlay_value_id = self.env.ref('regency_shopsite.none_overlay_attribute_value')
+                customization_attr_id = self.env.ref('regency_shopsite.customization_attribute')
+                if overlay_attribute_id == ptav.attribute_id and ptav.product_attribute_value_id != none_overlay_value_id:
+                    raise UserError('Overlay attribute line values possible to change only from overlay template')
+
+                if customization_attr_id == ptav.attribute_id and self.env.ref(
+                        'regency_shopsite.no_customization_value') != ptav.product_attribute_value_id:
+                    raise UserError('Cannot add Customization attribute manually.')
