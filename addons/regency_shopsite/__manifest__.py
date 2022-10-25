@@ -25,6 +25,7 @@
         'views/website/website_shop_catalog_page.xml',
         'views/overlay_template_view.xml',
         'views/overlay_position_view.xml',
+        'views/overlay_product.xml',
         'views/product_pricelist_item_view.xml',
         'views/product_product.xml',
         'views/website/sale_portal_templates.xml',

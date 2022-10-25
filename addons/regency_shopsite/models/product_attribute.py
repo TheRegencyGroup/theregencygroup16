@@ -106,7 +106,7 @@ class ProductTemplateAttributeValue(models.Model):
         Restrict values changes in the product not from the overlay template.
         """
         for ptav in self:
-            if not self._context.get('from_overlay_template'):
+            if self.env.context.get('sale_multi_pricelist_product_template'):
                 overlay_attribute_id = self.env.ref('regency_shopsite.overlay_attribute')
                 none_overlay_value_id = self.env.ref('regency_shopsite.none_overlay_attribute_value')
                 customization_attr_id = self.env.ref('regency_shopsite.customization_attribute')
