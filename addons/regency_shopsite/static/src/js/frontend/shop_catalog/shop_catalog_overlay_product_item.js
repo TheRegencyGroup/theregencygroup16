@@ -21,10 +21,11 @@ export class ShopCatalogOverlayProductItem extends Component {
     }
 
     get lastUpdatedDescription() {
-        let name = `by ${this.item.updatedByName}`;
+        let name = this.item.updatedByName;
         let date = this.dateStrInUserTZ;
         let separator = (name && date) ? ', ' : '';
         if (name || date) {
+            name = name ? `by ${name}` : '';
             return `Updated ${date}${separator}${name}`;
         }
         return '';
