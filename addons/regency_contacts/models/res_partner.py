@@ -40,7 +40,9 @@ class ResPartner(models.Model):
             # Link left partner to right partner
             for association in partner.association_ids:
                 right_asct_type = self.env['association.type'].search(
-                    [('right_to_left_name', '=', association.association_type.left_to_right_name)])
+                    [('name', '=', '%s to %s' % (
+                        association.association_type.right_to_left_name,
+                        association.association_type.left_to_right_name))])
                 association.right_partner_id.with_context({'stop_inverse': True}).association_ids = [
                     (0, 0, {'left_partner_id': association.right_partner_id.id, 'right_partner_id': partner.id,
                             'association_type': right_asct_type.id})
