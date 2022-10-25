@@ -100,7 +100,7 @@ class ProductTemplateAttributeValue(models.Model):
         return ", ".join([ptav.product_attribute_value_id.overlay_template_id.name or ptav.name
                           for ptav in ptavs])
 
-    @api.constrains('product_attribute_value_id')
+    @api.constrains('product_attribute_value_id', 'ptav_active')
     def _check_correct_attribute_value(self):
         """
         Restrict values changes in the product not from the overlay template.
@@ -111,8 +111,8 @@ class ProductTemplateAttributeValue(models.Model):
                 none_overlay_value_id = self.env.ref('regency_shopsite.none_overlay_attribute_value')
                 customization_attr_id = self.env.ref('regency_shopsite.customization_attribute')
                 if overlay_attribute_id == ptav.attribute_id and ptav.product_attribute_value_id != none_overlay_value_id:
-                    raise UserError('Overlay attribute line values possible to change only from overlay template')
+                    raise UserError('Overlay attribute line values possible to change only from overlay template.')
 
                 if customization_attr_id == ptav.attribute_id and self.env.ref(
                         'regency_shopsite.no_customization_value') != ptav.product_attribute_value_id:
-                    raise UserError('Cannot add Customization attribute manually.')
+                    raise UserError('Customization attribute line values possible to change only from overlay template.')

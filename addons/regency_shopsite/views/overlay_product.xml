@@ -9,7 +9,7 @@
                     <group>
                         <group>
                             <field name="name"/>
-                            <field name="overlay_template_id"/>
+                            <field name="overlay_template_id" invisible="1"/>
                             <field name="customize_attribute_value_id" string="Attribute value"/>
                         </group>
                         <group>
