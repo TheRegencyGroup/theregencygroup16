@@ -419,8 +419,8 @@
                                      </td>
                                     <td>
                                         <t t-if="line.attachment_id">
-                                            <a t-attf-href="/web/content/product.price.sheet.line/#{line.id}/attachment_id?download=true">
-                                                <i class="fa fa-paperclip"></i>
+                                            <a t-attf-href="/web/content/?model=product.price.sheet.line&amp;id={{line.id}}&amp;field=attachment_id&amp;download=true">
+                                            <i class="fa fa-paperclip"></i>
                                             </a>
                                         </t>
                                     </td>
