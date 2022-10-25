@@ -20,7 +20,7 @@ class OverlayProduct(models.Model):
     overlay_product_area_image_ids = fields.One2many('overlay.product.area.image', 'overlay_product_id', readonly=True)
     area_list_json = fields.Char(readonly=True)
     last_updated_date = fields.Datetime(readonly=True)
-    updated_by = fields.Many2one('res.partner', readonly=True)
+    updated_by_id = fields.Many2one('res.users', readonly=True)
 
     @api.depends('customize_attribute_value_ids')
     def _compute_customize_attribute_value_id(self):

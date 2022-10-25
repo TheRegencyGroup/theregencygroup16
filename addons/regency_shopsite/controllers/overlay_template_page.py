@@ -124,7 +124,7 @@ class OverlayTemplatePage(http.Controller):
             'overlay_template_id': overlay_template_id.id,
             'product_template_attribute_value_ids': [Command.set(product_template_attribute_value_ids)],
             'last_updated_date': Datetime.now(),
-            'updated_by':  request.env.user.partner_id.id
+            'updated_by_id':  request.env.user.id
         })
 
         cls._create_overlay_product_preview_images(overlay_product_id, preview_images_data)
