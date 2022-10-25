@@ -10,6 +10,8 @@ class SaleOrder(models.Model):
                                                     product_custom_attribute_values, **kwargs)
         if 'delivery_partner_id' in kwargs:
             result['delivery_partner_id'] = kwargs['delivery_partner_id']
+        if 'price_list_id' in kwargs:
+            result['price_list_id'] = kwargs['price_list_id']
         return result
 
 
@@ -18,6 +20,7 @@ class SaleOrderLine(models.Model):
 
     image_with_overlay_ids = fields.One2many('product.image', 'sale_order_line_id', string='Images with overlay')
     overlay_template_id = fields.Many2one('overlay.template', compute='_compute_overlay_template_id')
+    price_list_id = fields.Many2one('product.pricelist', default=lambda self: self.order_id.pricelist_id)
 
     @api.model_create_multi
     def create(self, vals):
@@ -44,6 +47,45 @@ class SaleOrderLine(models.Model):
                     .product_attribute_value_id.overlay_template_id.id
             else:
                 line.overlay_template_id = False
+
+    @api.depends('product_id', 'product_uom', 'product_uom_qty', 'price_list_id')
+    def _compute_pricelist_item_id(self):
+        for line in self:
+            if not line.product_id or line.display_type or not line.order_id.pricelist_id:
+                line.pricelist_item_id = False
+            else:
+                line.pricelist_item_id = line.price_list_id._get_product_rule(
+                    line.product_id,
+                    line.product_uom_qty or 1.0,
+                    uom=line.product_uom,
+                    date=line.order_id.date_order,
+                ) if line.price_list_id else line.order_id.pricelist_id._get_product_rule(
+                    line.product_id,
+                    line.product_uom_qty or 1.0,
+                    uom=line.product_uom,
+                    date=line.order_id.date_order,
+                )
+
+    @api.depends('product_id', 'product_uom', 'product_uom_qty', 'price_list_id')
+    def _compute_price_unit(self):
+        for line in self:
+            # check if there is already invoiced amount. if so, the price shouldn't change as it might have been
+            # manually edited
+            if line.qty_invoiced > 0:
+                continue
+            if not line.product_uom or not line.product_id or not line.order_id.pricelist_id:
+                line.price_unit = 0.0
+            else:
+                price = line.with_company(line.company_id)._get_display_price()
+                line.price_unit = line.product_id._get_tax_included_unit_price(
+                    line.company_id,
+                    line.order_id.currency_id,
+                    line.order_id.date_order,
+                    'sale',
+                    fiscal_position=line.order_id.fiscal_position_id,
+                    product_price_unit=price,
+                    product_currency=line.currency_id
+                )
 
     def action_open_sale_order_line_form(self):
         self.ensure_one()

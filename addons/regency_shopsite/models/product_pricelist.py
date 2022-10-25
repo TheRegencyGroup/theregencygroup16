@@ -18,9 +18,7 @@ class Pricelist(models.Model):
             templates_domain = ('product_tmpl_id', 'in', products.product_tmpl_id.ids)
             products_domain = ('product_id', 'in', products.ids)
             # start custom logic
-            attribute_id = self.env.ref('regency_shopsite.overlay_attribute')
-            value_id = products.product_template_variant_value_ids.filtered(lambda f: f.attribute_id == attribute_id)
-            overlay_tmpl_id = value_id.product_attribute_value_id.overlay_template_id
+            overlay_tmpl_id = products.overlay_product_id.overlay_template_id
             overlay_domain = ('overlay_tmpl_id', '=', overlay_tmpl_id.id)
             # end custom logic
 
