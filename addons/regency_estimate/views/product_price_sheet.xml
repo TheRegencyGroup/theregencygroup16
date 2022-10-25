@@ -88,8 +88,10 @@
                                       <field name="shipping_options"/>
                                       <field name="partner_id"/>
                                       <field name="allow_consumption_agreement"/>
-                                      <field name="attachment_id" string="Attachment"/>
                                       <button name="action_check_prices" type="object" class="fa fa-history"/>
+                                      <field name="attachment_id" string="Attach a file" widget="binary"
+                                             filename="attachment_name"/>
+                                      <field name="attachment_name" invisible="1"/>
                                   </tree>
                               </field>
                             </page>

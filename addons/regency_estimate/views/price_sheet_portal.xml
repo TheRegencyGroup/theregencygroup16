@@ -419,7 +419,7 @@
                                      </td>
                                     <td>
                                         <t t-if="line.attachment_id">
-                                            <a t-attf-href="/web/content/?model=product.price.sheet.line&amp;id={{line.id}}&amp;field=attachment_id&amp;download=true">
+                                            <a t-attf-href="/web/content/?model=product.price.sheet.line&amp;id={{line.id}}&amp;field=attachment_id&amp;filename={{line.attachment_name}}&amp;download=true">
                                             <i class="fa fa-paperclip"></i>
                                             </a>
                                         </t>
