@@ -16,7 +16,6 @@ class SaleOrder(models.Model):
 class SaleOrderLine(models.Model):
     _inherit = 'sale.order.line'
 
-    image_with_overlay_ids = fields.One2many('product.image', 'sale_order_line_id', string='Images with overlay')
     overlay_template_id = fields.Many2one('overlay.template', compute='_compute_overlay_template_id')
 
     @api.model_create_multi

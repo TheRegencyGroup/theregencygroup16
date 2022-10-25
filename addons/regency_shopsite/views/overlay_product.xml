@@ -5,17 +5,38 @@
         <field name="model">overlay.product</field>
         <field name="arch" type="xml">
             <form>
-                <group>
+                <sheet>
                     <group>
-                        <field name="overlay_template_id"/>
-                        <field name="name"/>
-                        <field name="customize_attribute_value_id" string="Attribute value"/>
+                        <group>
+                            <field name="name"/>
+                            <field name="overlay_template_id"/>
+                            <field name="customize_attribute_value_id" string="Attribute value"/>
+                        </group>
+                        <group>
+                            <field name="product_tmpl_id"/>
+                            <field name="product_id" readonly="1"/>
+                        </group>
                     </group>
-                    <group>
-                        <field name="product_tmpl_id"/>
-                        <field name="product_id" readonly="1"/>
-                    </group>
-                </group>
+                    <field name="overlay_product_image_ids" class="w-100" mode="kanban" nolabel="1" readonly="1">
+                        <kanban create="false">
+                            <field name="overlay_position_id"/>
+                            <field name="image"/>
+                            <templates>
+                                <t t-name="kanban-box">
+                                    <div class="d-flex flex-column align-items-center justify-content-center p-0">
+                                        <div class="flex-grow-1 d-flex flex-column align-items-center justify-content-center p-0">
+                                            <img class="card-img-top"
+                                              t-att-src="kanban_image('overlay.product.image', 'image', record.id.raw_value)"/>
+                                        </div>
+                                        <h4 class="w-100 text-center text-light bg-primary m-0 p-2">
+                                            <field name="overlay_position_id"/>
+                                        </h4>
+                                    </div>
+                                </t>
+                            </templates>
+                        </kanban>
+                    </field>
+                </sheet>
             </form>
         </field>
     </record>
