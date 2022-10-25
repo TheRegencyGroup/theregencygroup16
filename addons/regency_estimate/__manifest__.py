@@ -12,7 +12,8 @@
         'consumption_agreement',
         'dr_many_tags_link',
         'sale_management',
-        'web_one2many_duplicate_cr'
+        'web_one2many_duplicate_cr',
+        'delivery',
     ],
     'category': 'Regency/Sales',
     'sequence': 10,
@@ -32,7 +33,8 @@
         'views/res_partner.xml',
         'views/price_sheet_portal.xml',
         'views/crm_lead.xml',
-        'views/crm_stage.xml'
+        'views/crm_stage.xml',
+        'wizard/choose_delivery_carrier_view.xml',
     ],
     'demo': [
         'data/product_demo.xml',

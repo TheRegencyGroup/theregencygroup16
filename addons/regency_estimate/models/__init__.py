@@ -8,3 +8,4 @@ from . import purchase_order
 from . import res_partner
 from . import crm_stage
 from . import crm_lead
+from . import delivery_carrier
