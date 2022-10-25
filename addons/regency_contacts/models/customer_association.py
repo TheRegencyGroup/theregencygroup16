@@ -8,7 +8,7 @@ class CustomerAssociation(models.Model):
 
     association_type = fields.Many2one('association.type')
     left_partner_id = fields.Many2one('res.partner')
-    right_partner_id = fields.Many2one('res.partner', domain=[('contact_type', '=', 'customer')])
+    right_partner_id = fields.Many2one('res.partner')
 
 
 class AssociationType(models.Model):

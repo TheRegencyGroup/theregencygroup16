@@ -61,7 +61,8 @@ class ResPartner(models.Model):
         associations_from_right_side_to_delete = self.env['customer.association']
         for association in associations_to_delete:
             right_asct_type = self.env['association.type'].search(
-                [('right_to_left_name', '=', association.association_type.left_to_right_name)])
+                [('name', '=', '%s to %s' % (
+                association.association_type.right_to_left_name, association.association_type.left_to_right_name))])
             related_association_id = self.env['customer.association'].search(
                 [('right_partner_id', '=', self.id), ('association_type', '=', right_asct_type.id)])
             if related_association_id:
