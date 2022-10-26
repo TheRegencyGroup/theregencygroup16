@@ -171,7 +171,8 @@
                         <div class="radio-line-in">
                             <div class="radio-line-number"><t t-esc="price_item.quantity"/></div>
                             <div class="radio-line-price"><t t-esc="price_item.quantity"/> x <t
-                                    t-esc="price_item.price"/> = <t t-esc="price_item.quantity * price_item.price"/>
+                                    t-esc="price_item.price"/> = <t
+                                    t-esc="round((price_item.quantity * price_item.price), 2)"/>
                                 $</div>
                         </div>
                     </label>
