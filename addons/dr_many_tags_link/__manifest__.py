@@ -22,10 +22,12 @@
     'images': ['static/description/banner.gif'],
     'assets': {
             'web.assets_backend': [
-                'dr_many_tags_link/static/src/js/many_tags_link.js',
+                # 'dr_many_tags_link/static/src/js/many_tags_link.js',
+                'dr_many_tags_link/static/src/js/*.js',
+                'dr_many_tags_link/static/src/js/*.xml',
             ],
         },
 
-    'depends': ['base','web']
+    'depends': ['base', 'web']
 
 }

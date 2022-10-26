@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-inherit="web.TagsList" t-inherit-mode="extension" owl="1">
+        <xpath expr="//span" position="attributes">
+            <attribute name="t-on-click">() => this.onClickAction(tag.resId, tag.resModel, tag.text)</attribute>
+        </xpath>
+    </t>
+</templates>
