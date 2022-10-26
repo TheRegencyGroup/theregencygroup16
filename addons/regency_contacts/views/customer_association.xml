@@ -6,8 +6,8 @@
         <field name="model">customer.association</field>
         <field name="arch" type="xml">
              <form>
-                 <label for="association_type"/>
-                 <field name="association_type"/>
+                 <label for="association_name"/>
+                 <field name="association_name"/>
                  <label for="right_partner_id"/>
                  <field name="right_partner_id" string="Partner"/>
              </form>

@@ -59,7 +59,8 @@
                     <field name="association_partner_ids" invisible="1"/>
                     <field name="association_ids" widget="one2many" context="{'default_left_partner_id': id}">
                         <tree editable="top">
-                            <field name="association_type"/>
+                            <field name="association_name"/>
+                            <field name="association_type_id" invisible="1"/>
                             <field name="left_partner_id" readonly="1" invisible="1"/>
                             <field name="right_partner_id" string="Partner"/>
                         </tree>

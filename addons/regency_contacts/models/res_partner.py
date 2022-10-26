@@ -39,13 +39,13 @@ class ResPartner(models.Model):
 
             # Link left partner to right partner
             for association in partner.association_ids:
-                right_asct_type = self.env['association.type'].search(
-                    [('name', '=', '%s to %s' % (
-                        association.association_type.right_to_left_name,
-                        association.association_type.left_to_right_name))])
+                asct_type = self.env['association.type'].search(
+                    ['|', ('left_tech_name', '=', association.association_name),
+                     ('right_tech_name', '=', association.association_name)])
+                another_side = asct_type.right_tech_name if asct_type.left_tech_name == association.association_name else asct_type.left_tech_name
                 association.right_partner_id.with_context({'stop_inverse': True}).association_ids = [
                     (0, 0, {'left_partner_id': association.right_partner_id.id, 'right_partner_id': partner.id,
-                            'association_type': right_asct_type.id})
+                            'association_name': another_side})
                 ]
 
     def _compute_association_partner_ids(self):
@@ -62,12 +62,12 @@ class ResPartner(models.Model):
         associations_to_delete = prev_association_ids - self.association_ids
         associations_from_right_side_to_delete = self.env['customer.association']
         for association in associations_to_delete:
-            right_asct_type = self.env['association.type'].search(
-                [('name', '=', '%s to %s' % (
-                association.association_type.right_to_left_name, association.association_type.left_to_right_name))])
+            asct_type = self.env['association.type'].search(
+                ['|', ('left_tech_name', '=', association.association_name),
+                 ('right_tech_name', '=', association.association_name)])
+            another_side = asct_type.right_tech_name if asct_type.left_tech_name == association.association_name else asct_type.left_tech_name
             related_association_id = self.env['customer.association'].search(
-                [('right_partner_id', '=', self.id), ('association_type', '=', right_asct_type.id)])
+                [('right_partner_id', '=', self.id), ('association_name', '=', another_side)])
             if related_association_id:
                 associations_from_right_side_to_delete += related_association_id
         (associations_to_delete + associations_from_right_side_to_delete).unlink()
-
