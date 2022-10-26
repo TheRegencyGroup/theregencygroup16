@@ -34,7 +34,6 @@ class AssociationType(models.Model):
     _name = 'association.type'
     _description = 'Association type'
 
-    # name = fields.Char()
     left_tech_name = fields.Char()
     right_tech_name = fields.Char()
     left_to_right_name = fields.Char()
