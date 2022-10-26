@@ -13,6 +13,10 @@ export class PriceSelector extends Component {
         return Object.values(this.store.otPage.priceList);
     };
 
+    formatPrice(price) {
+        return `$${price.toFixed(2)}`
+    }
+
     onChangePrice(priceId) {
         this.store.otPage.changeSelectedPrice(priceId);
     }

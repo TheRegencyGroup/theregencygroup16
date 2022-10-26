@@ -38,6 +38,7 @@ class OverlayTemplatePage(http.Controller):
                     'id': x['id'],
                     'price': x['fixed_price'],
                     'quantity': x['min_quantity'],
+                    'totalPrice': round(x['fixed_price'] * x['min_quantity'], 2)
                 } for x in overlay_template_price_item_ids.read(['id', 'fixed_price', 'min_quantity'])
             }
         return price_list
