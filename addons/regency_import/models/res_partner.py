@@ -86,6 +86,7 @@ class ResPartner(models.Model):
             # find corresponding state during data import
             if rec.ext_country:
                 rec.country_id = self.env['res.country'].search(['|', ('name', '=ilike', rec.ext_country),
+                                                                 '|', ('code', '=ilike', rec.ext_country),
                                                                  ('alternative_name', '=ilike', rec.ext_country)],
                                                                 limit=1)
             if rec.ext_state and rec.country_id:
