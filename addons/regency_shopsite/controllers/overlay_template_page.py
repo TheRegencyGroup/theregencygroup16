@@ -75,6 +75,8 @@ class OverlayTemplatePage(http.Controller):
             back_image = back_image.resize((width, height))
             for image_data in image_with_overlay['images']:
                 image = Image.open(io.BytesIO(base64.b64decode(image_data['data'].encode())))
+                scale = image_data['scale']
+                image = image.resize((int(image.width * scale), int(image.height * scale)))
                 x = image_data['size']['x'] - delta_x
                 y = image_data['size']['y'] - delta_y
                 back_image.paste(image, (int(x), int(y)), image)

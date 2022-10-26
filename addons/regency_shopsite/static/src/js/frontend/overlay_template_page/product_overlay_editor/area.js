@@ -207,6 +207,7 @@ export class Area {
         this.removeMask();
         this.unselectedArea();
         return new Promise((resolve) => {
+            let canvasEl = this.canvas.upperCanvasEl;
             this.canvasEl.toBlob((blob) => {
                 this.createMask();
                 this.clipMask();
@@ -221,6 +222,7 @@ export class Area {
                             x: this.data.boundRect.x,
                             y: this.data.boundRect.y,
                         },
+                        scale: +(canvasEl.clientWidth / canvasEl.width).toFixed(2),
                     });
                 }
                 reader.readAsDataURL(blob);
