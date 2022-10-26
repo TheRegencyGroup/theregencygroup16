@@ -80,6 +80,12 @@ class SaleEstimate(models.Model):
     is_selected = fields.Boolean(compute="_compute_is_selected")
     sale_order_ids = fields.One2many('sale.order', 'estimate_id', string='Sale Orders')
     sale_order_count = fields.Integer(compute='_compute_sale_order_count')
+    # the field is used for product configuration widget at product lines
+    order_line = fields.One2many('sale.estimate.line', compute='_compute_order_line')
+
+    def _compute_order_line(self):
+        for rec in self:
+            rec.order_line = rec.product_lines
 
     def _compute_sale_order_count(self):
         for rec in self:
