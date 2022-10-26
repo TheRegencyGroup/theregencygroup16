@@ -322,12 +322,15 @@ class ProductPriceSheet(models.Model):
             rec.total = rec.price * rec.min_quantity
 
     def _compute_max_quantity(self):
-        prev_rec = False
         for rec in self.sorted('sequence'):
-            rec.max_quantity = MAX_QUANTITY
-            if prev_rec and prev_rec.product_id == rec.product_id:
-                prev_rec.max_quantity = rec.min_quantity
-            prev_rec = rec
+            same_product_and_vendor_recs = self.filtered(
+                lambda f: f.product_id == rec.product_id and f.partner_id == rec.partner_id).sorted('min_quantity')
+            prev_rec = False
+            for item in same_product_and_vendor_recs:
+                item.max_quantity = MAX_QUANTITY
+                if prev_rec:
+                    prev_rec.max_quantity = item.min_quantity
+                prev_rec = item
 
     @api.depends('product_uom_qty', 'price')
     def _compute_amount(self):
