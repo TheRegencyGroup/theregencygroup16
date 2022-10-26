@@ -44,7 +44,7 @@ if (cartData) {
                 }
                 return false;
             } catch (e) {
-                console.log(e)
+                alert(e.message?.data?.message || e.toString());
             }
         }
     }
