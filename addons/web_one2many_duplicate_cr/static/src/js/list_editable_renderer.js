@@ -46,8 +46,9 @@
                         value = record.data[fieldname]
                     }
 
-                    if ((typeof value !== 'undefined'))
+                    if (value !=null){
                         new_copy_data_dict['default_' + fieldname] = value
+                    }
                 })
                 let context_to_pass = Object.assign({},context,new_copy_data_dict);
                 await self.add({context: context_to_pass});
