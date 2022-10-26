@@ -1,6 +1,6 @@
 {
     'name': 'Regency Import',
-    'version': '16.0.0.1',
+    'version': '16.0.0.2',
     'summary': 'Custom fields needed for import of historical data',
     'author': 'OpsWay',
     'description': "",

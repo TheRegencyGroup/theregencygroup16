@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="sale_estimate_view_form_ext" model="ir.ui.view">
+        <field name="name">sale.estimate.form.ext</field>
+        <field name="model">sale.estimate</field>
+        <field name="inherit_id" ref="regency_estimate.sale_estimate_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//button[@name='action_view_sale_order']" position="after">
+                <button class="oe_stat_button" type="object"
+                        name="action_view_pickings" icon="fa-pencil-square-o">
+                    <field name="pickings_count" widget="statinfo" string="Transfers"/>
+                </button>
+                <button class="oe_stat_button" type="object"
+                        name="action_view_batch_pickings" icon="fa-pencil-square-o">
+                    <field name="batch_pickings_count" widget="statinfo" string="Batch transfers"/>
+                </button>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

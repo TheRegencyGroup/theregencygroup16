@@ -42,8 +42,9 @@ class WebsiteSaleRegency(WebsiteSale):
             product_id = overlay_product_id.product_id.id
 
         hotel_id = request.env.user._active_hotel_id()
+        price_list_id = hotel_id.property_product_pricelist.id
         self.cart_update_json(product_id=product_id, add_qty=qty, display=False,
-                              delivery_partner_id=hotel_id.id if hotel_id else False)
+                              delivery_partner_id=hotel_id.id if hotel_id else False, price_list_id=price_list_id)
         return {
             'cartData': request.website._get_cart_data(),
             'overlayProductData': OverlayTemplatePage.get_overlay_product_data(overlay_product_id),

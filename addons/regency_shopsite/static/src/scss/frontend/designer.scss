@@ -9,6 +9,10 @@
   }
 
   .product_overlay_editor_positions {
+    .product_overlay_editor_position_hide {
+      visibility: hidden;
+      height: 0;
+    }
 
     .product_overlay_position_editor {
       display: flex;

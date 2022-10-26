@@ -12,7 +12,7 @@
                     </span>
                     <span class="d-inline-block">
                         <field name="website_published"/>
-                        <label for="website_published" string="Website publish"/>
+                        <label for="website_published" string="Website published"/>
                     </span>
                 </xpath>
                 <xpath expr="//div[hasclass('oe_button_box')]" position="inside">

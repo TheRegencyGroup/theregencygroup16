@@ -170,7 +170,7 @@
                                t-on-click="() => this.onChangePrice(price_item.id)"/>
                         <div class="radio-line-in">
                             <div class="radio-line-number"><t t-esc="price_item.quantity"/></div>
-                            <div class="radio-line-price">$<t t-esc="price_item.price"/></div>
+                            <div class="radio-line-price"><t t-esc="formatPrice(price_item.totalPrice)"/></div>
                         </div>
                     </label>
                 </t>

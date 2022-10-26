@@ -3,6 +3,7 @@ import json
 from odoo.addons.http_routing.models.ir_http import slug
 from markupsafe import Markup
 from odoo import http
+from odoo.fields import Datetime
 from odoo.http import request
 
 from odoo.addons.regency_shopsite.const import SHOP_CATALOG_ITEM_LIMIT, OVERLAY_PRODUCT_CATALOG_TAB_KEY, \
@@ -37,7 +38,8 @@ class ShopCatalog(http.Controller):
                 'productName': rec.product_tmpl_id.name,
                 'imageUrl': rec._preview_image_url(),
                 'url': f'/shop/{slug(rec.overlay_template_id)}?{OVERLAY_PRODUCT_ID_URL_PARAMETER}={rec.id}',
-                'lastUpdatedStr': rec._get_last_updated_str(),
+                'updatedByName': rec.updated_by_id.partner_id.name or '',
+                'lastUpdatedDate': Datetime.to_string(rec.last_updated_date),
             })
         return res
 
@@ -51,7 +53,7 @@ class ShopCatalog(http.Controller):
 
         active_hotel_id = request.env.user._active_hotel_id()
         if active_hotel_id:
-            domain = [('hotel_ids', 'in', active_hotel_id.id)]
+            domain = [('hotel_ids', 'in', active_hotel_id.id), ('website_published', '=', True)]
             catalog_items_total = request.env[catalog_model].sudo().search_count(domain)
             order = DEFAULT_SHOP_CATALOG_TAB_SORT[catalog_tab]
             offset = (page - 1) * limit
