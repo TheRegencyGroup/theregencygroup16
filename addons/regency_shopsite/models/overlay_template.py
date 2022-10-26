@@ -13,6 +13,7 @@ class OverlayTemplate(models.Model):
     name = fields.Char(required=True)
     product_template_id = fields.Many2one('product.template', required=True, string='Product',
                                           domain="[('is_fit_for_overlay', '=', True)]")
+    website_published = fields.Boolean(related='product_template_id.website_published')
     overlay_attribute_value_id = fields.Many2one('product.attribute.value',
                                                  compute='_compute_overlay_attribute_value_id',
                                                  compute_sudo=True)

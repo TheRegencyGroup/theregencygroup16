@@ -6,7 +6,7 @@
             <div class="product_overlay_editor_positions">
                 <t t-foreach="Object.values(store.otPage.overlayPositions)" t-as="overlay_position"
                    t-key="overlay_position.id">
-                    <div t-att-class="{ 'd-none': state.selectedOverlayPositionId !== overlay_position.id }">
+                    <div t-att-class="{ 'product_overlay_editor_position_hide': state.selectedOverlayPositionId !== overlay_position.id }">
                         <ProductOverlayPositionComponent overlayPosition="overlay_position"/>
                     </div>
                 </t>

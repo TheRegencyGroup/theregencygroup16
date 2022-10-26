@@ -5,6 +5,7 @@ import json
 import PIL.Image as Image
 from markupsafe import Markup
 from odoo import http, Command
+from odoo.fields import Datetime
 from odoo.exceptions import ValidationError
 from odoo.http import request
 
@@ -74,6 +75,8 @@ class OverlayTemplatePage(http.Controller):
             back_image = back_image.resize((width, height))
             for image_data in image_with_overlay['images']:
                 image = Image.open(io.BytesIO(base64.b64decode(image_data['data'].encode())))
+                scale = image_data['scale']
+                image = image.resize((int(image.width * scale), int(image.height * scale)))
                 x = image_data['size']['x'] - delta_x
                 y = image_data['size']['y'] - delta_y
                 back_image.paste(image, (int(x), int(y)), image)
@@ -122,6 +125,8 @@ class OverlayTemplatePage(http.Controller):
             'name': overlay_product_name,
             'overlay_template_id': overlay_template_id.id,
             'product_template_attribute_value_ids': [Command.set(product_template_attribute_value_ids)],
+            'last_updated_date': Datetime.now(),
+            'updated_by_id':  request.env.user.id
         })
 
         cls._create_overlay_product_preview_images(overlay_product_id, preview_images_data)

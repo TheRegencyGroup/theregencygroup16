@@ -251,11 +251,11 @@ class ProductPriceSheet(models.Model):
     max_quantity = fields.Float(string='Max Qty', digits='Product Unit of Measure', compute="_compute_max_quantity")
     product_uom_qty = fields.Float(string='Qty', digits='Product Unit of Measure', default=0.0)
     margin = fields.Float(string='Margin %', compute='_compute_margin')
-    vendor_price = fields.Float(required=True, default=0.0, digits=(10, 4))
+    vendor_price = fields.Float(required=True, default=0.0, digits='Product Price')
     currency_id = fields.Many2one(
         'res.currency', 'Currency',
         readonly=True, related='price_sheet_id.currency_id', store=True)
-    price = fields.Float(digits=(10,4), string='Unit Price', store=True)
+    price = fields.Float(string='Unit Price', digits='Product Price', store=True)
     sale_estimate_line_ids = fields.Many2many('sale.estimate.line', 'product_price_sheet_line_sale_estimate_line_relation',
                                          'price_sheet_line_id', 'sale_estimate_line_id')
     total = fields.Float()
@@ -276,6 +276,7 @@ class ProductPriceSheet(models.Model):
     insection_rownumber = fields.Integer(compute="_compute_insection_rownumber")
     insection_total_rows = fields.Integer(compute="_compute_insection_rownumber")
     attachment_id = fields.Binary('File', attachment=True)
+    attachment_name = fields.Char()
 
     @api.depends('min_quantity', 'max_quantity', 'sequence')
     def _compute_qty_range_str(self):
