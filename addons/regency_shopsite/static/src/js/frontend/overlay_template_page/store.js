@@ -111,7 +111,7 @@ if (overlayTemplatePageData) {
                     this._updateOverlayProductIdUrlParameter();
                 }
             } catch (e) {
-                console.log(e)
+                alert(e.message?.data?.message || e.toString())
             }
         }
 
@@ -131,7 +131,7 @@ if (overlayTemplatePageData) {
                     this.selectedPriceId = this.getSelectedPriceId();
                 }
             } catch (e) {
-                console.log(e)
+                alert(e.message?.data?.message || e.toString())
             }
         }
 

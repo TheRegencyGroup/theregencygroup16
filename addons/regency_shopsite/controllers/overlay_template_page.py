@@ -126,7 +126,7 @@ class OverlayTemplatePage(http.Controller):
             'overlay_template_id': overlay_template_id.id,
             'product_template_attribute_value_ids': [Command.set(product_template_attribute_value_ids)],
             'last_updated_date': Datetime.now(),
-            'updated_by_id':  request.env.user.id
+            'updated_by_id': request.env.user.id
         })
 
         cls._create_overlay_product_preview_images(overlay_product_id, preview_images_data)
@@ -261,6 +261,11 @@ class OverlayTemplatePage(http.Controller):
                     overlay_product_area_image_list[rec.overlay_position_id.id][rec.area_index] = {}
                 overlay_product_area_image_list[rec.overlay_position_id.id][rec.area_index][
                     rec.area_object_index] = rec.id
+                for attribute in attribute_list.values():
+                    overlay_product_attribute_value_id = overlay_product_id.product_template_attribute_value_ids\
+                        .filtered(lambda x: x.attribute_id.id == attribute['id']).product_attribute_value_id
+                    if overlay_product_attribute_value_id:
+                        attribute['selectedValueId'] = overlay_product_attribute_value_id.id
             overlay_template_page_data.update({
                 'overlayProductId': overlay_product_id.id,
                 'overlayProductName': overlay_product_id.name if overlay_product_id else False,
@@ -268,6 +273,7 @@ class OverlayTemplatePage(http.Controller):
                 'overlayProductAreaImageList': overlay_product_area_image_list,
                 'overlayProductAreaImageModel': overlay_product_id.overlay_product_area_image_ids._name,
                 'productId': product_id.id,
+                'attributeList': attribute_list,
             })
 
         return request.render('regency_shopsite.overlay_template_page', {

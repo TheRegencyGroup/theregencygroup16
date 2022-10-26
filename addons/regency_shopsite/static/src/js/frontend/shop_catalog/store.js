@@ -53,7 +53,7 @@ if (shopCatalogData) {
                     this._updateUrlParameters();
                 }
             } catch (e) {
-                console.log(e)
+                alert(e.message?.data?.message || e.toString())
             }
         }
     }
