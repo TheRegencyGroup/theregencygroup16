@@ -64,42 +64,42 @@
                                 <AttributeSelector t-if="attribute.id" attributeId="attribute.id"/>
                             </t>
 
-                            <div class="product-group">
-                                <div class="h3">Sections</div>
+<!--                            <div class="product-group">-->
+<!--                                <div class="h3">Sections</div>-->
 
-                                <div class="form-set">
-                                    <div class="form-set-top">
-                                        <h3 class="form-set-title">Top logo</h3>
-                                        <div class="form-set-type">Text</div>
-                                    </div>
-                                    <div class="form-set-content">
-                                        <textarea class="form-control" placeholder="Add your text here"></textarea>
-                                    </div>
-                                </div>
+<!--                                <div class="form-set">-->
+<!--                                    <div class="form-set-top">-->
+<!--                                        <h3 class="form-set-title">Top logo</h3>-->
+<!--                                        <div class="form-set-type">Text</div>-->
+<!--                                    </div>-->
+<!--                                    <div class="form-set-content">-->
+<!--                                        <textarea class="form-control" placeholder="Add your text here"></textarea>-->
+<!--                                    </div>-->
+<!--                                </div>-->
 
-                                <div class="form-set">
-                                    <div class="form-set-top">
-                                        <h3 class="form-set-title">Main centered logo</h3>
-                                        <div class="form-set-type">Rectangle</div>
-                                    </div>
-                                    <div class="form-set-content">
-                                        <div class="upload">
-                                            <div class="upload-preview">
-                                                <span class="icon-image"></span>
-                                            </div>
-                                            <div class="upload-text">
-                                                <div class="upload-text-title">Drop or upload image</div>
-                                                <div class="upload-text-subtitle">10x7 cm</div>
-                                            </div>
-                                            <div class="upload-buttons">
-                                                <button class="btn btn-sm btn-dark">
-                                                    <span class="icon-upload"></span>
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+<!--                                <div class="form-set">-->
+<!--                                    <div class="form-set-top">-->
+<!--                                        <h3 class="form-set-title">Main centered logo</h3>-->
+<!--                                        <div class="form-set-type">Rectangle</div>-->
+<!--                                    </div>-->
+<!--                                    <div class="form-set-content">-->
+<!--                                        <div class="upload">-->
+<!--                                            <div class="upload-preview">-->
+<!--                                                <span class="icon-image"></span>-->
+<!--                                            </div>-->
+<!--                                            <div class="upload-text">-->
+<!--                                                <div class="upload-text-title">Drop or upload image</div>-->
+<!--                                                <div class="upload-text-subtitle">10x7 cm</div>-->
+<!--                                            </div>-->
+<!--                                            <div class="upload-buttons">-->
+<!--                                                <button class="btn btn-sm btn-dark">-->
+<!--                                                    <span class="icon-upload"></span>-->
+<!--                                                </button>-->
+<!--                                            </div>-->
+<!--                                        </div>-->
+<!--                                    </div>-->
+<!--                                </div>-->
+<!--                            </div>-->
 
                             <PriceSelector/>
 
