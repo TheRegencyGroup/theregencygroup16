@@ -139,7 +139,7 @@ class OverlayAreasPositionComponent extends Component {
     }
 
     onClickAddTextArea(event) {
-        this.overlay.addTextArea();
+        // this.overlay.addTextArea();
     }
 
     onClickAreaListItem(areaIndex, event) {
