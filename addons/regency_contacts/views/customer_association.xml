@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="customer_association_view_form" model="ir.ui.view">
+        <field name="name">customer.association.view.form</field>
+        <field name="model">customer.association</field>
+        <field name="arch" type="xml">
+             <form>
+                 <label for="association_name"/>
+                 <field name="association_name"/>
+                 <label for="right_partner_id"/>
+                 <field name="right_partner_id" string="Partner"/>
+             </form>
+        </field>
+    </record>
+
+</odoo>
