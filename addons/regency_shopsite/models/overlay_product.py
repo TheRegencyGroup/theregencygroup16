@@ -1,4 +1,6 @@
 from odoo import api, Command, fields, models
+from odoo.addons.http_routing.models.ir_http import slug
+from odoo.addons.regency_shopsite.const import OVERLAY_PRODUCT_ID_URL_PARAMETER
 
 
 class OverlayProduct(models.Model):
@@ -70,3 +72,8 @@ class OverlayProduct(models.Model):
             image_model = self.product_tmpl_id._name
             image_field = 'image_512'
         return f'/web/image?model={image_model}&id={image_id}&field={image_field}'
+
+    @property
+    def url(self):
+        self.ensure_one()
+        return f'/shop/{slug(self.overlay_template_id)}?{OVERLAY_PRODUCT_ID_URL_PARAMETER}={self.id}'
