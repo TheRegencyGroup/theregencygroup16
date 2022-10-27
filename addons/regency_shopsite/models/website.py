@@ -15,11 +15,10 @@ class Website(models.Model):
 
     def _header_preloaded_data(self):
         self.ensure_one()
-        user_id = self.env['res.users'].browse(self.env.uid)
-        hotel_id = user_id._active_hotel_id()
+        hotel_id = self.env.user._active_hotel_id()
         data = {
             'activeHotel': hotel_id.id if hotel_id else False,
-            'hotels': user_id.hotel_ids.read(['id', 'name']),
+            'hotels': self.env.user.hotel_ids.read(['id', 'name']),
         }
         return data
 
