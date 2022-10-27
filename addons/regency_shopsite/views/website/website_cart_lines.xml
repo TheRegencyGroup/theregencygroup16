@@ -250,7 +250,7 @@
     </template>
 
     <template id="cart_line_product_link_overlay_logic" name="Shopping Cart Line Product Link" inherit_id="website_sale.cart_line_product_link">
-        <xpath expr="//a" position="replace">
+        <xpath expr="//a[@t-att-href='line.product_id.website_url']" position="replace">
             <a t-att-href="line.product_id.url">
                 <t t-out="0"/>
             </a>
