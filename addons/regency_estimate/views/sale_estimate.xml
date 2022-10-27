@@ -5,7 +5,7 @@
             <field name="name">sale.estimate.form</field>
             <field name="model">sale.estimate</field>
              <field name="arch" type="xml">
-                   <form class="o_lead_opportunity_form" js_class="crm_form">
+                   <form class="o_lead_opportunity_form">
                     <header>
                            <button string="New Purchase Requisition" name="action_new_purchase_agreement" type="object" class="oe_highlight" data-hotkey="q"
                                 title="Create new Purchase Requisition"/>
