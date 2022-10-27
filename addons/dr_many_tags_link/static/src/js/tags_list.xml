@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-inherit="web.TagsList" t-inherit-mode="extension" owl="1">
+        <xpath expr="//span[contains (@t-attf-class, 'o_tag')]" position="attributes">
+            <attribute name="t-on-click">
+                (ev) => this.onClickAction(ev, tag)
+            </attribute>
+        </xpath>
+    </t>
+</templates>
