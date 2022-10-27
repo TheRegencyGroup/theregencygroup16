@@ -1,7 +1,11 @@
 /** @odoo-module **/
 
-import { Many2ManyTagsField } from '@web/views/fields/many2many_tags/many2many_tags_field';
+import {
+    Many2ManyTagsField,
+    Many2ManyTagsFieldColorEditable
+} from '@web/views/fields/many2many_tags/many2many_tags_field';
 import { patch } from 'web.utils';
+import { registry } from "@web/core/registry";
 
 patch(Many2ManyTagsField.prototype, 'dr_many_tags_link/static/src/js/many_tags_link', {
     getTagProps(record) {
@@ -9,7 +13,8 @@ patch(Many2ManyTagsField.prototype, 'dr_many_tags_link/static/src/js/many_tags_l
         Object.assign(props, {
             resModel: record.resModel,
         });
-        console.log(props);
         return props;
     },
 });
+
+registry.category("fields").add("list.many2many_tags", Many2ManyTagsFieldColorEditable);

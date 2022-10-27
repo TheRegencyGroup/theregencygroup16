@@ -17,12 +17,11 @@
     'maintainer': 'DevReaction',
     #'live_test_url': 'https://test-odoo.devreaction.com',
     'category': 'Extra Tools',
-    'version': '1.0.0',
+    'version': '16.0.0.1',
     'support': 'contact@devreaction.com',
     'images': ['static/description/banner.gif'],
     'assets': {
             'web.assets_backend': [
-                # 'dr_many_tags_link/static/src/js/many_tags_link.js',
                 'dr_many_tags_link/static/src/js/*.js',
                 'dr_many_tags_link/static/src/js/*.xml',
             ],

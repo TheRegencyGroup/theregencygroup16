@@ -10,8 +10,12 @@ patch(TagsList.prototype, 'dr_many_tags_link/static/src/js/tags_list', {
         this.action = useService('action')
     },
 
-    onClickAction(resId, resModel, title) {
-        return this.getActionForm(resId, resModel, title);
+    onClickAction(ev, tag) {
+        if (ev.shiftKey) {
+            return tag.onClick && tag.onClick(ev)
+        } else {
+            return this.getActionForm(tag.resId, tag.resModel, tag.text);
+        }
     },
 
     getActionForm(resId, resModel, title) {
