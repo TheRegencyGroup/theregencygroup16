@@ -162,6 +162,12 @@ export class Area {
             imageFormat: imageSplit[0].split('/')[1].split(';')[0],
             object,
         };
+        object.setControlsVisibility({
+            'mb': false,
+            'ml': false,
+            'mr': false,
+            'mt': false,
+        });
         this.canvas.add(object);
         this.clipMask();
     }
