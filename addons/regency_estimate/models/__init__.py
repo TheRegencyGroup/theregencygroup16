@@ -10,3 +10,4 @@ from . import crm_stage
 from . import crm_lead
 from . import delivery_carrier
 from . import stock_rule
+from . import product_product

@@ -35,6 +35,7 @@
         'views/crm_lead.xml',
         'views/crm_stage.xml',
         'wizard/choose_delivery_carrier_view.xml',
+        'views/product_views.xml',
     ],
     'demo': [
         'data/product_demo.xml',
@@ -44,7 +45,8 @@
             'regency_estimate/static/src/js/**/*'
         ],
         'web.assets_backend': [
-            'regency_estimate/static/src/scss/**/*'
+            'regency_estimate/static/src/scss/**/*',
+            'regency_estimate/static/src/xml/qty_at_date_widget.xml'
         ]
     },
     'installable': True,

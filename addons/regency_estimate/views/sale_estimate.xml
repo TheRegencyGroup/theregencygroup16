@@ -52,6 +52,7 @@
                                         'show_vat': True,
                                     }"
                                 />
+
                                 <label for="street" string="Address"/>
                                 <div class="o_address_format">
                                     <field name="street" placeholder="Street..." class="o_address_street"/>
@@ -125,7 +126,10 @@
                                                 'partner_id': parent.partner_id,
                                                 'quantity': product_uom_qty,
                                                 'company_id': parent.company_id,
-                                                'default_description_sale': name
+                                                'default_description_sale': name,
+                                                'search_default_previous_product': 1,
+                                                'tree_view_ref': 'regency_estimate.product_template_tree_view_from_estimate',
+                                                'search_view_ref': 'regency_estimate.product_template_search_view_from_estimate',
                                             }"
                                             options="{
                                                 'no_open': True,
@@ -144,6 +148,19 @@
                                                 'company_id': parent.company_id
                                             }"
                                         />
+
+                                        <!-- below fields are used in the widget qty_at_date_widget -->
+                                        <field name="virtual_available_at_date" invisible="1"/>
+                                        <field name="qty_available_today" invisible="1"/>
+                                        <field name="free_qty_today" invisible="1"/>
+                                        <field name="scheduled_date" invisible="1"/>
+                                        <field name="forecast_expected_date" invisible="1"/>
+                                        <field name="move_ids" invisible="1"/>
+                                        <field name="qty_to_deliver" invisible="1"/>
+                                        <field name="is_mto" invisible="1"/>
+                                        <field name="display_qty_widget" invisible="1"/>
+                                        <widget name="qty_at_date_widget" width="20px"/>
+
                                         <field name="product_template_attribute_value_ids" invisible="1" />
                                         <field name="product_custom_attribute_value_ids" invisible="1" >
                                             <tree>
