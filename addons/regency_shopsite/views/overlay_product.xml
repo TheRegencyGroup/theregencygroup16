@@ -5,6 +5,7 @@
         <field name="model">overlay.product</field>
         <field name="arch" type="xml">
             <form>
+                <field name="active" invisible="1"/>
                 <sheet>
                     <group>
                         <group>

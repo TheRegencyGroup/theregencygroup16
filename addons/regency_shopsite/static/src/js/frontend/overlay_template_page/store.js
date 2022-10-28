@@ -12,8 +12,11 @@ if (overlayTemplatePageData) {
             }
             this.selectedAttributeValues = this.getSelectedAttributeValues();
             this.selectedPriceId = this.getSelectedPriceId();
+            this.editMode = false;
 
             this._checkOverlayProductIdUrlParameter();
+
+            this.attrributesWasChanged = false;
         }
 
         get overlayPositions() {
@@ -32,6 +35,14 @@ if (overlayTemplatePageData) {
 
         get hasPriceList() {
             return this.priceList && Object.values(this.priceList).length;
+        }
+
+        get canAddedToCart() {
+            return this.overlayTemplateIsAvailableForActiveHotel && this.hasPriceList && this.overlayProductActive;
+        }
+
+        get overlayProductIsArchived() {
+            return this.hasOverlayProductId && !this.overlayProductActive;
         }
 
         getSelectedAttributeValues() {
@@ -77,6 +88,7 @@ if (overlayTemplatePageData) {
         changeAttributeValueAction(attributeId, valueId) {
             if (this.selectedAttributeValues[attributeId].valueId !== valueId) {
                 this.selectedAttributeValues[attributeId].valueId = valueId;
+                this.attrributesWasChanged = true;
             }
         }
 
@@ -93,22 +105,63 @@ if (overlayTemplatePageData) {
             };
         }
 
-        async saveOverlayProduct({ overlayProductName, overlayAreaList, previewImagesData }) {
+        enableEditMode() {
+            this.editMode = true;
+            this.attrributesWasChanged = false;
+        }
+
+        disableEditMode() {
+            this.editMode = false;
+            this.attrributesWasChanged = false;
+        }
+
+        async saveOverlayProduct({ overlayProductName, overlayAreaList, previewImagesData, overlayProductWasChanged }) {
             let data = this.getCustomizedData();
+            let params = {
+                overlay_template_id: data.overlayTemplateId,
+                overlay_product_name: overlayProductName,
+            };
+            if (!this.hasOverlayProductId || (this.hasOverlayProductId && overlayProductWasChanged)) {
+                params = {
+                    ...params,
+                    attribute_list: data.attributeList,
+                    overlay_area_list: overlayAreaList,
+                    preview_images_data: previewImagesData,
+                };
+            }
+            if (this.hasOverlayProductId && this.editMode) {
+                params = {
+                    ...params,
+                    overlay_product_id: this.overlayProductId,
+                    overlay_product_was_changed: overlayProductWasChanged || false,
+                };
+            }
             try {
                 let res = await rpc.query({
                     route: '/shop/overlay_template/save',
+                    params,
+                });
+                if (res) {
+                    this.updateOverlayProductData(res);
+                }
+            } catch (e) {
+                alert(e.message?.data?.message || e.toString())
+            }
+        }
+
+        async deleteOverlayProduct() {
+            if (!this.hasOverlayProductId) {
+                return;
+            }
+            try {
+                let res = await rpc.query({
+                    route: '/shop/overlay_template/delete',
                     params: {
-                        overlay_template_id: data.overlayTemplateId,
-                        attribute_list: data.attributeList,
-                        overlay_product_name: overlayProductName,
-                        overlay_area_list: overlayAreaList,
-                        preview_images_data: previewImagesData,
+                        overlay_product_id: this.overlayProductId,
                     },
                 });
                 if (res) {
-                    Object.assign(this, res);
-                    this._updateOverlayProductIdUrlParameter();
+                    window.location.replace('/shop?tab=op');
                 }
             } catch (e) {
                 alert(e.message?.data?.message || e.toString())
@@ -135,7 +188,7 @@ if (overlayTemplatePageData) {
             }
         }
 
-        async updateOverlayProductData(data) {
+        updateOverlayProductData(data) {
             Object.assign(this, data);
             this._updateOverlayProductIdUrlParameter();
         }

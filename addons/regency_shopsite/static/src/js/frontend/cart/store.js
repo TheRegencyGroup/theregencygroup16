@@ -12,7 +12,16 @@ if (cartData) {
             }
         }
 
-        async addOverlayToCart({ overlayTemplateId, attributeList, quantity, overlayProductId , overlayProductName, overlayAreaList, previewImagesData }) {
+        async addOverlayToCart({
+                                   overlayTemplateId,
+                                   attributeList,
+                                   quantity,
+                                   overlayProductId,
+                                   overlayProductName,
+                                   overlayAreaList,
+                                   previewImagesData,
+                                   overlayProductWasChanged,
+        }) {
             try {
                 let params = {
                     qty: quantity,
@@ -22,7 +31,8 @@ if (cartData) {
                         ...params,
                         overlay_product_id: overlayProductId,
                     };
-                } else {
+                }
+                if (!overlayProductId || overlayProductWasChanged) {
                     params = {
                         ...params,
                         overlay_template_id: overlayTemplateId,
@@ -30,6 +40,7 @@ if (cartData) {
                         overlay_product_name: overlayProductName,
                         overlay_area_list: overlayAreaList,
                         preview_images_data: previewImagesData,
+                        overlay_product_was_changed: overlayProductWasChanged,
                     };
                 }
                 let res = await rpc.query({
