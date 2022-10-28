@@ -68,7 +68,7 @@
             </div>
 
             <div class="position-buttons">
-                <a href="" class="btn btn-block">Add to cart</a>
+                <a t-att-href="item.url" class="btn btn-block">Add to cart</a>
                 <a href="" class="btn">Edit</a>
             </div>
         </div>
