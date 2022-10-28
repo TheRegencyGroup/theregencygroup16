@@ -255,7 +255,7 @@ class ProductPriceSheet(models.Model):
     currency_id = fields.Many2one(
         'res.currency', 'Currency',
         readonly=True, related='price_sheet_id.currency_id', store=True)
-    price = fields.Float(string='Unit Price', digits='Product Price', store=True)
+    price = fields.Float(string='Customer Price', digits='Product Price', store=True)
     sale_estimate_line_ids = fields.Many2many('sale.estimate.line', 'product_price_sheet_line_sale_estimate_line_relation',
                                          'price_sheet_line_id', 'sale_estimate_line_id')
     total = fields.Float()
@@ -264,6 +264,7 @@ class ProductPriceSheet(models.Model):
     FOB = fields.Char(string='FOB')
     duty = fields.Float()
     freight = fields.Float()
+    unit_price = fields.Float(string='Unit Price', digits='Product Price', store=True, compute='_compute_unit_price')
     production_lead_time = fields.Char()
     shipping_lead_time = fields.Char()
     allow_consumption_agreement = fields.Boolean(default=True)
@@ -277,6 +278,11 @@ class ProductPriceSheet(models.Model):
     insection_total_rows = fields.Integer(compute="_compute_insection_rownumber")
     attachment_id = fields.Binary('File', attachment=True)
     attachment_name = fields.Char()
+
+    @api.depends('vendor_price', 'duty', 'freight')
+    def _compute_unit_price(self):
+        for rec in self:
+            rec.unit_price = rec.vendor_price + rec.duty + rec.freight
 
     @api.depends('min_quantity', 'max_quantity', 'sequence')
     def _compute_qty_range_str(self):
