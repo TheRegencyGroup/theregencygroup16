@@ -82,6 +82,13 @@ class SaleEstimate(models.Model):
     sale_order_count = fields.Integer(compute='_compute_sale_order_count')
     # the field is used for product configuration widget at product lines
     order_line = fields.One2many('sale.estimate.line', compute='_compute_order_line')
+    sold_product_ids = fields.Many2many('product.template', 'sold_templ_rel', compute='_compute_sold_product_ids',
+                                        store=True, index=True)
+
+    @api.depends('partner_id', 'partner_id.sale_order_ids')
+    def _compute_sold_product_ids(self):
+        for rec in self:
+            rec.sold_product_ids = rec.partner_id.sale_order_ids.order_line.mapped('product_template_id')
 
     def _compute_order_line(self):
         for rec in self:

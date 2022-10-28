@@ -52,6 +52,7 @@
                                         'show_vat': True,
                                     }"
                                 />
+
                                 <label for="street" string="Address"/>
                                 <div class="o_address_format">
                                     <field name="street" placeholder="Street..." class="o_address_street"/>
@@ -125,7 +126,10 @@
                                                 'partner_id': parent.partner_id,
                                                 'quantity': product_uom_qty,
                                                 'company_id': parent.company_id,
-                                                'default_description_sale': name
+                                                'default_description_sale': name,
+                                                'search_default_previous_product': 1,
+                                                'tree_view_ref': 'regency_estimate.product_template_tree_view_from_estimate',
+                                                'search_view_ref': 'regency_estimate.product_template_search_view_from_estimate',
                                             }"
                                             options="{
                                                 'no_open': True,
