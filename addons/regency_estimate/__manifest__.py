@@ -44,7 +44,8 @@
             'regency_estimate/static/src/js/**/*'
         ],
         'web.assets_backend': [
-            'regency_estimate/static/src/scss/**/*'
+            'regency_estimate/static/src/scss/**/*',
+            'regency_estimate/static/src/xml/qty_at_date_widget.xml'
         ]
     },
     'installable': True,
