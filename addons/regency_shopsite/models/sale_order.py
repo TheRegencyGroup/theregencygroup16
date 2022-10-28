@@ -22,10 +22,9 @@ class SaleOrderLine(models.Model):
     price_list_id = fields.Many2one('product.pricelist', string='Pricelist')
 
     @api.onchange('product_id')
-    def _compute_pricelist_id(self):
-        for rec in self:
-            if not rec.price_list_id:
-                rec.price_list_id = rec.order_id.pricelist_id
+    def _onchange_pricelist_id(self):
+        if not self.price_list_id:
+            self.price_list_id = self.order_id.pricelist_id
 
     @api.model_create_multi
     def create(self, vals):
