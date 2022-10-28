@@ -19,7 +19,13 @@ class SaleOrderLine(models.Model):
     _inherit = 'sale.order.line'
 
     overlay_template_id = fields.Many2one('overlay.template', compute='_compute_overlay_template_id')
-    price_list_id = fields.Many2one('product.pricelist', default=lambda self: self.order_id.pricelist_id)
+    price_list_id = fields.Many2one('product.pricelist', string='Pricelist')
+
+    @api.onchange('product_id')
+    def _compute_pricelist_id(self):
+        for rec in self:
+            if not rec.price_list_id:
+                rec.price_list_id = rec.order_id.pricelist_id
 
     @api.model_create_multi
     def create(self, vals):
