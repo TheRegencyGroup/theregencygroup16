@@ -86,7 +86,6 @@
                                 <button type="object" name="acton_unselect_all" string="Unselect All"  attrs="{'invisible':[('is_selected', '=', False)]}"/>
                                 <!-- the field order_line is added for consistency with sol_product_many2one widget -->
                                 <field name="order_line" invisible="1"/>
-                                 <field name="sold_product_ids" invisible="1"/>
                                 <field
                                     name="product_lines"
                                     widget="section_and_note_one2many"
@@ -129,9 +128,8 @@
                                                 'company_id': parent.company_id,
                                                 'default_description_sale': name,
                                                 'search_default_previous_product': 1,
-                                                'sold_product_ids': parent.sold_product_ids,
-                                                'tree_view_ref': 'regency_estimate.product_template_tree_view',
-
+                                                'tree_view_ref': 'regency_estimate.product_template_tree_view_from_estimate',
+                                                'search_view_ref': 'regency_estimate.product_template_search_view_from_estimate',
                                             }"
                                             options="{
                                                 'no_open': True,
