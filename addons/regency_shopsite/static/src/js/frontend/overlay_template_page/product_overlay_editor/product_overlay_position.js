@@ -34,6 +34,7 @@ export class ProductOverlayPositionComponent extends Component {
         this.loadImage = false;
         this.currentColorValueId = this.store.otPage.selectedColorValueId;
         this.currentOverlayProductId = this.store.otPage.overlayProductId;
+        this.currentEditModeState = this.store.otPage.editMode;
     }
 
     onMounted() {
@@ -46,10 +47,13 @@ export class ProductOverlayPositionComponent extends Component {
             this.currentColorValueId = this.store.otPage.selectedColorValueId;
             this.state.imageSrc = this.getImageSrc();
         }
-        if (this.currentOverlayProductId !== this.store.otPage.overlayProductId) {
+        if (this.currentOverlayProductId !== this.store.otPage.overlayProductId ||
+            this.currentEditModeState !== this.store.otPage.editMode) {
             this.currentOverlayProductId = this.store.otPage.overlayProductId;
+            this.currentEditModeState = this.store.otPage.editMode;
             for (let area of Object.values(this.areas)) {
-                area.enablePointerEvents(!this.store.otPage.hasOverlayProductId);
+                area.enablePointerEvents(!this.store.otPage.hasOverlayProductId || this.store.otPage.editMode);
+                area.wasChanged = false;
             }
         }
     }
@@ -150,11 +154,14 @@ export class ProductOverlayPositionComponent extends Component {
             return;
         }
         const reader = new FileReader();
-        reader.onload = (ev) => {
+        reader.onloadend = () => {
             const image = new Image();
-            image.src = ev.target.result;
+            image.src = reader.result;
             image.onload = () => {
-                this.areas[this.state.selectedAreaIndex].addImageObject({ image });
+                this.areas[this.state.selectedAreaIndex].addImageObject({
+                    image,
+                    uploadedByUser: true,
+                });
                 event.target.value = '';
             };
         };

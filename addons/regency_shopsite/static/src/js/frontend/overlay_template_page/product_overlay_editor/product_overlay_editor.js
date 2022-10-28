@@ -25,12 +25,26 @@ export class ProductOverlayEditorComponent extends Component {
 
     }
 
-    getOverlayAreaList() {
-        let overlayPositionComponents = Object.values(this.__owl__.children)
+    get overlayPositionComponents() {
+        return Object.values(this.__owl__.children)
             .filter(e => e.component.constructor.name === 'ProductOverlayPositionComponent')
             .map(e => e.component);
+    }
+
+    checkAreasWasChanged() {
+       for (let component of this.overlayPositionComponents) {
+           for (let area of Object.values(component.areas)) {
+                if (area.wasChanged) {
+                    return true;
+                }
+           }
+       }
+       return false;
+    }
+
+    getOverlayAreaList() {
         let data = {};
-        for (let component of overlayPositionComponents) {
+        for (let component of this.overlayPositionComponents) {
             let overlayPosition = component.props.overlayPosition;
             let image = component.getColorImage();
             let imageData = {
@@ -55,9 +69,6 @@ export class ProductOverlayEditorComponent extends Component {
                     'data': areaData,
                 };
             }
-            // if (areaList.length) {
-            //     imageData.images = areaList;
-            // }
             data[overlayPosition.id] = {
                 overlayPositionId: overlayPosition.id,
                 areaList,
@@ -67,11 +78,8 @@ export class ProductOverlayEditorComponent extends Component {
     }
 
     async getPreviewImagesData() {
-        let overlayPositionComponents = Object.values(this.__owl__.children)
-            .filter(e => e.component.constructor.name === 'ProductOverlayPositionComponent')
-            .map(e => e.component);
         let data = [];
-        for (let component of overlayPositionComponents) {
+        for (let component of this.overlayPositionComponents) {
             let overlayPosition = component.props.overlayPosition;
             let image = component.getColorImage();
             let imageData = {

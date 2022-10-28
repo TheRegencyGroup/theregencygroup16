@@ -22,19 +22,41 @@
                                 <label class="label">Listing name</label>
                                 <input type="text" name="" class="form-control"
                                        t-ref="name_input"
-                                       t-att-disabled="store.otPage.hasOverlayProductId"
+                                       t-att-disabled="disabledEditName"
                                        t-att-value="store.otPage.overlayProductName"
                                        t-on-focusin="onInputNameFocusin"
                                        t-on-focusout="onInputNameFocusout"/>
                             </div>
                         </div>
                         <div class="product-top-right">
-<!--                            <button class="btn btn-sm">Delete</button>-->
-                            <button t-if="!store.otPage.hasOverlayProductId"
+                            <button t-if="showEditBtn"
+                                    class="btn btn-dark btn-sm"
+                                    t-on-click="onClickEditCustomization">
+                                Edit
+                            </button>
+                            <button t-if="showSaveBtn"
                                     class="btn btn-sm btn-dark minw100"
                                     t-on-click="onClickSaveCustomization">
                                 Save
                             </button>
+                            <button t-if="showCancelBtn"
+                                    class="btn btn-sm btn-dark minw100"
+                                    t-on-click="onClickCancelCustomization">
+                                Cancel
+                            </button>
+<!--                            <button t-if="showDuplicateBtn"-->
+<!--                                    t-on-click="onClickDuplicateCustomization"-->
+<!--                                    class="btn btn-dark btn-sm">-->
+<!--                                Duplicate-->
+<!--                            </button>-->
+                            <button t-if="showDeleteBtn"
+                                    t-on-click="onClickDeleteCustomization"
+                                    class="btn btn-dark btn-sm">
+                                Delete
+                            </button>
+                            <div t-if="store.otPage.overlayProductIsArchived" class="product-is-archived">
+                                Customization was archived
+                            </div>
                         </div>
                     </div>
 
@@ -44,7 +66,7 @@
                             <div class="banner">
                                 <div class="banner-in">
                                     <div class="banner-logo">
-                                        <img src="img/logo.png" alt=""/>
+                                        <img src="/regency_shopsite/static/src/img/logo.png" alt=""/>
                                     </div>
                                     <h2>Bringing your Brand to Life</h2>
                                 </div>
@@ -101,10 +123,10 @@
 <!--                                </div>-->
 <!--                            </div>-->
 
-                            <PriceSelector/>
+                            <PriceSelector t-if="store.otPage.overlayProductActive"/>
 
-                            <button class="btn btn-block btn-dark product-add-to-cart"
-                                    t-att-class="{ 'product-add-to-cart-disabled': !store.otPage.overlayTemplateIsAvailableForActiveHotel || !store.otPage.hasPriceList }"
+                            <button t-if="store.otPage.overlayProductActive" class="btn btn-block btn-dark product-add-to-cart"
+                                    t-att-class="{ 'product-add-to-cart-disabled': !store.otPage.canAddedToCart }"
                                     t-on-click="onClickAddToCart">
                                 <span>Add to cart</span>
                                 <span class="icon-cart"></span>
@@ -126,37 +148,40 @@
             <div class="h3"><t t-esc="attribute.name"/></div>
             <div class="radio-simple-vals">
                 <t t-foreach="Object.values(attribute.valueList)" t-as="value" t-key="value.id">
-                    <t t-set="is_checked" t-value="store.otPage.selectedAttributeValues[props.attributeId].valueId === value.id"/>
-                    <label t-if="is_checked || (!is_checked and !store.otPage.hasOverlayProductId)" class="radio-simple-val">
-                        <input type="radio"
-                               t-att-name="attribute.name"
-                               t-att-checked="is_checked"
-                               t-on-change="() => this.onChangeAttributeValue(value.id)"
-                               class="ml-1 mr-3"/>
-                        <div class="radio-simple-val-in"><t t-esc="value.name"/></div>
-                    </label>
+                    <AttributeSelectorValue attribute="attribute" value="value"/>
                 </t>
             </div>
         </div>
     </t>
 
-    <t t-name="overlay_template_page_color_attribute_selector" owl="1">
-        <div class="product-group">
-            <div class="h3"><t t-esc="attribute.name"/></div>
-            <div class="radio-colors">
-                <t t-foreach="Object.values(attribute.valueList)" t-as="value" t-key="value.id">
-                    <t t-set="is_checked" t-value="store.otPage.selectedAttributeValues[props.attributeId].valueId === value.id"/>
-                    <label t-if="is_checked || (!is_checked and !store.otPage.hasOverlayProductId)" class="radio-color">
-                        <input type="radio"
-                               t-att-name="attribute.name"
-                               t-att-checked="is_checked"
-                               t-on-change="() => this.onChangeAttributeValue(value.id)"
-                               class="ml-1 mr-3"/>
-                        <div class="radio-color-in" t-attf-style="background: {{value.color}}"/>
-                    </label>
-                </t>
-            </div>
-        </div>
+    <t t-name="overlay_template_page_attribute_selector_value" owl="1">
+        <label t-if="showValue" class="radio-simple-val">
+            <input type="radio"
+                   t-att-name="props.attribute.name"
+                   t-att-checked="isChecked"
+                   t-on-change="onChangeAttributeValue"/>
+            <div class="radio-simple-val-in"><t t-esc="props.value.name"/></div>
+        </label>
+    </t>
+
+    <t t-name="overlay_template_page_color_attribute_selector"
+       t-inherit="regency_shopsite.overlay_template_page_attribute_selector" t-mode="primary" owl="1">
+        <xpath expr="//div[hasclass('radio-simple-vals')]" position="attributes">
+            <attribute name="class">radio-colors</attribute>
+        </xpath>
+        <xpath expr="//AttributeSelectorValue" position="replace">
+            <ColorAttributeSelectorValue attribute="attribute" value="value"/>
+        </xpath>
+    </t>
+
+    <t t-name="overlay_template_page_color_attribute_selector_value"
+       t-inherit="regency_shopsite.overlay_template_page_attribute_selector_value" t-mode="primary" owl="1">
+        <xpath expr="//label[hasclass('radio-simple-val')]" position="attributes">
+            <attribute name="class">radio-color</attribute>
+        </xpath>
+        <xpath expr="//div[hasclass('radio-simple-val-in')]" position="replace">
+            <div class="radio-color-in" t-attf-style="background: {{props.value.color}}"/>
+        </xpath>
     </t>
 
     <t t-name="overlay_template_page_price_selector" owl="1">
