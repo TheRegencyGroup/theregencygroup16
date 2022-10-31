@@ -173,7 +173,7 @@ if (overlayTemplatePageData) {
 
         duplicateOverlayProduct() {
             this.overlayProductId = null;
-            this.overlayProductName = null;
+            this.overlayProductName = this.overlayProductName + ' (Copy)';
             this.overlayProductActive = null;
             this._updateOverlayProductIdUrlParameter();
         }
