@@ -43,6 +43,12 @@ class ResPartner(models.Model):
                     ['|', ('left_tech_name', '=', association.association_name),
                      ('right_tech_name', '=', association.association_name)])
                 another_side = asct_type.right_tech_name if asct_type.left_tech_name == association.association_name else asct_type.left_tech_name
+                right_partner_association = association.right_partner_id.association_ids.filtered(
+                    lambda f: f.right_partner_id == partner)
+                if right_partner_association:
+                    if another_side != right_partner_association.association_name:
+                        right_partner_association.association_name = another_side
+                        continue
                 association.right_partner_id.with_context({'stop_inverse': True}).association_ids = [
                     (0, 0, {'left_partner_id': association.right_partner_id.id, 'right_partner_id': partner.id,
                             'association_name': another_side})
