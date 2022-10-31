@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from odoo import api, Command, fields, models
 from odoo.addons.http_routing.models.ir_http import slug
 from odoo.addons.regency_shopsite.const import OVERLAY_PRODUCT_ID_URL_PARAMETER
@@ -63,6 +65,11 @@ class OverlayProduct(models.Model):
                     'value_ids': [Command.link(pav.id)]
                 })
 
+    def _set_update_info(self):
+        for rec in self:
+            rec.last_updated_date = datetime.now()
+            rec.updated_by_id = self.env.user.id
+
     def _preview_image_url(self):
         self.ensure_one()
         if self.overlay_product_image_ids:
@@ -90,4 +97,5 @@ class OverlayProduct(models.Model):
         for overlay_product_area_image_id in self.overlay_product_area_image_ids:
             new_overlay_product_area_image_id = overlay_product_area_image_id.copy()
             new_overlay_product_area_image_id.overlay_product_id = res.id
+        res._set_update_info()
         return res
