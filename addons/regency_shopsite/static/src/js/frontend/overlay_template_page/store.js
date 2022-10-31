@@ -39,8 +39,7 @@ if (overlayTemplatePageData) {
 
         get canAddedToCart() {
             return this.overlayTemplateIsAvailableForActiveHotel &&
-                this.hasPriceList &&
-                ((this.hasOverlayProductId && this.overlayProductActive) || !this.hasOverlayProductId);
+                this.hasPriceList && !this.overlayProductIsArchived;
         }
 
         get overlayProductIsArchived() {
@@ -79,12 +78,14 @@ if (overlayTemplatePageData) {
         }
 
         _updateOverlayProductIdUrlParameter() {
+            let url = new URL(window.location.href);
+            let paramKey = this.options?.overlayProductIdUrlParameter;
             if (this.hasOverlayProductId) {
-                let url = new URL(window.location.href);
-                let paramKey = this.options?.overlayProductIdUrlParameter;
                 url.searchParams.set(paramKey, this.overlayProductId);
-                window.history.replaceState(null, null, url);
+            } else {
+                url.searchParams.delete(paramKey);
             }
+            window.history.replaceState(null, null, url);
         }
 
         changeAttributeValueAction(attributeId, valueId) {
@@ -168,6 +169,13 @@ if (overlayTemplatePageData) {
             } catch (e) {
                 alert(e.message?.data?.message || e.toString())
             }
+        }
+
+        duplicateOverlayProduct() {
+            this.overlayProductId = null;
+            this.overlayProductName = null;
+            this.overlayProductActive = null;
+            this._updateOverlayProductIdUrlParameter();
         }
 
         async updatePriceList(activeHotelId) {

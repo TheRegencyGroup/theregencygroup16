@@ -5,7 +5,6 @@ import json
 import PIL.Image as Image
 from markupsafe import Markup
 from odoo import http, Command
-from odoo.fields import Datetime
 from odoo.exceptions import ValidationError
 from odoo.http import request
 
@@ -184,8 +183,7 @@ class OverlayTemplatePage(http.Controller):
                         del obj['image']
             overlay_product.area_list_json = json.dumps(overlay_area_list)
 
-        overlay_product.last_updated_date = Datetime.now()
-        overlay_product.updated_by_id = request.env.user.id
+        overlay_product._set_update_info()
 
         return overlay_product, product_template_attribute_value_ids
 

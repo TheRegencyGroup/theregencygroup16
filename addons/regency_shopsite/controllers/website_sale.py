@@ -35,7 +35,7 @@ class WebsiteSaleRegency(WebsiteSale):
             product_template_customize_attribute_value_id = product_template_id.attribute_line_ids \
                 .filtered(lambda x: x.attribute_id.id == customize_attribute_id.id) \
                 .product_template_value_ids \
-                .filtered(lambda x: x.product_attribute_value_id.overlay_product_id.id == overlay_product_id)
+                .filtered(lambda x: x.product_attribute_value_id.overlay_product_id.id == overlay_product.id)
             if not product_template_customize_attribute_value_id:
                 raise ValidationError(f'Product {product_template_id.name} does not have customize attribute!')
             product_template_attribute_value_ids.append(product_template_customize_attribute_value_id.id)
