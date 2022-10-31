@@ -15,12 +15,12 @@ class CustomerAssociation(models.Model):
         return data
 
     association_name = fields.Selection(selection=lambda x: x.env['customer.association']._get_association_types(),
-                                        string='Name')
+                                        string='Name', required=True)
 
     association_type_id = fields.Many2one('association.type', compute='_compute_association_type', store=True,
                                           compute_sudo=True)
     left_partner_id = fields.Many2one('res.partner')
-    right_partner_id = fields.Many2one('res.partner')
+    right_partner_id = fields.Many2one('res.partner', required=True)
 
     @api.depends('association_name')
     def _compute_association_type(self):
