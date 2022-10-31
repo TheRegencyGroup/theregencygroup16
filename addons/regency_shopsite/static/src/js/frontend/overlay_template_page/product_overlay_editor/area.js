@@ -178,6 +178,9 @@ export class Area {
 
     removeActiveObject() {
         let activeObj = this.canvas.getActiveObject();
+        if (!activeObj) {
+            return;
+        }
         delete this.imageObjectList[activeObj.objIndex];
         this.canvas.remove(activeObj);
         this.wasChanged = true;

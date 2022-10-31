@@ -29,16 +29,18 @@ class SaleOrderLine(models.Model):
     @api.model_create_multi
     def create(self, vals):
         res = super().create(vals)
-        res._link_overlay_to_product()
+        res._link_overlay_product_to_product_variant()
         return res
 
-    def _link_overlay_to_product(self):
+    def _link_overlay_product_to_product_variant(self):
+        customization_attribute_id = self.env.ref('regency_shopsite.customization_attribute')
         for line in self:
-            attribute_ids = line.product_template_attribute_value_ids.mapped('attribute_id')
-            if self.env.ref('regency_shopsite.overlay_attribute') in attribute_ids and self.env.ref(
-                    'regency_shopsite.customization_attribute') in attribute_ids:
-                for overlay_product in line.product_template_id.overlay_template_ids.mapped('overlay_product_ids'):
-                    overlay_product.product_id = line.product_id.id
+            customization_value_id = line.product_id.product_template_attribute_value_ids\
+                .filtered(lambda x: x.attribute_id.id == customization_attribute_id.id)\
+                .product_attribute_value_id
+            if not customization_value_id or not customization_value_id.overlay_product_id:
+                continue
+            customization_value_id.overlay_product_id.product_id = line.product_id.id
 
     @api.depends('product_id', 'product_id.product_template_attribute_value_ids')
     def _compute_overlay_template_id(self):
