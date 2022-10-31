@@ -22,3 +22,6 @@ class ResUsers(models.Model):
         else:
             hotel_id = self.env['res.partner']
         return hotel_id
+
+    def _active_hotel_background_url(self) -> str:
+        return self._active_hotel_id().background_url

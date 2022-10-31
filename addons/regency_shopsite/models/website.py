@@ -24,6 +24,9 @@ class Website(models.Model):
         }
         return data
 
+    def get_active_hotel_background_url(self):
+        self.env.user._active_hotel_id()
+
     @api.model
     def _header_preloaded(self):
         website = request and request.website_routing
