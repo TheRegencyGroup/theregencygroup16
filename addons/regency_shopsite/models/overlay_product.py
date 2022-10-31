@@ -97,5 +97,6 @@ class OverlayProduct(models.Model):
         for overlay_product_area_image_id in self.overlay_product_area_image_ids:
             new_overlay_product_area_image_id = overlay_product_area_image_id.copy()
             new_overlay_product_area_image_id.overlay_product_id = res.id
+        res.name = self.name + ' (Copy)'
         res._set_update_info()
         return res
