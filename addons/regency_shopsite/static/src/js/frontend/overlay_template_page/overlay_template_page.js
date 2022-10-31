@@ -72,6 +72,11 @@ export class OverlayTemplatePageComponent extends Component {
             !this.store.otPage.editMode;
     }
 
+    get showAddToCartBtn() {
+        return !this.store.otPage.hasOverlayProductId ||
+            (this.store.otPage.hasOverlayProductId && this.store.otPage.overlayProductActive);
+    }
+
     onInputNameFocusin() {
         this.state.nameInputIsFilled = true;
     }

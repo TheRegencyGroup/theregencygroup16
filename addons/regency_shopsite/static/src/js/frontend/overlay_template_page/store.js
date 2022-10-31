@@ -38,7 +38,9 @@ if (overlayTemplatePageData) {
         }
 
         get canAddedToCart() {
-            return this.overlayTemplateIsAvailableForActiveHotel && this.hasPriceList && this.overlayProductActive;
+            return this.overlayTemplateIsAvailableForActiveHotel &&
+                this.hasPriceList &&
+                ((this.hasOverlayProductId && this.overlayProductActive) || !this.hasOverlayProductId);
         }
 
         get overlayProductIsArchived() {
