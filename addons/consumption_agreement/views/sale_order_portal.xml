@@ -13,14 +13,4 @@
         </xpath>
     </template>
 
-    <template id="sale_order_portal_content_inherit_regency"
-              inherit_id="sale.sale_order_portal_content">
-        <xpath expr="//th[contains(text(), 'Unit Price')]" position="replace">
-            <th t-attf-class="text-end {{ 'd-none d-sm-table-cell' if report_type == 'html' else '' }}">
-                Customer Price
-            </th>
-        </xpath>
-    </template>
-
-
 </odoo>
