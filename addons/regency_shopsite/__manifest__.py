@@ -31,6 +31,7 @@
         'views/product_product.xml',
         'views/website/sale_portal_templates.xml',
         'security/groups.xml',
+        'views/res_partner.xml',
     ],
     'assets': {
         'web.assets_frontend': [
