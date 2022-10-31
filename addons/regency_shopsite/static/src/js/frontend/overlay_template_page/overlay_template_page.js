@@ -127,6 +127,9 @@ export class OverlayTemplatePageComponent extends Component {
     }
 
     async onClickDeleteCustomization() {
+        if (!window.confirm('Do you really want to delete this customization?')) {
+            return;
+        }
         if (this.store.otPage.overlayProductIsArchived) {
             return;
         }
