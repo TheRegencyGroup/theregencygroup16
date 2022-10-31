@@ -13,6 +13,9 @@
                 <xpath expr="//button[@id='draft_confirm']" position="replace">
                      <button name="button_confirm" type="object" attrs="{'invisible': ['|', ('state', '!=', 'draft'), ('requisition_id', '!=', False), ] }" string="Confirm Order" id="draft_confirm"/>
                 </xpath>
+                <xpath expr="//field[@name='requisition_id']" position="attributes">
+                    <attribute name="string">Purchase Requisition</attribute>
+                </xpath>
             </field>
          </record>
     </data>
