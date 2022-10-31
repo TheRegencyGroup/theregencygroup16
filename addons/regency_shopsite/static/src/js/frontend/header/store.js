@@ -30,10 +30,21 @@ if (hotelSelectorData) {
         }
 
         get currentHotelName() {
-            if (!this.activeHotel || !this.hotels[this.activeHotel]) {
+            if (this.isNoActiveHotel) {
                 return "";
             }
             return this.hotels[this.activeHotel].name;
+        }
+
+        get currentHotelLogoUrl() {
+            if (this.isNoActiveHotel) {
+                return "";
+            }
+            return this.hotels[this.activeHotel].logo_url;
+        }
+
+        get isNoActiveHotel(){
+            return !this.activeHotel || !this.hotels[this.activeHotel]
         }
 
         _updateActiveHotel = () => {
