@@ -125,7 +125,7 @@
 
                             <PriceSelector t-if="store.otPage.overlayProductActive"/>
 
-                            <button t-if="store.otPage.overlayProductActive" class="btn btn-block btn-dark product-add-to-cart"
+                            <button t-if="showAddToCartBtn" class="btn btn-block btn-dark product-add-to-cart"
                                     t-att-class="{ 'product-add-to-cart-disabled': !store.otPage.canAddedToCart }"
                                     t-on-click="onClickAddToCart">
                                 <span>Add to cart</span>
