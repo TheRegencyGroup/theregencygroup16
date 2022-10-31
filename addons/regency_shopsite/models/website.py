@@ -19,7 +19,7 @@ class Website(models.Model):
         data = {
             'activeHotel': hotel_id.id if hotel_id else False,
             'hotels': self.env.user.hotel_ids.mapped(
-                lambda h: {field: h[field] for field in ['id', 'name', 'logo_url']}
+                lambda h: {field: h[field] for field in ['id', 'name', 'logo_url', 'background_url']}
             ),
         }
         return data

@@ -43,7 +43,14 @@ if (hotelSelectorData) {
             return this.hotels[this.activeHotel].logo_url;
         }
 
-        get isNoActiveHotel(){
+        get currentHotelBackgroundUrl() {
+            if (this.isNoActiveHotel) {
+                return "";
+            }
+            return this.hotels[this.activeHotel].background_url;
+        }
+
+        get isNoActiveHotel() {
             return !this.activeHotel || !this.hotels[this.activeHotel]
         }
 
@@ -63,6 +70,16 @@ if (hotelSelectorData) {
             value = parseInt(value);
             this._activeHotel = value;
             dropPrevious.exec(this._updateActiveHotel);
+            this._setActiveHotelBackground()
+        }
+
+        _setActiveHotelBackground() {
+            let backgroundUrl = this.currentHotelBackgroundUrl
+            let cssRec = 'background: ""'
+            if (backgroundUrl && !this.isNoActiveHotel) {
+                cssRec = `background: url(${backgroundUrl}) center center no-repeat;`
+            }
+            document.querySelector('.regency-top').style = cssRec
         }
     }
 
