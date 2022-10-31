@@ -46,39 +46,41 @@ export class OverlayTemplatePageComponent extends Component {
     }
 
     get showEditBtn() {
-        return this.store.otPage.overlayProductActive &&
-            this.store.otPage.hasOverlayProductId &&
+        return this.store.otPage.hasOverlayProductId &&
+            !this.store.otPage.overlayProductIsArchived &&
             !this.store.otPage.editMode;
     }
 
     get showDeleteBtn() {
-        return this.store.otPage.overlayProductActive && !this.store.otPage.editMode;
+        return this.store.otPage.hasOverlayProductId &&
+            !this.store.otPage.overlayProductIsArchived &&
+            !this.store.otPage.editMode;
     }
 
     get showCancelBtn() {
-        return this.store.otPage.hasOverlayProductId && this.store.otPage.editMode;
+        return this.store.otPage.hasOverlayProductId &&
+            !this.store.otPage.overlayProductIsArchived &&
+            this.store.otPage.editMode;
     }
 
     get showSaveBtn() {
-        return (this.store.otPage.overlayProductActive &&
-                this.store.otPage.hasOverlayProductId &&
-                this.store.otPage.editMode) ||
-            !this.store.otPage.hasOverlayProductId;
+        return (this.store.otPage.hasOverlayProductId &&
+            !this.store.otPage.overlayProductIsArchived &&
+            this.store.otPage.editMode) || !this.store.otPage.hasOverlayProductId;
     }
 
     get showDuplicateBtn() {
-        return this.store.otPage.overlayProductActive &&
-            this.store.otPage.hasOverlayProductId &&
+        return this.store.otPage.hasOverlayProductId &&
+            !this.store.otPage.overlayProductIsArchived &&
             !this.store.otPage.editMode;
     }
 
     get showPriceSelector() {
-        return this.store.otPage.hasPriceList && this.showAddToCartBtn;
+        return !this.store.otPage.overlayProductIsArchived && this.store.otPage.hasPriceList;
     }
 
     get showAddToCartBtn() {
-        return !this.store.otPage.hasOverlayProductId ||
-            (this.store.otPage.hasOverlayProductId && this.store.otPage.overlayProductActive);
+        return !this.store.otPage.overlayProductIsArchived && this.store.otPage.hasPriceList;
     }
 
     onInputNameFocusin() {
@@ -145,6 +147,7 @@ export class OverlayTemplatePageComponent extends Component {
         if (this.store.otPage.overlayProductIsArchived) {
             return;
         }
+        this.store.otPage.duplicateOverlayProduct();
     }
 
     onClickCancelCustomization() {

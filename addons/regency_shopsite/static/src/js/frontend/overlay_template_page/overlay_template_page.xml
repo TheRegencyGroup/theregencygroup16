@@ -44,11 +44,11 @@
                                     t-on-click="onClickCancelCustomization">
                                 Cancel
                             </button>
-<!--                            <button t-if="showDuplicateBtn"-->
-<!--                                    t-on-click="onClickDuplicateCustomization"-->
-<!--                                    class="btn btn-dark btn-sm">-->
-<!--                                Duplicate-->
-<!--                            </button>-->
+                            <button t-if="showDuplicateBtn"
+                                    t-on-click="onClickDuplicateCustomization"
+                                    class="btn btn-dark btn-sm">
+                                Duplicate
+                            </button>
                             <button t-if="showDeleteBtn"
                                     t-on-click="onClickDeleteCustomization"
                                     class="btn btn-dark btn-sm">
