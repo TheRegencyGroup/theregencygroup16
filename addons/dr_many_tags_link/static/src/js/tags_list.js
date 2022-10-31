@@ -14,7 +14,23 @@ patch(TagsList.prototype, 'dr_many_tags_link/static/src/js/tags_list', {
         if (ev.shiftKey) {
             return tag.onClick && tag.onClick(ev)
         } else {
-            return this.getActionForm(tag.resId, tag.resModel, tag.text);
+
+            console.log('dEBUG')
+
+            let resId = tag.resId;
+            let resModel = tag.resModel;
+            let text = tag.text;
+
+            if (resModel === 'purchase.requisition.line') {
+                // let res = rpc.query({
+                //     route: '/my/price_sheets/54/create_sale_order'
+                // });
+                // if (res) {
+                //      this.getActionForm(resId, resModel, text);
+                // }
+            }
+
+            return this.getActionForm(resId, resModel, text);
         }
     },
 

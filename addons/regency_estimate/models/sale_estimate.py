@@ -337,7 +337,12 @@ class SaleEstimateLine(models.Model):
     selected = fields.Boolean(default=False)
     purchase_agreement_ids = fields.Many2many('purchase.requisition', 'sale_estimate_line_purchase_agreements_rel',
                                      'estimate_line_id', 'purchase_agreement_id')
-    price_sheet_line_ids = fields.Many2many('product.price.sheet.line', 'product_price_sheet_line_sale_estimate_line_relation',
+    purchase_requisition_line_ids = fields.Many2many('purchase.requisition.line',
+                                                     'estimate_line_purchase_requisition_rel', 'estimate_line_id',
+                                                     'requisition_line_id',
+                                                     compute='_compute_purchase_requisition_line_ids', store=True)
+    price_sheet_line_ids = fields.Many2many('product.price.sheet.line',
+                                            'product_price_sheet_line_sale_estimate_line_relation',
                                             'sale_estimate_line_id', 'price_sheet_line_id')
     display_type = fields.Selection([
         ('line_section', "Section"),
@@ -441,3 +446,10 @@ class SaleEstimateLine(models.Model):
             name += "\n" + pacv.with_context(lang=self.estimate_id.partner_id.lang).display_name
 
         return name
+
+    @api.depends('estimate_id.purchase_agreement_ids.line_ids')
+    def _compute_purchase_requisition_line_ids(self):
+        for sel in self:
+            prl_ids = sel.estimate_id.purchase_agreement_ids.mapped('line_ids')
+            related_prl_ids = prl_ids.filtered(lambda f: f.product_id == sel.product_id)
+            sel.purchase_requisition_line_ids = [(6, 0, related_prl_ids.ids)]
