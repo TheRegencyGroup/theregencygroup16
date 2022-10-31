@@ -16,10 +16,6 @@
                 <field name="qty_remaining"/>
             </xpath>
 
-            <xpath expr="//field[@name='order_line']/tree/field[@name='price_unit']" position="attributes">
-                <attribute name="string">Customer Price</attribute>
-            </xpath>
-
         </field>
     </record>
 </odoo>

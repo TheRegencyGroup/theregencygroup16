@@ -36,6 +36,7 @@
         'views/crm_stage.xml',
         'wizard/choose_delivery_carrier_view.xml',
         'views/product_views.xml',
+        'views/delivery_carrier.xml',
     ],
     'demo': [
         'data/product_demo.xml',
