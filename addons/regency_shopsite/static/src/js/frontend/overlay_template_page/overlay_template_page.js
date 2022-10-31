@@ -72,6 +72,10 @@ export class OverlayTemplatePageComponent extends Component {
             !this.store.otPage.editMode;
     }
 
+    get showPriceSelector() {
+        return this.store.otPage.hasPriceList && this.showAddToCartBtn;
+    }
+
     get showAddToCartBtn() {
         return !this.store.otPage.hasOverlayProductId ||
             (this.store.otPage.hasOverlayProductId && this.store.otPage.overlayProductActive);
