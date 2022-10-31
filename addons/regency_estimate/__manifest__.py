@@ -14,6 +14,7 @@
         'sale_management',
         'web_one2many_duplicate_cr',
         'delivery',
+        'stock_mts_mto_rule'
     ],
     'category': 'Regency/Sales',
     'sequence': 10,

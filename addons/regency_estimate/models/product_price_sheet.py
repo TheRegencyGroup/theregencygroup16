@@ -82,6 +82,7 @@ class ProductPriceSheet(models.Model):
 
     def action_new_quotation(self):
         action = self.env["ir.actions.actions"]._for_xml_id("sale_crm.sale_action_quotations_new")
+        sol = self.env['sale.order_line']
         selected_lines = self.item_ids
         action['context'] = {
             'search_default_price_sheet_id': self.id,
@@ -108,6 +109,9 @@ class ProductPriceSheet(models.Model):
                     'price_unit': p.price,
                     'product_uom': p.product_id.uom_id.id,
                     'shipping_options': p.shipping_options,
+                    'route_id': self.env.ref('stock_dropshipping.route_drop_shipping').id
+                                if p.product_id.qty_available <= 0 and not sol.find_consumption_agreement(p.product_id, self.partner_id)
+                                else self.env.ref("stock_mts_mto_rule.route_mto_mts").id,
                     'allow_consumption_agreement': p.allow_consumption_agreement
                 }) for p in selected_lines.sorted('sequence')]
         }
@@ -202,6 +206,7 @@ class ProductPriceSheet(models.Model):
 
     def create_sale_order(self, lines_to_order):
         self.ensure_one()
+        sol = self.env['sale.order.line']
         order = self.env['sale.order'].create({'access_token': self.access_token,
                                        'partner_id': self.partner_id.id,
                                        'estimate_id': lines_to_order.price_sheet_id.estimate_id.id,
@@ -212,7 +217,10 @@ class ProductPriceSheet(models.Model):
                                                 'product_uom_qty': p.product_uom_qty,
                                                 'price_unit': p.price,
                                                 'product_uom': p.product_id.uom_id.id,
-
+                                                'route_id': self.env.ref('stock_dropshipping.route_drop_shipping').id
+                                                            if p.product_id.qty_available <= 0 and not sol.find_consumption_agreement(
+                                                                p.product_id, self.partner_id)
+                                                            else self.env.ref("stock_mts_mto_rule.route_mto_mts").id,
                                             }) for p in lines_to_order]})
         lines_to_order.write({'product_uom_qty': 0})
         return order
