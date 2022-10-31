@@ -80,7 +80,11 @@ export class OverlayTemplatePageComponent extends Component {
     }
 
     get showAddToCartBtn() {
-        return !this.store.otPage.overlayProductIsArchived && this.store.otPage.hasPriceList;
+        return !this.store.otPage.overlayProductIsArchived &&
+            ((this.store.otPage.hasPriceList &&
+                    this.store.otPage.overlayTemplateIsAvailableForActiveHotel) ||
+                (!this.store.otPage.hasPriceList &&
+                    !this.store.otPage.overlayTemplateIsAvailableForActiveHotel));
     }
 
     onInputNameFocusin() {

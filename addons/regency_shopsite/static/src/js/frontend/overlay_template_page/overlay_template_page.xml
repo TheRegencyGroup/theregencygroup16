@@ -131,7 +131,7 @@
                                 <span>Add to cart</span>
                                 <span class="icon-cart"></span>
                             </button>
-                            <span t-if="!store.otPage.overlayTemplateIsAvailableForActiveHotel"
+                            <span t-if="!store.otPage.overlayTemplateIsAvailableForActiveHotel and !store.otPage.overlayProductIsArchived"
                                   class="product-unavailable-message">
                                 <sup>*</sup>This product is unavailable for selected hotel
                             </span>
