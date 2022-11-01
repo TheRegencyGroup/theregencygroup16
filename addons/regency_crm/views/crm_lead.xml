@@ -67,6 +67,9 @@
                       <field name="number_of_keys"/>
                   </group>
              </xpath>
+             <xpath expr="//page[last()]" position="after">
+                <xpath expr="//page[@name='internal_notes']" position="move"/>
+             </xpath>
              <xpath expr="//page[@name='extra']/group/group[last()]" position="after">
                   <group string="Avendra Data">
                       <field name="avendra_id"/>
