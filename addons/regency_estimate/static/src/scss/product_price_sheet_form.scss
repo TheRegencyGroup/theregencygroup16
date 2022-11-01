@@ -1,0 +1,15 @@
+.r_binary_widget {
+  .o_select_file_button:not([data-tooltip='Edit']) {
+    font-size: 0;
+    font-family: 'FontAwesome';
+    text-rendering: auto;
+    -webkit-font-smoothing: antialiased;
+
+    &:before {
+      content: "\f093";
+      font-size: 1rem;
+      vertical-align: 0;
+      text-rendering: geometricPrecision;
+    }
+  }
+}

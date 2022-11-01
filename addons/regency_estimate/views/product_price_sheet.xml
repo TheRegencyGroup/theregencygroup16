@@ -58,8 +58,7 @@
                         </group>
                         <notebook>
                             <page name="pricelist" string="Price Sheet Items">
-                              <field name="item_ids"  widget="section_and_note_one2many"
-                                mode="tree" >
+                              <field name="item_ids"  widget="section_and_note_one2many" mode="tree">
                                   <tree string="Price Sheet Items" editable="bottom" default_order='product_id asc, min_quantity asc'>
                                       <control>
                                         <create name="add_product_control" string="Add a product"/>
@@ -91,7 +90,7 @@
                                       <field name="allow_consumption_agreement"/>
                                       <button name="action_check_prices" type="object" class="fa fa-history"/>
                                       <field name="attachment_id" string="Attach a file" widget="binary"
-                                             filename="attachment_name"/>
+                                             filename="attachment_name" class="r_binary_widget"/>
                                       <field name="attachment_name" invisible="1"/>
                                   </tree>
                               </field>
