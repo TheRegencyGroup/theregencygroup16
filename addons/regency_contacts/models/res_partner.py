@@ -13,6 +13,7 @@ class ResPartner(models.Model):
         ('customer', 'Customer'),
         ('vendor', 'Vendor')
     ])
+    vendor_type = fields.Selection([('overseas', 'Overseas'), ('domestic', 'Domestic')])
     cc_invoice = fields.Boolean(string='CC on Invoice')
     default_shipping_percent = fields.Float()
     on_hold = fields.Boolean()

@@ -99,6 +99,7 @@ class PurchaseRequisitionLine(models.Model):
     _inherit = 'purchase.requisition.line'
 
     partner_id = fields.Many2one('res.partner', 'Vendor')
+    produced_overseas = fields.Boolean('Produced Overseas')
     display_name = fields.Char(compute='_compute_display_name')
     state = fields.Selection([
         ('draft', 'Draft'),
