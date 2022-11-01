@@ -240,7 +240,7 @@ class SaleEstimate(models.Model):
 
     def action_new_price_sheet(self):
         action = self.env["ir.actions.actions"]._for_xml_id("regency_estimate.action_product_price_sheet_new")
-        confirmed_requisition_lines = self.purchase_agreement_ids.filtered(lambda a: a.state == 'done').mapped('line_ids')
+        confirmed_requisition_lines = self.purchase_agreement_ids.mapped('line_ids').filtered(lambda a: a.state == 'done')
         products_to_estimate = self.product_lines.mapped(lambda x: (x.product_id, x.product_uom_qty))
         new_requisition_lines = confirmed_requisition_lines.filtered(lambda x: (x.product_id, x.product_qty) not in products_to_estimate)
         sheet_lines = []
