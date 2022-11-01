@@ -5,7 +5,7 @@
             <field name="name">crm.lead.form</field>
             <field name="model">crm.lead</field>
             <field name="inherit_id" ref="sale_crm.crm_case_form_view_oppor"/>
-             <field name="arch" type="xml">
+            <field name="arch" type="xml">
                 <xpath expr="//button[@name='%(crm.crm_lead_lost_action)d']" position="replace">
                 </xpath>
                 <xpath expr="//button[@name='action_set_lost']" position="replace">
@@ -86,6 +86,12 @@
                       <field name="avendra_account_date_setup"/>
                       <field name="avendra_account_punchout_user_name"/>
                   </group>
+             </xpath>
+             <xpath expr="//group[@name='opportunity_partner']/field[@name='partner_id']" position="after">
+                 <field name="representative_name" string="Representative"/>
+             </xpath>
+             <xpath expr="//page[@name='lead']" position="after">
+                 <xpath expr="//page[@name='internal_notes']" position="move"/>
              </xpath>
          </field>
      </record>
