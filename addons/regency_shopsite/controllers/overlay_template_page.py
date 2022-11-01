@@ -100,6 +100,7 @@ class OverlayTemplatePage(http.Controller):
             raise ValidationError('Overlay template does not exists!')
         product_template_id = overlay_template_id.product_template_id
 
+        sol_with_overlay_product = False
         old_overlay_product = False
         overlay_product = False
         if overlay_product_id:
@@ -109,8 +110,6 @@ class OverlayTemplatePage(http.Controller):
             if old_overlay_product.product_id:
                 sol_with_overlay_product = request.env['sale.order.line'].sudo().search(
                     [('product_id', '=', old_overlay_product.product_id.id)])
-            else:
-                sol_with_overlay_product = False
             if sol_with_overlay_product and overlay_product_was_changed:
                 old_overlay_product.active = False
             else:
@@ -119,6 +118,7 @@ class OverlayTemplatePage(http.Controller):
                 if overlay_product_was_changed:
                     overlay_product.overlay_product_image_ids.unlink()
                     overlay_product.overlay_product_area_image_ids.unlink()
+                    overlay_product.product_id = False
 
         if not overlay_product:
             overlay_product = request.env['overlay.product'].sudo().create({
