@@ -1,4 +1,4 @@
-from odoo import fields, models
+from odoo import fields, models, api
 
 
 class ResPartner(models.Model):
@@ -12,16 +12,33 @@ class ResPartner(models.Model):
     def _compute_logo_url(self):
         for partner in self:
             image_field = 'image_256'
-            rec_id = partner.id if partner[image_field] else self.env['ir.config_parameter'].sudo().get_param('regency.fallback_partner_id')
-            model = partner._name
-            partner.logo_url = f'/web/image?model={model}&id={rec_id}&field={image_field}'
+            rec_id = partner._get_rec_id_with_image(image_field) or partner.id
+            partner.logo_url = partner._prepare_image_link(rec_id, image_field)
 
     def _compute_background_url(self):
         for partner in self:
             image_field = 'background_image'
-            rec_id = partner.id if partner[image_field] else self.env['ir.config_parameter'].sudo().get_param('regency.fallback_partner_id')
-            model = partner._name
-            background_url = f'/web/image?model={model}&id={rec_id}&field={image_field}'
-            has_background_img = bool(self.browse(rec_id)[image_field])
-            partner.background_url = background_url if has_background_img else ''
+            rec_id_with_image = partner._get_rec_id_with_image(image_field)
+            url = ''
+            if rec_id_with_image:
+                url = partner._prepare_image_link(rec_id_with_image, image_field)
+            partner.background_url = url
 
+    @api.model
+    def _prepare_image_link(self, rec_id: int, image_field_name: str) -> str:
+        self.ensure_one()
+        return f'/web/image?model={self._name}&id={rec_id}&field={image_field_name}'
+
+    def _get_rec_id_with_image(self, image_field_name: str) -> int or bool:
+        """Default Logo and background image could be stored in the res.config.settings or css
+        :returns: self.id or default id or False where image will be first found(if false css should be used)"""
+        self.ensure_one()
+        if self[image_field_name]:
+            return self.id
+
+        default_rec_id = self.env['ir.config_parameter'].sudo().get_param('regency.fallback_partner_id')
+        if default_rec_id:
+            default_rec_id = self.browse(int(default_rec_id))
+            if default_rec_id[image_field_name]:
+                return default_rec_id.id
+        return False
