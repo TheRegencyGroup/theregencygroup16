@@ -293,6 +293,7 @@ class SaleEstimate(models.Model):
         action['context'] = {
             'default_estimate_id': self.id
         }
+        action['views'] = [(self.env.ref('regency_estimate.product_price_sheet_list_view_from_estimate').id, 'tree')]
         action['domain'] = [('estimate_id', '=', self.id)]
         if len(self.price_sheet_ids) == 1:
             action['views'] = [(self.env.ref('regency_estimate.product_price_sheet_view_inherit').id, 'form')]
