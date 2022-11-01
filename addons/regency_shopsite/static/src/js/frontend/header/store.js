@@ -77,14 +77,10 @@ if (hotelSelectorData) {
             this._setActiveHotelBackground();
         }
 
-
         _setActiveHotelBackground() {
             let backgroundUrl = this.currentHotelBackgroundUrl;
-            let styleStr = "";
-            if (backgroundUrl && this.hasActiveHotel) {
-                styleStr = `url(${backgroundUrl}) center center no-repeat`
-            }
-            document.querySelector('.regency-top').style.background = styleStr;
+            document.querySelector('.regency-top').style['background-image'] =
+                backgroundUrl ? `url(${backgroundUrl})` : "";
         }
     }
 

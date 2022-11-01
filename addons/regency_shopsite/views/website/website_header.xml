@@ -4,7 +4,7 @@
         <xpath expr="//header[@id='top']" position="replace">
             <t t-set="background_url" t-value="request.env.user._active_hotel_background_url()"/>
             <t t-set="style_val" t-value=''/>
-            <t t-if="background_url" t-set="style_val" t-value="'background:url(' + background_url + ') center center no-repeat;'"/>
+            <t t-if="background_url" t-set="style_val" t-value="'background-image: url(' + background_url + ')'"/>
             <div class="regency-top" t-att-style="style_val">
                 <header id="regency_header">
                     <div class="container">

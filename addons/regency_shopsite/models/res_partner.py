@@ -12,21 +12,16 @@ class ResPartner(models.Model):
     def _compute_logo_url(self):
         for partner in self:
             image_field = 'image_256'
-            self.env['ir.config_parameter'].sudo().get_param('database.secret')
-            if not partner[image_field]:
-                a = 1
-            image_id = partner.id
-            image_model = partner._name
-            partner.logo_url = f'/web/image?model={image_model}&id={image_id}&field={image_field}'
+            rec_id = partner.id if partner[image_field] else self.env['ir.config_parameter'].sudo().get_param('regency.fallback_partner_id')
+            model = partner._name
+            partner.logo_url = f'/web/image?model={model}&id={rec_id}&field={image_field}'
 
     def _compute_background_url(self):
         for partner in self:
-            if partner.background_image:
-                image_id = partner.id
-                image_model = partner._name
-                image_field = 'background_image'
-                background_url = f'/web/image?model={image_model}&id={image_id}&field={image_field}'
-            else:
-                background_url = ''
-            partner.background_url = background_url
+            image_field = 'background_image'
+            rec_id = partner.id if partner[image_field] else self.env['ir.config_parameter'].sudo().get_param('regency.fallback_partner_id')
+            model = partner._name
+            background_url = f'/web/image?model={model}&id={rec_id}&field={image_field}'
+            has_background_img = bool(self.browse(rec_id)[image_field])
+            partner.background_url = background_url if has_background_img else ''
 
