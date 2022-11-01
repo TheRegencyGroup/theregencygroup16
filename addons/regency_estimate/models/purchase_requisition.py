@@ -99,3 +99,35 @@ class PurchaseRequisitionLine(models.Model):
     _inherit = 'purchase.requisition.line'
 
     partner_id = fields.Many2one('res.partner', 'Vendor')
+    produced_overseas = fields.Boolean('Produced Overseas')
+    display_name = fields.Char(compute='_compute_display_name')
+    state = fields.Selection([
+        ('draft', 'Draft'),
+        ('in_progress', 'In Progress'),
+        ('done', 'Done')
+    ], compute='_compute_state', store=True)
+    color = fields.Integer('Color Index', compute='_compute_color')
+
+    def _compute_display_name(self):
+        for prl in self:
+            prl.display_name = '%s %s' % (prl.requisition_id.user_id.name, prl.requisition_id.name)
+
+    def _compute_state(self):
+        for prl in self:
+            if prl.requisition_id.vendor_id and prl.price_unit > 0:
+                prl.state = 'done'
+                continue
+            elif prl.requisition_id.state == 'draft':
+                prl.state = 'draft'
+                continue
+            else:
+                prl.state = 'in_progress'
+
+    def _compute_color(self):
+        for rec in self:
+            if rec.state == 'in_progress':
+                rec.color = 3  # Yellow
+            elif rec.state == 'done':
+                rec.color = 10  # Green
+            else:
+                rec.color = 0  # White

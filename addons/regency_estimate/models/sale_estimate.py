@@ -267,6 +267,7 @@ class SaleEstimate(models.Model):
                                 'price': line.price_unit * 1.6,
                                 'total': line.price_unit * 1.6 * line.product_qty,
                                 'display_type': p.display_type,
+                                'produced_overseas': line.produced_overseas,
                                 'sale_estimate_line_ids': [(6, 0, [p.id])]
                             }))
                         seq += 1
@@ -297,7 +298,8 @@ class SaleEstimate(models.Model):
                 'min_quantity': x.product_qty,
                 'vendor_price': x.price_unit,
                 'price': x.price_unit * 1.6,
-                'total': x.price_unit * 1.6 * x.product_qty
+                'total': x.price_unit * 1.6 * x.product_qty,
+                'produced_overseas': x.produced_overseas
             }))
             seq += 1
 
@@ -314,6 +316,7 @@ class SaleEstimate(models.Model):
         action['context'] = {
             'default_estimate_id': self.id
         }
+        action['views'] = [(self.env.ref('regency_estimate.product_price_sheet_list_view_from_estimate').id, 'tree')]
         action['domain'] = [('estimate_id', '=', self.id)]
         if len(self.price_sheet_ids) == 1:
             action['views'] = [(self.env.ref('regency_estimate.product_price_sheet_view_inherit').id, 'form')]
@@ -358,7 +361,12 @@ class SaleEstimateLine(models.Model):
     selected = fields.Boolean(default=False)
     purchase_agreement_ids = fields.Many2many('purchase.requisition', 'sale_estimate_line_purchase_agreements_rel',
                                      'estimate_line_id', 'purchase_agreement_id')
-    price_sheet_line_ids = fields.Many2many('product.price.sheet.line', 'product_price_sheet_line_sale_estimate_line_relation',
+    purchase_requisition_line_ids = fields.Many2many('purchase.requisition.line',
+                                                     'estimate_line_purchase_requisition_rel', 'estimate_line_id',
+                                                     'requisition_line_id',
+                                                     compute='_compute_purchase_requisition_line_ids', store=True)
+    price_sheet_line_ids = fields.Many2many('product.price.sheet.line',
+                                            'product_price_sheet_line_sale_estimate_line_relation',
                                             'sale_estimate_line_id', 'price_sheet_line_id')
     display_type = fields.Selection([
         ('line_section', "Section"),
@@ -462,3 +470,11 @@ class SaleEstimateLine(models.Model):
             name += "\n" + pacv.with_context(lang=self.estimate_id.partner_id.lang).display_name
 
         return name
+
+    @api.depends('estimate_id.purchase_agreement_ids.line_ids')
+    def _compute_purchase_requisition_line_ids(self):
+        for sel in self:
+            prl_ids = sel.estimate_id.purchase_agreement_ids.mapped('line_ids')
+            related_prl_ids = prl_ids.filtered(
+                lambda f: f.product_id == sel.product_id and f.product_qty == sel.product_uom_qty)
+            sel.purchase_requisition_line_ids = [(6, 0, related_prl_ids.ids)]

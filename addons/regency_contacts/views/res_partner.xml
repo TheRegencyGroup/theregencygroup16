@@ -15,6 +15,8 @@
                 <group>
                     <field name="contact_type" widget="radio" options="{'horizontal': true}"
                            attrs="{'invisible': [('company_type', '!=', 'company')]}"/>
+                    <field name="vendor_type" widget="radio" options="{'horizontal': true}"
+                           attrs="{'invisible': [('contact_type', '!=', 'vendor')]}"/>
                 </group>
             </xpath>
 

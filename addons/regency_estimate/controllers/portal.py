@@ -367,6 +367,12 @@ class CustomerPortal(portal.CustomerPortal):
             'redirect_url': consumption.get_portal_url(query_string=query_string)
         }
 
+    @http.route('/requisition/get/<int:prl_id>', type='http', auth='public')
+    def get_requisition_id(self, prl_id):
+        purchase_requisition_line_id = request.env['purchase.requisition.line'].browse(prl_id)
+        purchase_requisition_id = purchase_requisition_line_id.requisition_id.id
+        return request.make_response(json.dumps({'pr_id': purchase_requisition_id}))
+
     @http.route('/price_sheet/get/<int:psl_id>', type='http', auth='public')
     def get_price_sheet_id(self, psl_id):
         price_sheet_line_id = request.env['product.price.sheet.line'].browse(psl_id)

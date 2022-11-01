@@ -269,7 +269,6 @@ class ProductPriceSheet(models.Model):
     total = fields.Float()
     shipping_options = fields.Char()
     partner_id = fields.Many2one('res.partner', 'Vendor')
-    FOB = fields.Char(string='FOB')
     duty = fields.Float()
     freight = fields.Float()
     unit_price = fields.Float(string='Unit Price', digits='Product Price', store=True, compute='_compute_unit_price')
@@ -286,6 +285,7 @@ class ProductPriceSheet(models.Model):
     insection_total_rows = fields.Integer(compute="_compute_insection_rownumber")
     attachment_id = fields.Binary('File', attachment=True)
     attachment_name = fields.Char()
+    produced_overseas = fields.Boolean('Produced Overseas')
     display_name = fields.Char(compute='_compute_display_name')
     color = fields.Integer('Color Index', compute='_compute_color')
 
