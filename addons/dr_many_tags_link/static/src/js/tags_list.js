@@ -26,7 +26,7 @@ patch(TagsList.prototype, 'dr_many_tags_link/static/src/js/tags_list', {
             type: "ir.actions.act_window",
             views: [[false, "form"]],
             view_mode: "form",
-            target: "new",
+            target: "current",
         });
     },
 });

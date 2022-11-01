@@ -1,6 +1,6 @@
 {
     'name': 'Regency Sales Estimates',
-    'version': '16.0.0.2',
+    'version': '16.0.0.3',
     'summary': '',
     'author': 'OpsWay',
     'description': "",
@@ -44,9 +44,10 @@
     ],
     'assets': {
         'web.assets_frontend': [
-            'regency_estimate/static/src/js/**/*'
+            'regency_estimate/static/src/frontend/js/**/*'
         ],
         'web.assets_backend': [
+            'regency_estimate/static/src/js/**/*',
             'regency_estimate/static/src/scss/**/*',
             'regency_estimate/static/src/xml/qty_at_date_widget.xml'
         ]

@@ -1,4 +1,5 @@
 import binascii
+import json
 from functools import partial
 from odoo.tools import formatLang
 
@@ -365,3 +366,9 @@ class CustomerPortal(portal.CustomerPortal):
             'force_refresh': True,
             'redirect_url': consumption.get_portal_url(query_string=query_string)
         }
+
+    @http.route('/price_sheet/get/<int:psl_id>', type='http', auth='public')
+    def get_price_sheet_id(self, psl_id):
+        price_sheet_line_id = request.env['product.price.sheet.line'].browse(psl_id)
+        price_sheet_id = price_sheet_line_id.price_sheet_id.id
+        return request.make_response(json.dumps({'ps_id': price_sheet_id}))

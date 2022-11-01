@@ -173,7 +173,9 @@
                                         <field name="purchase_agreement_ids" string="Assigned to" widget="many2many_tags"
                                             options="{'no_open': False, 'no_create': True, 'color_field': 'color',
                                             'no_edit_color': True}" />
-                                        <field name="price_sheet_line_ids" widget="many2many_tags" readonly="1"/>
+                                        <field name="price_sheet_line_ids" widget="many2many_tags"
+                                             options="{'no_open': False, 'no_create': True, 'color_field': 'color',
+                                            'no_edit_color': True}" readonly="1"/>
                                         <field name="comment"/>
                                     </tree>
                                 </field>
