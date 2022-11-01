@@ -21,11 +21,6 @@ class SaleOrderLine(models.Model):
     overlay_template_id = fields.Many2one('overlay.template', compute='_compute_overlay_template_id')
     price_list_id = fields.Many2one('product.pricelist', string='Pricelist')
 
-    @api.onchange('product_id')
-    def _onchange_pricelist_id(self):
-        if not self.price_list_id:
-            self.price_list_id = self.order_id.pricelist_id
-
     @api.model_create_multi
     def create(self, vals):
         res = super().create(vals)
