@@ -11,9 +11,12 @@ class ResPartner(models.Model):
 
     def _compute_logo_url(self):
         for partner in self:
+            image_field = 'image_256'
+            self.env['ir.config_parameter'].sudo().get_param('database.secret')
+            if not partner[image_field]:
+                a = 1
             image_id = partner.id
             image_model = partner._name
-            image_field = 'image_256'
             partner.logo_url = f'/web/image?model={image_model}&id={image_id}&field={image_field}'
 
     def _compute_background_url(self):

@@ -15,4 +15,5 @@ from . import (
     res_partner,
     overlay_product_image,
     overlay_product_area_image,
+    res_config_settings,
 )

@@ -4,6 +4,7 @@
     'author': 'OpsWay',
     'license': "Other proprietary",
     'depends': [
+        'website',
         'website_sale',
         'fe_owl_base',
         'product',
@@ -13,6 +14,7 @@
     'data': [
         'security/ir.model.access.csv',
         'security/rules.xml',
+        'security/groups.xml',
         'data/overlay_position.xml',
         'data/product_attribute.xml',
         'data/ir_config_parameter.xml',
@@ -30,8 +32,8 @@
         'views/product_pricelist_item_view.xml',
         'views/product_product.xml',
         'views/website/sale_portal_templates.xml',
-        'security/groups.xml',
         'views/res_partner.xml',
+        'views/res_config_settings.xml',
     ],
     'assets': {
         'web.assets_frontend': [
