@@ -1,6 +1,6 @@
 {
     'name': 'Regency Sales Estimates',
-    'version': '16.0.0.1',
+    'version': '16.0.0.2',
     'summary': '',
     'author': 'OpsWay',
     'description': "",
