@@ -30,28 +30,32 @@ if (hotelSelectorData) {
         }
 
         get currentHotelName() {
-            if (this.isNoActiveHotel) {
+            if (!this.hasActiveHotel) {
                 return "";
             }
-            return this.hotels[this.activeHotel].name;
+            return this.activeHotelData.name;
         }
 
         get currentHotelLogoUrl() {
-            if (this.isNoActiveHotel) {
+            if (!this.hasActiveHotel) {
                 return "";
             }
-            return this.hotels[this.activeHotel].logo_url;
+            return this.activeHotelData.logo_url;
         }
 
         get currentHotelBackgroundUrl() {
-            if (this.isNoActiveHotel) {
+            if (!this.hasActiveHotel) {
                 return "";
             }
-            return this.hotels[this.activeHotel].background_url;
+            return this.activeHotelData.background_url;
         }
 
-        get isNoActiveHotel() {
-            return !this.activeHotel || !this.hotels[this.activeHotel]
+        get hasActiveHotel() {
+            return this.activeHotel && this.activeHotelData;
+        }
+
+        get activeHotelData(){
+            return this.hotels[this.activeHotel];
         }
 
         _updateActiveHotel = () => {
@@ -70,16 +74,17 @@ if (hotelSelectorData) {
             value = parseInt(value);
             this._activeHotel = value;
             dropPrevious.exec(this._updateActiveHotel);
-            this._setActiveHotelBackground()
+            this._setActiveHotelBackground();
         }
 
+
         _setActiveHotelBackground() {
-            let backgroundUrl = this.currentHotelBackgroundUrl
-            let cssRec = 'background: ""'
-            if (backgroundUrl && !this.isNoActiveHotel) {
-                cssRec = `background: url(${backgroundUrl}) center center no-repeat;`
+            let backgroundUrl = this.currentHotelBackgroundUrl;
+            let styleStr = "";
+            if (backgroundUrl && this.hasActiveHotel) {
+                styleStr = `url(${backgroundUrl}) center center no-repeat`
             }
-            document.querySelector('.regency-top').style = cssRec
+            document.querySelector('.regency-top').style.background = styleStr;
         }
     }
 
