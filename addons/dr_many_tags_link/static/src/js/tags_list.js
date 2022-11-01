@@ -14,9 +14,6 @@ patch(TagsList.prototype, 'dr_many_tags_link/static/src/js/tags_list', {
         if (ev.shiftKey) {
             return tag.onClick && tag.onClick(ev)
         } else {
-
-            console.log('dEBUG')
-
             let resId = tag.resId;
             let resModel = tag.resModel;
             let text = tag.text;
