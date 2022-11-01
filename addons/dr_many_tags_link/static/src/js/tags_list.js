@@ -22,12 +22,8 @@ patch(TagsList.prototype, 'dr_many_tags_link/static/src/js/tags_list', {
             let text = tag.text;
 
             if (resModel === 'purchase.requisition.line') {
-                // let res = rpc.query({
-                //     route: '/my/price_sheets/54/create_sale_order'
-                // });
-                // if (res) {
-                //      this.getActionForm(resId, resModel, text);
-                // }
+                fetch('/requisition/get/' + resId).then((response) => response.json())
+                    .then((data) => {return this.getActionForm(data.pr_id, 'purchase.requisition', text)});
             }
 
             return this.getActionForm(resId, resModel, text);

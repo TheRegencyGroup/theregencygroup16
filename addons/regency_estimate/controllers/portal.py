@@ -1,4 +1,5 @@
 import binascii
+import json
 from functools import partial
 from odoo.tools import formatLang
 
@@ -365,3 +366,9 @@ class CustomerPortal(portal.CustomerPortal):
             'force_refresh': True,
             'redirect_url': consumption.get_portal_url(query_string=query_string)
         }
+
+    @http.route('/requisition/get/<int:prl_id>', type='http', auth='public')
+    def get_requisition_id(self, prl_id):
+        purchase_requisition_line_id = request.env['purchase.requisition.line'].browse(prl_id)
+        purchase_requisition_id = purchase_requisition_line_id.requisition_id.id
+        return request.make_response(json.dumps({'pr_id': purchase_requisition_id}))
