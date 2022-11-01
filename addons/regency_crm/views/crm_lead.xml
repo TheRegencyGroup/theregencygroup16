@@ -93,9 +93,6 @@
              <xpath expr="//group[@name='opportunity_partner']/field[@name='partner_id']" position="after">
                  <field name="representative_name" string="Representative"/>
              </xpath>
-             <xpath expr="//page[@name='lead']" position="after">
-                 <xpath expr="//page[@name='internal_notes']" position="move"/>
-             </xpath>
          </field>
      </record>
 

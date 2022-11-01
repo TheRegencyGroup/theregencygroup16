@@ -14,16 +14,7 @@ patch(TagsList.prototype, 'dr_many_tags_link/static/src/js/tags_list', {
         if (ev.shiftKey) {
             return tag.onClick && tag.onClick(ev)
         } else {
-            let resId = tag.resId;
-            let resModel = tag.resModel;
-            let text = tag.text;
-
-            if (resModel === 'purchase.requisition.line') {
-                fetch('/requisition/get/' + resId).then((response) => response.json())
-                    .then((data) => {return this.getActionForm(data.pr_id, 'purchase.requisition', text)});
-            }
-
-            return this.getActionForm(resId, resModel, text);
+            return this.getActionForm(tag.resId, tag.resModel, tag.text);
         }
     },
 
@@ -35,7 +26,7 @@ patch(TagsList.prototype, 'dr_many_tags_link/static/src/js/tags_list', {
             type: "ir.actions.act_window",
             views: [[false, "form"]],
             view_mode: "form",
-            target: "new",
+            target: "current",
         });
     },
 });

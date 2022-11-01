@@ -286,6 +286,21 @@ class ProductPriceSheet(models.Model):
     attachment_id = fields.Binary('File', attachment=True)
     attachment_name = fields.Char()
     produced_overseas = fields.Boolean('Produced Overseas')
+    display_name = fields.Char(compute='_compute_display_name')
+    color = fields.Integer('Color Index', compute='_compute_color')
+
+    def _compute_display_name(self):
+        for psl in self:
+            psl.display_name = '%s %s' % (psl.price_sheet_id.name, psl.name)
+
+    def _compute_color(self):
+        for rec in self:
+            if rec.price_sheet_id.state == 'draft':
+                rec.color = 3  # Yellow
+            elif rec.price_sheet_id.state == 'confirmed':
+                rec.color = 10  # Green
+            else:
+                rec.color = 0  # White
 
     @api.depends('vendor_price', 'duty', 'freight')
     def _compute_unit_price(self):
