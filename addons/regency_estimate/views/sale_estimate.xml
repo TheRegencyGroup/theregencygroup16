@@ -170,9 +170,9 @@
                                         </field>
                                         <field name="product_no_variant_attribute_value_ids" invisible="1" />
                                         <field name="is_configurable_product" invisible="1" />
-                                        <field name="purchase_agreement_ids" string="Assigned to" widget="many2many_tags"
-                                            options="{'no_open': False, 'no_create': True, 'color_field': 'color',
-                                            'no_edit_color': True}" />
+                                        <field name="purchase_requisition_line_ids" widget="many2many_tags"
+                                               string="Assigned to"
+                                               options="{'no_open': False, 'no_create': True, 'color_field': 'color','no_edit_color': True}"/>
                                         <field name="price_sheet_line_ids" widget="many2many_tags" readonly="1"/>
                                         <field name="comment"/>
                                     </tree>
