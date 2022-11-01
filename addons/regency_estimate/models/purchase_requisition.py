@@ -112,9 +112,10 @@ class PurchaseRequisitionLine(models.Model):
         for prl in self:
             prl.display_name = '%s %s' % (prl.requisition_id.user_id.name, prl.requisition_id.name)
 
+    @api.depends('requisition_id', 'partner_id', 'requisition_id.state', 'price_unit')
     def _compute_state(self):
         for prl in self:
-            if prl.requisition_id.vendor_id and prl.price_unit > 0:
+            if prl.partner_id and prl.price_unit > 0:
                 prl.state = 'done'
                 continue
             elif prl.requisition_id.state == 'draft':

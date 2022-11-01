@@ -113,19 +113,7 @@
             <field name="model">product.price.sheet</field>
             <field name="arch" type="xml">
                 <tree>
-                     <field name="name"/>
-                    <field name="currency_id"/>
-                    <field name="opportunity_id"/>
-                </tree>
-            </field>
-        </record>
-
-        <record id="product_price_sheet_list_view_from_estimate" model="ir.ui.view">
-            <field name="name">product.price.sheet.tree.from.estimate</field>
-            <field name="model">product.price.sheet</field>
-            <field name="arch" type="xml">
-                <tree>
-                     <field name="name"/>
+                    <field name="name"/>
                     <field name="currency_id"/>
                     <field name="opportunity_id"/>
                     <field name="state"/>
