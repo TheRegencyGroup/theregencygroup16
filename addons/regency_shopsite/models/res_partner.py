@@ -26,7 +26,10 @@ class ResPartner(models.Model):
 
     @api.model
     def _prepare_image_link(self, rec_id: int, image_field_name: str) -> str:
+        """if rec_id has no image, oddo displays default "no image" pic"""
         self.ensure_one()
+        if not isinstance(rec_id, int) or rec_id < 1:
+            raise TypeError(f"rec_id should be int with value:{rec_id} > 0")
         return f'/web/image?model={self._name}&id={rec_id}&field={image_field_name}'
 
     def _get_rec_id_with_image(self, image_field_name: str) -> int or bool:
