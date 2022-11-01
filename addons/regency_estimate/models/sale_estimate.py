@@ -264,7 +264,8 @@ class SaleEstimate(models.Model):
                             'vendor_price': line.price_unit,
                             'price': line.price_unit * 1.6,
                             'total': line.price_unit * 1.6 * line.product_qty,
-                            'display_type': p.display_type
+                            'display_type': p.display_type,
+                            'produced_overseas': line.produced_overseas,
                         }))
                     seq += 1
         seq = self.product_lines.sorted('sequence')[-1].sequence
@@ -277,7 +278,8 @@ class SaleEstimate(models.Model):
                 'min_quantity': l.product_qty,
                 'vendor_price': l.price_unit,
                 'price': l.price_unit * 1.6,
-                'total': l.price_unit * 1.6 * l.product_qty
+                'total': l.price_unit * 1.6 * l.product_qty,
+                'produced_overseas': l.produced_overseas,
             }))
             seq += 1
 
