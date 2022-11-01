@@ -451,5 +451,6 @@ class SaleEstimateLine(models.Model):
     def _compute_purchase_requisition_line_ids(self):
         for sel in self:
             prl_ids = sel.estimate_id.purchase_agreement_ids.mapped('line_ids')
-            related_prl_ids = prl_ids.filtered(lambda f: f.product_id == sel.product_id)
+            related_prl_ids = prl_ids.filtered(
+                lambda f: f.product_id == sel.product_id and f.product_qty == sel.product_uom_qty)
             sel.purchase_requisition_line_ids = [(6, 0, related_prl_ids.ids)]
