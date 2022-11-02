@@ -6,26 +6,20 @@ class StockPickingBatch(models.Model):
 
     tracking_number = fields.Char()
     account_move_id = fields.Many2one('account.move', domain=[('move_type', '=', 'in_invoice')], string='Vendor Bill')
-    landed_cost_ids = fields.One2many('stock.landed.cost', compute='_compute_landed_cost_ids')
-    landed_cost_count = fields.Integer(compute='_compute_landed_costs_count')
-    vendor_bill_ids = fields.One2many('account.move', compute='_compute_vendor_bill_ids')
-    vendor_bills_count = fields.Integer(compute='_compute_vendor_bill_count')
+    landed_cost_ids = fields.One2many('stock.landed.cost', compute='_compute_landed_costs')
+    landed_cost_count = fields.Integer(compute='_compute_landed_costs')
+    vendor_bill_ids = fields.One2many('account.move', compute='_compute_vendor_bills')
+    vendor_bills_count = fields.Integer(compute='_compute_vendor_bills')
 
-    def _compute_vendor_bill_ids(self):
+    def _compute_vendor_bills(self):
         for rec in self:
             rec.vendor_bill_ids = self.env['account.move'].browse(
                 set([x.vendor_bill_id.id for x in rec.landed_cost_ids]))
-
-    def _compute_vendor_bill_count(self):
-        for rec in self:
             rec.vendor_bills_count = len(rec.vendor_bill_ids)
 
-    def _compute_landed_cost_ids(self):
+    def _compute_landed_costs(self):
         for rec in self:
             rec.landed_cost_ids = self.env['stock.landed.cost'].search([('picking_batch_ids', 'in', self.id)])
-
-    def _compute_landed_costs_count(self):
-        for rec in self:
             rec.landed_cost_count = len(rec.landed_cost_ids)
 
     def open_landed_costs(self):
