@@ -82,7 +82,6 @@ class ProductPriceSheet(models.Model):
 
     def action_new_quotation(self):
         action = self.env["ir.actions.actions"]._for_xml_id("sale_crm.sale_action_quotations_new")
-        sol = self.env['sale.order_line']
         selected_lines = self.item_ids
         action['context'] = {
             'search_default_price_sheet_id': self.id,
