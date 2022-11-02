@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="portal_link_wizard_view_form" model="ir.ui.view">
+        <field name="name">portal.link.wizard.form</field>
+        <field name="model">portal.link.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Generate Portal Link">
+                <group>
+                    <field name="name" readonly="1" widget="CopyClipboardChar"/>
+                </group>
+                <footer>
+                    <button string="Close" class="btn-primary" special="cancel" data-hotkey="z"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+</odoo>

@@ -239,7 +239,6 @@ class SaleEstimate(models.Model):
         return action
 
     def action_new_price_sheet(self):
-        action = self.env["ir.actions.actions"]._for_xml_id("regency_estimate.action_product_price_sheet_new")
         confirmed_requisition_lines = self.purchase_agreement_ids.mapped('line_ids').filtered(lambda a: a.state == 'done')
         products_to_estimate = self.product_lines.mapped(lambda x: (x.product_id, x.product_uom_qty))
         new_requisition_lines = confirmed_requisition_lines.filtered(lambda x: (x.product_id, x.product_qty) not in products_to_estimate)
@@ -302,12 +301,20 @@ class SaleEstimate(models.Model):
                 'produced_overseas': x.produced_overseas
             }))
             seq += 1
-
-        action['context'] = {
-            'search_default_estimate_id': self.id,
-            'default_estimate_id': self.id,
-            'default_item_ids': sheet_lines
-        }
+        existing_draft_pricesheets = self.price_sheet_ids.filtered(lambda x: x.state == 'draft')
+        if existing_draft_pricesheets:
+            pricesheet = existing_draft_pricesheets[0]
+            pricesheet.update_lines(sheet_lines)
+            action = self.action_view_price_sheet()
+            action['views'] = [(self.env.ref('regency_estimate.product_price_sheet_view_inherit').id, 'form')]
+            action['res_id'] = pricesheet.id
+        else:
+            action = self.env["ir.actions.actions"]._for_xml_id("regency_estimate.action_product_price_sheet_new")
+            action['context'] = {
+                'search_default_estimate_id': self.id,
+                'default_estimate_id': self.id,
+                'default_item_ids': sheet_lines
+            }
         self.product_lines.filtered('selected').write({'selected': False})
         return action
 
