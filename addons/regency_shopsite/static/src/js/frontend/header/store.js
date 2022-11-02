@@ -30,10 +30,32 @@ if (hotelSelectorData) {
         }
 
         get currentHotelName() {
-            if (!this.activeHotel || !this.hotels[this.activeHotel]) {
+            if (!this.hasActiveHotel) {
                 return "";
             }
-            return this.hotels[this.activeHotel].name;
+            return this.activeHotelData.name;
+        }
+
+        get currentHotelLogoUrl() {
+            if (!this.hasActiveHotel) {
+                return "";
+            }
+            return this.activeHotelData.logo_url;
+        }
+
+        get currentHotelBackgroundUrl() {
+            if (!this.hasActiveHotel) {
+                return "";
+            }
+            return this.activeHotelData.background_url;
+        }
+
+        get hasActiveHotel() {
+            return this.activeHotel && this.activeHotelData;
+        }
+
+        get activeHotelData(){
+            return this.hotels[this.activeHotel];
         }
 
         _updateActiveHotel = () => {
@@ -52,6 +74,13 @@ if (hotelSelectorData) {
             value = parseInt(value);
             this._activeHotel = value;
             dropPrevious.exec(this._updateActiveHotel);
+            this._setActiveHotelBackground();
+        }
+
+        _setActiveHotelBackground() {
+            let backgroundUrl = this.currentHotelBackgroundUrl;
+            document.querySelector('.regency-top').style['background-image'] =
+                backgroundUrl ? `url(${backgroundUrl})` : "";
         }
     }
 
