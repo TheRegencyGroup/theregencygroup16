@@ -4,6 +4,7 @@
     'author': 'OpsWay',
     'license': "Other proprietary",
     'depends': [
+        'sale',
         'website',
         'website_sale',
         'fe_owl_base',
@@ -34,6 +35,7 @@
         'views/website/sale_portal_templates.xml',
         'views/res_partner.xml',
         'views/res_config_settings.xml',
+        'views/sale_portal_templates.xml',
     ],
     'assets': {
         'web.assets_frontend': [
