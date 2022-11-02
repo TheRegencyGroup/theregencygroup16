@@ -13,14 +13,14 @@
                 <xpath expr="//button[@id='draft_confirm']" position="replace">
                      <button name="button_confirm" type="object" attrs="{'invisible': ['|', ('state', '!=', 'draft'), ('requisition_id', '!=', False), ] }" string="Confirm Order" id="draft_confirm"/>
                 </xpath>
+                <xpath expr="//field[@name='requisition_id']" position="after">
+                    <field name="show_column_produced_overseas" invisible="1"/>
+                </xpath>
                 <xpath expr="//field[@name='order_line']/tree/field[@name='name']" position="after">
-                    <field name="produced_overseas" attrs="{'column_invisible': [('parent.vendor_type', '=', 'domestic')]}"/>
+                    <field name="produced_overseas" attrs="{'column_invisible': [('parent.show_column_produced_overseas', '=', False)]}"/>
                 </xpath>
                 <xpath expr="//field[@name='requisition_id']" position="attributes">
                     <attribute name="string">Purchase Requisition</attribute>
-                </xpath>
-                <xpath expr="//field[@name='requisition_id']" position="after">
-                    <field name="vendor_type" invisible="1"/>
                 </xpath>
             </field>
          </record>
