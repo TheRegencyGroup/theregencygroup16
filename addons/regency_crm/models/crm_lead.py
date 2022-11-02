@@ -24,6 +24,14 @@ class CRMLead(models.Model):
     avendra_account_date_setup = fields.Date(string="Account Setup Date")
     avendra_account_punchout_user_name = fields.Char(string="Account Punchout User Name")
     number_of_keys = fields.Integer()
+    is_existing_customer = fields.Boolean(compute='_compute_is_existing_customer', store=True)
+
+    @api.depends('account_number', 'avendra_account_address1', 'avendra_account_address2', 'street', 'street2')
+    def _compute_is_existing_customer(self):
+        for rec in self:
+            rec.is_existing_customer = rec.account_number\
+                                       and rec.street == rec.avendra_account_address1\
+                                       and rec.street2 == rec.avendra_account_address2
 
     @api.depends('message_ids')
     def _compute_contacted(self):
