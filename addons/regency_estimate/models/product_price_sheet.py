@@ -408,16 +408,26 @@ class ProductPriceSheetLine(models.Model):
     def action_check_prices(self):
         customer = self.price_sheet_id.partner_id
         if customer:
-            sale_orders = self.env['sale.order'].search([('state', '=', 'sale'), ('partner_id', '=', customer.id)])
-            so_lines = sale_orders.mapped('order_line')
+            related_so_lines = self.env['sale.order.line'].search([('order_id.state', '=', 'sale'),
+                                                                   ('order_id.partner_id', '=', customer.id),
+                                                                   ('product_id', '=', self.product_id.id),
+                                                                   ('qty_invoiced', '>', 0),
+                                                                   ('qty_delivered', '>', 0)])
             price_lines = self.env['previous.price.line.wizard']
-            related_so_lines = so_lines.filtered(lambda f: f.product_id == self.product_id and f.product_id and (
-                        f.qty_invoiced > 0 or f.qty_delivered > 0))
             for r_line in related_so_lines:
                 if r_line.product_id:
+                    p_line = r_line.get_purchase_order_lines().filtered(lambda x: x.state != 'cancel')
+                    p_line = p_line[0] if p_line else False
                     new_price_line = self.env['previous.price.line.wizard'].create(
                         {'product_id': r_line.product_id.id, 'price': r_line.price_unit,
-                         'date_order': r_line.order_id.date_order, 'qty': r_line.product_uom_qty})
+                         'date_order': r_line.order_id.date_order, 'qty': r_line.product_uom_qty,
+                         'cost_price': r_line.purchase_price, 'margin_percent': r_line.margin_percent,
+                         'ca_price': r_line.consumption_agreement_line_id.price_unit if r_line.consumption_agreement_line_id else 0,
+                         'ca_qty': r_line.consumption_agreement_line_id.qty_allowed if r_line.consumption_agreement_line_id else 0,
+                         'ca_date_order': r_line.consumption_agreement_line_id.signed_date if r_line.consumption_agreement_line_id else False,
+                         'po_price': p_line.price_unit if p_line else 0,
+                         'po_qty': p_line.product_uom_qty if p_line else 0
+                         })
                     price_lines += new_price_line
             wizard_id = self.env['previous.prices.wizard'].create({'name': 'Prices'})
             price_lines.write({'price_wizard_id': wizard_id.id})
