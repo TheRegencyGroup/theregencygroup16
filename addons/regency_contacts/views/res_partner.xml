@@ -16,10 +16,9 @@
                     <field name="contact_type" widget="radio" options="{'horizontal': true}"
                            attrs="{'invisible': [('company_type', '!=', 'company')]}"/>
                     <field name="vendor_type" widget="radio" options="{'horizontal': true}"
-                           attrs="{'invisible': [('contact_type', '!=', 'vendor')]}"/>
+                           attrs="{'invisible': ['|', ('contact_type', '!=', 'vendor'), ('is_company', '=', False)]}"/>
                 </group>
             </xpath>
-
 
             <xpath expr="//field[@name='phone']" position="after">
                 <field name="phone_extra"/>

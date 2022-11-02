@@ -11,7 +11,24 @@ class PurchaseOrder(models.Model):
     ], ondelete={
         'confirmed_prices': lambda recs: recs.write({'state': 'draft'}),
     })
-    vendor_type = fields.Selection(related='partner_id.vendor_type')
+    show_column_produced_overseas = fields.Boolean(compute='_compute_show_column_produced_overseas')
+
+    @api.depends('partner_id', 'partner_id.is_company', 'partner_id.contact_type', 'partner_id.vendor_type')
+    def _compute_show_column_produced_overseas(self):
+        for rec in self:
+            rec.show_column_produced_overseas = rec.partner_id.is_company\
+                                                and rec.partner_id.contact_type == 'vendor'\
+                                                and rec.partner_id.vendor_type == 'overseas'
+
+    @api.onchange('partner_id')
+    @api.depends('partner_id', 'partner_id.is_company', 'partner_id.contact_type', 'partner_id.vendor_type')
+    def _onchange_partner_id(self):
+        if self.partner_id.is_company\
+                and self.partner_id.contact_type == 'vendor'\
+                and self.partner_id.vendor_type == 'overseas':
+            self.order_line.write({'produced_overseas': True})
+        else:
+            self.order_line.write({'produced_overseas': False})
 
     def action_confirm_prices(self):
         self.write({'state': 'confirmed_prices'})
@@ -46,7 +63,9 @@ class MyPurchaseOrderLine(models.Model):
     @api.onchange('product_id')
     def onchange_product_id(self):
         super().onchange_product_id()
-        self.produced_overseas = self.partner_id.vendor_type == 'overseas'
+        self.produced_overseas = self.partner_id.is_company \
+                                 and self.partner_id.contact_type == 'vendor' \
+                                 and self.partner_id.vendor_type == 'overseas'
 
     def _new_compute_price_unit_and_date_planned_and_name(self):
         """Override for fixing bugs"""
