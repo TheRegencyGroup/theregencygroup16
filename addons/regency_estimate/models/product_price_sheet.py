@@ -295,8 +295,8 @@ class ProductPriceSheetLine(models.Model):
     total = fields.Float()
     shipping_options = fields.Char()
     partner_id = fields.Many2one('res.partner', 'Vendor')
-    duty = fields.Float()
-    freight = fields.Float()
+    duty = fields.Float(digits='Product Price')
+    freight = fields.Float(digits='Product Price')
     unit_price = fields.Float(string='Unit Price', digits='Product Price', store=True, compute='_compute_unit_price')
     production_lead_time = fields.Char()
     shipping_lead_time = fields.Char()
@@ -361,10 +361,10 @@ class ProductPriceSheetLine(models.Model):
                 first_rec = False
             prev_rec = rec
 
-    @api.depends('price', 'vendor_price')
+    @api.depends('price', 'unit_price')
     def _compute_margin(self):
         for rec in self:
-            rec.margin = 100 * (rec.price - rec.vendor_price) / rec.price if rec.price else 0
+            rec.margin = 100 * (rec.price - rec.unit_price) / rec.price if rec.price else 0
 
     @api.onchange('total')
     def onchange_total(self):
