@@ -159,7 +159,6 @@ class ProductPriceSheet(models.Model):
                 currency = partner.property_purchase_currency_id or self.env.company.currency_id
                 price = line.vendor_price
 
-
                 supplierinfo = self._prepare_supplier_info(partner, line, price, currency)
 
                 vals = {
@@ -170,6 +169,20 @@ class ProductPriceSheet(models.Model):
                 except AccessError:  # no write access rights -> just ignore
                     break
         self.write({'state': 'confirmed'})
+
+    def action_get_portal_link(self):
+        if self.state == 'draft':
+            self.action_confirm()
+        base_url = self.get_base_url()
+        wiz = self.env['portal.link.wizard'].create({'name': f'{base_url}{self.get_portal_url()}'})
+        return {
+            'name': 'Portal Link',
+            'view_mode': 'form',
+            'res_model': 'portal.link.wizard',
+            'res_id': wiz.id,
+            'type': 'ir.actions.act_window',
+            'target': 'new'
+        }
 
     def has_to_be_signed(self):
         return False
@@ -239,8 +252,15 @@ class ProductPriceSheet(models.Model):
         lines_to_order.write({'product_uom_qty': 0})
         return order
 
+    def update_lines(self, sheet_lines):
+        for rec in self:
+            existing_product_lines = self.item_ids.mapped(lambda x: (x.product_id.id, x.partner_id.id, x.product_uom_qty))
+            for line in sheet_lines:
+                if (line[2].get('product_id'), line[2].get('partner_id'), line[2].get('product_uom_qty')) not in existing_product_lines:
+                    rec.write({'item_ids': [line]})
 
-class ProductPriceSheet(models.Model):
+
+class ProductPriceSheetLine(models.Model):
     _name = 'product.price.sheet.line'
     _order = 'product_id ASC, min_quantity ASC'
 
