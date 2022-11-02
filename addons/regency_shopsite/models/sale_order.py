@@ -4,6 +4,12 @@ from odoo import fields, models, api
 class SaleOrder(models.Model):
     _inherit = 'sale.order'
 
+    def action_confirm(self):
+        res = super(SaleOrder, self).action_confirm()
+        for order in self:
+            order.order_line._compute_image_snapshot()
+        return res
+
     def _prepare_order_line_values(self, product_id, quantity, linked_line_id=False, no_variant_attribute_values=None,
                                    product_custom_attribute_values=None, **kwargs):
         result = super()._prepare_order_line_values(product_id, quantity, linked_line_id, no_variant_attribute_values,
@@ -20,12 +26,19 @@ class SaleOrderLine(models.Model):
 
     overlay_template_id = fields.Many2one('overlay.template', compute='_compute_overlay_template_id')
     price_list_id = fields.Many2one('product.pricelist', string='Pricelist')
+    image_snapshot = fields.Image('Product Image', compute='_compute_image_snapshot', store=True)
 
     @api.model_create_multi
     def create(self, vals):
         res = super().create(vals)
         res._link_overlay_product_to_product_variant()
         return res
+
+    def _compute_image_snapshot(self):
+        """should be called manually in right moment of business logic
+        (if you really should synchronize image for order lines in existing order)"""
+        for sol in self:
+            sol.image_snapshot = sol.product_id.overlay_product_id._preview_image()
 
     def _link_overlay_product_to_product_variant(self):
         customization_attribute_id = self.env.ref('regency_shopsite.customization_attribute')
