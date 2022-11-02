@@ -4,7 +4,7 @@
         <div t-if="store.hotelSelector" t-att-class="{'header-menu-select':true,opened:this.state.isOpen}">
             <a href="#" class="header-menu-button" t-on-click.prevent="onToggle">
                 <div class="header-menu-button-logo">
-                    <img src="/regency_shopsite/static/src/img/logo-hotel.png"
+                    <img t-att-src="store.hotelSelector.currentHotelLogoUrl"
                          t-att-alt="store.hotelSelector.currentHotelName"/>
                 </div>
                 <div class="header-menu-text" t-esc="store.hotelSelector.currentHotelName"/>
