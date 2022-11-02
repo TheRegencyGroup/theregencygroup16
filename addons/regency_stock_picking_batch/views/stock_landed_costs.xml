@@ -9,8 +9,13 @@
             <xpath expr="//field[@name='picking_ids']" position="replace">
                 <field name="picking_ids" invisible="1"/>
                 <field name="picking_batch_ids" widget="many2many_tags"
-                       options="{'no_create_edit': True}" domain="[('company_id', '=', company_id)]"/>
+                       options="{'no_create_edit': True}" domain="[('company_id', '=', company_id)]"
+                       attrs="{'invisible': [('target_model', '!=', 'batch_transfers')]}"/>
             </xpath>
+            <field name="target_model" position="attributes">
+                <attribute name="invisible">0</attribute>
+                <attribute name="widget"></attribute>
+            </field>
         </field>
     </record>
 

@@ -8,6 +8,8 @@ class StockLandedCost(models.Model):
         'stock.picking.batch', string='Batch transfers',
         copy=False, states={'done': [('readonly', True)]})
     picking_ids = fields.Many2many(compute='_compute_picking_ids', store=True)
+    target_model = fields.Selection(selection_add=[('batch_transfers', 'Batch Transfers')],
+                                    ondelete={'batch_transfers': 'set default'})
 
     @api.depends('picking_batch_ids')
     def _compute_picking_ids(self):
