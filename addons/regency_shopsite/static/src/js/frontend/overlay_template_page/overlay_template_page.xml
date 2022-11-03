@@ -198,7 +198,7 @@
                                 <span>Qty</span>
                                 <t t-esc="price_item.quantity"/>
                             </div>
-                            <div class="price-line-value"><t t-esc="formatPrice(price_item.price)"/></div>
+                            <div class="price-line-value"><t t-esc="formatPrice(price_item.totalPrice)"/></div>
                         </div>
                     </label>
                 </t>
