@@ -72,7 +72,6 @@ publicWidget.registry.PriceSheetPortal = publicWidget.Widget.extend({
         }).then(function (data) {
             if (data.error) {
                 self.$('.o_portal_sign_error_msg').remove();
-                // self.$controls.prepend(qweb.render('portal.portal_signature_error', {widget: data}));
             } else if (data.success) {
                 var $success = qweb.render('portal.portal_signature_success', {widget: data});
                 self.$el.empty().append($success);
@@ -114,7 +113,7 @@ publicWidget.registry.PriceSheetPortal = publicWidget.Widget.extend({
      * @param {Object} params
      * @return {Deferred}
      */
-    ft(order_id, params) {
+    _callCreateConsumptionAgreement(order_id, params) {
         return this._rpc({
             route: "/my/price_sheets/" + order_id + "/create_consumption_agreement",
             params: params,
