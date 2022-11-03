@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="portal_record_sidebar_ext" inherit_id="portal.portal_record_sidebar" name="Footer Language Selector">
+        <xpath expr="//div[@id='sidebar_content']" position="replace">
+        </xpath>
+    </template>
+</odoo>

@@ -39,6 +39,7 @@
         'wizard/portal_link.xml',
         'views/product_views.xml',
         'views/delivery_carrier.xml',
+        'views/portal_templates.xml'
     ],
     'demo': [
         'data/product_demo.xml',

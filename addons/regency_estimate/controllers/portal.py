@@ -3,13 +3,14 @@ import json
 from functools import partial
 from odoo.tools import formatLang
 
-from odoo.exceptions import AccessError, MissingError
+from odoo.exceptions import AccessError, MissingError, UserError
 from odoo.http import request
 from odoo.addons.sale_management.controllers import portal
 from odoo.addons.portal.controllers.portal import pager as portal_pager, get_records_pager
 from odoo.addons.portal.controllers.mail import _message_post_helper
 
 from odoo import fields, http, SUPERUSER_ID, _, Command
+from odoo.addons.regency_tools import SystemMessages
 
 
 class CustomerPortal(portal.CustomerPortal):
@@ -323,18 +324,25 @@ class CustomerPortal(portal.CustomerPortal):
         return request.redirect(order_sudo.get_portal_url(query_string=query_string))
 
     @http.route(['/my/price_sheets/<int:order_id>/create_sale_order'], type='json', auth="public", website=True)
-    def create_sale_order_from_price_sheet(self, order_id, access_token=None):
+    def create_sale_order_from_price_sheet(self, order_id, selected_line_ids=None, access_token=None):
         # get from query string if not on json param
+        if not selected_line_ids:
+            return {'error': _('Select at least one line.')}
+        selected_line_ids = [int(price_sheet_line_id) for price_sheet_line_id in selected_line_ids]
         access_token = access_token or request.httprequest.args.get('access_token')
         try:
             order_sudo = self._document_check_access('product.price.sheet', order_id, access_token=access_token)
         except (AccessError, MissingError):
             return {'error': _('Invalid order.')}
 
-        lines_to_order = order_sudo.item_ids.filtered(lambda l: l.product_uom_qty > 0 and
-                                                          l.consumption_type == 'dropship')
+        price_sheet_line_ids = order_sudo.item_ids
+        self.check_price_sheet_lines(ps_lines=price_sheet_line_ids, method='create_so')
+
+        lines_to_order = price_sheet_line_ids.filtered(lambda f: f.product_uom_qty > 0 and
+                                                                f.consumption_type == 'dropship' and
+                                                                f.id in selected_line_ids)
         if not lines_to_order:
-            return {'error': _('Select at least one line.')}
+            return {'error': _('Orders not found.')}
 
         sale_order = order_sudo.create_sale_order(lines_to_order)
 
@@ -345,17 +353,26 @@ class CustomerPortal(portal.CustomerPortal):
             'redirect_url': sale_order.get_portal_url(query_string=query_string)
         }
 
-    @http.route(['/my/price_sheets/<int:order_id>/create_consumption_agreement'], type='json', auth="public", website=True)
-    def create_consumption_from_price_sheet(self, order_id, access_token=None):
+    @http.route(['/my/price_sheets/<int:order_id>/create_consumption_agreement'], type='json', auth="public",
+                website=True)
+    def create_consumption_from_price_sheet(self, order_id, selected_line_ids=None, access_token=None):
         # get from query string if not on json param
+
+        if not selected_line_ids:
+            return {'error': _('Select at least one line.')}
+
         access_token = access_token or request.httprequest.args.get('access_token')
         try:
             order_sudo = self._document_check_access('product.price.sheet', order_id, access_token=access_token)
         except (AccessError, MissingError):
             return {'error': _('Invalid order.')}
 
-        lines_to_order = order_sudo.item_ids.filtered(lambda l: l.product_uom_qty > 0 and
-                                                          l.consumption_type == 'consumption')
+        price_sheet_line_ids = order_sudo.item_ids
+        self.check_price_sheet_lines(ps_lines=price_sheet_line_ids, method='create_ca')
+
+        lines_to_order = price_sheet_line_ids.filtered(lambda f: f.product_uom_qty > 0 and
+                                                                 f.consumption_type == 'consumption' and
+                                                                 f.id in selected_line_ids)
         if not lines_to_order:
             return {'error': _('Select at least one line.')}
 
@@ -379,3 +396,12 @@ class CustomerPortal(portal.CustomerPortal):
         price_sheet_line_id = request.env['product.price.sheet.line'].browse(psl_id)
         price_sheet_id = price_sheet_line_id.price_sheet_id.id
         return request.make_response(json.dumps({'ps_id': price_sheet_id}))
+
+    @staticmethod
+    def check_price_sheet_lines(ps_lines, method):
+        if sum(ps_lines.mapped('product_uom_qty')) <= 0:
+            raise UserError(SystemMessages.get('M-003'))
+        if method == 'create_so' and True in ps_lines.mapped('allow_consumption_agreement'):
+            raise UserError(SystemMessages.get('M-004'))
+        if method == 'create_ca' and False in ps_lines.mapped('allow_consumption_agreement'):
+            raise UserError(SystemMessages.get('M-004'))
