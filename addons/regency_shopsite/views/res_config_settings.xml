@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="res_config_settings_view_form" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.regency.shopsite</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="website.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//div[@data-key='website']//div[hasclass('content-group')]" position="inside">
+                <div class="row flex-row flex-nowrap mt8 align-items-lg-center">
+                    <label class="col ps-0 text-nowrap" for="fallback_partner_id"/>
+                    <field name="fallback_partner_id" options="{'no_open': True, 'no_create': True}"/>
+                    <span class="col-auto" style="padding-right: 8rem"/>
+                </div>
+            </xpath>
+        </field>
+    </record>
+</odoo>

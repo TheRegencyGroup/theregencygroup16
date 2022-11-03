@@ -160,7 +160,6 @@ class ProductPriceSheet(models.Model):
                 currency = partner.property_purchase_currency_id or self.env.company.currency_id
                 price = line.vendor_price
 
-
                 supplierinfo = self._prepare_supplier_info(partner, line, price, currency)
 
                 vals = {
@@ -171,6 +170,20 @@ class ProductPriceSheet(models.Model):
                 except AccessError:  # no write access rights -> just ignore
                     break
         self.write({'state': 'confirmed'})
+
+    def action_get_portal_link(self):
+        if self.state == 'draft':
+            self.action_confirm()
+        base_url = self.get_base_url()
+        wiz = self.env['portal.link.wizard'].create({'name': f'{base_url}{self.get_portal_url()}'})
+        return {
+            'name': 'Portal Link',
+            'view_mode': 'form',
+            'res_model': 'portal.link.wizard',
+            'res_id': wiz.id,
+            'type': 'ir.actions.act_window',
+            'target': 'new'
+        }
 
     def has_to_be_signed(self):
         return False
@@ -245,8 +258,15 @@ class ProductPriceSheet(models.Model):
         lines_to_order.write({'product_uom_qty': 0})
         return order
 
+    def update_lines(self, sheet_lines):
+        for rec in self:
+            existing_product_lines = self.item_ids.mapped(lambda x: (x.product_id.id, x.partner_id.id, x.product_uom_qty))
+            for line in sheet_lines:
+                if (line[2].get('product_id'), line[2].get('partner_id'), line[2].get('product_uom_qty')) not in existing_product_lines:
+                    rec.write({'item_ids': [line]})
 
-class ProductPriceSheet(models.Model):
+
+class ProductPriceSheetLine(models.Model):
     _name = 'product.price.sheet.line'
     _order = 'product_id ASC, min_quantity ASC'
 
@@ -275,8 +295,8 @@ class ProductPriceSheet(models.Model):
     total = fields.Float()
     shipping_options = fields.Char()
     partner_id = fields.Many2one('res.partner', 'Vendor')
-    duty = fields.Float()
-    freight = fields.Float()
+    duty = fields.Float(digits='Product Price')
+    freight = fields.Float(digits='Product Price')
     unit_price = fields.Float(string='Unit Price', digits='Product Price', store=True, compute='_compute_unit_price')
     production_lead_time = fields.Char()
     shipping_lead_time = fields.Char()
@@ -341,10 +361,10 @@ class ProductPriceSheet(models.Model):
                 first_rec = False
             prev_rec = rec
 
-    @api.depends('price', 'vendor_price')
+    @api.depends('price', 'unit_price')
     def _compute_margin(self):
         for rec in self:
-            rec.margin = 100 * (rec.price - rec.vendor_price) / rec.price if rec.price else 0
+            rec.margin = 100 * (rec.price - rec.unit_price) / rec.price if rec.price else 0
 
     @api.onchange('total')
     def onchange_total(self):
@@ -388,16 +408,26 @@ class ProductPriceSheet(models.Model):
     def action_check_prices(self):
         customer = self.price_sheet_id.partner_id
         if customer:
-            sale_orders = self.env['sale.order'].search([('state', '=', 'sale'), ('partner_id', '=', customer.id)])
-            so_lines = sale_orders.mapped('order_line')
+            related_so_lines = self.env['sale.order.line'].search([('order_id.state', '=', 'sale'),
+                                                                   ('order_id.partner_id', '=', customer.id),
+                                                                   ('product_id', '=', self.product_id.id),
+                                                                   ('qty_invoiced', '>', 0),
+                                                                   ('qty_delivered', '>', 0)])
             price_lines = self.env['previous.price.line.wizard']
-            related_so_lines = so_lines.filtered(lambda f: f.product_id == self.product_id and f.product_id and (
-                        f.qty_invoiced > 0 or f.qty_delivered > 0))
             for r_line in related_so_lines:
                 if r_line.product_id:
+                    p_line = r_line.get_purchase_order_lines().filtered(lambda x: x.state != 'cancel')
+                    p_line = p_line[0] if p_line else False
                     new_price_line = self.env['previous.price.line.wizard'].create(
                         {'product_id': r_line.product_id.id, 'price': r_line.price_unit,
-                         'date_order': r_line.order_id.date_order, 'qty': r_line.product_uom_qty})
+                         'date_order': r_line.order_id.date_order, 'qty': r_line.product_uom_qty,
+                         'cost_price': r_line.purchase_price, 'margin_percent': r_line.margin_percent,
+                         'ca_price': r_line.consumption_agreement_line_id.price_unit if r_line.consumption_agreement_line_id else 0,
+                         'ca_qty': r_line.consumption_agreement_line_id.qty_allowed if r_line.consumption_agreement_line_id else 0,
+                         'ca_date_order': r_line.consumption_agreement_line_id.signed_date if r_line.consumption_agreement_line_id else False,
+                         'po_price': p_line.price_unit if p_line else 0,
+                         'po_qty': p_line.product_uom_qty if p_line else 0
+                         })
                     price_lines += new_price_line
             wizard_id = self.env['previous.prices.wizard'].create({'name': 'Prices'})
             price_lines.write({'price_wizard_id': wizard_id.id})

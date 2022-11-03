@@ -1,6 +1,6 @@
 {
     'name': 'Regency Sales Estimates',
-    'version': '16.0.0.3',
+    'version': '16.0.0.4',
     'summary': '',
     'author': 'OpsWay',
     'description': "",
@@ -36,6 +36,7 @@
         'views/crm_lead.xml',
         'views/crm_stage.xml',
         'wizard/choose_delivery_carrier_view.xml',
+        'wizard/portal_link.xml',
         'views/product_views.xml',
         'views/delivery_carrier.xml',
     ],

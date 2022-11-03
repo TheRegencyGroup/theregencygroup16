@@ -22,3 +22,8 @@ class SaleOrderLine(models.Model):
         """
         #TODO: uncomment when taxes will be handled in a correct way
         pass
+
+    def get_purchase_order_lines(self):
+        return self.purchase_line_ids |\
+               self.order_id.procurement_group_id.stock_move_ids.filtered(lambda x: x.product_id == self.product_id).created_purchase_line_id |\
+               self.order_id.procurement_group_id.stock_move_ids.filtered(lambda x: x.product_id == self.product_id).move_orig_ids.purchase_line_id

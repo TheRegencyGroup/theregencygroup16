@@ -24,13 +24,17 @@
 <!--                        <button string="New Quotation" name="action_new_quotation" type="object" class="oe_highlight"-->
 <!--                                data-hotkey="q"-->
 <!--                                title="Create new quotation"/>-->
-                        <button string="Confirm" name="action_confirm" type="object" class="oe_highlight"
+                        <button string="Generate Portal Link" name="action_get_portal_link" type="object" class="oe_highlight"
                                 data-hotkey="q"
                                 attrs="{'invisible':[('state', '=', 'confirmed')]}"
-                                title="Confirm"/>
+                                title="Generate Portal Link"/>
+                        <button string="Get Portal Link" name="action_get_portal_link" type="object" class="oe_highlight"
+                                data-hotkey="q"
+                                attrs="{'invisible':[('state', '=', 'draft')]}"
+                                title="Get Portal Link"/>
                         <field name="state" widget="statusbar" statusbar_visible="draft,confirmed"/>
                     </header>
-                     <sheet style="max-width:90%;">
+                     <sheet>
                         <div class="oe_button_box" name="button_box">
                                 <button class="oe_stat_button" type="object"
                                     name="action_view_sale_quotation" icon="fa-pencil-square-o" >

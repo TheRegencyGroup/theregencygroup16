@@ -27,6 +27,7 @@ class CustomerPortal(portal.CustomerPortal):
 
     def _prepare_price_sheets_domain(self, partner):
         return [
+            ('state', 'in', ['confirmed', 'done']),
             ('message_partner_ids', 'child_of', [partner.commercial_partner_id.id]),
         ]
 

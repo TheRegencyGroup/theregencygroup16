@@ -10,7 +10,14 @@
                     <field name="product_id"/>
                     <field name="qty"/>
                     <field name="price"/>
+                    <field name="cost_price"/>
+                    <field name="margin_percent"/>
                     <field name="date_order"/>
+                    <field name="po_qty"/>
+                    <field name="po_price"/>
+                    <field name="ca_qty"/>
+                    <field name="ca_price"/>
+                    <field name="ca_date_order"/>
                 </tree>
             </field>
             <footer>
