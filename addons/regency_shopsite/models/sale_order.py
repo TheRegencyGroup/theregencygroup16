@@ -7,7 +7,7 @@ class SaleOrder(models.Model):
     def action_confirm(self):
         res = super(SaleOrder, self).action_confirm()
         for order in self:
-            order.order_line._compute_image_snapshot()
+            order.order_line._write_image_snapshot()
         return res
 
     def _prepare_order_line_values(self, product_id, quantity, linked_line_id=False, no_variant_attribute_values=None,
@@ -26,7 +26,7 @@ class SaleOrderLine(models.Model):
 
     overlay_template_id = fields.Many2one('overlay.template', compute='_compute_overlay_template_id')
     price_list_id = fields.Many2one('product.pricelist', string='Pricelist')
-    image_snapshot = fields.Image('Product Image', compute='_compute_image_snapshot', store=True)
+    image_snapshot = fields.Image('Product Image')
     image_snapshot_url = fields.Text(compute='_compute_image_snapshot_url')
 
 
@@ -36,7 +36,7 @@ class SaleOrderLine(models.Model):
         res._link_overlay_product_to_product_variant()
         return res
 
-    def _compute_image_snapshot(self):
+    def _write_image_snapshot(self):
         """should be called manually in right moment of business logic
         (if you really should synchronize image for order lines in existing order)"""
         for sol in self:
