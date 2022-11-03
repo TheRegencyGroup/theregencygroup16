@@ -14,7 +14,7 @@ class StockPickingBatch(models.Model):
     def _compute_vendor_bills(self):
         for rec in self:
             rec.vendor_bill_ids = self.env['account.move'].browse(
-                set([x.vendor_bill_id.id for x in rec.landed_cost_ids]))
+                set([x.vendor_bill_id.id for x in rec.landed_cost_ids if x.vendor_bill_id]))
             rec.vendor_bills_count = len(rec.vendor_bill_ids)
 
     def _compute_landed_costs(self):
