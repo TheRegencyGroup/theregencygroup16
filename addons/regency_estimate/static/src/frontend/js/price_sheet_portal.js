@@ -64,10 +64,10 @@ publicWidget.registry.PriceSheetPortal = publicWidget.Widget.extend({
         ev.preventDefault();
 
         let self = this;
-        //     selected_ids = $('td#selection input:checked').map(function(){return $(this).attr("select-id");}).get();
+        let selected_ids = $('td#selection input:checked').map(function(){return $(this).attr("select-id");}).get();
 
         return this._callCreateConsumptionAgreement(self.orderDetail.orderId, {
-            // 'selected_line_ids': selected_ids,
+            'selected_line_ids': selected_ids,
             'access_token': self.orderDetail.token
         }).then(function (data) {
             if (data.error) {
@@ -114,7 +114,7 @@ publicWidget.registry.PriceSheetPortal = publicWidget.Widget.extend({
      * @param {Object} params
      * @return {Deferred}
      */
-    _callCreateConsumptionAgreement(order_id, params) {
+    ft(order_id, params) {
         return this._rpc({
             route: "/my/price_sheets/" + order_id + "/create_consumption_agreement",
             params: params,

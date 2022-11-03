@@ -324,18 +324,20 @@ class CustomerPortal(portal.CustomerPortal):
     @http.route(['/my/price_sheets/<int:order_id>/create_sale_order'], type='json', auth="public", website=True)
     def create_sale_order_from_price_sheet(self, order_id, selected_line_ids=None, access_token=None):
         # get from query string if not on json param
-        if selected_line_ids is None:
-            selected_line_ids = []
+        if not selected_line_ids:
+            return {'error': _('Select at least one line.')}
+        selected_line_ids = [int(price_sheet_line_id) for price_sheet_line_id in selected_line_ids]
         access_token = access_token or request.httprequest.args.get('access_token')
         try:
             order_sudo = self._document_check_access('product.price.sheet', order_id, access_token=access_token)
         except (AccessError, MissingError):
             return {'error': _('Invalid order.')}
 
-        lines_to_order = order_sudo.item_ids.filtered(lambda l: l.product_uom_qty > 0 and
-                                                          l.consumption_type == 'dropship')
+        lines_to_order = order_sudo.item_ids.filtered(lambda f: f.product_uom_qty > 0 and
+                                                                f.consumption_type == 'dropship'
+                                                                and f.id in selected_line_ids)
         if not lines_to_order:
-            return {'error': _('Select at least one line.')}
+            return {'error': _('Orders not found.')}
 
         sale_order = order_sudo.create_sale_order(lines_to_order)
 
@@ -347,7 +349,7 @@ class CustomerPortal(portal.CustomerPortal):
         }
 
     @http.route(['/my/price_sheets/<int:order_id>/create_consumption_agreement'], type='json', auth="public", website=True)
-    def create_consumption_from_price_sheet(self, order_id, access_token=None):
+    def create_consumption_from_price_sheet(self, order_id, selected_line_ids=None, access_token=None):
         # get from query string if not on json param
         access_token = access_token or request.httprequest.args.get('access_token')
         try:
