@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="recompute_image_of_order_sale_lines" model="ir.cron">
+        <field name="name">Recompute image snapshot for order sale lines</field>
+        <field name="model_id" ref="model_sale_order_line"/>
+        <field name="state">code</field>
+        <field name="code">model.search([])._compute_image_snapshot()</field>
+        <field name="numbercall">-1</field>
+        <field name="active">False</field>
+    </record>
+</odoo>
