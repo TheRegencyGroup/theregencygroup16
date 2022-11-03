@@ -34,7 +34,7 @@
                                 title="Get Portal Link"/>
                         <field name="state" widget="statusbar" statusbar_visible="draft,confirmed"/>
                     </header>
-                     <sheet style="max-width:90%;">
+                     <sheet>
                         <div class="oe_button_box" name="button_box">
                                 <button class="oe_stat_button" type="object"
                                     name="action_view_sale_quotation" icon="fa-pencil-square-o" >

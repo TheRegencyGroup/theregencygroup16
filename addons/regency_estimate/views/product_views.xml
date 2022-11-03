@@ -56,7 +56,7 @@
                 <field name="cost_currency_id" invisible="1"/>
                 <field name="priority" widget="priority" optional="show" nolabel="1"/>
                 <field name="name" string="Product Name"/>
-                <field name="sale_order_ids" widget="many2many_tags"/>
+                <field name="sale_order_ids" widget="many2many_tags" invisible="1"/>
                 <field name="last_order_date"/>
                 <field name="last_order_qty"/>
                 <field name="last_order_uom_id"/>
