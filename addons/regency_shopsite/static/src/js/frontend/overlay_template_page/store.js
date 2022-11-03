@@ -47,6 +47,13 @@ if (overlayTemplatePageData) {
             return this.hasOverlayProductId && !this.overlayProductActive;
         }
 
+        get sortedPriceList() {
+            if (this.priceList && Object.values(this.priceList).length) {
+                return Object.values(this.priceList).sort((a, b) => a.quantity - b.quantity);
+            }
+            return [];
+        }
+
         get selectedPrice() {
             return this.priceList[this.selectedPriceId];
         }
@@ -73,8 +80,7 @@ if (overlayTemplatePageData) {
         }
 
         getSelectedPriceId() {
-            const priceList = Object.values(this.priceList);
-            return priceList.length ? priceList[0].id : null;
+            return this.sortedPriceList.length ? this.sortedPriceList[0].id : null;
         }
 
         _checkOverlayProductIdUrlParameter() {
@@ -113,7 +119,7 @@ if (overlayTemplatePageData) {
 
         changeQuantity(qty) {
             this.quantity = qty;
-            let prices = Object.values(this.priceList);
+            let prices = this.sortedPriceList;
             if (prices.length === 1) {
                 return;
             }
