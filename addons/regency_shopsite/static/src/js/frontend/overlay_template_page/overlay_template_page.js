@@ -4,7 +4,7 @@ import './store';
 import { mountComponentAsWidget, useStore } from '@fe_owl_base/js/main';
 import { ProductOverlayEditorComponent } from './product_overlay_editor/product_overlay_editor';
 import { AttributeSelector, ColorAttributeSelector } from './attribute_selector';
-import { PriceSelector } from './price_selector';
+import { QuantitySelector } from './quantity_selector';
 import env from 'web.public_env';
 
 const { Component, useState, useRef } = owl;
@@ -75,7 +75,7 @@ export class OverlayTemplatePageComponent extends Component {
             !this.store.otPage.editMode;
     }
 
-    get showPriceSelector() {
+    get showQuantitySelector() {
         return !this.store.otPage.overlayProductIsArchived && this.store.otPage.hasPriceList;
     }
 
@@ -165,6 +165,9 @@ export class OverlayTemplatePageComponent extends Component {
         if (!this.store.otPage.canAddedToCart) {
             return;
         }
+        if (this.store.otPage.quantity < this.store.otPage.minimumOrderQuantity) {
+            return;
+        }
         let data = this.store.otPage.getCustomizedData();
         let overlayProductId = this.store.otPage.overlayProductId;
         if (!!overlayProductId) {
@@ -203,7 +206,7 @@ OverlayTemplatePageComponent.components = {
     ProductOverlayEditorComponent,
     AttributeSelector,
     ColorAttributeSelector,
-    PriceSelector,
+    QuantitySelector,
 };
 
 OverlayTemplatePageComponent.template = 'overlay_template_page';

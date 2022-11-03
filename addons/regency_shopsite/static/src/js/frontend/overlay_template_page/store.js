@@ -12,6 +12,7 @@ if (overlayTemplatePageData) {
             }
             this.selectedAttributeValues = this.getSelectedAttributeValues();
             this.selectedPriceId = this.getSelectedPriceId();
+            this.quantity = this.selectedPriceId ? this.selectedPrice.quantity : null;
             this.editMode = false;
 
             this._checkOverlayProductIdUrlParameter();
@@ -44,6 +45,16 @@ if (overlayTemplatePageData) {
 
         get overlayProductIsArchived() {
             return this.hasOverlayProductId && !this.overlayProductActive;
+        }
+
+        get selectedPrice() {
+            return this.priceList[this.selectedPriceId];
+        }
+
+        get minimumOrderQuantity() {
+            if (this.priceList && Object.values(this.priceList).length) {
+                return Math.min(...Object.values(this.priceList).map(e => e.quantity));
+            }
         }
 
         getSelectedAttributeValues() {
@@ -97,6 +108,28 @@ if (overlayTemplatePageData) {
 
         changeSelectedPrice(priceId) {
             this.selectedPriceId = priceId;
+            this.quantity = this.selectedPrice.quantity;
+        }
+
+        changeQuantity(qty) {
+            this.quantity = qty;
+            let prices = Object.values(this.priceList);
+            if (prices.length === 1) {
+                return;
+            }
+            let changed = false;
+            for (let [index, e] of prices.entries()) {
+                const min = index === 0 ? 0 : prices[index - 1].quantity;
+                const max = e.quantity;
+                if (this.quantity >= min && this.quantity < max) {
+                    this.selectedPriceId = index === 0 ? e.id : prices[index - 1].id;
+                    changed = true;
+                    break;
+                }
+            }
+            if (!changed) {
+                this.selectedPriceId = prices.pop().id;
+            }
         }
 
         getCustomizedData() {
@@ -104,7 +137,7 @@ if (overlayTemplatePageData) {
                 overlayTemplateId: this.overlayTemplateId,
                 attributeList: Object.entries(this.selectedAttributeValues)
                     .map(e => ({ 'attribute_id': parseInt(e[0]), value_id: e[1].valueId })),
-                quantity: this.hasPriceList ? this.priceList[this.selectedPriceId].quantity : null,
+                quantity: this.quantity,
             };
         }
 
