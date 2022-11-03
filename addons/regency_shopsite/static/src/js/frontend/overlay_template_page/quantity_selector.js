@@ -11,10 +11,6 @@ export class QuantitySelector extends Component {
         this.quantityInputRef = useRef('quantity_input');
     }
 
-    get priceList() {
-        return Object.values(this.store.otPage.priceList);
-    };
-
     get invalidQuantity() {
         return this.store.otPage.quantity < this.store.otPage.minimumOrderQuantity;
     }

@@ -185,10 +185,10 @@
     </t>
 
     <t t-name="overlay_template_page_quantity_selector" owl="1">
-        <t t-if="priceList.length">
+        <t t-if="store.otPage.sortedPriceList.length">
             <div class="line"></div>
             <div class="price-lines">
-                <t t-foreach="priceList" t-as="price_item" t-key="price_item.id">
+                <t t-foreach="store.otPage.sortedPriceList" t-as="price_item" t-key="price_item.id">
                     <label class="price-line">
                         <input type="radio" name="number"
                                t-att-checked="price_item.id === store.otPage.selectedPriceId"
