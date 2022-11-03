@@ -40,7 +40,11 @@ class SaleOrderLine(models.Model):
         """should be called manually in right moment of business logic
         (if you really should synchronize image for order lines in existing order)"""
         for sol in self:
-            sol.image_snapshot = sol.product_id.overlay_product_id._preview_image()
+            overlay_product_id = sol.product_id.overlay_product_id
+            if overlay_product_id:
+                sol.image_snapshot = overlay_product_id._preview_image()
+            else:
+                sol.image_snapshot = False
 
     def _compute_image_snapshot_url(self):
         for sol in self:
