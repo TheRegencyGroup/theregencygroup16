@@ -6,6 +6,23 @@
         <field name="model">stock.picking.batch</field>
         <field name="inherit_id" ref="stock_picking_batch.stock_picking_batch_form"/>
         <field name="arch" type="xml">
+            <xpath expr="//div[@name='button_box']" position="inside">
+                <button name="open_landed_costs" type="object"
+                        class="oe_stat_button" icon="fa-bars" attrs="{'invisible' : [('landed_cost_count', '=', 0)]}">
+                    <div class="o_field_widget o_stat_info">
+                        <span class="o_stat_value"><field name="landed_cost_count"/></span>
+                        <span class="o_stat_text">Landed Costs</span>
+                    </div>
+                </button>
+                <button name="open_vendor_bills" type="object"
+                        class="oe_stat_button" icon="fa-bars" attrs="{'invisible' : [('vendor_bills_count', '=', 0)]}">
+                    <div class="o_field_widget o_stat_info">
+                        <span class="o_stat_value"><field name="vendor_bills_count"/></span>
+                        <span class="o_stat_text">Vendor Bills</span>
+                    </div>
+                </button>
+            </xpath>
+
             <xpath expr="//field[@name='picking_type_id']" position="after">
                 <field name="tracking_number"/>
                 <field name="account_move_id"/>
