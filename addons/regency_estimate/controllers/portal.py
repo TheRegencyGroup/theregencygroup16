@@ -370,7 +370,8 @@ class CustomerPortal(portal.CustomerPortal):
         self.check_price_sheet_lines(ps_lines=price_sheet_line_ids, method='create_ca')
 
         lines_to_order = price_sheet_line_ids.filtered(lambda f: f.product_uom_qty > 0 and
-                                                                f.consumption_type == 'consumption')
+                                                                 f.consumption_type == 'consumption' and
+                                                                 f.id in selected_line_ids)
         if not lines_to_order:
             return {'error': _('Select at least one line.')}
 
