@@ -5,7 +5,7 @@
             <field name="name">sale.estimate.form</field>
             <field name="model">sale.estimate</field>
              <field name="arch" type="xml">
-                   <form class="o_lead_opportunity_form" js_class="crm_form">
+                   <form class="o_lead_opportunity_form">
                     <header>
                            <button string="New Purchase Requisition" name="action_new_purchase_agreement" type="object" class="oe_highlight" data-hotkey="q"
                                 title="Create new Purchase Requisition"/>
@@ -52,6 +52,7 @@
                                         'show_vat': True,
                                     }"
                                 />
+
                                 <label for="street" string="Address"/>
                                 <div class="o_address_format">
                                     <field name="street" placeholder="Street..." class="o_address_street"/>
@@ -125,7 +126,10 @@
                                                 'partner_id': parent.partner_id,
                                                 'quantity': product_uom_qty,
                                                 'company_id': parent.company_id,
-                                                'default_description_sale': name
+                                                'default_description_sale': name,
+                                                'search_default_previous_product': 1,
+                                                'tree_view_ref': 'regency_estimate.product_template_tree_view_from_estimate',
+                                                'search_view_ref': 'regency_estimate.product_template_search_view_from_estimate',
                                             }"
                                             options="{
                                                 'no_open': True,
@@ -144,6 +148,19 @@
                                                 'company_id': parent.company_id
                                             }"
                                         />
+
+                                        <!-- below fields are used in the widget qty_at_date_widget -->
+                                        <field name="virtual_available_at_date" invisible="1"/>
+                                        <field name="qty_available_today" invisible="1"/>
+                                        <field name="free_qty_today" invisible="1"/>
+                                        <field name="scheduled_date" invisible="1"/>
+                                        <field name="forecast_expected_date" invisible="1"/>
+                                        <field name="move_ids" invisible="1"/>
+                                        <field name="qty_to_deliver" invisible="1"/>
+                                        <field name="is_mto" invisible="1"/>
+                                        <field name="display_qty_widget" invisible="1"/>
+                                        <widget name="qty_at_date_widget" width="20px"/>
+
                                         <field name="product_template_attribute_value_ids" invisible="1" />
                                         <field name="product_custom_attribute_value_ids" invisible="1" >
                                             <tree>
@@ -153,9 +170,12 @@
                                         </field>
                                         <field name="product_no_variant_attribute_value_ids" invisible="1" />
                                         <field name="is_configurable_product" invisible="1" />
-                                        <field name="purchase_agreement_ids" string="Assigned to" widget="many2many_tags"
-                                            options="{'no_open': False, 'no_create': True, 'color_field': 'color'}" />
-                                        <field name="price_sheet_line_ids" widget="many2many_tags" readonly="1"/>
+                                        <field name="purchase_requisition_line_ids" string="Assigned to" widget="many2many_tags"
+                                            options="{'no_open': False, 'no_create': True, 'color_field': 'color',
+                                            'no_edit_color': True}" />
+                                        <field name="price_sheet_line_ids" widget="many2many_tags"
+                                             options="{'no_open': False, 'no_create': True, 'color_field': 'color',
+                                            'no_edit_color': True}" readonly="1"/>
                                         <field name="comment"/>
                                     </tree>
                                 </field>

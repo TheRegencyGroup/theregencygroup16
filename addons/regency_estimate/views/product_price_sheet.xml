@@ -58,8 +58,7 @@
                         </group>
                         <notebook>
                             <page name="pricelist" string="Price Sheet Items">
-                              <field name="item_ids"  widget="section_and_note_one2many"
-                                mode="tree" >
+                              <field name="item_ids"  widget="section_and_note_one2many" mode="tree">
                                   <tree string="Price Sheet Items" editable="bottom" default_order='product_id asc, min_quantity asc'>
                                       <control>
                                         <create name="add_product_control" string="Add a product"/>
@@ -76,21 +75,23 @@
                                       <field name="insection_rownumber" invisible="1"/>
                                       <field name="qty_range_str"/>
                                       <field name="vendor_price" string="Vendor Price per Unit"/>
-                                      <field name="FOB"/>
                                       <field name="duty"/>
                                       <field name="freight"/>
                                       <field name="currency_id" invisible="1"/>
-                                      <field name="price" string="Unit Price" />
-                                      <field name="total"/>
-                                      <field name="margin"/>
+                                      <field name="unit_price" string="Unit Price"/>
                                       <field name="production_lead_time"/>
                                       <field name="shipping_lead_time"/>
                                       <field name="shipping_options"/>
                                       <field name="partner_id"/>
+                                      <field name="produced_overseas"/>
+                                      <field name="price" string="Customer Price" />
+                                      <field name="total"/>
+                                      <field name="margin"/>
                                       <field name="allow_consumption_agreement"/>
+                                      <field name="sale_estimate_line_ids" invisible="1"/>
                                       <button name="action_check_prices" type="object" class="fa fa-history"/>
                                       <field name="attachment_id" string="Attach a file" widget="binary"
-                                             filename="attachment_name"/>
+                                             filename="attachment_name" class="r_binary_widget"/>
                                       <field name="attachment_name" invisible="1"/>
                                   </tree>
                               </field>
@@ -112,9 +113,10 @@
             <field name="model">product.price.sheet</field>
             <field name="arch" type="xml">
                 <tree>
-                     <field name="name"/>
+                    <field name="name"/>
                     <field name="currency_id"/>
                     <field name="opportunity_id"/>
+                    <field name="state"/>
                 </tree>
             </field>
         </record>

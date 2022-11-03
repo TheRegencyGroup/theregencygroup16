@@ -82,6 +82,13 @@ class SaleEstimate(models.Model):
     sale_order_count = fields.Integer(compute='_compute_sale_order_count')
     # the field is used for product configuration widget at product lines
     order_line = fields.One2many('sale.estimate.line', compute='_compute_order_line')
+    sold_product_ids = fields.Many2many('product.template', 'sold_templ_rel', compute='_compute_sold_product_ids',
+                                        store=True, index=True)
+
+    @api.depends('partner_id', 'partner_id.sale_order_ids')
+    def _compute_sold_product_ids(self):
+        for rec in self:
+            rec.sold_product_ids = rec.partner_id.sale_order_ids.order_line.mapped('product_template_id')
 
     def _compute_order_line(self):
         for rec in self:
@@ -233,11 +240,11 @@ class SaleEstimate(models.Model):
 
     def action_new_price_sheet(self):
         action = self.env["ir.actions.actions"]._for_xml_id("regency_estimate.action_product_price_sheet_new")
-        confirmed_lines = self.purchase_agreement_ids.filtered(lambda a: a.state == 'done').mapped('line_ids')
-        preordered_products = self.product_lines.mapped(lambda l: (l.product_id, l.product_uom_qty))
-        new_lines = confirmed_lines.filtered(lambda l: (l.product_id, l.product_qty) not in preordered_products)
+        confirmed_requisition_lines = self.purchase_agreement_ids.mapped('line_ids').filtered(lambda a: a.state == 'done')
+        products_to_estimate = self.product_lines.mapped(lambda x: (x.product_id, x.product_uom_qty))
+        new_requisition_lines = confirmed_requisition_lines.filtered(lambda x: (x.product_id, x.product_qty) not in products_to_estimate)
         sheet_lines = []
-        for p in self.product_lines.sorted('sequence'):
+        for p in self.product_lines.filtered('selected').sorted('sequence'):
             seq = p.sequence
             if p.display_type:
                 sheet_lines.append(Command.create({
@@ -246,31 +253,53 @@ class SaleEstimate(models.Model):
                     'display_type': p.display_type
                 }))
             else:
-                for line in confirmed_lines.filtered(lambda l: l.product_id == p.product_id
-                                                           and l.product_qty == p.product_uom_qty).sorted('product_qty'):
+                matched_lines = confirmed_requisition_lines.filtered(lambda x: x.product_id == p.product_id
+                                                           and x.product_qty == p.product_uom_qty).sorted('product_qty')
+                if matched_lines:
+                    for line in matched_lines:
+                        sheet_lines.append(Command.create({
+                                'name': p.name,
+                                'sequence': seq,
+                                'product_id': p.product_id.id,
+                                'partner_id': line.partner_id.id,
+                                'min_quantity': line.product_qty,
+                                'vendor_price': line.price_unit,
+                                'price': line.price_unit * 1.6,
+                                'total': line.price_unit * 1.6 * line.product_qty,
+                                'display_type': p.display_type,
+                                'produced_overseas': line.produced_overseas,
+                                'sale_estimate_line_ids': [(6, 0, [p.id])]
+                            }))
+                        seq += 1
+                else:
+                    # create new line for the product that is in estimate, but not in purchase requisition
                     sheet_lines.append(Command.create({
-                            'name': p.name,
-                            'sequence': seq,
-                            'product_id': p.product_id.id,
-                            'partner_id': line.partner_id.id,
-                            'min_quantity': line.product_qty,
-                            'vendor_price': line.price_unit,
-                            'price': line.price_unit * 1.6,
-                            'total': line.price_unit * 1.6 * line.product_qty,
-                            'display_type': p.display_type
-                        }))
+                        'name': p.name,
+                        'sequence': seq,
+                        'product_id': p.product_id.id,
+                        'partner_id': False,
+                        'min_quantity': p.product_uom_qty,
+                        'vendor_price': p.product_id.standard_price,
+                        'price': p.product_id.list_price,
+                        'total': p.product_id.list_price * p.product_uom_qty,
+                        'display_type': p.display_type,
+                        'sale_estimate_line_ids': [(6, 0, [p.id])]
+                    }))
                     seq += 1
+
+        # add new lines(not in estimate) from confirmed purchase requisitions
         seq = self.product_lines.sorted('sequence')[-1].sequence
-        for l in new_lines:
+        for x in new_requisition_lines:
             sheet_lines.append(Command.create({
-                'name': l.product_description_variants,
+                'name': x.product_description_variants,
                 'sequence': seq,
-                'product_id': l.product_id.id,
-                'partner_id': l.partner_id.id,
-                'min_quantity': l.product_qty,
-                'vendor_price': l.price_unit,
-                'price': l.price_unit * 1.6,
-                'total': l.price_unit * 1.6 * l.product_qty
+                'product_id': x.product_id.id,
+                'partner_id': x.partner_id.id,
+                'min_quantity': x.product_qty,
+                'vendor_price': x.price_unit,
+                'price': x.price_unit * 1.6,
+                'total': x.price_unit * 1.6 * x.product_qty,
+                'produced_overseas': x.produced_overseas
             }))
             seq += 1
 
@@ -279,6 +308,7 @@ class SaleEstimate(models.Model):
             'default_estimate_id': self.id,
             'default_item_ids': sheet_lines
         }
+        self.product_lines.filtered('selected').write({'selected': False})
         return action
 
     def action_view_price_sheet(self):
@@ -330,13 +360,45 @@ class SaleEstimateLine(models.Model):
     selected = fields.Boolean(default=False)
     purchase_agreement_ids = fields.Many2many('purchase.requisition', 'sale_estimate_line_purchase_agreements_rel',
                                      'estimate_line_id', 'purchase_agreement_id')
-    price_sheet_line_ids = fields.Many2many('product.price.sheet.line', 'product_price_sheet_line_sale_estimate_line_relation',
+    purchase_requisition_line_ids = fields.Many2many('purchase.requisition.line',
+                                                     'estimate_line_purchase_requisition_rel', 'estimate_line_id',
+                                                     'requisition_line_id',
+                                                     compute='_compute_purchase_requisition_line_ids', store=True)
+    price_sheet_line_ids = fields.Many2many('product.price.sheet.line',
+                                            'product_price_sheet_line_sale_estimate_line_relation',
                                             'sale_estimate_line_id', 'price_sheet_line_id')
     display_type = fields.Selection([
         ('line_section', "Section"),
         ('line_note', "Note")], default=False, help="Technical field for UX purpose.")
     comment = fields.Text('Comment')
 
+    # Fields below used for a widget
+    virtual_available_at_date = fields.Float(compute='_compute_qty_at_date', digits='Product Unit of Measure')
+    qty_available_today = fields.Float(compute='_compute_qty_at_date')
+    free_qty_today = fields.Float(compute='_compute_qty_at_date')
+    scheduled_date = fields.Datetime(compute='_compute_qty_at_date')  # Need to display widget as red
+    qty_to_deliver = fields.Float(compute='_compute_qty_to_deliver', digits='Product Unit of Measure')
+    forecast_expected_date = fields.Datetime(compute='_compute_qty_at_date')
+    move_ids = fields.One2many('stock.move', 'sale_line_id', string='Stock Moves')
+    is_mto = fields.Boolean(compute='_compute_is_mto')
+    display_qty_widget = fields.Boolean(compute='_compute_qty_to_deliver')
+
+    def _compute_qty_at_date(self):
+        for sel in self:
+            sel.virtual_available_at_date = sel.product_id.free_qty
+            sel.qty_available_today = 0
+            sel.free_qty_today = 0
+            sel.scheduled_date = fields.Datetime.now()
+            sel.forecast_expected_date = fields.Datetime.now()
+
+    def _compute_is_mto(self):
+        for sel in self:
+            sel.is_mto = False  # If False, forecasted displayed
+
+    def _compute_qty_to_deliver(self):
+        for sel in self:
+            sel.qty_to_deliver = sel.product_uom_qty # Red widget if qty_to_deliver less than virtual_available_at_date
+            sel.display_qty_widget = True
 
     @api.onchange('product_id')
     def product_id_change(self):
@@ -407,3 +469,11 @@ class SaleEstimateLine(models.Model):
             name += "\n" + pacv.with_context(lang=self.estimate_id.partner_id.lang).display_name
 
         return name
+
+    @api.depends('estimate_id.purchase_agreement_ids.line_ids')
+    def _compute_purchase_requisition_line_ids(self):
+        for sel in self:
+            prl_ids = sel.estimate_id.purchase_agreement_ids.mapped('line_ids')
+            related_prl_ids = prl_ids.filtered(
+                lambda f: f.product_id == sel.product_id and f.product_qty == sel.product_uom_qty)
+            sel.purchase_requisition_line_ids = [(6, 0, related_prl_ids.ids)]

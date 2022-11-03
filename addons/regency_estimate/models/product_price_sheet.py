@@ -82,6 +82,7 @@ class ProductPriceSheet(models.Model):
 
     def action_new_quotation(self):
         action = self.env["ir.actions.actions"]._for_xml_id("sale_crm.sale_action_quotations_new")
+        sol = self.env['sale.order_line']
         selected_lines = self.item_ids
         action['context'] = {
             'search_default_price_sheet_id': self.id,
@@ -108,6 +109,10 @@ class ProductPriceSheet(models.Model):
                     'price_unit': p.price,
                     'product_uom': p.product_id.uom_id.id,
                     'shipping_options': p.shipping_options,
+                    'route_id': self.env.ref('stock_dropshipping.route_drop_shipping').id if
+                            self._is_dropship_needed(p.produced_overseas,
+                                                     p.product_id, self.partner_id)
+                            else self.env.ref("stock_mts_mto_rule.route_mto_mts").id,
                     'allow_consumption_agreement': p.allow_consumption_agreement
                 }) for p in selected_lines.sorted('sequence')]
         }
@@ -202,6 +207,7 @@ class ProductPriceSheet(models.Model):
 
     def create_sale_order(self, lines_to_order):
         self.ensure_one()
+
         order = self.env['sale.order'].create({'access_token': self.access_token,
                                        'partner_id': self.partner_id.id,
                                        'estimate_id': lines_to_order.price_sheet_id.estimate_id.id,
@@ -212,10 +218,18 @@ class ProductPriceSheet(models.Model):
                                                 'product_uom_qty': p.product_uom_qty,
                                                 'price_unit': p.price,
                                                 'product_uom': p.product_id.uom_id.id,
-
+                                                'route_id': self.env.ref('stock_dropshipping.route_drop_shipping').id if
+                                                        self._is_dropship_needed(p.produced_overseas,
+                                                                                 p.product_id, self.partner_id) else
+                                                        self.env.ref("stock_mts_mto_rule.route_mto_mts").id,
                                             }) for p in lines_to_order]})
         lines_to_order.write({'product_uom_qty': 0})
         return order
+
+    def _is_dropship_needed(self, produced_overseas, product_id, partner_id):
+        sol = self.env['sale.order.line']
+        return not produced_overseas and product_id.qty_available <= 0 and \
+               not sol.find_consumption_agreement(product_id, partner_id)
 
     def create_consumption_agreement(self, lines_to_order):
         self.ensure_one()
@@ -255,15 +269,15 @@ class ProductPriceSheet(models.Model):
     currency_id = fields.Many2one(
         'res.currency', 'Currency',
         readonly=True, related='price_sheet_id.currency_id', store=True)
-    price = fields.Float(string='Unit Price', digits='Product Price', store=True)
+    price = fields.Float(string='Customer Price', digits='Product Price', store=True)
     sale_estimate_line_ids = fields.Many2many('sale.estimate.line', 'product_price_sheet_line_sale_estimate_line_relation',
                                          'price_sheet_line_id', 'sale_estimate_line_id')
     total = fields.Float()
     shipping_options = fields.Char()
     partner_id = fields.Many2one('res.partner', 'Vendor')
-    FOB = fields.Char(string='FOB')
     duty = fields.Float()
     freight = fields.Float()
+    unit_price = fields.Float(string='Unit Price', digits='Product Price', store=True, compute='_compute_unit_price')
     production_lead_time = fields.Char()
     shipping_lead_time = fields.Char()
     allow_consumption_agreement = fields.Boolean(default=True)
@@ -277,6 +291,27 @@ class ProductPriceSheet(models.Model):
     insection_total_rows = fields.Integer(compute="_compute_insection_rownumber")
     attachment_id = fields.Binary('File', attachment=True)
     attachment_name = fields.Char()
+    produced_overseas = fields.Boolean('Produced Overseas')
+    display_name = fields.Char(compute='_compute_display_name')
+    color = fields.Integer('Color Index', compute='_compute_color')
+
+    def _compute_display_name(self):
+        for psl in self:
+            psl.display_name = '%s %s' % (psl.price_sheet_id.name, psl.name)
+
+    def _compute_color(self):
+        for rec in self:
+            if rec.price_sheet_id.state == 'draft':
+                rec.color = 3  # Yellow
+            elif rec.price_sheet_id.state == 'confirmed':
+                rec.color = 10  # Green
+            else:
+                rec.color = 0  # White
+
+    @api.depends('vendor_price', 'duty', 'freight')
+    def _compute_unit_price(self):
+        for rec in self:
+            rec.unit_price = rec.vendor_price + rec.duty + rec.freight
 
     @api.depends('min_quantity', 'max_quantity', 'sequence')
     def _compute_qty_range_str(self):
@@ -322,12 +357,15 @@ class ProductPriceSheet(models.Model):
             rec.total = rec.price * rec.min_quantity
 
     def _compute_max_quantity(self):
-        prev_rec = False
         for rec in self.sorted('sequence'):
-            rec.max_quantity = MAX_QUANTITY
-            if prev_rec and prev_rec.product_id == rec.product_id:
-                prev_rec.max_quantity = rec.min_quantity
-            prev_rec = rec
+            same_product_and_vendor_recs = self.filtered(
+                lambda f: f.product_id == rec.product_id and f.partner_id == rec.partner_id).sorted('min_quantity')
+            prev_rec = False
+            for item in same_product_and_vendor_recs:
+                item.max_quantity = MAX_QUANTITY
+                if prev_rec:
+                    prev_rec.max_quantity = item.min_quantity
+                prev_rec = item
 
     @api.depends('product_uom_qty', 'price')
     def _compute_amount(self):

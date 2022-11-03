@@ -335,7 +335,7 @@
                             <th class="text-left">Products</th>
                             <th class="text-center">Qty Range</th>
                             <th class="text-right">Quantity</th>
-                            <th t-attf-class="text-right {{ 'd-none d-sm-table-cell' if report_type == 'html' else '' }}">Unit Price</th>
+                            <th t-attf-class="text-right {{ 'd-none d-sm-table-cell' if report_type == 'html' else '' }}">Customer Price</th>
 <!--                            <th t-if="display_discount" t-attf-class="text-right {{ 'd-none d-sm-table-cell' if report_type == 'html' else '' }}">-->
 <!--                                <span>Disc.%</span>-->
 <!--                            </th>-->

@@ -26,14 +26,7 @@ class SaleOrderLine(models.Model):
     @api.onchange('product_id')
     def _onchange_product_id_warning(self):
         super(SaleOrderLine, self)._onchange_product_id_warning()
-        self.consumption_agreement_line_id = self.env['consumption.agreement.line'].\
-            search([('product_id', '=', self.product_id.id),
-                    ('qty_remaining', '>', 0),
-                    '|', ('allowed_partner_ids', 'in', self.partner_id.id),
-                         '&', ('allowed_partner_ids', '=', False),
-                              ('agreement_id.allowed_partner_ids', 'in', self.partner_id.id)],
-                   order='signed_date',
-                   limit=1)
+        self.consumption_agreement_line_id = self.find_consumption_agreement(self.product_id, self.partner_id)
         if self.consumption_agreement_line_id:
             self.price_unit = self.consumption_agreement_line_id.price_unit
 
@@ -43,6 +36,15 @@ class SaleOrderLine(models.Model):
         if self.consumption_agreement_line_id:
             self.price_unit = self.consumption_agreement_line_id.price_unit
 
+    def find_consumption_agreement(self, product_id, partner_id):
+        return self.env['consumption.agreement.line'].\
+            search([('product_id', '=', product_id.id),
+                    ('qty_remaining', '>', 0),
+                    '|', ('allowed_partner_ids', 'in', partner_id.id),
+                         '&', ('allowed_partner_ids', '=', False),
+                              ('agreement_id.allowed_partner_ids', 'in', partner_id.id)],
+                   order='signed_date',
+                   limit=1)
     def write(self, vals):
         res = super(SaleOrderLine, self).write(vals)
         if 'product_uom_qty' in vals:

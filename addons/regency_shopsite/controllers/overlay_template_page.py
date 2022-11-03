@@ -5,7 +5,6 @@ import json
 import PIL.Image as Image
 from markupsafe import Markup
 from odoo import http, Command
-from odoo.fields import Datetime
 from odoo.exceptions import ValidationError
 from odoo.http import request
 
@@ -47,6 +46,7 @@ class OverlayTemplatePage(http.Controller):
     def get_overlay_product_data(cls, overlay_product_id):
         return {
             'overlayProductId': overlay_product_id.id if overlay_product_id else False,
+            'overlayProductActive': overlay_product_id.active if overlay_product_id else False,
             'overlayProductName': overlay_product_id.name if overlay_product_id else False,
         }
 
@@ -92,75 +92,100 @@ class OverlayTemplatePage(http.Controller):
             })
 
     @classmethod
-    def create_overlay_product(cls, overlay_template_id, attribute_list, overlay_product_name, overlay_area_list,
-                               preview_images_data):
+    def save_overlay_product(cls, overlay_template_id, overlay_product_name, attribute_list=None,
+                             overlay_area_list=None, preview_images_data=None, overlay_product_id=None,
+                             overlay_product_was_changed=None):
         overlay_template_id = request.env['overlay.template'].browse(overlay_template_id).exists()
         if not overlay_template_id:
             raise ValidationError('Overlay template does not exists!')
         product_template_id = overlay_template_id.product_template_id
 
+        sol_with_overlay_product = False
+        old_overlay_product = False
+        overlay_product = False
+        if overlay_product_id:
+            old_overlay_product = request.env['overlay.product'].sudo().browse(overlay_product_id).exists()
+            if not old_overlay_product:
+                raise ValidationError(f'Overlay product with ID={overlay_product_id} does not exists!')
+            if old_overlay_product.product_id:
+                sol_with_overlay_product = request.env['sale.order.line'].sudo().search(
+                    [('product_id', '=', old_overlay_product.product_id.id)])
+            if sol_with_overlay_product and overlay_product_was_changed:
+                old_overlay_product.active = False
+            else:
+                overlay_product = old_overlay_product
+                overlay_product.name = overlay_product_name
+                if overlay_product_was_changed:
+                    overlay_product.overlay_product_image_ids.unlink()
+                    overlay_product.overlay_product_area_image_ids.unlink()
+                    overlay_product.product_id = False
+
+        if not overlay_product:
+            overlay_product = request.env['overlay.product'].sudo().create({
+                'name': overlay_product_name,
+                'overlay_template_id': overlay_template_id.id,
+            })
+
         product_template_attribute_value_ids = []
-        for attribute in attribute_list:
-            attribute_id = attribute['attribute_id']
-            product_template_attribute_line_id = product_template_id.attribute_line_ids \
-                .filtered(lambda x: x.attribute_id.id == attribute_id)
-            if not product_template_attribute_line_id:
-                raise ValidationError(f'Attribute with id "{attribute_id}" does not exists in the product!')
-            value_id = attribute['value_id']
-            product_template_attribute_value_id = product_template_attribute_line_id.product_template_value_ids \
-                .filtered(lambda x: x.product_attribute_value_id.id == value_id)
-            if not product_template_attribute_line_id:
-                raise ValidationError(f'Attribute value with id "{attribute_id}" does not exists in the product!')
-            product_template_attribute_value_ids.append(product_template_attribute_value_id.id)
+        if not old_overlay_product or overlay_product_was_changed:
+            if not attribute_list:
+                raise ValidationError('attribute_list argument is required!')
+            for attribute in attribute_list:
+                attribute_id = attribute['attribute_id']
+                product_template_attribute_line_id = product_template_id.attribute_line_ids \
+                    .filtered(lambda x: x.attribute_id.id == attribute_id)
+                if not product_template_attribute_line_id:
+                    raise ValidationError(f'Attribute with id "{attribute_id}" does not exists in the product!')
+                value_id = attribute['value_id']
+                product_template_attribute_value_id = product_template_attribute_line_id.product_template_value_ids \
+                    .filtered(lambda x: x.product_attribute_value_id.id == value_id)
+                if not product_template_attribute_line_id:
+                    raise ValidationError(f'Attribute value with id "{attribute_id}" does not exists in the product!')
+                product_template_attribute_value_ids.append(product_template_attribute_value_id.id)
 
-        overlay_attribute_id = request.env.ref('regency_shopsite.overlay_attribute')
-        product_template_overlay_attribute_value_id = product_template_id.attribute_line_ids \
-            .filtered(lambda x: x.attribute_id.id == overlay_attribute_id.id) \
-            .product_template_value_ids \
-            .filtered(lambda x: x.product_attribute_value_id.overlay_template_id.id == overlay_template_id.id)
-        if not product_template_overlay_attribute_value_id:
-            raise ValidationError(f'Product {product_template_id.name} does not have overlay attribute!')
-        product_template_attribute_value_ids.append(product_template_overlay_attribute_value_id.id)
+            overlay_attribute_id = request.env.ref('regency_shopsite.overlay_attribute')
+            product_template_overlay_attribute_value_id = product_template_id.attribute_line_ids \
+                .filtered(lambda x: x.attribute_id.id == overlay_attribute_id.id) \
+                .product_template_value_ids \
+                .filtered(lambda x: x.product_attribute_value_id.overlay_template_id.id == overlay_template_id.id)
+            if not product_template_overlay_attribute_value_id:
+                raise ValidationError(f'Product {product_template_id.name} does not have overlay attribute!')
+            product_template_attribute_value_ids.append(product_template_overlay_attribute_value_id.id)
+            overlay_product.product_template_attribute_value_ids = [Command.set(product_template_attribute_value_ids)]
 
-        overlay_product_id = request.env['overlay.product'].sudo().create({
-            'name': overlay_product_name,
-            'overlay_template_id': overlay_template_id.id,
-            'product_template_attribute_value_ids': [Command.set(product_template_attribute_value_ids)],
-            'last_updated_date': Datetime.now(),
-            'updated_by_id': request.env.user.id
-        })
+            cls._create_overlay_product_preview_images(overlay_product, preview_images_data)
 
-        cls._create_overlay_product_preview_images(overlay_product_id, preview_images_data)
-
-        for item in overlay_area_list.values():
-            overlay_position_id = item.get('overlayPositionId', False)
-            if overlay_position_id:
-                overlay_position_id = request.env['overlay.position'].sudo().browse(overlay_position_id).exists()
-            if not overlay_position_id:
-                continue
-
-            area_list = item.get('areaList', {})
-            if not area_list:
-                continue
-            for area in area_list.values():
-                data = area.get('data', [])
-                if not data:
+            for item in overlay_area_list.values():
+                overlay_position_id = item.get('overlayPositionId', False)
+                if overlay_position_id:
+                    overlay_position_id = request.env['overlay.position'].sudo().browse(overlay_position_id).exists()
+                if not overlay_position_id:
                     continue
-                for obj in data:
-                    image_bytes = obj.get('image', False)
-                    if not image_bytes:
-                        continue
-                    request.env['overlay.product.area.image'].sudo().create({
-                        'image': image_bytes.encode(),
-                        'overlay_position_id': overlay_position_id.id,
-                        'area_index': area.get('index'),
-                        'area_object_index': obj.get('index'),
-                        'overlay_product_id': overlay_product_id.id,
-                    })
-                    del obj['image']
-        overlay_product_id.area_list_json = json.dumps(overlay_area_list)
 
-        return overlay_product_id, product_template_attribute_value_ids
+                area_list = item.get('areaList', {})
+                if not area_list:
+                    continue
+                for area in area_list.values():
+                    data = area.get('data', [])
+                    if not data:
+                        continue
+                    for obj in data:
+                        image_bytes = obj.get('image', False)
+                        if not image_bytes:
+                            continue
+                        request.env['overlay.product.area.image'].sudo().create({
+                            'image': image_bytes.encode(),
+                            'overlay_position_id': overlay_position_id.id,
+                            'area_index': area.get('index'),
+                            'area_object_index': obj.get('index'),
+                            'overlay_product_id': overlay_product.id,
+                        })
+                        del obj['image']
+            overlay_product.area_list_json = json.dumps(overlay_area_list)
+
+        overlay_product._set_update_info()
+
+        return overlay_product, product_template_attribute_value_ids
 
     @http.route(['/shop/<model("overlay.template"):overlay_template_id>'], type='http', auth='user', website=True)
     def overlay_template_page(self, overlay_template_id, **kwargs):
@@ -246,7 +271,7 @@ class OverlayTemplatePage(http.Controller):
         if url_overlay_product_id:
             try:
                 url_overlay_product_id = int(url_overlay_product_id)
-                overlay_product_id = request.env['overlay.product'].sudo().search(
+                overlay_product_id = request.env['overlay.product'].sudo().with_context(active_test=False).search(
                     [('id', '=', url_overlay_product_id), ('overlay_template_id', '=', overlay_template_id.id)])
             except (ValueError, TypeError):
                 pass
@@ -269,6 +294,7 @@ class OverlayTemplatePage(http.Controller):
                         attribute['selectedValueId'] = overlay_product_attribute_value_id.id
             overlay_template_page_data.update({
                 'overlayProductId': overlay_product_id.id,
+                'overlayProductActive': overlay_product_id.active,
                 'overlayProductName': overlay_product_id.name if overlay_product_id else False,
                 'overlayProductAreaList': json.loads(overlay_product_id.area_list_json) or {},
                 'overlayProductAreaImageList': overlay_product_area_image_list,
@@ -283,11 +309,36 @@ class OverlayTemplatePage(http.Controller):
 
     @http.route(['/shop/overlay_template/save'], type='json', auth='user', methods=['POST'], website=True,
                 csrf=False)
-    def overlay_product_save(self, overlay_template_id, attribute_list, overlay_product_name, overlay_area_list,
-                             preview_images_data, **kwargs):
-        overlay_product_id, product_template_attribute_value_ids = self.create_overlay_product(
-            overlay_template_id, attribute_list, overlay_product_name, overlay_area_list, preview_images_data)
-        return self.get_overlay_product_data(overlay_product_id)
+    def overlay_product_save(self, overlay_template_id, overlay_product_name, attribute_list=None,
+                             overlay_area_list=None, preview_images_data=None, overlay_product_id=None,
+                             overlay_product_was_changed=None, **kwargs):
+        overlay_product, product_template_attribute_value_ids = self.save_overlay_product(
+            overlay_template_id, overlay_product_name,
+            attribute_list=attribute_list,
+            overlay_area_list=overlay_area_list,
+            preview_images_data=preview_images_data,
+            overlay_product_id=overlay_product_id,
+            overlay_product_was_changed=overlay_product_was_changed)
+        return self.get_overlay_product_data(overlay_product)
+
+    @http.route(['/shop/overlay_template/delete'], type='json', auth='user', methods=['POST'], website=True,
+                csrf=False)
+    def overlay_product_delete(self, overlay_product_id):
+        overlay_product = request.env['overlay.product'].sudo().browse(overlay_product_id).exists()
+        if not overlay_product:
+            raise ValidationError(f'Overlay product with ID={overlay_product_id} does not exists!')
+        overlay_template_id = overlay_product.overlay_template_id
+        if self._overlay_template_is_available_for_user(overlay_template_id):
+            sol_with_overlay_product = False
+            if overlay_product.product_id:
+                sol_with_overlay_product = request.env['sale.order.line'].sudo().search(
+                    [('product_id', '=', overlay_product.product_id.id)])
+            if sol_with_overlay_product:
+                overlay_product.active = False
+            else:
+                overlay_product.sudo().unlink()
+            return True
+        return False
 
     @http.route(['/shop/overlay_template/price_list'], type='json', auth='user', methods=['POST'], website=True)
     def overlay_template_price_list(self, overlay_template_id, **kwargs):

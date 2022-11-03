@@ -30,7 +30,7 @@
 
     <t t-name="product_overlay_position" owl="1">
         <div class="product_overlay_position_editor">
-            <div t-if="!store.otPage.hasOverlayProductId" class="product_overlay_position_editor_tools">
+            <div t-if="!store.otPage.hasOverlayProductId || this.store.otPage.editMode" class="product_overlay_position_editor_tools">
                 <label t-att-class="{ 'product_overlay_disabled': !state.selectedAreaIndex }"
                        t-attf-for="upload_area_image_{{props.overlayPosition.id}}"
                        title="Upload image">

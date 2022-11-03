@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<templates id="template" xml:space="preserve">
+    <t t-inherit="sale_stock.QtyDetailPopOver" t-inherit-mode="extension" owl="1">
+        <xpath expr="//tbody" position="replace">
+
+            <tbody t-if="props.record.resModel == 'sale.estimate.line'">
+                <tr>
+                    <td><strong>Available</strong><br /></td>
+                    <td><b t-out='props.record.data.virtual_available_at_date'/> </td>
+                </tr>
+            </tbody>
+
+            <tbody t-if="props.record.resModel != 'sale.estimate.line'">
+                <t t-if="!props.record.data.is_mto and ['draft', 'sent'].includes(props.record.data.state)">
+                    <tr>
+                        <td><strong>Forecasted Stock</strong><br/><small>On <span t-out="props.calcData.delivery_date"/></small></td>
+                        <td><b t-out='props.record.data.virtual_available_at_date'/> <t t-out='props.record.data.product_uom[1]'/></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Available</strong><br /><small>All planned operations included</small></td>
+                        <td><b t-out='props.record.data.free_qty_today' t-att-class="!props.calcData.will_be_fulfilled ? 'text-danger': ''"/> <t t-out='props.record.data.product_uom[1]'/></td>
+                    </tr>
+                </t>
+                <t t-elif="props.record.data.is_mto and ['draft', 'sent'].includes(props.record.data.state)">
+                    <tr>
+                        <td><strong>Expected Delivery</strong></td>
+                        <td class="oe-right"><span t-out="props.calcData.delivery_date"/></td>
+                    </tr>
+                    <tr>
+                        <p>This product is replenished on demand.</p>
+                    </tr>
+                </t>
+                <t t-elif="props.record.data.state == 'sale'">
+                    <tr>
+                        <td>
+                            <strong>Reserved</strong><br/>
+                        </td>
+                        <td style="min-width: 50px; text-align: right;">
+                            <b t-out='props.record.data.qty_available_today'/> <t t-out='props.record.data.product_uom[1]'/>
+                        </td>
+                    </tr>
+                    <tr t-if="props.record.data.qty_available_today &lt; props.record.data.qty_to_deliver">
+                        <td>
+                            <span t-if="props.calcData.will_be_fulfilled and props.calcData.forecast_expected_date_str">
+                                Remaining demand available at <b t-out="props.calcData.forecast_expected_date_str" t-att-class="props.record.data.scheduled_date &lt; props.record.data.forecast_expected_date ? 'text-danger' : ''"/>
+                            </span>
+                            <span t-elif="!props.calcData.will_be_fulfilled and props.calcData.forecast_expected_date_str" class="text-danger">
+                                Not enough future availability
+                            </span>
+                            <span t-elif="!props.calcData.will_be_fulfilled" class="text-danger">
+                                No future availability
+                            </span>
+                            <span t-else="">
+                                Available in stock
+                            </span>
+                        </td>
+                    </tr>
+                </t>
+            </tbody>
+        </xpath>
+    </t>
+</templates>

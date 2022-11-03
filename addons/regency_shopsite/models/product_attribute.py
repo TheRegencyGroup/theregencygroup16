@@ -97,8 +97,18 @@ class ProductTemplateAttributeValue(models.Model):
         """Exclude values from single value lines or from no_variant attributes."""
         ptavs = self._without_no_variant_attributes().with_prefetch(self._prefetch_ids)
         ptavs = ptavs._filter_single_value_lines().with_prefetch(self._prefetch_ids)
-        return ", ".join([ptav.product_attribute_value_id.overlay_template_id.name or ptav.name
-                          for ptav in ptavs])
+        overlay_attribute_id = self.env.ref('regency_shopsite.overlay_attribute')
+        customize_attribute_id = self.env.ref('regency_shopsite.customization_attribute')
+        ptav_name_list = []
+        for ptav in ptavs:
+            if ptav.attribute_id.id == overlay_attribute_id.id and ptav.product_attribute_value_id.overlay_template_id:
+                name = ptav.product_attribute_value_id.overlay_template_id.name
+            elif ptav.attribute_id.id == customize_attribute_id.id and ptav.product_attribute_value_id.overlay_product_id:
+                name = ptav.product_attribute_value_id.overlay_product_id.name
+            else:
+                name = ptav.name
+            ptav_name_list.append(name)
+        return ", ".join(ptav_name_list)
 
     @api.constrains('product_attribute_value_id', 'ptav_active')
     def _check_correct_attribute_value(self):

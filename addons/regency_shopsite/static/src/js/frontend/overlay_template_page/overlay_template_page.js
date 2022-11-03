@@ -35,10 +35,56 @@ export class OverlayTemplatePageComponent extends Component {
         return attributeList;
     }
 
-    get OverlayEditor() {
+    get overlayEditor() {
         return Object.values(this.__owl__.children)
             .find(e => e.component.constructor.name === 'ProductOverlayEditorComponent')
             .component;
+    }
+
+    get disabledEditName() {
+        return this.store.otPage.hasOverlayProductId && !this.store.otPage.editMode;
+    }
+
+    get showEditBtn() {
+        return this.store.otPage.hasOverlayProductId &&
+            !this.store.otPage.overlayProductIsArchived &&
+            !this.store.otPage.editMode;
+    }
+
+    get showDeleteBtn() {
+        return this.store.otPage.hasOverlayProductId &&
+            !this.store.otPage.overlayProductIsArchived &&
+            !this.store.otPage.editMode;
+    }
+
+    get showCancelBtn() {
+        return this.store.otPage.hasOverlayProductId &&
+            !this.store.otPage.overlayProductIsArchived &&
+            this.store.otPage.editMode;
+    }
+
+    get showSaveBtn() {
+        return (this.store.otPage.hasOverlayProductId &&
+            !this.store.otPage.overlayProductIsArchived &&
+            this.store.otPage.editMode) || !this.store.otPage.hasOverlayProductId;
+    }
+
+    get showDuplicateBtn() {
+        return this.store.otPage.hasOverlayProductId &&
+            !this.store.otPage.overlayProductIsArchived &&
+            !this.store.otPage.editMode;
+    }
+
+    get showPriceSelector() {
+        return !this.store.otPage.overlayProductIsArchived && this.store.otPage.hasPriceList;
+    }
+
+    get showAddToCartBtn() {
+        return !this.store.otPage.overlayProductIsArchived &&
+            ((this.store.otPage.hasPriceList &&
+                    this.store.otPage.overlayTemplateIsAvailableForActiveHotel) ||
+                (!this.store.otPage.hasPriceList &&
+                    !this.store.otPage.overlayTemplateIsAvailableForActiveHotel));
     }
 
     onInputNameFocusin() {
@@ -50,57 +96,100 @@ export class OverlayTemplatePageComponent extends Component {
     }
 
     async getDataForSaveCustomization() {
-        let name = this.inputNameRef.el.value.trim();
-        if (!name) {
+        let overlayProductName = this.inputNameRef.el.value.trim();
+        if (!overlayProductName) {
             alert('Listing name is empty!')
             return false;
         }
-        let overlayAreaList = this.OverlayEditor.getOverlayAreaList();
-        if (!overlayAreaList) {
-            return false;
+        let overlayAreaList;
+        let previewImagesData;
+        let overlayProductWasChanged;
+        if (this.store.otPage.editMode) {
+            overlayProductWasChanged = this.overlayEditor.checkAreasWasChanged() ||
+                this.store.otPage.attrributesWasChanged;
         }
-        let previewImagesData = await this.OverlayEditor.getPreviewImagesData();
-        return { name, overlayAreaList, previewImagesData }
+        if (!this.store.otPage.hasOverlayProductId ||
+            (this.store.otPage.editMode && (overlayProductWasChanged))) {
+            overlayAreaList = this.overlayEditor.getOverlayAreaList();
+            if (!overlayAreaList) {
+                return false;
+            }
+            previewImagesData = await this.overlayEditor.getPreviewImagesData();
+        }
+        return { overlayProductName, overlayAreaList, previewImagesData, overlayProductWasChanged }
+    }
+
+    async onClickEditCustomization() {
+        if (this.store.otPage.overlayProductIsArchived || this.store.otPage.editMode) {
+            return;
+        }
+        this.store.otPage.enableEditMode();
+    }
+
+    async onClickDeleteCustomization() {
+        if (!window.confirm('Do you really want to delete this customization?')) {
+            return;
+        }
+        if (this.store.otPage.overlayProductIsArchived) {
+            return;
+        }
+        await this.store.otPage.deleteOverlayProduct();
     }
 
     async onClickSaveCustomization() {
+        if (this.store.otPage.overlayProductIsArchived) {
+            return;
+        }
         const customData = await this.getDataForSaveCustomization();
         if (!customData) {
             return false;
         }
-        this.store.otPage.saveOverlayProduct({
-            overlayProductName: customData.name,
-            overlayAreaList: customData.overlayAreaList,
-            previewImagesData: customData.previewImagesData,
-        }).catch();
+        await this.store.otPage.saveOverlayProduct(customData);
+        if (this.store.otPage.editMode) {
+            this.store.otPage.disableEditMode();
+        }
+    }
+
+    async onClickDuplicateCustomization() {
+        if (this.store.otPage.overlayProductIsArchived) {
+            return;
+        }
+        this.store.otPage.duplicateOverlayProduct();
+    }
+
+    onClickCancelCustomization() {
+        window.location.reload();
     }
 
     async onClickAddToCart() {
-        if (!this.store.otPage.overlayTemplateIsAvailableForActiveHotel || !this.store.otPage.hasPriceList) {
+        if (!this.store.otPage.canAddedToCart) {
             return;
         }
         let data = this.store.otPage.getCustomizedData();
         let overlayProductId = this.store.otPage.overlayProductId;
         if (!!overlayProductId) {
             data = {
-                quantity: data.quantity,
+                ...data,
                 overlayProductId,
             };
-        } else {
+        }
+        if (!this.store.otPage.hasOverlayProductId ||
+            (!!this.store.otPage.hasOverlayProductId && this.store.otPage.editMode)) {
             const customData = await this.getDataForSaveCustomization();
             if (!customData) {
                 return false;
             }
             data = {
                 ...data,
-                overlayProductName: customData.name,
-                overlayAreaList: customData.overlayAreaList,
-                previewImagesData: customData.previewImagesData,
+                ...customData,
             }
         }
         let res = await this.store.cart.addOverlayToCart(data);
         if (res) {
             this.store.otPage.updateOverlayProductData(res);
+        }
+        if (this.store.otPage.editMode) {
+            this.store.otPage.disableEditMode();
         }
     }
 

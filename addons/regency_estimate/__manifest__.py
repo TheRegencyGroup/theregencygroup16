@@ -1,6 +1,6 @@
 {
     'name': 'Regency Sales Estimates',
-    'version': '16.0.0.1',
+    'version': '16.0.0.3',
     'summary': '',
     'author': 'OpsWay',
     'description': "",
@@ -14,6 +14,7 @@
         'sale_management',
         'web_one2many_duplicate_cr',
         'delivery',
+        'stock_mts_mto_rule'
     ],
     'category': 'Regency/Sales',
     'sequence': 10,
@@ -35,16 +36,20 @@
         'views/crm_lead.xml',
         'views/crm_stage.xml',
         'wizard/choose_delivery_carrier_view.xml',
+        'views/product_views.xml',
+        'views/delivery_carrier.xml',
     ],
     'demo': [
         'data/product_demo.xml',
     ],
     'assets': {
         'web.assets_frontend': [
-            'regency_estimate/static/src/js/**/*'
+            'regency_estimate/static/src/frontend/js/**/*'
         ],
         'web.assets_backend': [
-            'regency_estimate/static/src/scss/**/*'
+            'regency_estimate/static/src/js/**/*',
+            'regency_estimate/static/src/scss/**/*',
+            'regency_estimate/static/src/xml/qty_at_date_widget.xml'
         ]
     },
     'installable': True,

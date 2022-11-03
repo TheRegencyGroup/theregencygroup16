@@ -7,4 +7,4 @@ class OverlayProductImage(models.Model):
 
     image = fields.Image(required=True)
     overlay_position_id = fields.Many2one('overlay.position', required=True)
-    overlay_product_id = fields.Many2one('overlay.product', required=True, ondelete='cascade')
+    overlay_product_id = fields.Many2one('overlay.product', ondelete='cascade', copy=False)

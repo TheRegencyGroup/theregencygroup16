@@ -18,6 +18,11 @@ class ProductProduct(models.Model):
             else:
                 rec.overlay_product_id = False
 
+    @property
+    def url(self):
+        overlay_product = self.overlay_product_id
+        return overlay_product.url if overlay_product else self.website_url
+
     def open_pricelist_rules(self):
         self.ensure_one()
         domain = ['|',
