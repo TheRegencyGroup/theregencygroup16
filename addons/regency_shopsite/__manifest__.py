@@ -19,6 +19,7 @@
         'data/overlay_position.xml',
         'data/product_attribute.xml',
         'data/ir_config_parameter.xml',
+        'data/ir_cron.xml',
         'views/sale_order_view.xml',
         'views/website/web_frontend_layout.xml',
         'views/website/website_header.xml',
