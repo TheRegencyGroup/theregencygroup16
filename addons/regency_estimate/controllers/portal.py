@@ -322,8 +322,10 @@ class CustomerPortal(portal.CustomerPortal):
         return request.redirect(order_sudo.get_portal_url(query_string=query_string))
 
     @http.route(['/my/price_sheets/<int:order_id>/create_sale_order'], type='json', auth="public", website=True)
-    def create_sale_order_from_price_sheet(self, order_id, access_token=None):
+    def create_sale_order_from_price_sheet(self, order_id, selected_line_ids=None, access_token=None):
         # get from query string if not on json param
+        if selected_line_ids is None:
+            selected_line_ids = []
         access_token = access_token or request.httprequest.args.get('access_token')
         try:
             order_sudo = self._document_check_access('product.price.sheet', order_id, access_token=access_token)

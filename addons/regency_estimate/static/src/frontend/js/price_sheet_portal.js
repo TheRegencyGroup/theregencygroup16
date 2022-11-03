@@ -30,15 +30,14 @@ publicWidget.registry.PriceSheetPortal = publicWidget.Widget.extend({
         ev.preventDefault();
 
         let self = this;
-        //     selected_ids = $('td#selection input:checked').map(function(){return $(this).attr("select-id");}).get();
+        let selected_ids = $('td#selection input:checked').map(function(){return $(this).attr("select-id");}).get();
 
         return this._callCreateOrder(self.orderDetail.orderId, {
-            // 'selected_line_ids': selected_ids,
+            'selected_line_ids': selected_ids,
             'access_token': self.orderDetail.token
         }).then(function (data) {
             if (data.error) {
                 self.$('.o_portal_sign_error_msg').remove();
-                // self.$controls.prepend(qweb.render('portal.portal_signature_error', {widget: data}));
             } else if (data.success) {
                 var $success = qweb.render('portal.portal_signature_success', {widget: data});
                 self.$el.empty().append($success);
@@ -52,7 +51,7 @@ publicWidget.registry.PriceSheetPortal = publicWidget.Widget.extend({
                 // no resolve if we reload the page
                 return new Promise(function () { });
             }
-        });
+        })
     },
 
     /**
