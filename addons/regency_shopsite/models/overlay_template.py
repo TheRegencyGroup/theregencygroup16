@@ -152,8 +152,6 @@ class OverlayTemplate(models.Model):
     @api.constrains('product_template_id')
     def _constrains_changes_if_has_sale(self):
         for record in self:
-            if not record.active:
-                continue
             if record.sale_order_line_ids:
                 raise ValidationError(_("The '%s' shopsite item template (ID%s) has sales."
                                         "A product template shouldn't be change for it.")
