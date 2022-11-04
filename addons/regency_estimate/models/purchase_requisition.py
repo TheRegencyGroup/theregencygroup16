@@ -86,7 +86,7 @@ class PurchaseRequisition(models.Model):
                 'channel_type': 'chat',
             })
         if ch:
-            ch.message_post(body=message, author_id=self.env.user.partner_id.id)
+            ch.message_post(body=message, author_id=self.env.user.partner_id.id, message_type='comment')
 
     def action_in_progress(self):
         super(PurchaseRequisition, self).action_in_progress()
