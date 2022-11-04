@@ -7,18 +7,35 @@ import { AttributeSelector, ColorAttributeSelector } from './attribute_selector'
 import { QuantitySelector } from './quantity_selector';
 import env from 'web.public_env';
 
-const { Component, useState, useRef } = owl;
+const { Component, useState, useRef, onMounted } = owl;
 
 export class OverlayTemplatePageComponent extends Component {
     setup() {
+        onMounted(this.onMounted.bind(this));
+
         this.store = useStore();
         this.state = useState({
             nameInputIsFilled: !!this.store.otPage.overlayProductName,
         });
 
         this.inputNameRef = useRef('name_input');
+        this.listingNameInfoRef = useRef('listing_name_info')
 
         env.bus.on('active-hotel-changed', null, this.onChangedActiveHotel.bind(this));
+    }
+
+    onMounted() {
+        this.listingNameInfoPopover = tippy(this.listingNameInfoRef.el, {
+            sticky: true,
+            zIndex: 999,
+            maxWidth: 215,
+            placement: 'top-start',
+            theme: 'listing-name-info',
+            appendTo: () => document.getElementById('wrap'),
+            content: 'This is where you supply the name of your customized item',
+            trigger: 'mouseenter focus',
+            offset: [-10, 10],
+        });
     }
 
     get sortedAttributeList() {
@@ -85,6 +102,10 @@ export class OverlayTemplatePageComponent extends Component {
                     this.store.otPage.overlayTemplateIsAvailableForActiveHotel) ||
                 (!this.store.otPage.hasPriceList &&
                     !this.store.otPage.overlayTemplateIsAvailableForActiveHotel));
+    }
+
+    get showListingNameInfoPopover() {
+        return !this.store.otPage.hasOverlayProductId || this.store.otPage.editMode;
     }
 
     onInputNameFocusin() {
