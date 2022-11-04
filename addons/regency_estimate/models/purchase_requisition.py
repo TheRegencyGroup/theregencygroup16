@@ -108,6 +108,12 @@ class PurchaseRequisitionLine(models.Model):
     ], compute='_compute_state', store=True)
     color = fields.Integer('Color Index', compute='_compute_color')
 
+    @api.onchange('partner_id')
+    def _onchange_partner(self):
+        self.produced_overseas = self.partner_id.is_company\
+                                 and self.partner_id.contact_type == 'vendor'\
+                                 and self.partner_id.vendor_type == 'overseas'
+
     def _compute_display_name(self):
         for prl in self:
             prl.display_name = '%s %s' % (prl.requisition_id.user_id.name, prl.requisition_id.name)
