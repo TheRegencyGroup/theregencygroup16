@@ -55,7 +55,7 @@ class ProductPriceSheet(models.Model):
                                  default=lambda self: self.env.company)
     payment_term_id = fields.Many2one(
         'account.payment.term', string='Payment Terms', check_company=True,  # Unrequired company
-        domain="['|', ('company_id', '=', False), ('company_id', '=', company_id)]", )
+        domain="['|', ('company_id', '=', False), ('company_id', '=', company_id)]",)
 
     @api.depends('sale_order_ids')
     def _compute_sale_order_data(self):
@@ -145,7 +145,7 @@ class ProductPriceSheet(models.Model):
             'min_qty': line.min_quantity,
             'price': price,
             'currency_id': currency.id,
-            # 'delay': line.ETA,
+           # 'delay': line.ETA,
         }
 
     def action_confirm(self):
@@ -211,7 +211,7 @@ class ProductPriceSheet(models.Model):
     @api.depends('item_ids.price', 'amount_total', 'amount_untaxed')
     def _compute_tax_totals_json(self):
         for order in self:
-            totals = {
+            totals =  {
                 'amount_total': order.amount_total,
                 'amount_untaxed': order.amount_untaxed,
                 'formatted_amount_total': formatLang(self.env, order.amount_total, currency_obj=order.currency_id),
