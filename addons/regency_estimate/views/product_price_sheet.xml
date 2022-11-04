@@ -63,7 +63,7 @@
                         <notebook>
                             <page name="pricelist" string="Price Sheet Items">
                               <field name="item_ids"  widget="section_and_note_one2many" mode="tree">
-                                  <tree string="Price Sheet Items" editable="bottom" default_order='product_id asc, min_quantity asc'>
+                                  <tree string="Price Sheet Items" class="custom_list_header" editable="bottom">
                                       <control>
                                         <create name="add_product_control" string="Add a product"/>
                                         <create name="add_section_control" string="Add a section" context="{'default_display_type': 'line_section'}"/>
@@ -72,15 +72,15 @@
                                       <field name="sequence" widget="handle" />
                                       <!-- We do not display the type because we don't want the user to be bothered with that information if he has no section or note. -->
                                       <field name="display_type" invisible="1"/>
-                                      <field name="product_id"/>
-                                      <field name="name" widget="section_and_note_text" optional="show"/>
+                                      <field name="product_id" options="{'hide_sort_icon': True}"/>
+                                      <field name="name" widget="section_and_note_text" optional="show" options="{'hide_sort_icon': True}"/>
                                       <field name="min_quantity"/>
                                       <field name="max_quantity" invisible="1"/>
                                       <field name="insection_rownumber" invisible="1"/>
                                       <field name="qty_range_str"/>
                                       <field name="vendor_price" string="Vendor Price per Unit"/>
-                                      <field name="duty"/>
-                                      <field name="freight"/>
+                                      <field name="duty"  options="{'hide_sort_icon': True}"/>
+                                      <field name="freight"  options="{'hide_sort_icon': True}"/>
                                       <field name="currency_id" invisible="1"/>
                                       <field name="unit_price" string="Unit Price"/>
                                       <field name="production_lead_time"/>

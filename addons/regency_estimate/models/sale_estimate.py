@@ -243,7 +243,7 @@ class SaleEstimate(models.Model):
         products_to_estimate = self.product_lines.mapped(lambda x: (x.product_id, x.product_uom_qty))
         new_requisition_lines = confirmed_requisition_lines.filtered(lambda x: (x.product_id, x.product_qty) not in products_to_estimate)
         sheet_lines = []
-        for p in self.product_lines.filtered('selected').sorted('sequence'):
+        for p in self.product_lines.filtered(lambda x: x.selected or x.display_type).sorted('sequence'):
             seq = p.sequence
             if p.display_type:
                 sheet_lines.append(Command.create({
