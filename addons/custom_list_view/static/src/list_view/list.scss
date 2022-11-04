@@ -1,0 +1,11 @@
+.custom_list_header {
+  thead {
+    th {
+      & > div {
+        & > span {
+          white-space: normal !important;
+        }
+      }
+    }
+  }
+}
