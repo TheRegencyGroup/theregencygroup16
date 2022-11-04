@@ -46,11 +46,12 @@
     ],
     'assets': {
         'web.assets_frontend': [
-            'regency_estimate/static/src/frontend/js/**/*'
+            'regency_estimate/static/src/frontend/js/**/*.js',
+            'regency_estimate/static/src/scss/frontend/*.scss',
         ],
         'web.assets_backend': [
             'regency_estimate/static/src/js/**/*',
-            'regency_estimate/static/src/scss/**/*',
+            'regency_estimate/static/src/scss/backend/*.scss',
             'regency_estimate/static/src/xml/qty_at_date_widget.xml'
         ]
     },

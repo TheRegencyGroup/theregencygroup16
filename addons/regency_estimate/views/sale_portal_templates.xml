@@ -15,4 +15,43 @@
 
     </template>
 
+    <template id="sale_order_portal_content" inherit_id="sale.sale_order_portal_content">
+        <xpath expr="//section[@id='terms']" position="inside">
+            <div t-if="sale_order.state == 'draft'" class="regency_legal_accept">
+                <input class="form-check-input" id="legal_accept" type="checkbox" t-att-checked="sale_order.legal_accepted" t-att-data-sale-order-id="sale_order.id"/>
+                <label class="form-check-label" for="legal_accept">By checking this box, you are agreeing to our Terms &amp; Conditions</label>
+            </div>
+        </xpath>
+
+    </template>
+    <template id="sale_order_portal_template" inherit_id="sale.sale_order_portal_template">
+        <xpath expr="//t[contains(@t-if, '_has_to_be_signed')]//a[@data-bs-target='#modalaccept']" position="attributes">
+            <attribute name="t-att-data-sale-order-legal-accepted">str(sale_order.legal_accepted)</attribute>
+            <attribute name="data-sale-order-confirm-btn">1</attribute>
+        </xpath>
+        <xpath expr="//div[contains(@t-elif, '_has_to_be_paid')]//a[@data-bs-target='#modalaccept']" position="attributes">
+            <attribute name="t-att-data-sale-order-legal-accepted">str(sale_order.legal_accepted)</attribute>
+            <attribute name="data-sale-order-confirm-btn">1</attribute>
+        </xpath>
+
+    </template>
+
 </odoo>
+
+
+<!-- <t t-if="sale_order._has_to_be_signed(True)">-->
+<!--                            <div class="col-sm-auto mt8">-->
+<!--                                <a role="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalaccept" href="#"><i class="fa fa-check"/><t t-if="sale_order._has_to_be_paid(True)"> Sign &amp; Pay</t><t t-else=""> Accept &amp; Sign</t></a>-->
+<!--                            </div>-->
+<!--                            <div class="col-sm-auto mt8">-->
+<!--                                <a role="button" class="btn btn-secondary" href="#discussion"><i class="fa fa-comment"/> Feedback</a>-->
+<!--                            </div>-->
+<!--                            <div class="col-sm-auto mt8">-->
+<!--                                <a role="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#modaldecline" href="#"> <i class="fa fa-times"/> Reject</a>-->
+<!--                            </div>-->
+<!--                        </t>-->
+<!--                        <div t-elif="sale_order._has_to_be_paid(True)" class="col-sm-auto mt8">-->
+<!--                            <a role="button" data-bs-toggle="modal" data-bs-target="#modalaccept" href="#" t-att-class="'%s' % ('btn btn-light' if sale_order.transaction_ids else 'btn btn-primary')">-->
+<!--                                <i class="fa fa-check"/> <t t-if="not sale_order.signature">Accept &amp; Pay</t><t t-else="">Pay Now</t>-->
+<!--                            </a>-->
+<!--                        </div>-->
