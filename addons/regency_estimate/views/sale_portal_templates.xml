@@ -24,16 +24,5 @@
         </xpath>
 
     </template>
-    <template id="sale_order_portal_template" inherit_id="sale.sale_order_portal_template">
-        <xpath expr="//t[contains(@t-if, '_has_to_be_signed')]//a[@data-bs-target='#modalaccept']" position="attributes">
-            <attribute name="t-att-data-sale-order-legal-accepted">str(sale_order.legal_accepted)</attribute>
-            <attribute name="data-sale-order-confirm-btn">1</attribute>
-        </xpath>
-        <xpath expr="//div[contains(@t-elif, '_has_to_be_paid')]//a[@data-bs-target='#modalaccept']" position="attributes">
-            <attribute name="t-att-data-sale-order-legal-accepted">str(sale_order.legal_accepted)</attribute>
-            <attribute name="data-sale-order-confirm-btn">1</attribute>
-        </xpath>
-
-    </template>
 
 </odoo>
