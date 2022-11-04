@@ -27,6 +27,10 @@
                                        t-on-focusin="onInputNameFocusin"
                                        t-on-focusout="onInputNameFocusout"/>
                             </div>
+                            <div class="listing-name-info"
+                                 t-att-class="{ 'd-none': !showListingNameInfoPopover }">
+                                <i class="icon-info" t-ref="listing_name_info"/>
+                            </div>
                         </div>
                         <div class="product-top-right">
                             <button t-if="showEditBtn"
