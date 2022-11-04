@@ -4,6 +4,7 @@ from odoo.tools.misc import formatLang
 from odoo.exceptions import AccessError
 MAX_QUANTITY = 999999999999
 from odoo.tools import html_keep_url
+from odoo.addons.regency_tools import SystemMessages
 
 
 class ProductPriceSheet(models.Model):
@@ -28,16 +29,18 @@ class ProductPriceSheet(models.Model):
             return _('Terms & Conditions: %s', baseurl)
         return use_invoice_terms and self.env.company.invoice_terms or ''
 
-    name = fields.Char('Pricelist Name', required=True, translate=True, default=_get_default_name)
+    name = fields.Char('Pricesheet Name', required=True, translate=True, default=_get_default_name, readonly=True,
+                       states={'draft': [('readonly', False)]})
     item_ids = fields.One2many(
         'product.price.sheet.line', 'price_sheet_id', 'Price sheet lines',
-        copy=True)
-    currency_id = fields.Many2one('res.currency', 'Currency', default=_get_default_currency_id, required=True)
+        copy=True, readonly=True, states={'draft': [('readonly', False)]})
+    currency_id = fields.Many2one('res.currency', 'Currency', default=_get_default_currency_id, required=True,
+                                  readonly=True, states={'draft': [('readonly', False)]})
     opportunity_id = fields.Many2one(related='estimate_id.opportunity_id')
-    estimate_id = fields.Many2one('sale.estimate')
+    estimate_id = fields.Many2one('sale.estimate', readonly=True, states={'draft': [('readonly', False)]})
     partner_id = fields.Many2one(related='estimate_id.partner_id')
     quotation_count = fields.Integer(compute='_compute_sale_order_data',
-                                       string="Number of Quotations")
+                                     string="Number of Quotations")
     sale_order_ids = fields.One2many('sale.order', 'price_sheet_id', string='Quotations')
     state = fields.Selection([('draft', 'Draft'),
                               ('confirmed', 'Confirmed'),
@@ -52,7 +55,7 @@ class ProductPriceSheet(models.Model):
                                  default=lambda self: self.env.company)
     payment_term_id = fields.Many2one(
         'account.payment.term', string='Payment Terms', check_company=True,  # Unrequired company
-        domain="['|', ('company_id', '=', False), ('company_id', '=', company_id)]",)
+        domain="['|', ('company_id', '=', False), ('company_id', '=', company_id)]", )
 
     @api.depends('sale_order_ids')
     def _compute_sale_order_data(self):
@@ -142,7 +145,7 @@ class ProductPriceSheet(models.Model):
             'min_qty': line.min_quantity,
             'price': price,
             'currency_id': currency.id,
-           # 'delay': line.ETA,
+            # 'delay': line.ETA,
         }
 
     def action_confirm(self):
@@ -165,10 +168,16 @@ class ProductPriceSheet(models.Model):
                 except AccessError:  # no write access rights -> just ignore
                     break
         self.write({'state': 'confirmed'})
+        url = f'{self.get_base_url()}{self.get_portal_url()}'
+        message = SystemMessages['M-005'] % (
+            f'<a href="/web#id={self.id}&amp;model={self._name}&amp;view_type=form">Pricesheet name ({self.name})</a>',
+            f'<a href={url}>{url}</a>')
+        self.env['purchase.requisition'].send_notification(message=message, user_id=self.estimate_id.user_id)
+
+    def action_draft(self):
+        self.write({'state': 'draft'})
 
     def action_get_portal_link(self):
-        if self.state == 'draft':
-            self.action_confirm()
         base_url = self.get_base_url()
         wiz = self.env['portal.link.wizard'].create({'name': f'{base_url}{self.get_portal_url()}'})
         return {
@@ -202,7 +211,7 @@ class ProductPriceSheet(models.Model):
     @api.depends('item_ids.price', 'amount_total', 'amount_untaxed')
     def _compute_tax_totals_json(self):
         for order in self:
-            totals =  {
+            totals = {
                 'amount_total': order.amount_total,
                 'amount_untaxed': order.amount_untaxed,
                 'formatted_amount_total': formatLang(self.env, order.amount_total, currency_obj=order.currency_id),

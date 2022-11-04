@@ -24,6 +24,10 @@
 <!--                        <button string="New Quotation" name="action_new_quotation" type="object" class="oe_highlight"-->
 <!--                                data-hotkey="q"-->
 <!--                                title="Create new quotation"/>-->
+                        <button string="Confirm" name="action_confirm" type="object" class="oe_highlight"
+                                data-hotkey="c" states="draft"/>
+                        <button string="Reset to Draft" name="action_draft" states="confirmed,closed" type="object"
+                                data-hotkey="r" groups="regency_estimate.group_estimate_manager"/>
                         <button string="Generate Portal Link" name="action_get_portal_link" type="object" class="oe_highlight"
                                 data-hotkey="q"
                                 attrs="{'invisible':[('state', '=', 'confirmed')]}"
@@ -103,10 +107,11 @@
                         </notebook>
                     </sheet>
 <!--                    <div class="o_attachment_preview"/>-->
-<!--                    <div class="oe_chatter">-->
-<!--                        <field name="message_follower_ids"/>-->
-<!--                        <field name="message_ids"/>-->
-<!--                    </div>-->
+                    <div class="oe_chatter">
+                        <field name="message_follower_ids"/>
+                        <field name="activity_ids"/>
+                        <field name="message_ids"/>
+                    </div>
                 </form>
 
             </field>

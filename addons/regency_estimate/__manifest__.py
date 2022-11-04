@@ -23,6 +23,7 @@
         'data/sale_estimate_stages.xml',
         'data/purchase_requisition_data.xml',
         'security/ir.model.access.csv',
+        'security/groups.xml',
         'views/sale_estimate.xml',
         'views/sale_estimate_stage_views.xml',
         'views/purchase_requisition_views.xml',

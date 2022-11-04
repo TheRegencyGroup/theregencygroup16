@@ -34,7 +34,7 @@ class SaleEstimate(models.Model):
         'res.company', string='Company', index=True,
         compute='_compute_company_id', readonly=False, store=True)
     user_id = fields.Many2one(
-        'res.users', string='Assignee', default=lambda self: self.env.user,
+        'res.users', string='Salesperson', default=lambda self: self.env.user,
         domain="[('share', '=', False)]",
         check_company=True, index=True, tracking=True)
     priority = fields.Selection(
