@@ -1,8 +1,10 @@
 from datetime import datetime
 from collections import namedtuple
+
 ImageParams = namedtuple('ImageParams', ['model_name', 'rec_id', 'field_name'])
 
-from odoo import api, Command, fields, models
+from odoo import api, Command, fields, models, _
+from odoo.exceptions import ValidationError
 from odoo.addons.http_routing.models.ir_http import slug
 from odoo.addons.regency_shopsite.const import OVERLAY_PRODUCT_ID_URL_PARAMETER
 
@@ -45,6 +47,24 @@ class OverlayProduct(models.Model):
         res = super().create(vals)
         res._create_attribute_value()
         return res
+
+    def unlink(self):
+        self._constrains_if_has_sale()
+        res = super(OverlayProduct, self).unlink()
+        return res
+
+    def _constrains_if_has_sale(self):
+        sales = self._get_sale_order_line_ids(limit=1)
+        if sales:
+            model_name, model_id = sales._name, sales.id
+            raise ValidationError(
+                "The operation cannot be completed: another model requires "
+                "the record being deleted. If possible, archive it instead.\n\n"
+                f"Model: {model_name}s, ID: {model_id}"
+            )  # TODO REG-151 do in _( ??
+
+    def _get_sale_order_line_ids(self, limit=None):
+        return self.env['sale.order.line'].search([('product_id', 'in', self.product_id.ids)], limit=limit)
 
     def _create_attribute_value(self):
         customization_attr = self.env.ref('regency_shopsite.customization_attribute')
