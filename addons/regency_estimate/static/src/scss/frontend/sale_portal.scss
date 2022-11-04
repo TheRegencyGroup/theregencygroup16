@@ -1,8 +1,10 @@
-a[data-sale-order-legal-accepted='False'] {
-  @extend .disabled;
-}
-
 .regency_legal_accept {
+  input {
+    &.highlight + label {
+      color: $red;
+    }
+  }
+
   label {
     font-style: italic;
   }
