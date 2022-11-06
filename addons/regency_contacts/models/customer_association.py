@@ -7,7 +7,7 @@ class CustomerAssociation(models.Model):
     _name = 'customer.association'
     _description = 'Customer association'
 
-    association_name = fields.Selection(selection=lambda x: x.env['association.type']._get_association_types(),
+    association_name = fields.Selection(selection=lambda x: x.env['association.type']._association_types_selection(),
                                         string='Name', required=True)
 
     association_type_id = fields.Many2one('association.type', compute='_compute_association_type', store=True,
