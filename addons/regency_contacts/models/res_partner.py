@@ -1,13 +1,13 @@
 from odoo import api, fields, models
 
+from .const import ENTITY_SELECTION
+
 
 class ResPartner(models.Model):
     _inherit = 'res.partner'
 
-    association_ids = fields.Many2many('customer.association', 'contact_association_rel', 'partner_id',
-                                       'association_id', compute='_compute_association_ids',
-                                       inverse='_inverse_association_ids',
-                                       precompute=True, store=True)
+    association_ids = fields.Many2many('customer.association', relation="customer_association_res_partner_rel",
+                                       column1='res_partner_id', column2='customer_association_id')
     association_partner_ids = fields.One2many('res.partner', compute='_compute_association_partner_ids')
     contact_type = fields.Selection([
         ('customer', 'Customer'),
@@ -27,33 +27,7 @@ class ResPartner(models.Model):
     hotel_ids = fields.Many2many('res.partner', 'contact_hotel_rel', 'hotel_id', 'contact_id',
                                  domain=[('is_company', '=', True), ('contact_type', '=', 'customer')])
 
-    @api.depends('association_ids')
-    def _compute_association_ids(self):
-        for partner in self:
-            partner.association_ids = partner.association_ids
-
-    def _inverse_association_ids(self):
-        for partner in self:
-            if self.env.context.get('stop_inverse'):
-                break
-            partner.association_ids = partner.association_ids
-
-            # Link left partner to right partner
-            for association in partner.association_ids:
-                asct_type = self.env['association.type'].search(
-                    ['|', ('left_tech_name', '=', association.association_name),
-                     ('right_tech_name', '=', association.association_name)])
-                another_side = asct_type.right_tech_name if asct_type.left_tech_name == association.association_name else asct_type.left_tech_name
-                right_partner_association = association.right_partner_id.association_ids.filtered(
-                    lambda f: f.right_partner_id == partner)
-                if right_partner_association:
-                    if another_side != right_partner_association.association_name:
-                        right_partner_association.association_name = another_side
-                        continue
-                association.right_partner_id.with_context({'stop_inverse': True}).association_ids = [
-                    (0, 0, {'left_partner_id': association.right_partner_id.id, 'right_partner_id': partner.id,
-                            'association_name': another_side})
-                ]
+    entity_type = fields.Selection(selection=ENTITY_SELECTION)
 
     def _compute_association_partner_ids(self):
         for partner in self:
@@ -62,19 +36,5 @@ class ResPartner(models.Model):
     def write(self, vals):
         prev_association_ids = self.association_ids
         res = super().write(vals)
-        self._unlink_associations(prev_association_ids)
+        prev_association_ids._delete_incomplete()
         return res
-
-    def _unlink_associations(self, prev_association_ids):
-        associations_to_delete = prev_association_ids - self.association_ids
-        associations_from_right_side_to_delete = self.env['customer.association']
-        for association in associations_to_delete:
-            asct_type = self.env['association.type'].search(
-                ['|', ('left_tech_name', '=', association.association_name),
-                 ('right_tech_name', '=', association.association_name)])
-            another_side = asct_type.right_tech_name if asct_type.left_tech_name == association.association_name else asct_type.left_tech_name
-            related_association_id = self.env['customer.association'].search(
-                [('right_partner_id', '=', self.id), ('association_name', '=', another_side)])
-            if related_association_id:
-                associations_from_right_side_to_delete += related_association_id
-        (associations_to_delete + associations_from_right_side_to_delete).unlink()
