@@ -5,7 +5,7 @@
             <field name="name">crm.lead.form</field>
             <field name="model">crm.lead</field>
             <field name="inherit_id" ref="sale_crm.crm_case_form_view_oppor"/>
-             <field name="arch" type="xml">
+            <field name="arch" type="xml">
                 <xpath expr="//button[@name='%(crm.crm_lead_lost_action)d']" position="replace">
                 </xpath>
                 <xpath expr="//button[@name='action_set_lost']" position="replace">
@@ -67,6 +67,9 @@
                       <field name="number_of_keys"/>
                   </group>
              </xpath>
+             <xpath expr="//page[last()]" position="after">
+                <xpath expr="//page[@name='internal_notes']" position="move"/>
+             </xpath>
              <xpath expr="//page[@name='extra']/group/group[last()]" position="after">
                   <group string="Avendra Data">
                       <field name="avendra_id"/>
@@ -86,6 +89,9 @@
                       <field name="avendra_account_date_setup"/>
                       <field name="avendra_account_punchout_user_name"/>
                   </group>
+             </xpath>
+             <xpath expr="//group[@name='opportunity_partner']/field[@name='partner_id']" position="after">
+                 <field name="representative_name" string="Representative"/>
              </xpath>
          </field>
      </record>
@@ -122,5 +128,16 @@
                 </field>
             </field>
         </record>
+
+    <record id="view_crm_case_leads_filter" model="ir.ui.view">
+        <field name="inherit_id" ref="crm.view_crm_case_leads_filter"/>
+        <field name="model">crm.lead</field>
+        <field name="arch" type="xml">
+            <xpath expr="//filter[@name='assigned_to_me']" position="after">
+                <filter name="existing_customers" string="Existing Customers"
+                        domain="[('is_existing_customer', '!=', False)]"/>
+            </xpath>
+        </field>
+    </record>
 
 </odoo>

@@ -4,6 +4,7 @@ from odoo.tools.misc import formatLang
 from odoo.exceptions import AccessError
 MAX_QUANTITY = 999999999999
 from odoo.tools import html_keep_url
+from odoo.addons.regency_tools import SystemMessages
 
 
 class ProductPriceSheet(models.Model):
@@ -28,16 +29,18 @@ class ProductPriceSheet(models.Model):
             return _('Terms & Conditions: %s', baseurl)
         return use_invoice_terms and self.env.company.invoice_terms or ''
 
-    name = fields.Char('Pricelist Name', required=True, translate=True, default=_get_default_name)
+    name = fields.Char('Pricesheet Name', required=True, translate=True, default=_get_default_name, readonly=True,
+                       states={'draft': [('readonly', False)]})
     item_ids = fields.One2many(
         'product.price.sheet.line', 'price_sheet_id', 'Price sheet lines',
-        copy=True)
-    currency_id = fields.Many2one('res.currency', 'Currency', default=_get_default_currency_id, required=True)
+        copy=True, readonly=True, states={'draft': [('readonly', False)]})
+    currency_id = fields.Many2one('res.currency', 'Currency', default=_get_default_currency_id, required=True,
+                                  readonly=True, states={'draft': [('readonly', False)]})
     opportunity_id = fields.Many2one(related='estimate_id.opportunity_id')
-    estimate_id = fields.Many2one('sale.estimate')
+    estimate_id = fields.Many2one('sale.estimate', readonly=True, states={'draft': [('readonly', False)]})
     partner_id = fields.Many2one(related='estimate_id.partner_id')
     quotation_count = fields.Integer(compute='_compute_sale_order_data',
-                                       string="Number of Quotations")
+                                     string="Number of Quotations")
     sale_order_ids = fields.One2many('sale.order', 'price_sheet_id', string='Quotations')
     state = fields.Selection([('draft', 'Draft'),
                               ('confirmed', 'Confirmed'),
@@ -82,7 +85,6 @@ class ProductPriceSheet(models.Model):
 
     def action_new_quotation(self):
         action = self.env["ir.actions.actions"]._for_xml_id("sale_crm.sale_action_quotations_new")
-        sol = self.env['sale.order_line']
         selected_lines = self.item_ids
         action['context'] = {
             'search_default_price_sheet_id': self.id,
@@ -109,9 +111,6 @@ class ProductPriceSheet(models.Model):
                     'price_unit': p.price,
                     'product_uom': p.product_id.uom_id.id,
                     'shipping_options': p.shipping_options,
-                    'route_id': self.env.ref('stock_dropshipping.route_drop_shipping').id
-                                if p.product_id.qty_available <= 0 and not sol.find_consumption_agreement(p.product_id, self.partner_id)
-                                else self.env.ref("stock_mts_mto_rule.route_mto_mts").id,
                     'allow_consumption_agreement': p.allow_consumption_agreement
                 }) for p in selected_lines.sorted('sequence')]
         }
@@ -159,7 +158,6 @@ class ProductPriceSheet(models.Model):
                 currency = partner.property_purchase_currency_id or self.env.company.currency_id
                 price = line.vendor_price
 
-
                 supplierinfo = self._prepare_supplier_info(partner, line, price, currency)
 
                 vals = {
@@ -170,6 +168,26 @@ class ProductPriceSheet(models.Model):
                 except AccessError:  # no write access rights -> just ignore
                     break
         self.write({'state': 'confirmed'})
+        url = f'{self.get_base_url()}{self.get_portal_url()}'
+        message = SystemMessages['M-005'] % (
+            f'<a href="/web#id={self.id}&amp;model={self._name}&amp;view_type=form">Pricesheet name ({self.name})</a>',
+            f'<a href={url}>{url}</a>')
+        self.env['purchase.requisition'].send_notification(message=message, user_id=self.estimate_id.user_id)
+
+    def action_draft(self):
+        self.write({'state': 'draft'})
+
+    def action_get_portal_link(self):
+        base_url = self.get_base_url()
+        wiz = self.env['portal.link.wizard'].create({'name': f'{base_url}{self.get_portal_url()}'})
+        return {
+            'name': 'Portal Link',
+            'view_mode': 'form',
+            'res_model': 'portal.link.wizard',
+            'res_id': wiz.id,
+            'type': 'ir.actions.act_window',
+            'target': 'new'
+        }
 
     def has_to_be_signed(self):
         return False
@@ -206,7 +224,7 @@ class ProductPriceSheet(models.Model):
 
     def create_sale_order(self, lines_to_order):
         self.ensure_one()
-        sol = self.env['sale.order.line']
+
         order = self.env['sale.order'].create({'access_token': self.access_token,
                                        'partner_id': self.partner_id.id,
                                        'estimate_id': lines_to_order.price_sheet_id.estimate_id.id,
@@ -217,10 +235,6 @@ class ProductPriceSheet(models.Model):
                                                 'product_uom_qty': p.product_uom_qty,
                                                 'price_unit': p.price,
                                                 'product_uom': p.product_id.uom_id.id,
-                                                'route_id': self.env.ref('stock_dropshipping.route_drop_shipping').id
-                                                            if p.product_id.qty_available <= 0 and not sol.find_consumption_agreement(
-                                                                p.product_id, self.partner_id)
-                                                            else self.env.ref("stock_mts_mto_rule.route_mto_mts").id,
                                             }) for p in lines_to_order]})
         lines_to_order.write({'product_uom_qty': 0})
         return order
@@ -239,8 +253,15 @@ class ProductPriceSheet(models.Model):
         lines_to_order.write({'product_uom_qty': 0})
         return order
 
+    def update_lines(self, sheet_lines):
+        for rec in self:
+            existing_product_lines = self.item_ids.mapped(lambda x: (x.product_id.id, x.partner_id.id, x.product_uom_qty))
+            for line in sheet_lines:
+                if (line[2].get('product_id'), line[2].get('partner_id'), line[2].get('product_uom_qty')) not in existing_product_lines:
+                    rec.write({'item_ids': [line]})
 
-class ProductPriceSheet(models.Model):
+
+class ProductPriceSheetLine(models.Model):
     _name = 'product.price.sheet.line'
     _order = 'product_id ASC, min_quantity ASC'
 
@@ -269,9 +290,8 @@ class ProductPriceSheet(models.Model):
     total = fields.Float()
     shipping_options = fields.Char()
     partner_id = fields.Many2one('res.partner', 'Vendor')
-    FOB = fields.Char(string='FOB')
-    duty = fields.Float()
-    freight = fields.Float()
+    duty = fields.Float(digits='Product Price')
+    freight = fields.Float(digits='Product Price')
     unit_price = fields.Float(string='Unit Price', digits='Product Price', store=True, compute='_compute_unit_price')
     production_lead_time = fields.Char()
     shipping_lead_time = fields.Char()
@@ -286,6 +306,22 @@ class ProductPriceSheet(models.Model):
     insection_total_rows = fields.Integer(compute="_compute_insection_rownumber")
     attachment_id = fields.Binary('File', attachment=True)
     attachment_name = fields.Char()
+    produced_overseas = fields.Boolean('Produced Overseas')
+    display_name = fields.Char(compute='_compute_display_name')
+    color = fields.Integer('Color Index', compute='_compute_color')
+
+    def _compute_display_name(self):
+        for psl in self:
+            psl.display_name = '%s %s' % (psl.price_sheet_id.name, psl.name)
+
+    def _compute_color(self):
+        for rec in self:
+            if rec.price_sheet_id.state == 'draft':
+                rec.color = 3  # Yellow
+            elif rec.price_sheet_id.state == 'confirmed':
+                rec.color = 10  # Green
+            else:
+                rec.color = 0  # White
 
     @api.depends('vendor_price', 'duty', 'freight')
     def _compute_unit_price(self):
@@ -320,10 +356,10 @@ class ProductPriceSheet(models.Model):
                 first_rec = False
             prev_rec = rec
 
-    @api.depends('price', 'vendor_price')
+    @api.depends('price', 'unit_price')
     def _compute_margin(self):
         for rec in self:
-            rec.margin = 100 * (rec.price - rec.vendor_price) / rec.price if rec.price else 0
+            rec.margin = 100 * (rec.price - rec.unit_price) / rec.price if rec.price else 0
 
     @api.onchange('total')
     def onchange_total(self):
@@ -367,16 +403,26 @@ class ProductPriceSheet(models.Model):
     def action_check_prices(self):
         customer = self.price_sheet_id.partner_id
         if customer:
-            sale_orders = self.env['sale.order'].search([('state', '=', 'sale'), ('partner_id', '=', customer.id)])
-            so_lines = sale_orders.mapped('order_line')
+            related_so_lines = self.env['sale.order.line'].search([('order_id.state', '=', 'sale'),
+                                                                   ('order_id.partner_id', '=', customer.id),
+                                                                   ('product_id', '=', self.product_id.id),
+                                                                   ('qty_invoiced', '>', 0),
+                                                                   ('qty_delivered', '>', 0)])
             price_lines = self.env['previous.price.line.wizard']
-            related_so_lines = so_lines.filtered(lambda f: f.product_id == self.product_id and f.product_id and (
-                        f.qty_invoiced > 0 or f.qty_delivered > 0))
             for r_line in related_so_lines:
                 if r_line.product_id:
+                    p_line = r_line.get_purchase_order_lines().filtered(lambda x: x.state != 'cancel')
+                    p_line = p_line[0] if p_line else False
                     new_price_line = self.env['previous.price.line.wizard'].create(
                         {'product_id': r_line.product_id.id, 'price': r_line.price_unit,
-                         'date_order': r_line.order_id.date_order, 'qty': r_line.product_uom_qty})
+                         'date_order': r_line.order_id.date_order, 'qty': r_line.product_uom_qty,
+                         'cost_price': r_line.purchase_price, 'margin_percent': r_line.margin_percent,
+                         'ca_price': r_line.consumption_agreement_line_id.price_unit if r_line.consumption_agreement_line_id else 0,
+                         'ca_qty': r_line.consumption_agreement_line_id.qty_allowed if r_line.consumption_agreement_line_id else 0,
+                         'ca_date_order': r_line.consumption_agreement_line_id.signed_date if r_line.consumption_agreement_line_id else False,
+                         'po_price': p_line.price_unit if p_line else 0,
+                         'po_qty': p_line.product_uom_qty if p_line else 0
+                         })
                     price_lines += new_price_line
             wizard_id = self.env['previous.prices.wizard'].create({'name': 'Prices'})
             price_lines.write({'price_wizard_id': wizard_id.id})

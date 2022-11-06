@@ -11,18 +11,37 @@ class PurchaseOrder(models.Model):
     ], ondelete={
         'confirmed_prices': lambda recs: recs.write({'state': 'draft'}),
     })
+    show_column_produced_overseas = fields.Boolean(compute='_compute_show_column_produced_overseas')
+
+    @api.depends('partner_id', 'partner_id.is_company', 'partner_id.contact_type', 'partner_id.vendor_type')
+    def _compute_show_column_produced_overseas(self):
+        for rec in self:
+            rec.show_column_produced_overseas = rec.partner_id.is_company\
+                                                and rec.partner_id.contact_type == 'vendor'\
+                                                and rec.partner_id.vendor_type == 'overseas'
+
+    @api.onchange('partner_id')
+    @api.depends('partner_id', 'partner_id.is_company', 'partner_id.contact_type', 'partner_id.vendor_type')
+    def _onchange_partner_id(self):
+        if self.partner_id.is_company\
+                and self.partner_id.contact_type == 'vendor'\
+                and self.partner_id.vendor_type == 'overseas':
+            self.order_line.write({'produced_overseas': True})
+        else:
+            self.order_line.write({'produced_overseas': False})
 
     def action_confirm_prices(self):
         self.write({'state': 'confirmed_prices'})
-        for rec in self.filtered(lambda l: l.requisition_id):
+        for rec in self.filtered(lambda f: f.requisition_id):
             for line in rec.order_line:
-                req_line = rec.requisition_id.line_ids.filtered(lambda l: l.product_id == line.product_id
-                                                                      and (l.partner_id == rec.partner_id or not l.partner_id)
-                                                                      and l.product_qty == line.product_qty)
+                req_line = rec.requisition_id.line_ids.filtered(lambda f: f.product_id == line.product_id
+                                                                      and (f.partner_id == rec.partner_id or not f.partner_id)
+                                                                      and f.product_qty == line.product_qty)
                 if req_line:
                     req_line.write({'partner_id': rec.partner_id.id,
                                     'price_unit': line.price_unit,
-                                    'product_qty': line.product_qty})
+                                    'product_qty': line.product_qty,
+                                    'produced_overseas': line.produced_overseas})
                 else:
                     self.env['purchase.requisition.line'].create({
                         'requisition_id': rec.requisition_id.id,
@@ -31,11 +50,22 @@ class PurchaseOrder(models.Model):
                         'product_qty': line.product_qty,
                         'price_unit': line.price_unit,
                         'partner_id': rec.partner_id.id,
-                        'product_uom_id': line.product_uom.id
+                        'product_uom_id': line.product_uom.id,
+                        'produced_overseas': line.produced_overseas,
                     })
+
 
 class MyPurchaseOrderLine(models.Model):
     _inherit = 'purchase.order.line'
+
+    produced_overseas = fields.Boolean(string='Produced overseas')
+
+    @api.onchange('product_id')
+    def onchange_product_id(self):
+        super().onchange_product_id()
+        self.produced_overseas = self.partner_id.is_company \
+                                 and self.partner_id.contact_type == 'vendor' \
+                                 and self.partner_id.vendor_type == 'overseas'
 
     def _new_compute_price_unit_and_date_planned_and_name(self):
         """Override for fixing bugs"""

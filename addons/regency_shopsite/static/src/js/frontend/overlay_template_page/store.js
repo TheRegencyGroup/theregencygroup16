@@ -12,6 +12,7 @@ if (overlayTemplatePageData) {
             }
             this.selectedAttributeValues = this.getSelectedAttributeValues();
             this.selectedPriceId = this.getSelectedPriceId();
+            this.quantity = this.selectedPriceId ? this.selectedPrice.quantity : null;
             this.editMode = false;
 
             this._checkOverlayProductIdUrlParameter();
@@ -46,6 +47,23 @@ if (overlayTemplatePageData) {
             return this.hasOverlayProductId && !this.overlayProductActive;
         }
 
+        get sortedPriceList() {
+            if (this.priceList && Object.values(this.priceList).length) {
+                return Object.values(this.priceList).sort((a, b) => a.quantity - b.quantity);
+            }
+            return [];
+        }
+
+        get selectedPrice() {
+            return this.priceList[this.selectedPriceId];
+        }
+
+        get minimumOrderQuantity() {
+            if (this.priceList && Object.values(this.priceList).length) {
+                return Math.min(...Object.values(this.priceList).map(e => e.quantity));
+            }
+        }
+
         getSelectedAttributeValues() {
             let res = {};
             const attributeList = Object.values(overlayTemplatePageData.attributeList);
@@ -62,8 +80,7 @@ if (overlayTemplatePageData) {
         }
 
         getSelectedPriceId() {
-            const priceList = Object.values(this.priceList);
-            return priceList.length ? priceList[0].id : null;
+            return this.sortedPriceList.length ? this.sortedPriceList[0].id : null;
         }
 
         _checkOverlayProductIdUrlParameter() {
@@ -97,6 +114,28 @@ if (overlayTemplatePageData) {
 
         changeSelectedPrice(priceId) {
             this.selectedPriceId = priceId;
+            this.quantity = this.selectedPrice.quantity;
+        }
+
+        changeQuantity(qty) {
+            this.quantity = qty;
+            let prices = this.sortedPriceList;
+            if (prices.length === 1) {
+                return;
+            }
+            let changed = false;
+            for (let [index, e] of prices.entries()) {
+                const min = index === 0 ? 0 : prices[index - 1].quantity;
+                const max = e.quantity;
+                if (this.quantity >= min && this.quantity < max) {
+                    this.selectedPriceId = index === 0 ? e.id : prices[index - 1].id;
+                    changed = true;
+                    break;
+                }
+            }
+            if (!changed) {
+                this.selectedPriceId = prices.pop().id;
+            }
         }
 
         getCustomizedData() {
@@ -104,7 +143,7 @@ if (overlayTemplatePageData) {
                 overlayTemplateId: this.overlayTemplateId,
                 attributeList: Object.entries(this.selectedAttributeValues)
                     .map(e => ({ 'attribute_id': parseInt(e[0]), value_id: e[1].valueId })),
-                quantity: this.hasPriceList ? this.priceList[this.selectedPriceId].quantity : null,
+                quantity: this.quantity,
             };
         }
 

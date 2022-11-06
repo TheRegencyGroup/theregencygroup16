@@ -9,7 +9,7 @@
                 <xpath expr="//field[@name='invoice_policy']" position="after">
                     <label for="fixed_margin" string="Fixed Margin on Rate"/>
                     <div>
-                        <field name="fixed_margin" class="oe_inline"/>%
+                        <field name="fixed_margin" class="oe_inline"/>
                     </div>
                 </xpath>
              </field>

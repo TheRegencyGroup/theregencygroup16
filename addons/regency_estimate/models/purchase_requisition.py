@@ -86,7 +86,7 @@ class PurchaseRequisition(models.Model):
                 'channel_type': 'chat',
             })
         if ch:
-            ch.message_post(body=message, author_id=self.env.user.partner_id.id)
+            ch.message_post(body=message, author_id=self.env.user.partner_id.id, message_type='comment')
 
     def action_in_progress(self):
         super(PurchaseRequisition, self).action_in_progress()
@@ -99,6 +99,7 @@ class PurchaseRequisitionLine(models.Model):
     _inherit = 'purchase.requisition.line'
 
     partner_id = fields.Many2one('res.partner', 'Vendor')
+    produced_overseas = fields.Boolean('Produced Overseas')
     display_name = fields.Char(compute='_compute_display_name')
     state = fields.Selection([
         ('draft', 'Draft'),
@@ -107,13 +108,20 @@ class PurchaseRequisitionLine(models.Model):
     ], compute='_compute_state', store=True)
     color = fields.Integer('Color Index', compute='_compute_color')
 
+    @api.onchange('partner_id')
+    def _onchange_partner(self):
+        self.produced_overseas = self.partner_id.is_company\
+                                 and self.partner_id.contact_type == 'vendor'\
+                                 and self.partner_id.vendor_type == 'overseas'
+
     def _compute_display_name(self):
         for prl in self:
             prl.display_name = '%s %s' % (prl.requisition_id.user_id.name, prl.requisition_id.name)
 
+    @api.depends('requisition_id', 'partner_id', 'requisition_id.state', 'price_unit')
     def _compute_state(self):
         for prl in self:
-            if prl.requisition_id.vendor_id and prl.price_unit > 0:
+            if prl.partner_id and prl.price_unit > 0:
                 prl.state = 'done'
                 continue
             elif prl.requisition_id.state == 'draft':

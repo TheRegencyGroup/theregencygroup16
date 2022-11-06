@@ -1,4 +1,6 @@
 from datetime import datetime
+from collections import namedtuple
+ImageParams = namedtuple('ImageParams', ['model_name', 'rec_id', 'field_name'])
 
 from odoo import api, Command, fields, models
 from odoo.addons.http_routing.models.ir_http import slug
@@ -72,15 +74,22 @@ class OverlayProduct(models.Model):
 
     def _preview_image_url(self):
         self.ensure_one()
+        params = self._preview_image_params()
+        return f'/web/image?model={params.model_name}&id={params.rec_id}&field={params.field_name}'
+
+    def _preview_image(self):
+        self.ensure_one()
+        params = self._preview_image_params()
+        return self.env[params.model_name].browse(params.rec_id)[params.field_name]
+
+    def _preview_image_params(self):
+        self.ensure_one()
         if self.overlay_product_image_ids:
-            image_model = self.overlay_product_image_ids._name
-            image_id = self.overlay_product_image_ids[0].id
-            image_field = 'image'
+            image_params = ImageParams(self.overlay_product_image_ids._name, self.overlay_product_image_ids[0].id,
+                                       'image')
         else:
-            image_id = self.product_tmpl_id.id
-            image_model = self.product_tmpl_id._name
-            image_field = 'image_512'
-        return f'/web/image?model={image_model}&id={image_id}&field={image_field}'
+            image_params = ImageParams(self.product_tmpl_id._name, self.product_tmpl_id.id, 'image_512')
+        return image_params
 
     @property
     def url(self):

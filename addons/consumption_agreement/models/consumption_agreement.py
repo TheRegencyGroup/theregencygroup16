@@ -41,8 +41,6 @@ class ConsumptionAgreement(models.Model):
                                             Command.create({
                                                 'product_id': p.product_id.id,
                                                 'product_uom_qty': 0,
-                                                'min_quantity': 0,
-                                                'max_quantity': p.qty_remaining,
                                                 'price_unit': p.price_unit,
                                                 'product_uom': p.product_id.uom_id.id,
                                                 'consumption_agreement_line_id': p.id

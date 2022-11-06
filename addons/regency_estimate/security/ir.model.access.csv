@@ -6,3 +6,4 @@ access_product_price_sheet,product_price_sheet,model_product_price_sheet,base.gr
 access_product_price_sheet_line,product_price_sheet_line,model_product_price_sheet_line,base.group_user,1,1,1,1
 access_previous_prices_wizard,previous.prices.wizard,model_previous_prices_wizard,base.group_user,1,1,1,1
 access_previous_price_line_wizard,previous.price.line.wizard,model_previous_price_line_wizard,base.group_user,1,1,1,1
+access_portal_link_wizard,portal.link.wizard,model_portal_link_wizard,base.group_user,1,1,1,1

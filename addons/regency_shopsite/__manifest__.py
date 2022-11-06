@@ -4,6 +4,8 @@
     'author': 'OpsWay',
     'license': "Other proprietary",
     'depends': [
+        'sale',
+        'website',
         'website_sale',
         'fe_owl_base',
         'product',
@@ -13,6 +15,7 @@
     'data': [
         'security/ir.model.access.csv',
         'security/rules.xml',
+        'security/groups.xml',
         'data/overlay_position.xml',
         'data/product_attribute.xml',
         'data/ir_config_parameter.xml',
@@ -30,11 +33,13 @@
         'views/product_pricelist_item_view.xml',
         'views/product_product.xml',
         'views/website/sale_portal_templates.xml',
-        'security/groups.xml',
+        'views/res_partner.xml',
+        'views/res_config_settings.xml',
+        'views/sale_portal_templates.xml',
     ],
     'assets': {
         'web.assets_frontend': [
-            'regency_shopsite/static/lib/*.js',
+            'regency_shopsite/static/lib/**/*.js',
             'regency_shopsite/static/src/js/main.js',
             'regency_shopsite/static/src/js/frontend/header/*.js',
             'regency_shopsite/static/src/js/frontend/overlay_template_page/**/*.js',
@@ -44,6 +49,8 @@
 
             'regency_shopsite/static/src/js/frontend/**/**/*.xml',
 
+            'regency_shopsite/static/lib/**/*.css',
+            'regency_shopsite/static/lib/**/*.scss',
             'regency_shopsite/static/src/scss/frontend/variables.scss',
             'regency_shopsite/static/src/scss/frontend/fonts/*.scss',
             'regency_shopsite/static/src/scss/frontend/base/mixins.scss',
