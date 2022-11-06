@@ -22,9 +22,9 @@ class ResPartner(models.Model):
     other_phone = fields.Char()
     other_phone_extra = fields.Char()
     hotel_contact_ids = fields.Many2many('res.partner', 'contact_hotel_rel', 'contact_id', 'hotel_id',
-                                 domain=[('is_company', '=', False)])
+                                         domain=[('is_company', '=', False)])
     hotel_ids = fields.Many2many('res.partner', 'contact_hotel_rel', 'hotel_id', 'contact_id',
-                                domain=[('is_company', '=', True), ('contact_type', '=', 'customer')])
+                                 domain=[('is_company', '=', True), ('contact_type', '=', 'customer')])
 
     @api.depends('association_ids')
     def _compute_association_ids(self):
