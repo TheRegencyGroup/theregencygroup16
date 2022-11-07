@@ -27,5 +27,27 @@ patch(ListRenderer.prototype, 'custom_list_view', {
                }
             }
         });
-    }
+    },
+
+    freezeColumnWidths() {
+        this._super(...arguments);
+        const headers = [...this.tableRef.el.querySelectorAll("thead th:not(.o_list_actions_header)")];
+        for (let th of headers) {
+            const fieldName = th.dataset.name;
+            if (!fieldName) {
+                continue;
+            }
+            const column = this.state.columns.find(e => e.name === fieldName);
+            if (!column) {
+                continue;
+            }
+            const widthOption = column.options.width;
+            if (!widthOption) {
+                continue;
+            }
+            th.style.width = widthOption;
+            th.style.maxWidth = 'unset';
+            th.style.minWidth = 'unset';
+        }
+    },
 });
