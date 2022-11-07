@@ -62,6 +62,7 @@ class SaleOrderLine(models.Model):
 
     @api.depends('product_id', 'product_id.product_template_attribute_value_ids')
     def _compute_overlay_template_id(self):
+        # TODO REG-151 - not correct result - overlay.template without sales has sale_order_line_ids
         overlay_attribute_id = self.env.ref('regency_shopsite.overlay_attribute')
         for line in self:
             product_template_attribute_value_ids = line.product_id.product_template_attribute_value_ids

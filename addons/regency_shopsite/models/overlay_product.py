@@ -14,7 +14,7 @@ class OverlayProduct(models.Model):
     _description = 'Overlay product'
 
     active = fields.Boolean(default=True)
-    overlay_template_id = fields.Many2one('overlay.template', required=True)
+    overlay_template_id = fields.Many2one('overlay.template', required=True, ondelete='restrict')
     product_tmpl_id = fields.Many2one(string="Product template", related='overlay_template_id.product_template_id',
                                       store=True)
     website_published = fields.Boolean(related='product_tmpl_id.website_published')
@@ -64,6 +64,7 @@ class OverlayProduct(models.Model):
             )  # TODO REG-151 do in _( ??
 
     def _get_sale_order_line_ids(self, limit=None):
+        # TODO REG - 151 - try to add field sale_order_line_ids instead of this and add ondelete=restrict
         return self.env['sale.order.line'].search([('product_id', 'in', self.product_id.ids)], limit=limit)
 
     def _create_attribute_value(self):
