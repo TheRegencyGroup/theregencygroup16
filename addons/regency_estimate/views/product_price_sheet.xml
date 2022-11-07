@@ -83,7 +83,7 @@
                                       <field name="max_quantity" invisible="1"/>
                                       <field name="insection_rownumber" invisible="1"/>
                                       <field name="qty_range_str"/>
-                                      <field name="vendor_price" string="Vendor Price" options="{'hide_sort_icon': True, 'width': '70px'}" optional="hide"/>
+                                      <field name="vendor_price" string="Vendor Price" options="{'hide_sort_icon': True, 'width': '70px'}"/>
                                       <field name="duty" options="{'hide_sort_icon': True,  'width': '70px'}"
                                              attrs="{'column_invisible': [('parent.has_produced_overseas_items', '=', False)]}"/>
                                       <field name="freight" options="{'hide_sort_icon': True, 'width': '70px'}"
