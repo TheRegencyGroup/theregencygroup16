@@ -1,0 +1,8 @@
+.form_view_with_bottom_chatter {
+  height: unset !important;
+  flex-direction: column !important;
+
+  .o_form_sheet_bg {
+    border-bottom: 1px solid $border-color !important;
+  }
+}
