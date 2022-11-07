@@ -78,28 +78,28 @@
                                       <field name="display_type" invisible="1"/>
                                       <field name="product_id" options="{'hide_sort_icon': True}"/>
                                       <field name="name" widget="section_and_note_text" optional="show" options="{'hide_sort_icon': True}"/>
-                                      <field name="min_quantity"/>
+                                      <field name="min_quantity" optional="hide"/>
                                       <field name="max_quantity" invisible="1"/>
                                       <field name="insection_rownumber" invisible="1"/>
                                       <field name="qty_range_str"/>
-                                      <field name="vendor_price" string="Vendor Price per Unit"/>
-                                      <field name="duty"  options="{'hide_sort_icon': True}"/>
-                                      <field name="freight"  options="{'hide_sort_icon': True}"/>
+                                      <field name="vendor_price" string="Vendor Price" options="{'hide_sort_icon': True, 'width': '70px'}"/>
+                                      <field name="duty"  options="{'hide_sort_icon': True,  'width': '70px'}"/>
+                                      <field name="freight"  options="{'hide_sort_icon': True, 'width': '70px'}"/>
                                       <field name="currency_id" invisible="1"/>
                                       <field name="unit_price" string="Unit Price"/>
-                                      <field name="production_lead_time"/>
-                                      <field name="shipping_lead_time"/>
-                                      <field name="shipping_options"/>
-                                      <field name="partner_id"/>
-                                      <field name="produced_overseas"/>
-                                      <field name="price" string="Customer Price" />
+                                      <field name="production_lead_time" options="{'hide_sort_icon': True, 'width': '80px'}"/>
+                                      <field name="shipping_lead_time" options="{'hide_sort_icon': True, 'width': '80px'}"/>
+                                      <field name="shipping_options" options="{'hide_sort_icon': True, 'width': '80px'}"/>
+                                      <field name="partner_id"  optional="hide"/>
+                                      <field name="produced_overseas"  optional="hide"/>
+                                      <field name="price" string="Customer Price" options="{'hide_sort_icon': True, 'width': '70px'}"/>
                                       <field name="total"/>
                                       <field name="margin"/>
-                                      <field name="allow_consumption_agreement"/>
+                                      <field name="allow_consumption_agreement"  options="{'hide_sort_icon': True, 'width': '50px'}"/>
                                       <field name="sale_estimate_line_ids" invisible="1"/>
                                       <button name="action_check_prices" type="object" class="fa fa-history"/>
                                       <field name="attachment_id" string="Attach a file" widget="binary"
-                                             filename="attachment_name" class="r_binary_widget"/>
+                                             filename="attachment_name" class="r_binary_widget" options="{'hide_sort_icon': True, 'width': '50px'}" />
                                       <field name="attachment_name" invisible="1"/>
                                   </tree>
                               </field>
