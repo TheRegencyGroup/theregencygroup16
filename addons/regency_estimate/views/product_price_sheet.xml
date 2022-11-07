@@ -6,10 +6,11 @@
             <field name="res_model">product.price.sheet</field>
             <field name="view_mode">form,tree</field>
             <field name="domain">[('opportunity_id', '=', active_id)]</field>
-            <field name="context">{'search_default_opportunity_id': active_id, 'default_opportunity_id': active_id}</field>
+            <field name="context">{'search_default_opportunity_id': active_id,
+                                   'default_opportunity_id': active_id}</field>
         </record>
 
-         <record id="action_product_price_sheet" model="ir.actions.act_window">
+        <record id="action_product_price_sheet" model="ir.actions.act_window">
             <field name="name">Price Sheet</field>
             <field name="res_model">product.price.sheet</field>
             <field name="view_mode">tree,form,kanban</field>
@@ -19,94 +20,102 @@
             <field name="name">product.price.sheet.form</field>
             <field name="model">product.price.sheet</field>
             <field name="arch" type="xml">
-                 <form string="Products Price Sheet">
+                <form string="Products Price Sheet">
                     <header>
-<!--                        <button string="New Quotation" name="action_new_quotation" type="object" class="oe_highlight"-->
-<!--                                data-hotkey="q"-->
-<!--                                title="Create new quotation"/>-->
+                        <!--                        <button string="New Quotation" name="action_new_quotation" type="object" class="oe_highlight"-->
+                        <!--                                data-hotkey="q"-->
+                        <!--                                title="Create new quotation"/>-->
                         <button string="Confirm" name="action_confirm" type="object" class="oe_highlight"
                                 data-hotkey="c" states="draft"/>
                         <button string="Reset to Draft" name="action_draft" states="confirmed,closed" type="object"
                                 data-hotkey="r" groups="regency_estimate.group_estimate_manager"/>
-                        <button string="Generate Portal Link" name="action_get_portal_link" type="object" class="oe_highlight"
+                        <button string="Generate Portal Link" name="action_get_portal_link" type="object"
+                                class="oe_highlight"
                                 data-hotkey="q"
                                 attrs="{'invisible':[('state', '=', 'confirmed')]}"
                                 title="Generate Portal Link"/>
-                        <button string="Get Portal Link" name="action_get_portal_link" type="object" class="oe_highlight"
+                        <button string="Get Portal Link" name="action_get_portal_link" type="object"
+                                class="oe_highlight"
                                 data-hotkey="q"
                                 attrs="{'invisible':[('state', '=', 'draft')]}"
                                 title="Get Portal Link"/>
                         <field name="state" widget="statusbar" statusbar_visible="draft,confirmed"/>
                     </header>
-                     <sheet>
+                    <sheet>
                         <div class="oe_button_box" name="button_box">
-                                <button class="oe_stat_button" type="object"
-                                    name="action_view_sale_quotation" icon="fa-pencil-square-o" >
-                                    <field name="quotation_count" widget="statinfo" string="Quotations"/>
-                                </button>
-                                <button name="preview_price_sheets"
+                            <button class="oe_stat_button" type="object"
+                                    name="action_view_sale_quotation" icon="fa-pencil-square-o">
+                                <field name="quotation_count" widget="statinfo" string="Quotations"/>
+                            </button>
+                            <button name="preview_price_sheets"
                                     type="object"
                                     class="oe_stat_button"
                                     icon="fa-globe icon">
-                                    <div class="o_field_widget o_stat_info">
-                                        <span class="o_stat_text">Customer</span>
-                                        <span class="o_stat_text">Preview</span>
-                                    </div>
-                                </button>
+                                <div class="o_field_widget o_stat_info">
+                                    <span class="o_stat_text">Customer</span>
+                                    <span class="o_stat_text">Preview</span>
+                                </div>
+                            </button>
                         </div>
                         <div class="oe_title">
                             <h1><field name="name" placeholder="e.g. USD Retailers"/></h1>
                         </div>
                         <group>
-                          <group name="pricelist_settings">
-                              <field name="estimate_id"/>
-                              <field name="partner_id"/>
-                              <field name="currency_id" groups="base.group_multi_currency"/>
-                          </group>
+                            <group name="pricelist_settings">
+                                <field name="estimate_id"/>
+                                <field name="partner_id"/>
+                                <field name="currency_id" groups="base.group_multi_currency"/>
+                            </group>
                         </group>
                         <notebook>
                             <page name="pricelist" string="Price Sheet Items">
-                              <field name="item_ids"  widget="section_and_note_one2many" mode="tree">
-                                  <tree string="Price Sheet Items" class="custom_list_header" editable="bottom">
-                                      <control>
-                                        <create name="add_product_control" string="Add a product"/>
-                                        <create name="add_section_control" string="Add a section" context="{'default_display_type': 'line_section'}"/>
-                                        <create name="add_note_control" string="Add a note" context="{'default_display_type': 'line_note'}"/>
-                                      </control>
-                                      <field name="sequence" widget="handle" />
-                                      <!-- We do not display the type because we don't want the user to be bothered with that information if he has no section or note. -->
-                                      <field name="display_type" invisible="1"/>
-                                      <field name="product_id" options="{'hide_sort_icon': True}"/>
-                                      <field name="name" widget="section_and_note_text" optional="show" options="{'hide_sort_icon': True}"/>
-                                      <field name="min_quantity"/>
-                                      <field name="max_quantity" invisible="1"/>
-                                      <field name="insection_rownumber" invisible="1"/>
-                                      <field name="qty_range_str"/>
-                                      <field name="vendor_price" string="Vendor Price per Unit"/>
-                                      <field name="duty"  options="{'hide_sort_icon': True}"/>
-                                      <field name="freight"  options="{'hide_sort_icon': True}"/>
-                                      <field name="currency_id" invisible="1"/>
-                                      <field name="unit_price" string="Unit Price"/>
-                                      <field name="production_lead_time"/>
-                                      <field name="shipping_lead_time"/>
-                                      <field name="shipping_options"/>
-                                      <field name="partner_id"/>
-                                      <field name="produced_overseas"/>
-                                      <field name="price" string="Customer Price" />
-                                      <field name="total"/>
-                                      <field name="margin"/>
-                                      <field name="allow_consumption_agreement"/>
-                                      <field name="sale_estimate_line_ids" invisible="1"/>
-                                      <button name="action_check_prices" type="object" class="fa fa-history"/>
-                                      <field name="attachment_id" string="Attach a file" widget="binary"
-                                             filename="attachment_name" class="r_binary_widget"/>
-                                      <field name="attachment_name" invisible="1"/>
-                                  </tree>
-                              </field>
+                                <field name="has_produced_overseas_items" invisible="0"/>
+                                <field name="item_ids" widget="section_and_note_one2many" mode="tree">
+                                    <tree string="Price Sheet Items" class="custom_list_header" editable="bottom">
+                                        <control>
+                                            <create name="add_product_control" string="Add a product"/>
+                                            <create name="add_section_control" string="Add a section"
+                                                    context="{'default_display_type': 'line_section'}"/>
+                                            <create name="add_note_control" string="Add a note"
+                                                    context="{'default_display_type': 'line_note'}"/>
+                                        </control>
+                                        <field name="sequence" widget="handle"/>
+                                        <!-- We do not display the type because we don't want the user to be bothered with that information if he has no section or note. -->
+                                        <field name="display_type" invisible="1"/>
+                                        <field name="product_id" options="{'hide_sort_icon': True}"/>
+                                        <field name="name" widget="section_and_note_text" optional="show"
+                                               options="{'hide_sort_icon': True}"/>
+                                        <field name="min_quantity" optional="hide"/>
+                                        <field name="max_quantity" invisible="1"/>
+                                        <field name="insection_rownumber" invisible="1"/>
+                                        <field name="qty_range_str"/>
+                                        <field name="vendor_price" string="Vendor Price per Unit"/>
+                                        <field name="duty" options="{'hide_sort_icon': True}"
+                                               attrs="{'column_invisible': [('parent.has_produced_overseas_items', '=', False)]}"/>
+                                        <field name="freight" options="{'hide_sort_icon': True}"
+                                               attrs="{'column_invisible': [('parent.has_produced_overseas_items', '=', False)]}"/>
+                                        <field name="currency_id" invisible="1"/>
+                                        <field name="unit_price" string="Unit Price"/>
+                                        <field name="production_lead_time"/>
+                                        <field name="shipping_lead_time" string="ETA for delivery"/>
+                                        <field name="shipping_options"/>
+                                        <field name="partner_id" optional="hide"/>
+                                        <field name="produced_overseas" optional="hide"/>
+                                        <field name="price" string="Customer Price"/>
+                                        <field name="total"/>
+                                        <field name="margin"/>
+                                        <field name="allow_consumption_agreement" string="Allow CA"/>
+                                        <field name="sale_estimate_line_ids" invisible="1"/>
+                                        <button name="action_check_prices" type="object" class="fa fa-history"/>
+                                        <field name="attachment_id" string="Attach a file" widget="binary"
+                                               filename="attachment_name" class="r_binary_widget"/>
+                                        <field name="attachment_name" invisible="1"/>
+                                    </tree>
+                                </field>
                             </page>
                         </notebook>
                     </sheet>
-<!--                    <div class="o_attachment_preview"/>-->
+                    <!--                    <div class="o_attachment_preview"/>-->
                     <div class="oe_chatter oe_chatter_bottom">
                         <field name="message_follower_ids"/>
                         <field name="activity_ids"/>
@@ -130,7 +139,8 @@
             </field>
         </record>
 
-        <menuitem id="menu_product_price_sheet" name="Price Sheets" parent="sale.sale_order_menu" action="action_product_price_sheet"  sequence="3"/>
+        <menuitem id="menu_product_price_sheet" name="Price Sheets" parent="sale.sale_order_menu"
+                  action="action_product_price_sheet" sequence="3"/>
 
     </data>
 </odoo>

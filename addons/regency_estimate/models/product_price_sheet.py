@@ -2,6 +2,7 @@ import json
 from odoo import fields, models, api, Command, _
 from odoo.tools.misc import formatLang
 from odoo.exceptions import AccessError
+
 MAX_QUANTITY = 999999999999
 from odoo.tools import html_keep_url
 from odoo.addons.regency_tools import SystemMessages
@@ -34,6 +35,7 @@ class ProductPriceSheet(models.Model):
     item_ids = fields.One2many(
         'product.price.sheet.line', 'price_sheet_id', 'Price sheet lines',
         copy=True, readonly=True, states={'draft': [('readonly', False)]})
+    has_produced_overseas_items = fields.Boolean(compute='_compute_has_produced_overseas_items')
     currency_id = fields.Many2one('res.currency', 'Currency', default=_get_default_currency_id, required=True,
                                   readonly=True, states={'draft': [('readonly', False)]})
     opportunity_id = fields.Many2one(related='estimate_id.opportunity_id')
@@ -55,12 +57,16 @@ class ProductPriceSheet(models.Model):
                                  default=lambda self: self.env.company)
     payment_term_id = fields.Many2one(
         'account.payment.term', string='Payment Terms', check_company=True,  # Unrequired company
-        domain="['|', ('company_id', '=', False), ('company_id', '=', company_id)]",)
+        domain="['|', ('company_id', '=', False), ('company_id', '=', company_id)]", )
 
     @api.depends('sale_order_ids')
     def _compute_sale_order_data(self):
         for lead in self:
             lead.quotation_count = len(lead.sale_order_ids)
+    @api.depends('item_ids.produced_overseas')
+    def _compute_has_produced_overseas_items(self):
+        for ps in self:
+            ps.has_produced_overseas_items = any(ps.mapped('item_ids.produced_overseas'))
 
     @api.depends('item_ids.price_total')
     def _amount_all(self):
@@ -145,7 +151,7 @@ class ProductPriceSheet(models.Model):
             'min_qty': line.min_quantity,
             'price': price,
             'currency_id': currency.id,
-           # 'delay': line.ETA,
+            # 'delay': line.ETA,
         }
 
     def action_confirm(self):
@@ -211,7 +217,7 @@ class ProductPriceSheet(models.Model):
     @api.depends('item_ids.price', 'amount_total', 'amount_untaxed')
     def _compute_tax_totals_json(self):
         for order in self:
-            totals =  {
+            totals = {
                 'amount_total': order.amount_total,
                 'amount_untaxed': order.amount_untaxed,
                 'formatted_amount_total': formatLang(self.env, order.amount_total, currency_obj=order.currency_id),
@@ -226,38 +232,40 @@ class ProductPriceSheet(models.Model):
         self.ensure_one()
 
         order = self.env['sale.order'].create({'access_token': self.access_token,
-                                       'partner_id': self.partner_id.id,
-                                       'estimate_id': lines_to_order.price_sheet_id.estimate_id.id,
-                                       'price_sheet_id': self.id,
-                                       'order_line': [
-                                            Command.create({
-                                                'product_id': p.product_id.id,
-                                                'product_uom_qty': p.product_uom_qty,
-                                                'price_unit': p.price,
-                                                'product_uom': p.product_id.uom_id.id,
-                                            }) for p in lines_to_order]})
+                                               'partner_id': self.partner_id.id,
+                                               'estimate_id': lines_to_order.price_sheet_id.estimate_id.id,
+                                               'price_sheet_id': self.id,
+                                               'order_line': [
+                                                   Command.create({
+                                                       'product_id': p.product_id.id,
+                                                       'product_uom_qty': p.product_uom_qty,
+                                                       'price_unit': p.price,
+                                                       'product_uom': p.product_id.uom_id.id,
+                                                   }) for p in lines_to_order]})
         lines_to_order.write({'product_uom_qty': 0})
         return order
 
     def create_consumption_agreement(self, lines_to_order):
         self.ensure_one()
         order = self.env['consumption.agreement'].create({'access_token': self.access_token,
-                                               'partner_id': self.partner_id.id,
-                                               'line_ids': [
-                                                   Command.create({
-                                                       'product_id': p.product_id.id,
-                                                       'qty_allowed': p.product_uom_qty,
-                                                       'price_unit': p.price,
-                                                    #   'product_uom': p.product_id.uom_id.id
-                                                   }) for p in lines_to_order]})
+                                                          'partner_id': self.partner_id.id,
+                                                          'line_ids': [
+                                                              Command.create({
+                                                                  'product_id': p.product_id.id,
+                                                                  'qty_allowed': p.product_uom_qty,
+                                                                  'price_unit': p.price,
+                                                                  #   'product_uom': p.product_id.uom_id.id
+                                                              }) for p in lines_to_order]})
         lines_to_order.write({'product_uom_qty': 0})
         return order
 
     def update_lines(self, sheet_lines):
         for rec in self:
-            existing_product_lines = self.item_ids.mapped(lambda x: (x.product_id.id, x.partner_id.id, x.product_uom_qty))
+            existing_product_lines = self.item_ids.mapped(
+                lambda x: (x.product_id.id, x.partner_id.id, x.product_uom_qty))
             for line in sheet_lines:
-                if (line[2].get('product_id'), line[2].get('partner_id'), line[2].get('product_uom_qty')) not in existing_product_lines:
+                if (line[2].get('product_id'), line[2].get('partner_id'),
+                    line[2].get('product_uom_qty')) not in existing_product_lines:
                     rec.write({'item_ids': [line]})
 
 
@@ -285,8 +293,9 @@ class ProductPriceSheetLine(models.Model):
         'res.currency', 'Currency',
         readonly=True, related='price_sheet_id.currency_id', store=True)
     price = fields.Float(string='Customer Price', digits='Product Price', store=True)
-    sale_estimate_line_ids = fields.Many2many('sale.estimate.line', 'product_price_sheet_line_sale_estimate_line_relation',
-                                         'price_sheet_line_id', 'sale_estimate_line_id')
+    sale_estimate_line_ids = fields.Many2many('sale.estimate.line',
+                                              'product_price_sheet_line_sale_estimate_line_relation',
+                                              'price_sheet_line_id', 'sale_estimate_line_id')
     total = fields.Float()
     shipping_options = fields.Char()
     partner_id = fields.Many2one('res.partner', 'Vendor')
@@ -390,7 +399,7 @@ class ProductPriceSheetLine(models.Model):
         for line in self:
             price = line.price  # * (1 - (line.discount or 0.0) / 100.0)  #TODO: add if discount will be needed
             taxes = self.env['account.tax'].compute_all(price, line.price_sheet_id.currency_id, line.product_uom_qty,
-                                            product=line.product_id, partner=line.price_sheet_id.partner_id)
+                                                        product=line.product_id, partner=line.price_sheet_id.partner_id)
             line.update({
                 'price_tax': taxes['total_included'] - taxes['total_excluded'],
                 'price_total': taxes['total_included'],
