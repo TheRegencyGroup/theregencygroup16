@@ -170,7 +170,7 @@ class ProductPriceSheet(models.Model):
         self.write({'state': 'confirmed'})
         url = f'{self.get_base_url()}{self.get_portal_url()}'
         message = SystemMessages['M-005'] % (
-            f'<a href="/web#id={self.id}&amp;model={self._name}&amp;view_type=form">Pricesheet name ({self.name})</a>',
+            f'<a href="/web#id={self.id}&amp;model={self._name}&amp;view_type=form">{self.name}</a>',
             f'<a href={url}>{url}</a>')
         self.env['purchase.requisition'].send_notification(message=message, user_id=self.estimate_id.user_id)
 
