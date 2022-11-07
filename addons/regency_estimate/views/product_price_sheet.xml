@@ -37,7 +37,7 @@
                                 attrs="{'invisible':[('state', '=', 'draft')]}"
                                 title="Get Portal Link"/>
                         <field name="state" widget="statusbar" statusbar_visible="draft,confirmed"/>
-                        <field name="has_produced_overseas_items" invisible="0"/>
+                        <field name="has_produced_overseas_items" invisible="1"/>
                     </header>
                      <sheet>
                         <div class="oe_button_box" name="button_box">
