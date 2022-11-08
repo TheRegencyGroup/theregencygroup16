@@ -53,7 +53,7 @@ class OverlayTemplate(models.Model):
                 if all(product_template_attributes.get(k) in v for k, v in overlay_template_attributes.items()):
                     rec.product_variant_ids += product_variant
 
-    @api.onchange('product_template_id', 'overlay_position_ids', 'overlay_attribute_line_ids')
+    # @api.onchange('product_template_id', 'overlay_position_ids', 'overlay_attribute_line_ids')
     def _compute_areas_json(self):
         for rec in self:
             json_val = json.loads(rec.areas_json) if rec.areas_json else {}

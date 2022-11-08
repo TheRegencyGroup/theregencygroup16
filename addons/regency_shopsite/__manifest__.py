@@ -36,6 +36,7 @@
         'views/res_partner.xml',
         'views/res_config_settings.xml',
         'views/sale_portal_templates.xml',
+        'views/product_image_views.xml'
     ],
     'demo': [
         'data/demo/product_demo.xml',
