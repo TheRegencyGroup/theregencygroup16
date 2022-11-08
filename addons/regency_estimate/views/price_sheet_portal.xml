@@ -337,6 +337,7 @@
                             <th class="text-center">Qty Range</th>
                             <th class="text-right">Quantity</th>
                             <th t-attf-class="text-right {{ 'd-none d-sm-table-cell' if report_type == 'html' else '' }}">Customer Price</th>
+                            <th class="text-right">Fee</th>
 <!--                            <th t-if="display_discount" t-attf-class="text-right {{ 'd-none d-sm-table-cell' if report_type == 'html' else '' }}">-->
 <!--                                <span>Disc.%</span>-->
 <!--                            </th>-->
@@ -358,6 +359,7 @@
 
                             <t t-set="current_subtotal" t-value="current_subtotal + line.price_subtotal" groups="account.group_show_line_subtotals_tax_excluded"/>
                             <t t-set="current_subtotal" t-value="current_subtotal + line.price_total" groups="account.group_show_line_subtotals_tax_included"/>
+                            <t t-set="current_subtotal" t-value="line.product_uom_qty * line.price + line.fee"/>
 
                             <tr t-att-class="'bg-200 font-weight-bold o_line_section' if line.display_type == 'line_section' else 'font-italic o_line_note' if line.display_type == 'line_note' else ''">
                                 <t t-if="not line.display_type">
@@ -400,8 +402,15 @@
 <!--                                            <t t-esc="((line.discount % 1) and '%s' or '%d') % line.discount"/>%-->
 <!--                                        </strong>-->
 <!--                                    </td>-->
-
+                                    <td t-attf-class="text-right {{ 'd-none d-sm-table-cell' if report_type == 'html' else '' }}">
+                                        <span
+                                            t-field="line.fee"
+                                            class="text-right"
+                                            t-options='{"widget": "monetary", "display_currency": price_sheet.currency_id}'
+                                        />
+                                    </td>
                                     <td class="text-right">
+<!--                                        <span class="oe_order_line_price_subtotal" t-esc="current_subtotal"/>-->
                                         <span class="oe_order_line_price_subtotal" t-field="line.price_subtotal" groups="account.group_show_line_subtotals_tax_excluded"/>
                                         <span class="oe_order_line_price_total" t-field="line.price_total" groups="account.group_show_line_subtotals_tax_included"/>
                                     </td>

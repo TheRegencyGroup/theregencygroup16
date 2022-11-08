@@ -345,6 +345,10 @@ class CustomerPortal(portal.CustomerPortal):
         if not lines_to_order:
             raise UserError('Orders not found.')
 
+        # for line in lines_to_order:
+        #     seq = line.sequence
+
+
         sale_order = order_sudo.create_sale_order(lines_to_order)
 
         query_string = f'&comeback_url_caption={order_sudo.name}&comeback_url={order_sudo.get_portal_url()}'

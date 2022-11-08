@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<odoo>
+
+    <record id="fee_value_list_view" model="ir.ui.view">
+        <field name="name">fee.value.tree</field>
+        <field name="model">fee.value</field>
+        <field name="arch" type="xml">
+            <tree string="Fee Types" editable="bottom">
+                <field name="name" string="Description"/>
+                <field name="fee_type_id"/>
+                <field name="value"/>
+                <field name="percent_value"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="action_fee_value" model="ir.actions.act_window">
+        <field name="name">Fee Value</field>
+        <field name="res_model">fee.value</field>
+        <field name="view_mode">tree</field>
+    </record>
+
+</odoo>

@@ -294,7 +294,7 @@ class ProductPriceSheetLine(models.Model):
     price = fields.Float(string='Customer Price', digits='Product Price', store=True)
     sale_estimate_line_ids = fields.Many2many('sale.estimate.line', 'product_price_sheet_line_sale_estimate_line_relation',
                                          'price_sheet_line_id', 'sale_estimate_line_id')
-    total = fields.Float()
+    total = fields.Float(compute='_compute_total', store=True)
     shipping_options = fields.Char()
     partner_id = fields.Many2one('res.partner', 'Vendor')
     duty = fields.Float(digits='Product Price')
@@ -316,6 +316,13 @@ class ProductPriceSheetLine(models.Model):
     produced_overseas = fields.Boolean('Produced Overseas')
     display_name = fields.Char(compute='_compute_display_name')
     color = fields.Integer('Color Index', compute='_compute_color')
+    fee = fields.Float(readonly=True, compute='_compute_fee', store=True)
+    fee_value_ids = fields.One2many('fee.value', 'price_sheet_line_id')
+
+    @api.depends('fee_value_ids', 'fee_value_ids.value')
+    def _compute_fee(self):
+        for rec in self:
+            rec.fee = sum(rec.fee_value_ids.mapped('value'))
 
     def _compute_display_name(self):
         for psl in self:
@@ -373,10 +380,16 @@ class ProductPriceSheetLine(models.Model):
         for rec in self:
             rec.price = rec.total / rec.min_quantity if rec.min_quantity else 0
 
+
     @api.onchange('price')
     def onchange_price(self):
         for rec in self:
             rec.total = rec.price * rec.min_quantity
+
+    @api.depends('fee_value_ids', 'fee_value_ids.value', 'fee')
+    def _compute_total(self):
+        for rec in self:
+            rec.total = rec.price * rec.min_quantity + rec.fee
 
     def _compute_max_quantity(self):
         for rec in self.sorted('sequence'):
@@ -442,3 +455,10 @@ class ProductPriceSheetLine(models.Model):
                 'target': 'new'
             }
             return res
+
+    def action_edit_fee_value(self):
+        self.ensure_one()
+        action = self.env["ir.actions.actions"]._for_xml_id("regency_estimate.action_fee_value")
+        action['domain'] = [('price_sheet_line_id', '=', self.id)]
+        action['context'] = {'default_price_sheet_line_id': self.id}
+        return action
