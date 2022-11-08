@@ -10,8 +10,8 @@ class Product(models.Model):
     ext_overseas = fields.Char()
     ext_routes_type = fields.Char()
     ext_template_name = fields.Char()
-    ext_qty_per_carton = fields.Integer()
-    ext_reorder_point = fields.Integer()
+    ext_qty_per_carton = fields.Float()
+    ext_reorder_point = fields.Float()
     ext_all_customers = fields.Boolean()
 
     def after_import_update(self):
