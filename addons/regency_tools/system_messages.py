@@ -23,6 +23,6 @@ def accept_format_string(mes, *args):
 
 SystemMessages = {
     "M-003": "Quantity is not set! Please, populate Quantity field with the necessary value.",
-    "M-004": "Please, make sure the Order type is chosen correctly!",
+    "M-004": "Please, make sure you’ve allowed Consumption Agreement creation!",
     "M-005": "%s is confirmed. Please, send it the customer!<br/>The link to portal: %s",
 }
