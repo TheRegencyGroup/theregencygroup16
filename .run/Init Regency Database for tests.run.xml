@@ -1,0 +1,33 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Init Regency Database for tests" type="PythonConfigurationType" factoryName="Python">
+    <module name="theregencygroup16" />
+    <option name="INTERPRETER_OPTIONS" value="" />
+    <option name="PARENT_ENVS" value="true" />
+    <envs>
+      <env name="PYTHONUNBUFFERED" value="1" />
+    </envs>
+    <option name="SDK_HOME" value="docker-compose://[$PROJECT_DIR$/env/local-test/docker-compose.yml]:regency_test_web/python3" />
+    <option name="WORKING_DIRECTORY" value="" />
+    <option name="IS_MODULE_SDK" value="false" />
+    <option name="ADD_CONTENT_ROOTS" value="true" />
+    <option name="ADD_SOURCE_ROOTS" value="true" />
+    <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+    <PathMappingSettings>
+      <option name="pathMappings">
+        <list>
+          <mapping local-root="$PROJECT_DIR$/addons" remote-root="/mnt/extra-addons" />
+          <mapping local-root="$PROJECT_DIR$/opsway/regency-enterprise" remote-root="/mnt/opsway/regency-enterprise" />
+          <mapping local-root="$PROJECT_DIR$/opsway/submodules" remote-root="/mnt/opsway/submodules" />
+        </list>
+      </option>
+    </PathMappingSettings>
+    <option name="SCRIPT_NAME" value="/usr/bin/odoo" />
+    <option name="PARAMETERS" value="--conf /etc/odoo/odoo-test.conf --init=regency_init" />
+    <option name="SHOW_COMMAND_LINE" value="false" />
+    <option name="EMULATE_TERMINAL" value="false" />
+    <option name="MODULE_MODE" value="false" />
+    <option name="REDIRECT_INPUT" value="false" />
+    <option name="INPUT_FILE" value="" />
+    <method v="2" />
+  </configuration>
+</component>

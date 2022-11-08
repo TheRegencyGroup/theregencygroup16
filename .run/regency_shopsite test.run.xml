@@ -1,0 +1,27 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="regency_shopsite test" type="tests" factoryName="py.test">
+    <module name="theregencygroup16" />
+    <option name="INTERPRETER_OPTIONS" value="" />
+    <option name="PARENT_ENVS" value="true" />
+    <option name="SDK_HOME" value="docker-compose://[$PROJECT_DIR$/env/local-test/docker-compose.yml]:regency_test_web/python3" />
+    <option name="WORKING_DIRECTORY" value="" />
+    <option name="IS_MODULE_SDK" value="false" />
+    <option name="ADD_CONTENT_ROOTS" value="true" />
+    <option name="ADD_SOURCE_ROOTS" value="true" />
+    <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+    <PathMappingSettings>
+      <option name="pathMappings">
+        <list>
+          <mapping local-root="$PROJECT_DIR$/addons" remote-root="/mnt/extra-addons" />
+          <mapping local-root="$PROJECT_DIR$/opsway/regency-enterprise" remote-root="/mnt/opsway/regency-enterprise" />
+        </list>
+      </option>
+    </PathMappingSettings>
+    <option name="_new_keywords" value="&quot;&quot;" />
+    <option name="_new_parameters" value="&quot;&quot;" />
+    <option name="_new_additionalArguments" value="&quot;--odoo-database\u003dregency_test --odoo-config /etc/odoo/odoo-test.conf&quot;" />
+    <option name="_new_target" value="&quot;addons.regency_shopsite.tests&quot;" />
+    <option name="_new_targetType" value="&quot;PYTHON&quot;" />
+    <method v="2" />
+  </configuration>
+</component>
