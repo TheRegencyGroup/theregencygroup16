@@ -15,17 +15,15 @@
             this._super();
             onMounted(() => {
                 const buttonTag = document.querySelector('td.o_list_record_copy');
-                if (buttonTag){
-                    const indexButtonTag = [...buttonTag.parentElement.children].indexOf(buttonTag);
+                const indexButtonTag = [...buttonTag.parentElement.children].indexOf(buttonTag);
 
-                    const newThTag = document.createElement("th");
-                    newThTag.classList.add('o_list_button');
-                    newThTag.style.width = '30px';
+                const newThTag = document.createElement("th");
+                newThTag.classList.add('o_list_button');
+                newThTag.style.width = '30px';
 
-                    const tableEl = buttonTag.parentElement.parentElement.parentElement;
-                    const allCells = tableEl.tHead.firstElementChild.children;
-                    (allCells[indexButtonTag - 1] || allCells[indexButtonTag]).after(newThTag);
-                }
+                const tableEl = buttonTag.parentElement.parentElement.parentElement;
+                const allCells = tableEl.tHead.firstElementChild.children;
+                (allCells[indexButtonTag - 1] || allCells[indexButtonTag]).after(newThTag);
             });
         },
 
