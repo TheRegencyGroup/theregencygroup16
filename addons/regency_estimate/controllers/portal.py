@@ -336,7 +336,7 @@ class CustomerPortal(portal.CustomerPortal):
             return {'error': _('Invalid order.')}
 
         price_sheet_line_ids = order_sudo.item_ids
-        self.check_price_sheet_lines(ps_lines=price_sheet_line_ids, method='create_so')
+        self.check_qty_sheet_lines(ps_lines=price_sheet_line_ids)
 
         lines_to_order = price_sheet_line_ids.filtered(lambda f: f.product_uom_qty > 0 and
                                                                 f.consumption_type == 'dropship' and
@@ -368,7 +368,9 @@ class CustomerPortal(portal.CustomerPortal):
             return {'error': _('Invalid order.')}
 
         price_sheet_line_ids = order_sudo.item_ids
-        self.check_price_sheet_lines(ps_lines=price_sheet_line_ids, method='create_ca')
+        self.check_qty_sheet_lines(ps_lines=price_sheet_line_ids)
+        if False in price_sheet_line_ids.mapped('allow_consumption_agreement'):
+            raise UserError(SystemMessages.get('M-004'))
 
         lines_to_order = price_sheet_line_ids.filtered(lambda f: f.product_uom_qty > 0 and
                                                                  f.consumption_type == 'consumption' and
@@ -405,3 +407,8 @@ class CustomerPortal(portal.CustomerPortal):
             raise UserError(SystemMessages.get('M-004'))
         if method == 'create_ca' and False in ps_lines.mapped('allow_consumption_agreement'):
             raise UserError(SystemMessages.get('M-004'))
+
+    @staticmethod
+    def check_qty_sheet_lines(ps_lines):
+        if sum(ps_lines.mapped('product_uom_qty')) <= 0:
+            raise UserError(SystemMessages.get('M-003'))
