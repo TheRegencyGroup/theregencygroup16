@@ -34,26 +34,22 @@
         <record id="regency_shopsite.product_template_bag" model="product.template">
             <field name="is_fit_for_overlay" eval="True"/>
 <!--            <field name="website_published" eval="True"/>-->
-
         </record>
 
+<!--        <record id="overlay_template_bag" model="overlay.template">-->
+<!--            <field name="name">Bag template</field>-->
+<!--            <field name="product_template_id" ref="regency_shopsite.product_template_bag"/>-->
+<!--            <field name="overlay_position_ids"-->
+<!--                   eval="[(4, ref('regency_shopsite.overlay_position_front')),-->
+<!--                                (4, ref('regency_shopsite.overlay_position_back'))]"/>-->
+<!--        </record>-->
 
-        <!--        <record id="overlay_template_bag" model="overlay.template">-->
-        <!--            <field name="name">Bag template</field>-->
-        <!--            <field name="product_template_id" ref="regency_shopsite.product_template_bag"/>-->
-        <!--            <field name="overlay_position_ids"-->
-        <!--                   eval="[(4, ref('regency_shopsite.overlay_position_front')),-->
-        <!--                        (4, ref('regency_shopsite.overlay_position_back'))]"/>-->
-        <!--        </record>-->
-
-        <!--        <record id="overlay_product_bag_customization_1" model="overlay.product">-->
-        <!--            <field name="name">Bag Customization 1</field>-->
-        <!--            <field name="overlay_template_id" ref='regency_shopsite.overlay_template_bag'/>-->
-        <!--            <field name="area_list_json">{"1": {"overlayPositionId": 1, "areaList": {"1": {"index": 1, "type":-->
-        <!--                "ellipse", "data": [{"index": 1, "imageFormat": "png", "objectData": {"width": 22, "height": 33, "x":-->
-        <!--                19, "y": 45, "angle": 23}}]}}}}-->
-        <!--            </field>-->
-        <!--        </record>-->
+<!--        <record id="overlay_product_bag_customization_1" model="overlay.product">-->
+<!--            <field name="name">Bag Customization 1</field>-->
+<!--            <field name="overlay_template_id" ref='regency_shopsite.overlay_template_bag'/>-->
+<!--            <field name="area_list_json">{"1": {"overlayPositionId": 1, "areaList": {"1": {"index": 1, "type": "ellipse", "data": [{"index": 1, "imageFormat": "png", "objectData": {"width": 22, "height": 33, "x": 19, "y": 45, "angle": 23}}]}}}}-->
+<!--            </field>-->
+<!--        </record>-->
 
     </data>
 </odoo>
