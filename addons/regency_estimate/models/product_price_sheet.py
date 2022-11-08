@@ -34,6 +34,7 @@ class ProductPriceSheet(models.Model):
     item_ids = fields.One2many(
         'product.price.sheet.line', 'price_sheet_id', 'Price sheet lines',
         copy=True, readonly=True, states={'draft': [('readonly', False)]})
+    has_produced_overseas_items = fields.Boolean(compute='_compute_has_produced_overseas_items')
     currency_id = fields.Many2one('res.currency', 'Currency', default=_get_default_currency_id, required=True,
                                   readonly=True, states={'draft': [('readonly', False)]})
     opportunity_id = fields.Many2one(related='estimate_id.opportunity_id')
@@ -77,6 +78,12 @@ class ProductPriceSheet(models.Model):
                 'amount_tax': amount_tax,
                 'amount_total': amount_untaxed + amount_tax,
             })
+
+    @api.depends('item_ids.produced_overseas')
+    def _compute_has_produced_overseas_items(self):
+        for ps in self:
+            ps.has_produced_overseas_items = any(ps.mapped('item_ids.produced_overseas'))
+
 
     def _compute_access_url(self):
         # super(ProductPriceSheet, self)._compute_access_url()
@@ -170,7 +177,7 @@ class ProductPriceSheet(models.Model):
         self.write({'state': 'confirmed'})
         url = f'{self.get_base_url()}{self.get_portal_url()}'
         message = SystemMessages['M-005'] % (
-            f'<a href="/web#id={self.id}&amp;model={self._name}&amp;view_type=form">Pricesheet name ({self.name})</a>',
+            f'<a href="/web#id={self.id}&amp;model={self._name}&amp;view_type=form">{self.name}</a>',
             f'<a href={url}>{url}</a>')
         self.env['purchase.requisition'].send_notification(message=message, user_id=self.estimate_id.user_id)
 

@@ -16,6 +16,7 @@
         'delivery',
         'stock_mts_mto_rule',
         'custom_list_view',
+        'mail_chatter_customization',
     ],
     'category': 'Regency/Sales',
     'sequence': 10,
