@@ -243,6 +243,7 @@ class ProductPriceSheet(models.Model):
                                                 'price_unit': p.price,
                                                 'product_uom': p.product_id.uom_id.id,
                                                 'pricesheet_line_id': p.id,
+                                                'name': p.name,
                                             }) for p in lines_to_order]})
         sequence = 10
         for line in order.order_line:
@@ -252,7 +253,7 @@ class ProductPriceSheet(models.Model):
             if fee_value_ids:
                 sequence += 1
                 line.create({'display_type': 'line_note',
-                             'name': 'Additional Fees:',
+                             'name': f'Additional Fees for {line.name}:',
                              'order_id': line.order_id.id,
                              'pricesheet_line_id': line.pricesheet_line_id.id,
                              'sequence': sequence})

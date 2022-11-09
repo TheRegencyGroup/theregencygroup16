@@ -51,7 +51,6 @@ class CustomerPortal(portal.CustomerPortal):
         if order_line:
             results.update({
                 'order_line_product_uom_qty': str(order_line.product_uom_qty),
-                'order_line_price_total': format_price(order_line.price_total),
                 'order_line_price_subtotal': format_price(order_line.price_subtotal),
                 'order_line_portal_fee': format_price(order_line.portal_fee),
             })
