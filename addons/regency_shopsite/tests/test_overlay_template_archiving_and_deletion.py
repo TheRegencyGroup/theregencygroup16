@@ -8,7 +8,7 @@ class TestOverlayTemplateArchivingDeletion(TransactionCase):
 
     def setUp(self):
         self.product = self.env['product.template'].create({'name': 'Test Product'})
-        self.overlay_position = self.env.ref('regency_shopsite.overlay_position_front')
+        self.overlay_position = self.browse_ref('regency_shopsite.overlay_position_front')
         self.overlay_template = self.env['overlay.template'].create({
             'name': 'Test Overlay',
             'overlay_position_ids': [self.overlay_position.id],
