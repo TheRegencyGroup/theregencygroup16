@@ -242,7 +242,27 @@ class ProductPriceSheet(models.Model):
                                                 'product_uom_qty': p.product_uom_qty,
                                                 'price_unit': p.price,
                                                 'product_uom': p.product_id.uom_id.id,
+                                                'pricesheet_line_id': p.id,
                                             }) for p in lines_to_order]})
+        sequence = 10
+        for line in order.order_line:
+            sequence += 1
+            line.sequence = sequence
+            fee_value_ids = line.pricesheet_line_id.fee_value_ids
+            if fee_value_ids:
+                sequence += 1
+                line.create({'display_type': 'line_note',
+                             'name': 'Additional Fees:',
+                             'order_id': line.order_id.id,
+                             'pricesheet_line_id': line.pricesheet_line_id.id,
+                             'sequence': sequence})
+                for fee in fee_value_ids:
+                    sequence += 1
+                    line.create({'product_id': fee.fee_type_id.product_id.id,
+                                 'price_unit': fee.portal_value,
+                                 'order_id': line.order_id.id,
+                                 'pricesheet_line_id': line.pricesheet_line_id.id,
+                                 'sequence': sequence})
         lines_to_order.write({'product_uom_qty': 0})
         return order
 
@@ -318,11 +338,13 @@ class ProductPriceSheetLine(models.Model):
     color = fields.Integer('Color Index', compute='_compute_color')
     fee = fields.Float(readonly=True, compute='_compute_fee', store=True)
     fee_value_ids = fields.One2many('fee.value', 'price_sheet_line_id')
+    portal_fee = fields.Float(compute='_compute_fee', store=True)
 
-    @api.depends('fee_value_ids', 'fee_value_ids.value')
+    @api.depends('fee_value_ids', 'fee_value_ids.value', 'fee_value_ids.portal_value')
     def _compute_fee(self):
         for rec in self:
             rec.fee = sum(rec.fee_value_ids.mapped('value'))
+            rec.portal_fee = sum(rec.fee_value_ids.mapped('portal_value'))
 
     def _compute_display_name(self):
         for psl in self:
@@ -380,7 +402,6 @@ class ProductPriceSheetLine(models.Model):
         for rec in self:
             rec.price = rec.total / rec.min_quantity if rec.min_quantity else 0
 
-
     @api.onchange('price')
     def onchange_price(self):
         for rec in self:
@@ -413,8 +434,7 @@ class ProductPriceSheetLine(models.Model):
                                             product=line.product_id, partner=line.price_sheet_id.partner_id)
             line.update({
                 'price_tax': taxes['total_included'] - taxes['total_excluded'],
-                'price_total': taxes['total_included'],
-                'price_subtotal': taxes['total_excluded'],
+                'price_subtotal': taxes['total_excluded'] + line.portal_fee,
             })
             # if self.env.context.get('import_file', False) and not self.env.user.user_has_groups(
             #         'account.group_account_manager'):

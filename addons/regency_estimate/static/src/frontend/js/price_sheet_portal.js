@@ -143,21 +143,17 @@ publicWidget.registry.PriceSheetPortal = publicWidget.Widget.extend({
      * @param {Object} data: contains order and line updated values
      */
     _updateOrderLineValues($orderLine, data) {
-        let linePriceTotal = data.order_line_price_total,
-            linePriceSubTotal = data.order_line_price_subtotal,
-            $linePriceTotal = $orderLine.find('.oe_order_line_price_total .oe_currency_value'),
+        let linePriceSubTotal = data.order_line_price_subtotal,
+            linePortalFee = data.order_line_portal_fee,
+            $linePortalFee = $orderLine.find('.oe_order_line_portal_fee'),
             $linePriceSubTotal = $orderLine.find('.oe_order_line_price_subtotal .oe_currency_value');
 
-        if (!$linePriceTotal.length && !$linePriceSubTotal.length) {
-            $linePriceTotal = $linePriceSubTotal = $orderLine.find('.oe_currency_value').last();
-        }
-
         $orderLine.find('.js_price_sheet_quantity').val(data.order_line_product_uom_qty);
-        if ($linePriceTotal.length && linePriceTotal !== undefined) {
-            $linePriceTotal.text(linePriceTotal);
-        }
         if ($linePriceSubTotal.length && linePriceSubTotal !== undefined) {
             $linePriceSubTotal.text(linePriceSubTotal);
+        }
+        if ($linePortalFee.length && linePortalFee !== undefined) {
+            $linePortalFee.text(linePortalFee);
         }
     },
     /**
