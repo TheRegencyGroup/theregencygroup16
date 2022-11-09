@@ -304,7 +304,7 @@ class ProductPriceSheetLine(models.Model):
     shipping_lead_time = fields.Char()
     allow_consumption_agreement = fields.Boolean(default=True)
     consumption_type = fields.Selection([('consumption', 'Consumption Agreement'),
-                                         ('dropship', 'Dropship')], default='dropship')
+                                         ('dropship', 'Dropship')], default='dropship')  # TODO: delete?
     price_subtotal = fields.Monetary(compute='_compute_amount', string='Subtotal', store=True)
     price_tax = fields.Float(compute='_compute_amount', string='Total Tax', store=True)
     price_total = fields.Monetary(compute='_compute_amount', string='Total', store=True)
