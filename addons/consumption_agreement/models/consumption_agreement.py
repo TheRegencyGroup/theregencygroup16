@@ -21,6 +21,12 @@ class ConsumptionAgreement(models.Model):
                              max_width=1024, max_height=1024)
     signed_by = fields.Char('Signed By', help='Name of the person that signed the Consumption Agreement.', copy=False)
     signed_on = fields.Datetime('Signed On', help='Date of the signature.', copy=False)
+    sale_order_ids = fields.One2many('sale.order', 'consumption_agreement_id')
+    sale_order_count = fields.Integer(compute='_compute_sale_order_count')
+
+    def _compute_sale_order_count(self):
+        for rec in self:
+            rec.sale_order_count = len(rec.sale_order_ids)
 
     def _compute_access_url(self):
         super(ConsumptionAgreement, self)._compute_access_url()
@@ -33,10 +39,20 @@ class ConsumptionAgreement(models.Model):
             if not rec.signed_date:
                 rec.signed_date = fields.Date.today()
 
+    def open_sale_orders(self):
+        action = self.env["ir.actions.act_window"]._for_xml_id("sale.action_orders")
+        action['context'] = {'default_consumption_agreement_id': self.id}
+        action['domain'] = [('id', 'in', self.sale_order_ids)]
+        if len(self.sale_order_ids) == 1:
+            action['views'] = [(self.env.ref('sale.view_order_form').id, 'form')]
+            action['res_id'] = self.sale_order_ids.id
+        return action
+
     def create_sale_order(self, selected_line_ids):
         self.ensure_one()
         order = self.env['sale.order'].create({'access_token': self.access_token,
                                        'partner_id': self.partner_id.id,
+                                       'consumption_agreement_id': self.id,
                                        'order_line': [
                                             Command.create({
                                                 'product_id': p.product_id.id,
