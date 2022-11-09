@@ -10,6 +10,8 @@
                         string="Confirm" type="object"
                         attrs="{'invisible': [('state', 'not in', ['draft'])]}"/>
                     <field name="state" widget="statusbar" statusbar_visible="draft,confirmed"/>
+                    <button name="generate_purchase_order" data-hotkey="g" type="object"
+                            string="Generate Purchase Order"/>
                 </header>
                 <sheet>
                      <div class="oe_button_box" name="button_box">
@@ -27,6 +29,12 @@
                                 type="object"
                                 icon="fa-bars">
                             <field string="Sale Orders" name="sale_order_count" widget="statinfo" />
+                        </button>
+                        <button class="oe_stat_button"
+                                name="open_purchase_orders"
+                                type="object"
+                                icon="fa-bars">
+                            <field string="Purchase Orders" name="purchase_order_count" widget="statinfo" />
                         </button>
                     </div>
                     <div class="oe_title">
@@ -64,6 +72,7 @@
                                     <field name="allowed_partner_ids" widget="many2many_tags"/>
                                     <field name="vendor_id" optional="hide"/>
                                     <field name="qty_allowed"/>
+                                    <field name="qty_available" string="Qty On Hand"/>
                                     <field name="qty_consumed"/>
                                     <field name="qty_remaining"/>
                                     <field name="price_unit"/>
