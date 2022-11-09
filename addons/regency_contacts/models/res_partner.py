@@ -1,6 +1,6 @@
-from odoo import api, fields, models
+from odoo import api, fields, models, Command
 
-from .const import ENTITY_SELECTION
+from .const import ENTITY_SELECTION, HOTEL
 
 
 class ResPartner(models.Model):
@@ -8,7 +8,8 @@ class ResPartner(models.Model):
 
     association_ids = fields.Many2many('customer.association', relation="customer_association_res_partner_rel",
                                        column1='res_partner_id', column2='customer_association_id')
-    association_partner_ids = fields.One2many('res.partner', compute='_compute_association_partner_ids')
+    association_partner_ids = fields.One2many('res.partner', compute='_compute_association_partner_ids',
+                                              compute_sudo=True)
     contact_type = fields.Selection([
         ('customer', 'Customer'),
         ('vendor', 'Vendor')
@@ -22,13 +23,17 @@ class ResPartner(models.Model):
     mobile_extra = fields.Char()
     other_phone = fields.Char()
     other_phone_extra = fields.Char()
-    hotel_contact_ids = fields.Many2many('res.partner', 'contact_hotel_rel', 'contact_id', 'hotel_id',
-                                         domain=[('is_company', '=', False)])
-    hotel_ids = fields.Many2many('res.partner', 'contact_hotel_rel', 'hotel_id', 'contact_id',
-                                 domain=[('is_company', '=', True), ('contact_type', '=', 'customer')])
-
+    hotel_ids = fields.Many2many('res.partner', compute="_compute_hotel_ids", compute_sudo=True)
     entity_type = fields.Selection(selection=ENTITY_SELECTION)
 
+    @api.depends('association_partner_ids')
+    def _compute_hotel_ids(self):
+        for entry in self:
+            entry.hotel_ids = [
+                Command.set(entry.association_partner_ids.filtered(lambda x: x.entity_type == HOTEL).ids),
+            ]
+
+    @api.depends('association_ids')
     def _compute_association_partner_ids(self):
         for partner in self:
             partner.association_partner_ids = partner.association_ids.mapped('right_partner_id')
