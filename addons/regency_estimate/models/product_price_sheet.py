@@ -408,7 +408,7 @@ class ProductPriceSheetLine(models.Model):
         for rec in self:
             rec.total = rec.price * rec.min_quantity
 
-    @api.depends('fee_value_ids', 'fee_value_ids.value', 'fee')
+    @api.depends('fee_value_ids', 'fee_value_ids.value', 'fee', 'price', 'min_quantity')
     def _compute_total(self):
         for rec in self:
             rec.total = rec.price * rec.min_quantity + rec.fee
