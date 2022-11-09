@@ -57,14 +57,13 @@ class OverlayProduct(models.Model):
         sales = self._get_sale_order_line_ids(limit=1)
         if sales:
             model_name, model_id = sales._name, sales.id
-            raise ValidationError(
-                "The operation cannot be completed: another model requires "
-                "the record being deleted. If possible, archive it instead.\n\n"
-                f"Model: {model_name}s, ID: {model_id}"
-            )  # TODO REG-151 do in _( ??
+            raise ValidationError(_("The operation cannot be completed: another model requires "
+                                    "the record being deleted. If possible, archive it instead.\n\n"
+                                    f"Model: {model_name}s, ID: {model_id}"
+                                    ))
 
     def _get_sale_order_line_ids(self, limit=None):
-        # TODO REG - 151 - try to add field sale_order_line_ids instead of this and add ondelete=restrict
+        # TODO [REF] if necessary: add field sale_order_line_ids instead and add ondelete=restrict (tech debt from REG-151)
         return self.env['sale.order.line'].search([('product_id', 'in', self.product_id.ids)], limit=limit)
 
     def _create_attribute_value(self):
