@@ -8,11 +8,13 @@ services:
       - regency_test_db
     user: odoo
     ports:
-      - "8019:8069"
+      - "8119:8069"
     volumes:
       - ../../addons:/mnt/extra-addons
       - ../../opsway/regency-enterprise:/mnt/opsway/regency-enterprise
+      - ../../opsway/submodules:/mnt/opsway/submodules
       - ./odoo-test.conf:/etc/odoo/odoo-test.conf
+      - ./data:/var/lib/odoo
     environment:
       - HOST=regency-test-db
       - USER=odoo
@@ -20,7 +22,7 @@ services:
   regency_test_db:
     container_name: regency-test-db
     ports:
-      - "5445:5432"
+      - "5552:5432"
     image: postgres:14.5
     environment:
       - POSTGRES_USER=odoo

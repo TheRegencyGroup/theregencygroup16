@@ -1,1 +1,1 @@
-from . import const, models, controllers, http_patching
+from . import const, models, controllers, http_patching, tests

@@ -45,7 +45,6 @@
         'views/portal_templates.xml'
     ],
     'demo': [
-        'data/product_demo.xml',
     ],
     'assets': {
         'web.assets_frontend': [
