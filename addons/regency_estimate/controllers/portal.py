@@ -339,9 +339,7 @@ class CustomerPortal(portal.CustomerPortal):
         price_sheet_line_ids = order_sudo.item_ids
         self.check_qty_sheet_lines(ps_lines=price_sheet_line_ids)
 
-        lines_to_order = price_sheet_line_ids.filtered(lambda f: f.product_uom_qty > 0 and
-                                                                f.consumption_type == 'dropship' and
-                                                                f.id in selected_line_ids)
+        lines_to_order = price_sheet_line_ids.filtered(lambda f: f.product_uom_qty > 0 and f.id in selected_line_ids)
         if not lines_to_order:
             raise UserError('Orders not found.')
 
@@ -376,7 +374,7 @@ class CustomerPortal(portal.CustomerPortal):
             raise UserError(SystemMessages.get('M-004'))
 
         lines_to_order = price_sheet_line_ids.filtered(lambda f: f.product_uom_qty > 0 and
-                                                                 f.consumption_type == 'consumption' and
+                                                                 f.allow_consumption_agreement and
                                                                  f.id in selected_line_ids)
         if not lines_to_order:
             raise UserError('Orders not found.')
