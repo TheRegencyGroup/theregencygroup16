@@ -113,6 +113,7 @@ class ConsumptionAggreementLine(models.Model):
     sale_order_line_ids = fields.One2many('sale.order.line', 'consumption_agreement_line_id')
     partner_id = fields.Many2one(related='agreement_id.partner_id', domain=[('contact_type', '=', 'customer')], store=True)
     allowed_partner_ids = fields.Many2many('res.partner', domain=[('contact_type', '=', 'customer')], string="Allowed Customers")
+    vendor_id = fields.Many2one('res.partner')
 
     @api.depends('qty_allowed', 'state', 'sale_order_line_ids', 'sale_order_line_ids.product_uom_qty')
     def _compute_qty_consumed(self):
