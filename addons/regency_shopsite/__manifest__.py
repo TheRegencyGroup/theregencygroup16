@@ -37,6 +37,9 @@
         'views/res_config_settings.xml',
         'views/sale_portal_templates.xml',
     ],
+    'demo': [
+        'data/demo/product_demo.xml',
+    ],
     'assets': {
         'web.assets_frontend': [
             'regency_shopsite/static/lib/**/*.js',

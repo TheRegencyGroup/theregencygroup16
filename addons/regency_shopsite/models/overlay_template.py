@@ -150,14 +150,21 @@ class OverlayTemplate(models.Model):
 
     @api.onchange('product_template_id')
     @api.constrains('product_template_id')
-    def _constrains_changes_if_has_sale(self):
-        for record in self:
-            if not record.active:
-                continue
-            if record.sale_order_line_ids:
-                raise ValidationError(_("The '%s' shopsite item template (ID%s) has sales."
+    def _constrains_changes_if_has_overlay_product(self):
+        for rec in self:
+            if rec.overlay_product_ids:
+                raise ValidationError(_("The '%s' shopsite item template (ID%s) has customize items."
                                         "A product template shouldn't be change for it.")
-                                      % (record.name, record.id,))
+                                      % (rec.name, rec.id,))
+
+    @api.constrains('active')
+    def _constrains_archive_and_deletion(self):
+        """ to restrict deletion the method should be used in def unlink"""
+        for ot in self:
+            active_overlay_product_ids = ot.overlay_product_ids.filtered(lambda op: op.active)
+            if active_overlay_product_ids:
+                raise ValidationError(f"Overlay template '{ot.name}' has active overlay product "
+                                      f"'{active_overlay_product_ids[0].name}', cause could not be delete or archived")
 
     def _create_overlay_attribute_value(self):
         overlay_attribute_id = self.env.ref('regency_shopsite.overlay_attribute')
@@ -219,7 +226,7 @@ class OverlayTemplate(models.Model):
         return res
 
     def unlink(self):
-        self._constrains_changes_if_has_sale()
+        self._constrains_archive_and_deletion()
         self._unlink_overlay_attribute_value()
         return super().unlink()
 
