@@ -362,6 +362,8 @@ class CustomerPortal(portal.CustomerPortal):
         if not selected_line_ids:
             raise UserError('Select at least one line.')
 
+        selected_line_ids = [int(price_sheet_line_id) for price_sheet_line_id in selected_line_ids]
+
         access_token = access_token or request.httprequest.args.get('access_token')
         try:
             order_sudo = self._document_check_access('product.price.sheet', order_id, access_token=access_token)
