@@ -57,7 +57,7 @@ class ConsumptionAgreement(models.Model):
     def open_sale_orders(self):
         action = self.env["ir.actions.act_window"]._for_xml_id("sale.action_orders")
         action['context'] = {'default_consumption_agreement_id': self.id}
-        action['domain'] = [('id', 'in', self.sale_order_ids)]
+        action['domain'] = [('id', 'in', self.sale_order_ids.ids)]
         if len(self.sale_order_ids) == 1:
             action['views'] = [(self.env.ref('sale.view_order_form').id, 'form')]
             action['res_id'] = self.sale_order_ids.id
@@ -66,7 +66,7 @@ class ConsumptionAgreement(models.Model):
     def open_purchase_orders(self):
         action = self.env["ir.actions.act_window"]._for_xml_id("purchase.purchase_rfq")
         action['context'] = {'default_consumption_agreement_id': self.id}
-        action['domain'] = [('id', 'in', self.purchase_order_ids)]
+        action['domain'] = [('id', 'in', self.purchase_order_ids.ids)]
         if len(self.purchase_order_ids) == 1:
             action['views'] = [(self.env.ref('purchase.purchase_order_form').id, 'form')]
             action['res_id'] = self.purchase_order_ids.id
