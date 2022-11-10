@@ -11,3 +11,5 @@ from . import crm_lead
 from . import delivery_carrier
 from . import stock_rule
 from . import product_product
+from . import fee_type
+from . import fee_value

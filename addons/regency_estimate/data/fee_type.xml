@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+
+        <record model="product.product" id="fee_type_freight_product">
+            <field name="name">Freight Fee</field>
+            <field name="detailed_type">service</field>
+        </record>
+        <record id="fee_type_freight" model="fee.type">
+            <field name="name">Freight Fee</field>
+            <field name="product_id" ref="fee_type_freight_product"/>
+        </record>
+
+        <record model="product.product" id="fee_handling_type_product">
+            <field name="name">Handling Fee</field>
+            <field name="detailed_type">service</field>
+        </record>
+        <record id="fee_type_handling" model="fee.type">
+            <field name="name">Handling Fee</field>
+            <field name="product_id" ref="fee_handling_type_product"/>
+        </record>
+
+        <record model="product.product" id="fee_insurance_type_product">
+            <field name="name">Insurance Fee</field>
+            <field name="detailed_type">service</field>
+        </record>
+        <record id="fee_type_insurancee" model="fee.type">
+            <field name="name">Insurance Fee</field>
+            <field name="product_id" ref="fee_insurance_type_product"/>
+        </record>
+
+        <record model="product.product" id="fee_setups_type_product">
+            <field name="name">Setups Fee</field>
+            <field name="detailed_type">service</field>
+        </record>
+        <record id="fee_type_setups" model="fee.type">
+            <field name="name">Setups Fee</field>
+            <field name="product_id" ref="fee_setups_type_product"/>
+        </record>
+
+        <record model="product.product" id="fee_pns_match_type_product">
+            <field name="name">PNS Match Fee</field>
+            <field name="detailed_type">service</field>
+        </record>
+        <record id="fee_type_pns_match" model="fee.type">
+            <field name="name">PNS Match Fee</field>
+            <field name="product_id" ref="fee_pns_match_type_product"/>
+        </record>
+
+        <record model="product.product" id="fee_die_plate_type_product">
+            <field name="name">Die Plate Fee</field>
+            <field name="detailed_type">service</field>
+        </record>
+        <record id="fee_type_die_plate" model="fee.type">
+            <field name="name">Die Plate Fee</field>
+            <field name="product_id" ref="fee_die_plate_type_product"/>
+        </record>
+
+        <record model="product.product" id="fee_foil_plate_type_product">
+            <field name="name">Foil Plate Fee</field>
+            <field name="detailed_type">service</field>
+        </record>
+        <record id="fee_type_foil_plate" model="fee.type">
+            <field name="name">Foil Plate Fee</field>
+            <field name="product_id" ref="fee_foil_plate_type_product"/>
+        </record>
+
+        <record model="product.product" id="fee_lazor_cut_type_product">
+            <field name="name">Lazor Cut Fee</field>
+            <field name="detailed_type">service</field>
+        </record>
+        <record id="fee_type_lazor_cut" model="fee.type">
+            <field name="name">Lazor Cut Fee</field>
+            <field name="product_id" ref="fee_lazor_cut_type_product"/>
+        </record>
+
+        <record model="product.product" id="fee_palet_type_product">
+            <field name="name">Palet Fee</field>
+            <field name="detailed_type">service</field>
+        </record>
+        <record id="fee_type_palet" model="fee.type">
+            <field name="name">Palet Fee</field>
+            <field name="product_id" ref="fee_palet_type_product"/>
+        </record>
+
+        <record model="product.product" id="fee_fuel_type_product">
+            <field name="name">Fuel Fee</field>
+            <field name="detailed_type">service</field>
+        </record>
+        <record id="fee_type_fuel" model="fee.type">
+            <field name="name">Fuel Fee</field>
+            <field name="product_id" ref="fee_fuel_type_product"/>
+        </record>
+
+    </data>
+</odoo>

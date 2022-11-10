@@ -90,6 +90,15 @@
                                              attrs="{'column_invisible': [('parent.has_produced_overseas_items', '=', False)]}"/>
                                       <field name="currency_id" invisible="1"/>
                                       <field name="unit_price" string="Unit Price"/>
+                                      <field name="production_lead_time"/>
+                                      <field name="shipping_lead_time"/>
+                                      <field name="shipping_options"/>
+                                      <field name="partner_id"/>
+                                      <field name="produced_overseas"/>
+                                      <field name="price" string="Customer Price" />
+                                      <field name="fee"/>
+                                      <button class="float-end" name="action_edit_fee_value" type="object"
+                                              icon="fa-pencil"/>
                                       <field name="production_lead_time" options="{'hide_sort_icon': True, 'width': '80px'}"/>
                                       <field name="shipping_lead_time" options="{'hide_sort_icon': True, 'width': '80px'}"
                                              string="ETA for delivery"/>
