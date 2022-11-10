@@ -411,3 +411,4 @@ class CustomerPortal(portal.CustomerPortal):
         for ps_line in ps_lines:
             if ps_line.product_uom_qty <= 0:
                 raise UserError(SystemMessages.get('M-003'))
+
