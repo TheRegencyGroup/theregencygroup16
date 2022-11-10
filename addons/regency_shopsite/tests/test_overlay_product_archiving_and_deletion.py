@@ -48,3 +48,11 @@ class TestOverlayProductArchivingDeletion(TransactionCase):
         self.create_sale_order()
         self.overlay_product.active = False
         self.assertFalse(self.overlay_product.active)
+
+    def test_03_if_archiving_overlay_product_then_archive_product_product(self):
+        self.create_sale_order()
+        self.assertTrue(self.overlay_product.active)
+        self.overlay_product.active = False
+        self.assertTrue(self.overlay_product)
+        self.assertFalse(self.overlay_product.active)
+
