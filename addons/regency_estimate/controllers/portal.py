@@ -336,14 +336,13 @@ class CustomerPortal(portal.CustomerPortal):
         except (AccessError, MissingError):
             raise UserError('Invalid order.')
 
-        price_sheet_line_ids = order_sudo.item_ids
-        self.check_qty_sheet_lines(ps_lines=price_sheet_line_ids)
+        selected_price_sheet_line_ids = order_sudo.item_ids.filtered(lambda f: f.id in selected_line_ids)
+        self.check_qty_sheet_lines(ps_lines=selected_price_sheet_line_ids)
 
-        lines_to_order = price_sheet_line_ids.filtered(lambda f: f.product_uom_qty > 0 and f.id in selected_line_ids)
-        if not lines_to_order:
+        if not selected_price_sheet_line_ids:
             raise UserError('Orders not found.')
 
-        sale_order = order_sudo.create_sale_order(lines_to_order)
+        sale_order = order_sudo.create_sale_order(selected_price_sheet_line_ids)
 
         query_string = f'&comeback_url_caption={order_sudo.name}&comeback_url={order_sudo.get_portal_url()}'
 
@@ -368,18 +367,16 @@ class CustomerPortal(portal.CustomerPortal):
         except (AccessError, MissingError):
             raise UserError('Invalid order.')
 
-        price_sheet_line_ids = order_sudo.item_ids
-        self.check_qty_sheet_lines(ps_lines=price_sheet_line_ids)
-        if False in price_sheet_line_ids.mapped('allow_consumption_agreement'):
+        selected_price_sheet_line_ids = order_sudo.item_ids.filtered(lambda f: f.id in selected_line_ids)
+        self.check_qty_sheet_lines(ps_lines=selected_price_sheet_line_ids)
+
+        if False in selected_price_sheet_line_ids.mapped('allow_consumption_agreement'):
             raise UserError(SystemMessages.get('M-004'))
 
-        lines_to_order = price_sheet_line_ids.filtered(lambda f: f.product_uom_qty > 0 and
-                                                                 f.allow_consumption_agreement and
-                                                                 f.id in selected_line_ids)
-        if not lines_to_order:
+        if not selected_price_sheet_line_ids:
             raise UserError('Orders not found.')
 
-        consumption = order_sudo.create_consumption_agreement(lines_to_order)
+        consumption = order_sudo.create_consumption_agreement(selected_price_sheet_line_ids)
 
         query_string = f'&comeback_url_caption={order_sudo.name}&comeback_url={order_sudo.get_portal_url()}'
 
@@ -411,5 +408,6 @@ class CustomerPortal(portal.CustomerPortal):
 
     @staticmethod
     def check_qty_sheet_lines(ps_lines):
-        if sum(ps_lines.mapped('product_uom_qty')) <= 0:
-            raise UserError(SystemMessages.get('M-003'))
+        for ps_line in ps_lines:
+            if ps_line.product_uom_qty <= 0:
+                raise UserError(SystemMessages.get('M-003'))
