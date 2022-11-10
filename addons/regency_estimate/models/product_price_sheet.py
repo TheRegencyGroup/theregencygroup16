@@ -255,6 +255,7 @@ class ProductPriceSheet(models.Model):
                                                        'product_id': p.product_id.id,
                                                        'qty_allowed': p.product_uom_qty,
                                                        'price_unit': p.price,
+                                                       'vendor_id': p.partner_id.id
                                                     #   'product_uom': p.product_id.uom_id.id
                                                    }) for p in lines_to_order]})
         lines_to_order.write({'product_uom_qty': 0})
