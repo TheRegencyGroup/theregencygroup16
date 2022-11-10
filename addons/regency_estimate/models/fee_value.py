@@ -3,14 +3,14 @@ from odoo import fields, models, api, _
 
 class FeeValue(models.Model):
     _name = 'fee.value'
-    _description = 'Create additional fees for price sheet line'
+    _description = 'Fee Value'
 
     name = fields.Char(required=True)
     fee_type_id = fields.Many2one('fee.type', required=True)
     value = fields.Float(required=True)
     percent_value = fields.Float()
     price_sheet_line_id = fields.Many2one('product.price.sheet.line', required=True)
-    portal_value = fields.Float(compute='_compute_portal_value', store=True, required=True)
+    portal_value = fields.Float(compute='_compute_portal_value', store=True)
 
     @api.depends('price_sheet_line_id.product_uom_qty', 'value', 'percent_value', 'price_sheet_line_id.min_quantity')
     def _compute_portal_value(self):
@@ -19,7 +19,7 @@ class FeeValue(models.Model):
                 if not rec.percent_value:
                     rec.portal_value = rec.value
                 else:
-                    rec.portal_value = rec.value / rec.price_sheet_line_id.min_quantity * rec.price_sheet_line_id.product_uom_qty
+                    rec.portal_value = rec.price_sheet_line_id.price * rec.price_sheet_line_id.product_uom_qty * rec.percent_value / 100
             else:
                 rec.portal_value = 0
 

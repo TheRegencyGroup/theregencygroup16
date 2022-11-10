@@ -346,6 +346,7 @@ class ProductPriceSheetLine(models.Model):
         for rec in self:
             rec.fee = sum(rec.fee_value_ids.mapped('value'))
             rec.portal_fee = sum(rec.fee_value_ids.mapped('portal_value'))
+            rec.onchange_price()
 
     def _compute_display_name(self):
         for psl in self:
@@ -405,11 +406,6 @@ class ProductPriceSheetLine(models.Model):
 
     @api.onchange('price')
     def onchange_price(self):
-        for rec in self:
-            rec.total = rec.price * rec.min_quantity
-
-    @api.depends('fee', 'price', 'min_quantity')
-    def _compute_total(self):
         for rec in self:
             rec.total = rec.price * rec.min_quantity + rec.fee
 
