@@ -176,4 +176,3 @@ class ConsumptionAggreementLine(models.Model):
             name = '%s - %s' % (rec.agreement_id.name, rec.product_id.name)
             result.append((rec.id, name))
         return result
-
