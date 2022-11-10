@@ -14,7 +14,7 @@
     </function>
 
     <record id="color_attribute" model="product.attribute">
-        <field name="name">Color.</field>
+        <field name="name">Color</field>
         <field name="create_variant">always</field>
         <field name="display_type">color</field>
     </record>
