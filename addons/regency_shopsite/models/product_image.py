@@ -9,7 +9,7 @@ class ProductImage(models.Model):
     use_as_main = fields.Boolean(default=False)
 
     def _check_image_in_overlay_template(self):
-        if self.env['overlay.template'].search([('product_image_ids', 'in', self.ids)]):
+        if self.env['overlay.template'].search([('areas_product_image_ids', 'in', self.ids)]):
             raise UserError('The image is used in the model "overlay.template"')
 
     def action_set_as_main_image(self):

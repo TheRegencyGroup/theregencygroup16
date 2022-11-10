@@ -9,7 +9,7 @@
 
     <t t-name="overlay_areas" owl="1">
         <div class="d-flex">
-            <button t-if="!editMode"
+            <button t-if="!editMode and Object.keys(state.overlayPositions).length"
                     class="ot_edit_mode_btn btn btn-primary"
                     t-on-click="onClickToEditMode">
                 Edit areas
@@ -17,35 +17,47 @@
             <span style="height: 31px;"/>
         </div>
         <div class="overlay_template_widget">
-            <div class="ot_image_list_popup_overlay"
-                 t-att-class="{ 'd-none': !state.showImageListForOverlayPosId }"
-                 t-ref="image_list_popup">
+            <div t-if="state.imagesListModalData"
+                 t-portal="'body'"
+                 class="ot_image_list_popup_overlay"
+                 t-ref="image_list_modal">
                 <div class="ot_image_list_popup">
                     <div class="ot_image_list_popup_header">
                         <span>Select image</span>
-                        <i class="fa fa-close" t-on-click="onClickCloseImageListPopup"/>
+                        <i class="fa fa-close" t-on-click="onClickCloseImageListModal"/>
                     </div>
                     <div class="ot_image_list_popup_content">
-                        <t t-foreach="filteredProductImageList" t-as="image" t-key="image.model + '_' + image.id">
-                            <img t-att-src="getProductImageSrc(image.id, image.model)"
-                                 class="ot_image_list_popup_content_item"
-                                 t-on-click="() => this.onClickImage(image.id, image.model)"/>
+                        <t t-foreach="filteredProductImageList" t-as="image" t-key="image.id">
+                            <div class="ot_modal_image_container"
+                                 t-att-class="{ 'disabled': !image.isAvailable }">
+                                <img t-att-src="image.image.src"
+                                     t-on-click="() => this.onClickImage(image.id)"/>
+                                <span class="ot_modal_image_size">
+                                    <t t-esc="image.image.width + 'x' + image.image.height"/>
+                                </span>
+                            </div>
                         </t>
-                        <div class="ot_image_list_popup_content_item" t-on-click="() => this.onClickImage(false, false)">
+                        <div class="ot_modal_image_container"
+                             t-on-click="() => this.onClickImage(false)">
                             <span class="fa fa-remove"/>
                             Remove image
                         </div>
                     </div>
                 </div>
             </div>
-            <t t-foreach="Object.values(state.overlayPositions)" t-as="overlay_position" t-key="overlay_position.id">
-                <OverlayAreasPositionComponent overlayPositionId="overlay_position.id"
-                                               overlayPositionName="overlay_position.name"
-                                               productTemplateId="state.productTemplateId || 0"
-                                               areaList="overlay_position.areaList || {}"
-                                               colorImages="overlay_position.colorImages || {}"
-                                               editMode="editMode"
-                                               changeOverlayImage="(args) => this.changeOverlayAreasImage(args)"/>
+            <t t-if="state.productTemplateImagesLoaded">
+                <t t-foreach="Object.values(state.overlayPositions)" t-as="position" t-key="position.id">
+                    <OverlayAreasPositionComponent editMode="editMode"
+                                                   productTemplateId="productTemplateId || 0"
+                                                   overlayPositionId="position.id"
+                                                   overlayPositionName="position.name"
+                                                   areasImageAttributeId="areasImageAttributeId || 0"
+                                                   areaList="position.areaList || {}"
+                                                   selectedImages="position.selectedImages || {}"
+                                                   areasImageValueList="areasImageAttributeValueList"
+                                                   productTemplateImages="state.productTemplateImages"
+                                                   openImageListModal="(args) => this.openImageListModal(args)"/>
+                </t>
             </t>
         </div>
     </t>
@@ -67,10 +79,7 @@
             <div class="ot_areas_position_main" t-att-class="{ 'd-none': !props.productTemplateId }">
                 <div class="ot_areas_tab" t-att-class="{ 'ot_areas_tab_hide': state.activeTab !== AREAS_TAB }">
                     <div t-if="props.editMode" class="ot_areas_position_tools">
-<!--                        <button class="btn btn-primary" t-on-click="onClickChangeImage">-->
-<!--                            <i class="fa fa-image"/>Change image-->
-<!--                        </button>-->
-                        <t t-if="!!state.imageSrc">
+                        <t t-if="!!state.editorImage">
                             <button class="btn btn-primary" t-on-click="onClickAddRectangleArea">
                                 <i class="fa fa-plus-circle"/>Rectangle
                             </button>
@@ -82,23 +91,29 @@
                             </button>
                         </t>
                     </div>
-                    <div class="ot_areas_position_editor" t-att-class="{ 'd-none': !state.imageSrc }">
-                        <img t-att-src="state.imageSrc || ''" t-ref="image_ref"/>
-                        <div class="ot_areas_position_canvas_container" t-ref="canvas_container_ref">
-                            <canvas t-ref="canvas_ref"/>
+                    <div class="ot_areas_position_editor_block"
+                         t-att-class="{ 'd-none': !state.editorImage }">
+                        <div class="ot_areas_position_editor">
+                            <img t-att-src="state.editorImage.src || ''"
+                                 t-ref="image_ref"/>
+                            <div class="ot_areas_position_canvas_container" t-ref="canvas_container_ref">
+                                <canvas t-ref="canvas_ref"/>
+                            </div>
                         </div>
-                        <div class="ot_areas_position_editor_color_switcher">
-                            <t t-foreach="Object.values(props.colorImages)" t-as="image" t-key="image.id">
-                                <div t-if="image.imageId and image.imageModel"
-                                     t-att-class="{ 'selected_color_image': (image.imageId === state.currentData.imageId and image.imageModel === state.currentData.imageModel) }"
-                                     t-on-click="() => this.onClickOverlayColorImage(image.id)">
-                                    <img t-att-src="getImageSrc(image.imageId, image.imageModel)"/>
-                                    <span><t t-esc="image.name"/></span>
+                        <div t-if="showEditorImageSwitcher"
+                             class="ot_areas_position_editor_image_switcher">
+                            <t t-foreach="editorSwitcherImageList" t-as="item" t-key="item.valueId">
+                                <div t-att-class="{ 'selected_color_image': item.valueId === state.editorSwitcherImageValueId }"
+                                     t-on-click="() => this.onChangeEditorImage(item.valueId)">
+                                    <img t-att-src="item.imageSrc"/>
+                                    <span>
+                                        <t t-esc="item.name"/>
+                                    </span>
                                 </div>
                             </t>
                         </div>
                     </div>
-                    <t t-if="!state.imageSrc">
+                    <t t-if="!state.editorImage">
                         <div class="ot_areas_position_non_image">
                             Please select image to start editing
                         </div>
@@ -195,17 +210,16 @@
                 </div>
                 </div>
                 <div class="ot_images_tab" t-att-class="{ 'd-none': state.activeTab !== IMAGES_TAB }">
-                    <t t-foreach="Object.values(props.colorImages)" t-as="color_image" t-key="color_image.id">
+                    <t t-foreach="areasImageValueList" t-as="value" t-key="value.id">
                         <div class="ot_images_tab_color_image_container">
-                            <t t-set="imgSrc" t-value="getImageSrc(color_image.imageId, color_image.imageModel)"/>
                             <div class="ot_images_tab_color_image">
                                 <button t-if="props.editMode"
                                         class="btn btn-primary ot_images_tab_color_image_change_btn"
-                                        t-on-click="() => this.onClickChangeColorImage(color_image.id)">
+                                        t-on-click="() => this.onClickChangeValueImage(value.id)">
                                     <i class="fa fa-image"/>
                                 </button>
-                                <t t-if="imgSrc">
-                                    <img t-att-src="imgSrc"/>
+                                <t t-if="value.selectedImageSrc">
+                                    <img t-att-src="value.selectedImageSrc"/>
                                 </t>
                                 <t t-else="">
                                     <div class="ot_images_tab_color_image_none">
@@ -214,13 +228,13 @@
                                 </t>
                             </div>
                             <div class="ot_images_tab_color_image_name">
-                                <t t-esc="color_image.name"/>
+                                <t t-esc="value.name"/>
                             </div>
                         </div>
                     </t>
                 </div>
             </div>
-            <t t-if="props.productTemplateId === 0">
+            <t t-if="!props.productTemplateId">
                 <div class="ot_areas_position_non_product">
                     Please select product to start editing
                 </div>

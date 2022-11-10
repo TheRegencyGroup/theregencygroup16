@@ -48,13 +48,6 @@ class ProductAttributeValue(models.Model):
 class ProductTemplateAttributeLine(models.Model):
     _inherit = 'product.template.attribute.line'
 
-    def _compute_overlay_template_areas(self):
-        color_attribute_id = self.env.ref('regency_shopsite.color_attribute')
-        if color_attribute_id.id in self.mapped('attribute_id').ids:
-            overlay_template_ids = self.env['overlay.template'].search(
-                [('product_template_id', 'in', self.mapped('product_tmpl_id').ids)])
-            overlay_template_ids._compute_areas_json()
-
     def _check_overlay_attribute(self):
         overlay_attribute_id = self.env.ref('regency_shopsite.overlay_attribute')
         if overlay_attribute_id.id in self.mapped('attribute_id').ids \
@@ -64,14 +57,11 @@ class ProductTemplateAttributeLine(models.Model):
     @api.model_create_multi
     def create(self, vals_list):
         res = super(ProductTemplateAttributeLine, self).create(vals_list)
-        res._compute_overlay_template_areas()
         return res
 
     def write(self, values):
         changed_value_ids = 'value_ids' in values
         res = super(ProductTemplateAttributeLine, self).write(values)
-        if changed_value_ids:
-            self._compute_overlay_template_areas()
         return res
 
 
