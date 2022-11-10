@@ -55,8 +55,8 @@ class OverlayProduct(models.Model):
 
     def write(self, vals):
         res = super(OverlayProduct, self).write(vals)
-        if 'active' in vals.keys() and not vals['active']:
-            self.product_id.active = False
+        if 'active' in vals.keys():
+            self.product_id.active = vals['active']
         return res
 
     def _constrains_if_has_sale(self):
