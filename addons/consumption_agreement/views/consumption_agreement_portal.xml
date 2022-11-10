@@ -79,7 +79,7 @@
                     <t t-set="entries">
                         <ul class="list-group list-group-flush flex-wrap flex-row flex-lg-column">
                             <li class="list-group-item flex-grow-1">
-                                <a t-if="consumption.has_to_be_signed()" role="button" class="btn btn-primary btn-block mb8" data-toggle="modal" data-target="#modalaccept" href="#">
+                                <a t-if="consumption.has_to_be_signed()" role="button" class="btn btn-primary btn-block mb8" data-toggle="modal" data-target="#modalaccept_consumption" href="#">
                                     <i class="fa fa-check"/> Accept &amp; Sign
                                 </a>
                                 <a t-if="consumption.state == 'confirmed'" id="create_sale_order_button" role="button" class="btn btn-primary btn-block mb8" href="#">
@@ -143,13 +143,13 @@
                 <div id="consumption_content" class="col-12 col-lg justify-content-end">
 
                     <!-- modal relative to the actions sign and pay -->
-                    <div role="dialog" class="modal fade" id="modalaccept">
+                    <div role="dialog" class="modal fade" id="modalaccept_consumption">
                         <div class="modal-dialog" t-if="consumption.has_to_be_signed()">
                             <form id="accept" method="POST" t-att-data-order-id="consumption.id" t-att-data-token="consumption.access_token" class="js_accept_json modal-content js_website_submit_form">
                                 <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
                                 <header class="modal-header">
                                     <h4 class="modal-title">Validate Order</h4>
-                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">×</button>
+                                    <button type="button" id="decline_sign" class="close" data-dismiss="modal" aria-label="Close">×</button>
                                 </header>
                                 <main class="modal-body" id="sign-dialog">
                                     <p>
@@ -171,7 +171,7 @@
                     </div>
 
                     <!-- modal relative to the action reject -->
-                    <div role="dialog" class="modal fade" id="modaldecline">
+                    <div role="dialog" class="modal fade" id="modaldecline_consumption">
                         <div class="modal-dialog">
                             <form id="decline" method="POST" t-attf-action="/my/consumptions/#{consumption.id}/decline?access_token=#{consumption.access_token}" class="modal-content">
                                 <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
@@ -231,13 +231,13 @@
 
                         <t t-if="consumption.has_to_be_signed()">
                             <div class="col-sm-auto mt8">
-                                <a role="button" class="btn btn-primary" data-toggle="modal" data-target="#modalaccept" href="#"><i class="fa fa-check"/> Accept &amp; Sign</a>
+                                <a role="button" id="accept_sign" class="btn btn-primary" data-toggle="modal" data-target="#modalaccept_consumption" href="#"><i class="fa fa-check"/> Accept &amp; Sign</a>
                             </div>
                             <div class="col-sm-auto mt8">
                                 <a role="button" class="btn btn-secondary" href="#discussion"><i class="fa fa-comment"/> Feedback</a>
                             </div>
                             <div class="col-sm-auto mt8">
-                                <a role="button" class="btn btn-danger" data-toggle="modal" data-target="#modaldecline" href="#"> <i class="fa fa-times"/> Reject</a>
+                                <a role="button" class="btn btn-danger" data-toggle="modal" data-target="#modaldecline_consumption" href="#"> <i class="fa fa-times"/> Reject</a>
                             </div>
                         </t>
                         <t t-if="consumption.state == 'confirmed'">
