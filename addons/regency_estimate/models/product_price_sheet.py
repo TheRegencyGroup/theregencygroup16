@@ -175,11 +175,12 @@ class ProductPriceSheet(models.Model):
                 except AccessError:  # no write access rights -> just ignore
                     break
         self.write({'state': 'confirmed'})
-        url = f'{self.get_base_url()}{self.get_portal_url()}'
-        message = SystemMessages['M-005'] % (
-            f'<a href="/web#id={self.id}&amp;model={self._name}&amp;view_type=form">{self.name}</a>',
-            f'<a href={url}>{url}</a>')
-        self.env['purchase.requisition'].send_notification(message=message, user_id=self.estimate_id.user_id)
+        if self.estimate_id.user_id:
+            url = f'{self.get_base_url()}{self.get_portal_url()}'
+            message = SystemMessages['M-005'] % (
+                f'<a href="/web#id={self.id}&amp;model={self._name}&amp;view_type=form">{self.name}</a>',
+                f'<a href={url}>{url}</a>')
+            self.env['purchase.requisition'].send_notification(message=message, user_id=self.estimate_id.user_id)
 
     def action_draft(self):
         self.write({'state': 'draft'})
