@@ -5,13 +5,25 @@
 #
 ##############################################################################
 
-from odoo import api, models, fields
+from odoo import api, models, fields, Command
 
 
 class SaleOrderLine(models.Model):
     _inherit = 'sale.order.line'
 
-    delivery_partner_id = fields.Many2one('res.partner', string="Delivery Address")
+    delivery_partner_id = fields.Many2one('res.partner', string="Hotel Name")
+    possible_delivery_address_ids = fields.Many2many('res.partner', compute='_compute_possible_delivery_address_id')
+    delivery_address_id = fields.Many2one('res.partner', string='Delivery Address',
+                                          domain="[('id', 'in', possible_delivery_address_ids)]")
+
+    @api.onchange('delivery_partner_id')
+    def _compute_possible_delivery_address_id(self):
+        for sol in self:
+            sol.possible_delivery_address_ids = [Command.set(sol.delivery_partner_id.child_ids.ids)]
+
+    def write(self, values):
+        res = super(SaleOrderLine, self).write(values)
+        return res
 
     @api.onchange('product_id')
     def onchange_product_partner(self):
