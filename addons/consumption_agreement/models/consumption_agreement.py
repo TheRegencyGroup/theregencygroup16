@@ -90,7 +90,7 @@ class ConsumptionAgreement(models.Model):
     def generate_purchase_order(self):
         self.ensure_one()
         for line in self.line_ids:
-            seller = line.product_id._select_seller()
+            seller = line.product_id._select_seller(quantity=line.qty_allowed)
             if not line.vendor_id and not seller:
                 raise UserError(_('Please set a vendor on product %s.') % line.product_id.display_name)
             self.env['purchase.order'].create({
