@@ -53,6 +53,6 @@ class TestOverlayProductArchivingDeletion(TransactionCase):
         self.create_sale_order()
         self.assertTrue(self.overlay_product.active)
         self.overlay_product.active = False
-        self.assertTrue(self.overlay_product)
-        self.assertFalse(self.overlay_product.active)
+        self.assertTrue(self.overlay_product.product_id)
+        self.assertFalse(self.overlay_product.product_id.active)
 
