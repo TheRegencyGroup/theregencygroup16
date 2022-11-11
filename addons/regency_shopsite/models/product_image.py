@@ -17,7 +17,7 @@ class ProductImage(models.Model):
         if self.product_tmpl_id.is_fit_for_overlay:
             self.product_tmpl_id.product_template_image_ids.use_as_main = False
             self.use_as_main = True
-            self.product_tmpl_id.image_1920 = self
+            self.product_tmpl_id.image_1920 = self.image_1920
 
     def write(self, vals):
         if 'image_1920' in vals:
