@@ -55,12 +55,15 @@ export class ProductOverlayPositionComponent extends Component {
             this.lastSelectedAreasImageAttributeValueId = this.store.otPage.selectedAreasImageAttributeValueId;
             this.updateImageSrc();
         }
-        if (this.lastOverlayProductId !== this.store.otPage.overlayProductId ||
-            this.lastEditModeState !== this.store.otPage.editMode) {
-            
-            this.lastOverlayProductId = this.store.otPage.overlayProductId;
+        let editModeWasChange = false;
+        if (this.lastEditModeState !== this.store.otPage.editMode) {
             this.lastEditModeState = this.store.otPage.editMode;
+            editModeWasChange = true;
+        }
+        if (this.lastOverlayProductId !== this.store.otPage.overlayProductId || editModeWasChange) {
+            this.lastOverlayProductId = this.store.otPage.overlayProductId;
             for (let area of Object.values(this.areas)) {
+                area.showMaskBorders(!this.store.otPage.hasOverlayProductId || this.store.otPage.editMode);
                 area.enablePointerEvents(!this.store.otPage.hasOverlayProductId || this.store.otPage.editMode);
                 area.wasChanged = false;
             }
@@ -102,9 +105,6 @@ export class ProductOverlayPositionComponent extends Component {
     }
 
     updateAreas() {
-        // if (this.overlay) {
-        //     this.overlay.destroy();
-        // }
         if (this.canvasContainerRef.el) {
             let areaObjectData;
             if (this.store.otPage.overlayProductAreaList) {
@@ -134,6 +134,7 @@ export class ProductOverlayPositionComponent extends Component {
                 if (area) {
                     area.onSelectedArea(this.onSelectedArea.bind(this));
                     area.enablePointerEvents(!this.store.otPage.hasOverlayProductId);
+                    area.showMaskBorders(!this.store.otPage.hasOverlayProductId || this.store.otPage.editMode);
                     this.areas[areaData.index] = area;
                 }
             }
