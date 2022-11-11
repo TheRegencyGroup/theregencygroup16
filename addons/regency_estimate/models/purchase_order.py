@@ -86,6 +86,12 @@ class MyPurchaseOrderLine(models.Model):
                     break
         super(PurchaseOrderLine, po_lines_without_requisition)._compute_price_unit_and_date_planned_and_name()
 
+    def _prepare_purchase_order_line(self, product_id, product_qty, product_uom, company_id, supplier, po, values=None):
+        res = super()._prepare_purchase_order_line(product_id, product_qty, product_uom, company_id, supplier, po)
+        if values['pricesheet_vendor_price']:
+            res.update({'price_unit': values['pricesheet_vendor_price']})
+        return res
+
 
 PurchaseOrderLine._compute_price_unit_and_date_planned_and_name = MyPurchaseOrderLine._new_compute_price_unit_and_date_planned_and_name
 

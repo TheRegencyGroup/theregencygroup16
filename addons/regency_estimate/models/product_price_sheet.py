@@ -245,6 +245,7 @@ class ProductPriceSheet(models.Model):
                                                 'product_uom': p.product_id.uom_id.id,
                                                 'pricesheet_line_id': p.id,
                                                 'name': p.name,
+                                                # 'vendor_id': p.vendor_id
                                             }) for p in lines_to_order]})
         sequence = 10
         for line in order.order_line:
@@ -317,7 +318,7 @@ class ProductPriceSheetLine(models.Model):
     price = fields.Float(string='Customer Price', digits='Product Price', store=True)
     sale_estimate_line_ids = fields.Many2many('sale.estimate.line', 'product_price_sheet_line_sale_estimate_line_relation',
                                          'price_sheet_line_id', 'sale_estimate_line_id')
-    total = fields.Float(compute='_compute_total', store=True)
+    total = fields.Float()
     shipping_options = fields.Char()
     partner_id = fields.Many2one('res.partner', 'Vendor')
     duty = fields.Float(digits='Product Price')
