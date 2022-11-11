@@ -258,6 +258,12 @@ export class Area {
         this.canvas.upperCanvasEl.style.pointerEvents = state ? 'all' : 'none';
     }
 
+    showMaskBorders(state) {
+        this.mask.set('stroke', state ? '#000000' : 'transparent');
+        this.canvas.backgroundColor = 'transparent';
+        this.canvas.renderAll();
+    }
+
     destroy() {
         this.canvas.dispose();
     }
