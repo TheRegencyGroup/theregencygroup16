@@ -36,7 +36,7 @@ class ResPartner(models.Model):
     @api.depends('association_ids')
     def _compute_association_partner_ids(self):
         for partner in self:
-            partner.association_partner_ids = partner.association_ids.mapped('right_partner_id')
+            partner.association_partner_ids = partner.association_ids.mapped('partner_ids')
 
     def write(self, vals):
         prev_association_ids = self.association_ids
