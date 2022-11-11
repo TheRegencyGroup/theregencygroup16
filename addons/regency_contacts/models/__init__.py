@@ -1,1 +1,1 @@
-from . import customer_association, res_partner
+from . import const, customer_association, res_partner

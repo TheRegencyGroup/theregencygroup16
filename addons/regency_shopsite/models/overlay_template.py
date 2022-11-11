@@ -4,6 +4,8 @@ from odoo.addons.http_routing.models.ir_http import slug
 from odoo.exceptions import ValidationError, UserError
 from odoo import fields, models, api, Command, _
 
+from odoo.addons.regency_contacts.models.const import HOTEL
+
 
 class OverlayTemplate(models.Model):
     _name = 'overlay.template'
@@ -27,7 +29,7 @@ class OverlayTemplate(models.Model):
     price_item_ids = fields.One2many('product.pricelist.item', 'overlay_tmpl_id', copy=True)
     display_name = fields.Char(compute='_compute_display_name')
     hotel_ids = fields.Many2many('res.partner', 'hotel_template_rel', 'template_id', 'hotel_id', string='Hotels',
-                                 domain=[('company_type', '=', 'company'), ('contact_type', '=', 'customer')])
+                                 domain=[('entity_type', "=", HOTEL)])
 
     areas_data = fields.Json()
     overlay_position_ids = fields.Many2many('overlay.position', required=True, string='Positions', ondelete='restrict')

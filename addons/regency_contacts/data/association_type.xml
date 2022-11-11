@@ -1,54 +1,74 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <data noupdate="0">
-        <record id="owner" model="association.type">
-            <field name="left_tech_name">owner</field>
-            <field name="right_tech_name">owner_by</field>
-            <field name="left_to_right_name">Owner</field>
+        <record id="hotel_group_to_management_group" model="association.type">
+            <field name="left_tech_name">hotel_group</field>
+            <field name="right_tech_name">management_group</field>
+            <field name="left_to_right_name">Owns</field>
             <field name="right_to_left_name">Owned by</field>
         </record>
 
-        <record id="asset_management_company" model="association.type">
-            <field name="left_tech_name">asset_management_company</field>
-            <field name="right_tech_name">controlled_by_asset_management_company</field>
-            <field name="left_to_right_name">Asset Management Company</field>
-            <field name="right_to_left_name">Controlled by Asset Management Company</field>
-        </record>
-
-        <record id="hotel_management_company" model="association.type">
-            <field name="left_tech_name">hotel_management_company</field>
-            <field name="right_tech_name">controlled_by_hotel_management_company</field>
-            <field name="left_to_right_name">Hotel Management Company</field>
+        <record id="management_group_to_hotel" model="association.type">
+            <field name="left_tech_name">management_group</field>
+            <field name="right_tech_name">hotel</field>
+            <field name="left_to_right_name">Hotel Management Company for</field>
             <field name="right_to_left_name">Controlled by Hotel Management Company</field>
         </record>
 
-        <record id="brand_management_company" model="association.type">
-            <field name="left_tech_name">brand_management_company</field>
-            <field name="right_tech_name">controlled_by_brand_management_company</field>
-            <field name="left_to_right_name">Brand Management Company</field>
-            <field name="right_to_left_name">Controlled by Brand Management Company</field>
-        </record>
-
-        <record id="producer_company" model="association.type">
-            <field name="left_tech_name">producer_company</field>
-            <field name="right_tech_name">controlled_by_producer_company</field>
-            <field name="left_to_right_name">Producer Company</field>
+        <record id="rebate_company_to_hotel" model="association.type">
+            <field name="left_tech_name">rebate_company</field>
+            <field name="right_tech_name">hotel</field>
+            <field name="left_to_right_name">Producer Company for</field>
             <field name="right_to_left_name">Controlled by Producer Company</field>
         </record>
 
-        <record id="procurement_partner" model="association.type">
-            <field name="left_tech_name">procurement_partner</field>
-            <field name="right_tech_name">controlled_by_procurement_partner</field>
-            <field name="left_to_right_name">Procurement Partner</field>
+        <record id="rebate_company_to_hotel_brand" model="association.type">
+            <field name="left_tech_name">rebate_company</field>
+            <field name="right_tech_name">hotel_brand</field>
+            <field name="left_to_right_name">Producer Company for</field>
+            <field name="right_to_left_name">Controlled by Producer Company</field>
+        </record>
+
+        <record id="rebate_company_to_hotel_group" model="association.type">
+            <field name="left_tech_name">rebate_company</field>
+            <field name="right_tech_name">hotel_group</field>
+            <field name="left_to_right_name">Producer Company for</field>
+            <field name="right_to_left_name">Controlled by Producer Company</field>
+        </record>
+
+        <record id="partner_company_to_hotel_group" model="association.type">
+            <field name="left_tech_name">partner_company</field>
+            <field name="right_tech_name">hotel_group</field>
+            <field name="left_to_right_name">Procurement Partner for</field>
             <field name="right_to_left_name">Controlled by Procurement Partner</field>
         </record>
 
-        <record id="contact_person" model="association.type">
-            <field name="left_tech_name">contact_person</field>
-            <field name="right_tech_name">contact_company</field>
-            <field name="left_to_right_name">Contact Person</field>
-            <field name="right_to_left_name">Contact Company</field>
+        <record id="hotel_brand_to_hotel_group" model="association.type">
+            <field name="left_tech_name">hotel_brand</field>
+            <field name="right_tech_name">hotel_group</field>
+            <field name="left_to_right_name">Brand Management Company for</field>
+            <field name="right_to_left_name">Controlled by Brand Management Company</field>
         </record>
 
+        <record id="partner_company_to_hotel_brand" model="association.type">
+            <field name="left_tech_name">partner_company</field>
+            <field name="right_tech_name">hotel_brand</field>
+            <field name="left_to_right_name">Procurement Partner for</field>
+            <field name="right_to_left_name">Controlled by Procurement Partner</field>
+        </record>
+
+        <record id="partner_company_to_hotel" model="association.type">
+            <field name="left_tech_name">partner_company</field>
+            <field name="right_tech_name">hotel</field>
+            <field name="left_to_right_name">Procurement Partner for</field>
+            <field name="right_to_left_name">Controlled by Procurement Partner</field>
+        </record>
+
+        <record id="hotel_to_contact" model="association.type">
+            <field name="left_tech_name">hotel</field>
+            <field name="right_tech_name">contact</field>
+            <field name="left_to_right_name">Shopsite displayed for</field>
+            <field name="right_to_left_name">Shopsite shows to</field>
+        </record>
     </data>
 </odoo>
