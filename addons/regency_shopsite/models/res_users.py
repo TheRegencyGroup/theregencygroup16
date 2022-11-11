@@ -5,7 +5,7 @@ from odoo.http import request
 class ResUsers(models.Model):
     _inherit = 'res.users'
 
-    hotel_ids = fields.Many2many(related='partner_id.hotel_ids')
+    hotel_ids = fields.Many2many('res.partner', related='partner_id.hotel_ids')
 
     def _active_hotel_id(self) -> object:
         self.ensure_one()
