@@ -1,6 +1,12 @@
 /** @odoo-module **/
 
 import { Overlay } from './overlay';
+import {
+    PRODUCT_IMAGE_MODEL,
+    PRODUCT_IMAGE_FIELD,
+    AREAS_IMAGE_NON_ATTRIBUTE_VALUE_ID,
+    computeImageSrc,
+} from '../main';
 
 const { Component, onMounted, onPatched, useState, useRef } = owl;
 
@@ -17,9 +23,10 @@ class OverlayAreasPositionComponent extends Component {
         onMounted(this.onMounted);
 
         this.state = useState({
-            imageLoad: false,
-            imageSrc: null,
-            selectedAreaIndex: null,
+            editorImageLoaded: false,
+            editorImage: false,
+            editorSwitcherImageValueId: false,
+            selectedAreaIndex: false,
             activeTab: AREAS_TAB,
         });
 
@@ -27,108 +34,188 @@ class OverlayAreasPositionComponent extends Component {
         this.imageRef = useRef('image_ref');
         this.canvasContainerRef = useRef('canvas_container_ref');
 
-        this.setCurrentData();
-        this.currentMode = this.mode;
+        this.lastMode = this.mode;
+        this.lastSelectedImageIds = this.selectedImageIds;
+        this.lastAreasImageAttributeId = this.props.areasImageAttributeId;
+        this.areaList = this.props.areaList;
 
-        this.currentImageTimestamp = new Date().valueOf();
+        this.firstEditorImageLoad = false;
+        this.imageTimestamp = new Date().valueOf();
+    }
+
+    get areasImageValueList() {
+        return this.props.areasImageValueList.map(e => {
+            let selectedImageId = false;
+            if (this.props.selectedImages[e.id]) {
+               selectedImageId = this.props.selectedImages[e.id].imageId;
+            }
+            const selectedImageSrc = selectedImageId
+                ? computeImageSrc({
+                    id: selectedImageId,
+                    model: PRODUCT_IMAGE_MODEL,
+                    field: PRODUCT_IMAGE_FIELD,
+                    timestamp: this.imageTimestamp,
+                })
+                : false;
+            return {
+                ...e,
+                selectedImageSrc,
+            };
+        });
+    }
+    
+    get selectedImageIds() {
+        return Object.values(this.props.selectedImages).map(e => e.imageId).sort((a, b) => a - b);
+    }
+
+    get showEditorImageSwitcher() {
+        const selectedImages = Object.values(this.props.selectedImages);
+        return selectedImages.length && !selectedImages.find(e => e.valueId === AREAS_IMAGE_NON_ATTRIBUTE_VALUE_ID);
+    }
+
+    get editorSwitcherImageList() {
+        return Object.values(this.props.selectedImages).map(e => ({
+            ...e,
+            imageSrc: computeImageSrc({
+                id: e.imageId,
+                model: PRODUCT_IMAGE_MODEL,
+                field: PRODUCT_IMAGE_FIELD,
+                timestamp: this.imageTimestamp,
+            }),
+            name: this.props.areasImageValueList.find(f => f.id === e.valueId).name,
+        }));
     }
 
     onMounted() {
         this.setImageOnloadCallback();
-        // TODO: implement proper solution
-        this.updateCanvas(); //TEMPORARY!!!!!!!!!!!!!!!
-        let image = this.getImageForOverlay();
-        if (image) {
-            this.state.imageSrc = this.getImageSrc(image.imageId, image.imageModel);
-            this.setCurrentData();
-        }
+        this.updateEditorSwitcherImageValueId();
+        this.updateEditorImage();
     }
 
     onPatched() {
-        if (this.currentMode !== this.props.editMode) {
-            this.currentMode = this.props.editMode;
+        if (this.lastMode !== this.props.editMode) {
+            this.lastMode = this.props.editMode;
             if (this.overlay) {
                 this.overlay.selectable = !!this.props.editMode;
             }
         }
-        let colorImages = Object.values(this.props.colorImages).filter(e => !!e.imageId && !!e.imageModel);
-        let imageIds = colorImages.map(e => e.imageId);
-        let imageModel = colorImages.map(e => e.imageModel);
-        if (!imageIds.includes(this.state.currentData.imageId) ||
-            !imageModel.includes(this.state.currentData.imageModel)) {
-            this.setCurrentData();
-            if (this.overlay) {
-                this.overlay.destroy();
-                this.overlay = null;
-            }
-            this.state.imageLoad = false;
-            this.state.imageSrc = this.getImageSrc(this.state.currentData.imageId, this.state.currentData.imageModel);
-            this.updateCanvas(); //TEMPORARY!!!!!!!!!!!!!!!
+        if (this.lastAreasImageAttributeId !== this.props.areasImageAttributeId) {
+            this.lastAreasImageAttributeId = this.props.areasImageAttributeId;
+            this.state.editorSwitcherImageValueId = false;
+            this.updateEditorSwitcherImageValueId();
+            this.updateEditorImage();
+        }
+        if (JSON.stringify(this.lastSelectedImageIds) !== JSON.stringify(this.selectedImageIds)) {
+            this.lastSelectedImageIds = this.selectedImageIds;
+            this.updateEditorSwitcherImageValueId();
+            this.updateEditorImage();
+        }
+        if (!!Object.keys(this.areaList).length && !Object.keys(this.props.areaList).length) {
+            this.areaList = this.props.areaList;
         }
     }
 
-    setCurrentData(colorId) {
-        let imageId = false;
-        let imageModel = false;
-        if (colorId) {
-            imageId = this.props.colorImages[colorId]?.imageId;
-            imageModel = this.props.colorImages[colorId]?.imageModel;
+    updateEditorSwitcherImageValueId() {
+        if ((!this.state.editorSwitcherImageValueId ||
+                !this.props.selectedImages[this.state.editorSwitcherImageValueId]) &&
+            !!this.selectedImageIds.length) {
+            this.state.editorSwitcherImageValueId = Object.values(this.props.selectedImages)
+                .find(e => e.imageId === this.selectedImageIds[0])
+                .valueId;
+        } else if (this.state.editorSwitcherImageValueId && !this.selectedImageIds.length) {
+            this.state.editorSwitcherImageValueId = false;
+        }
+    }
+    
+    updateEditorImage() {
+        let data = false;
+        if (Object.values(this.props.selectedImages).length && this.state.editorSwitcherImageValueId !== false) {
+            const newImageId = this.props.selectedImages[this.state.editorSwitcherImageValueId].imageId;
+            const newProductTemplateImage = this.props.productTemplateImages.find(e => e.id === newImageId);
+            const newWidth = newProductTemplateImage.image.width;
+            const newHeight = newProductTemplateImage.image.height;
+            if (newWidth !== this.state.editorImage.width || newHeight !== this.state.editorImage.height) {
+                this.state.editorImageLoaded = false;
+            }
+            data = {
+                width: newWidth,
+                height: newHeight,
+                src: computeImageSrc({
+                    id: newImageId,
+                    model: PRODUCT_IMAGE_MODEL,
+                    field: 'image_1920',
+                    timestamp: this.imageTimestamp,
+                })
+            };
         } else {
-            let image = this.getImageForOverlay();
-            if (image) {
-                imageId = image.imageId;
-                imageModel = image.imageModel;
+            this.state.editorImageLoaded = false;
+            if (this.overlay) {
+                this.destroyOverlay();
             }
         }
-        this.state.currentData = { imageId, imageModel };
-    }
-
-    getImageForOverlay() {
-        return Object.values(this.props.colorImages).find(e => !!e.imageId && !!e.imageModel);
+        this.state.editorImage = data;
     }
 
     setImageOnloadCallback() {
-        if (!this.imageRef.el) {
-            return;
-        }
         this.imageRef.el.onload = () => {
-            if (!this.state.imageLoad) {
-                this.state.imageLoad = true;
-                // this.updateCanvas();
+            if (!this.firstEditorImageLoad) {
+                this.firstEditorImageLoad = true;
+            }
+            if (!this.state.editorImageLoaded) {
+                this.state.editorImageLoaded = true;
+                this.updateCanvas();
             }
         };
-    }
-
-    getImageSrc(id, model) {
-        let baseUrl = window.location.origin;
-        return (id && model)
-            ? `${baseUrl}/web/image?model=${model}&id=${id}&field=image_512&unique=${this.currentImageTimestamp}`
-            : false;
     }
 
     updateCanvas() {
         if (this.overlay) {
-            this.overlay.destroy();
+            this.destroyOverlay();
         }
-        // if (this.imageRef.el) {
-        // this.canvasRef.el.width = this.imageRef.el.clientWidth;
-        // this.canvasRef.el.height = this.imageRef.el.clientHeight;
-        this.canvasRef.el.width = 500;
-        this.canvasRef.el.height = 500;
+        this.canvasRef.el.width = this.imageRef.el.clientWidth;
+        this.canvasRef.el.height = this.imageRef.el.clientHeight;
 
-        this.overlay = new Overlay(this.canvasRef.el, this.props.areaList);
+        this.overlay = new Overlay(this.canvasRef.el, this.areaList);
         this.overlay.selectable = this.props.editMode;
         this.overlay.onSelectedArea = (areaIndex) => {
             this.state.selectedAreaIndex = areaIndex;
         };
-        // }
     }
 
-    // onClickChangeImage(event) {
-    //     this.trigger('change-overlay-image', {
-    //         id: this.props.overlayPositionId,
-    //     });
-    // }
+    destroyOverlay() {
+        this.overlay.destroy();
+        this.overlay = null;
+        this.areaList = {};
+    }
+
+    onClickOpenAreasTab(event) {
+        if (this.state.activeTab !== AREAS_TAB) {
+            this.state.activeTab = AREAS_TAB;
+        }
+    }
+
+    onClickOpenImagesTab(event) {
+        if (this.state.activeTab !== IMAGES_TAB) {
+            this.state.activeTab = IMAGES_TAB;
+        }
+    }
+
+    onClickChangeValueImage(areasImageAttributeValueId) {
+        this.props.openImageListModal({
+            overlayPositionId: this.props.overlayPositionId,
+            areasImageAttributeValueId,
+        });
+    }
+
+    onChangeEditorImage(valueId) {
+        this.state.editorSwitcherImageValueId = valueId;
+        this.updateEditorImage();
+    }
+
+    onChangeTextFont(areaIndex, event) {
+        let font = event.target.value;
+        this.overlay.changeTextAreaFont(areaIndex, font);
+    }
 
     onClickAddRectangleArea(event) {
         this.overlay.addRectangleArea();
@@ -142,7 +229,7 @@ class OverlayAreasPositionComponent extends Component {
         // this.overlay.addTextArea();
     }
 
-    onClickAreaListItem(areaIndex, event) {
+    onClickAreaListItem(areaIndex) {
         if (this.props.editMode) {
             this.overlay.selectArea(areaIndex);
         } else {
@@ -167,45 +254,19 @@ class OverlayAreasPositionComponent extends Component {
         let newNumberOfLines = parseInt(event.target.value);
         this.overlay.changeTextAreaNumberOfLines(areaIndex, newNumberOfLines);
     }
-
-    onChangeTextFont(areaIndex, event) {
-        let font = event.target.value;
-        this.overlay.changeTextAreaFont(areaIndex, font);
-    }
-
-    onClickOpenAreasTab(event) {
-        if (this.state.activeTab !== AREAS_TAB) {
-            this.state.activeTab = AREAS_TAB;
-        }
-    }
-
-    onClickOpenImagesTab(event) {
-        if (this.state.activeTab !== IMAGES_TAB) {
-            this.state.activeTab = IMAGES_TAB;
-        }
-    }
-
-    onClickChangeColorImage(colorId) {
-        this.props.changeOverlayImage({
-            id: this.props.overlayPositionId,
-            colorId,
-        });
-    }
-
-    onClickOverlayColorImage(colorId, event) {
-        this.setCurrentData(colorId);
-        this.state.imageSrc = this.getImageSrc(this.state.currentData.imageId, this.state.currentData.imageModel);
-    }
 }
 
 OverlayAreasPositionComponent.props = {
+    editMode: Boolean,
+    productTemplateId: Number,
     overlayPositionId: Number,
     overlayPositionName: String,
-    productTemplateId: Number,
+    areasImageAttributeId: Number,
     areaList: Object,
-    editMode: Boolean,
-    colorImages: Object,
-    changeOverlayImage: Function,
+    selectedImages: Object,
+    areasImageValueList: Array,
+    productTemplateImages: Array,
+    openImageListModal: Function,
 }
 
 OverlayAreasPositionComponent.template = 'overlay_areas_position'

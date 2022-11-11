@@ -30,7 +30,7 @@ class OverlayProduct(models.Model):
                                                 copy=False)
     overlay_product_area_image_ids = fields.One2many('overlay.product.area.image', 'overlay_product_id', readonly=True,
                                                      copy=False)
-    area_list_json = fields.Char(readonly=True)
+    area_list_data = fields.Json()
     last_updated_date = fields.Datetime(readonly=True, copy=False)
     updated_by_id = fields.Many2one('res.users', readonly=True, copy=False)
 
@@ -53,18 +53,23 @@ class OverlayProduct(models.Model):
         res = super(OverlayProduct, self).unlink()
         return res
 
+    def write(self, vals):
+        res = super(OverlayProduct, self).write(vals)
+        if 'active' in vals.keys():
+            self.product_id.active = vals['active']
+        return res
+
     def _constrains_if_has_sale(self):
         sales = self._get_sale_order_line_ids(limit=1)
         if sales:
             model_name, model_id = sales._name, sales.id
-            raise ValidationError(
-                "The operation cannot be completed: another model requires "
-                "the record being deleted. If possible, archive it instead.\n\n"
-                f"Model: {model_name}s, ID: {model_id}"
-            )  # TODO REG-151 do in _( ??
+            raise ValidationError(_("The operation cannot be completed: another model requires "
+                                    "the record being deleted. If possible, archive it instead.\n\n"
+                                    f"Model: {model_name}s, ID: {model_id}"
+                                    ))
 
     def _get_sale_order_line_ids(self, limit=None):
-        # TODO REG - 151 - try to add field sale_order_line_ids instead of this and add ondelete=restrict
+        # TODO [REF] if necessary: add field sale_order_line_ids instead and add ondelete=restrict (tech debt from REG-151)
         return self.env['sale.order.line'].search([('product_id', 'in', self.product_id.ids)], limit=limit)
 
     def _create_attribute_value(self):

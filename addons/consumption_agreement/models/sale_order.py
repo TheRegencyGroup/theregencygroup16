@@ -1,8 +1,11 @@
 from odoo import api, fields, models
 from odoo.exceptions import UserError
 
+
 class SaleOrder(models.Model):
     _inherit = 'sale.order'
+
+    consumption_agreement_id = fields.Many2one('consumption.agreement')
 
     def action_confirm(self):
         unconfirmed_agreements = self.mapped('order_line').filtered(lambda s: s.consumption_agreement_line_id
@@ -15,6 +18,7 @@ class SaleOrder(models.Model):
         self.mapped('order_line').check_overconsumption()
         self.mapped('order_line').check_fifo_consumption()
         return res
+
 
 class SaleOrderLine(models.Model):
     _inherit = 'sale.order.line'

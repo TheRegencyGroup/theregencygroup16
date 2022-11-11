@@ -48,31 +48,31 @@ class ProductAttributeValue(models.Model):
 class ProductTemplateAttributeLine(models.Model):
     _inherit = 'product.template.attribute.line'
 
-    def _compute_overlay_template_areas(self):
-        color_attribute_id = self.env.ref('regency_shopsite.color_attribute')
-        if color_attribute_id.id in self.mapped('attribute_id').ids:
-            overlay_template_ids = self.env['overlay.template'].search(
-                [('product_template_id', 'in', self.mapped('product_tmpl_id').ids)])
-            overlay_template_ids._compute_areas_json()
-
-    def _check_overlay_attribute(self):
-        overlay_attribute_id = self.env.ref('regency_shopsite.overlay_attribute')
-        if overlay_attribute_id.id in self.mapped('attribute_id').ids \
-                and not self._context.get('from_overlay_template'):
-            raise UserError('Overlay attribute line values possible to change only from overlay template')
+    def _check_overlay_template_areas_image_attribute(self):
+        for rec in self:
+            if not rec.product_tmpl_id.overlay_template_ids:
+                continue
+            overlay_template_ids = rec.product_tmpl_id.overlay_template_ids \
+                .filtered(lambda x: x.areas_image_attribute_id.id == rec.attribute_id.id)
+            # overlay_template_ids = self.env['overlay.template'].search(
+            #     [('product_template_id', '=', rec.product_tmpl_id.id),
+            #      ('areas_image_attribute_id', '=', rec.attribute_id.id)])
+            if overlay_template_ids:
+                raise UserError(f'You can not remove the "{rec.attribute_id.name}" attribute because it is used in '
+                                f'overlay templates with IDS({", ".join([str(x) for x in overlay_template_ids.ids])})')
 
     @api.model_create_multi
     def create(self, vals_list):
         res = super(ProductTemplateAttributeLine, self).create(vals_list)
-        res._compute_overlay_template_areas()
         return res
 
     def write(self, values):
-        changed_value_ids = 'value_ids' in values
         res = super(ProductTemplateAttributeLine, self).write(values)
-        if changed_value_ids:
-            self._compute_overlay_template_areas()
         return res
+
+    def unlink(self):
+        self._check_overlay_template_areas_image_attribute()
+        return super(ProductTemplateAttributeLine, self).unlink()
 
 
 class ProductTemplateAttributeValue(models.Model):
@@ -89,8 +89,24 @@ class ProductTemplateAttributeValue(models.Model):
                 raise UserError(f'The attribute value "{rec.product_attribute_value_id.name}" is used in one of the '
                                 f'related overlay templates')
 
+    def _check_overlay_template_areas_image_attribute_values(self):
+        for rec in self:
+            if not rec.product_tmpl_id.overlay_template_ids:
+                continue
+            overlay_template_ids = rec.product_tmpl_id.overlay_template_ids \
+                .filtered(lambda x: x.areas_image_attribute_id.id == rec.attribute_id.id and
+                                    rec.product_attribute_value_id.id in x.areas_image_attribute_selected_value_ids.ids)
+            # overlay_template_ids = self.env['overlay.template'].search(
+            #     [('product_template_id', '=', rec.product_tmpl_id.id),
+            #      ('areas_image_attribute_id', '=', rec.attribute_id.id),
+            #      ('areas_image_attribute_selected_value_ids', 'in', rec.product_attribute_value_id.id)])
+            if overlay_template_ids:
+                raise UserError(f'You can not remove "{rec.product_attribute_value_id.name}" value because it is used '
+                                f'in overlay templates with IDS({", ".join([str(x) for x in overlay_template_ids.ids])})')
+
     def unlink(self):
         self._check_attribute_value_in_overlay_template()
+        self._check_overlay_template_areas_image_attribute_values()
         return super(ProductTemplateAttributeValue, self).unlink()
 
     def _get_combination_name(self):

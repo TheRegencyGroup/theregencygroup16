@@ -21,13 +21,14 @@ if (overlayTemplatePageData) {
         }
 
         get overlayPositions() {
-            return this.overlayTemplateAreasData?.overlayPositions || {};
+            return this.overlayPositionsData || {};
         }
 
-        get selectedColorValueId() {
-            const selectedAttributeValues = this.selectedAttributeValues;
-            const colorAttributeId = this.colorAttributeId;
-            return selectedAttributeValues[colorAttributeId].valueId;
+        get selectedAreasImageAttributeValueId() {
+            if (this.areasImageAttributeId) {
+                return this.selectedAttributeValues[this.areasImageAttributeId].valueId;
+            }
+            return false;
         }
 
         get hasOverlayProductId() {

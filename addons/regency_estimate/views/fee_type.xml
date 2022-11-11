@@ -1,0 +1,46 @@
+<?xml version="1.0"?>
+<odoo>
+
+    <record id="fee_type_list_view" model="ir.ui.view">
+        <field name="name">fee.type.tree</field>
+        <field name="model">fee.type</field>
+        <field name="arch" type="xml">
+            <tree string="Fee Types" editable="bottom">
+                <field name="name"/>
+                <field name="product_id"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="fee_type_form" model="ir.ui.view">
+        <field name="name">fee.type.form</field>
+        <field name="model">fee.type</field>
+        <field name="arch" type="xml">
+            <form string="Fee Type">
+                <sheet>
+                    <div class="oe_title">
+                        <label for="name"/>
+                        <h1>
+                            <field name="name"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="product_id"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_fee_type" model="ir.actions.act_window">
+        <field name="name">Fee Type</field>
+        <field name="res_model">fee.type</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <menuitem id="menu_fee_type" name="Fee type" parent="sale.menu_sale_config"
+              action="regency_estimate.action_fee_type" sequence="20"/>
+
+</odoo>

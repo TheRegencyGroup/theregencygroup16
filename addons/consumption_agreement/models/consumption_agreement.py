@@ -1,4 +1,5 @@
 from odoo import api, fields, models, _, Command
+from odoo.exceptions import UserError
 
 
 class ConsumptionAgreement(models.Model):
@@ -21,6 +22,15 @@ class ConsumptionAgreement(models.Model):
                              max_width=1024, max_height=1024)
     signed_by = fields.Char('Signed By', help='Name of the person that signed the Consumption Agreement.', copy=False)
     signed_on = fields.Datetime('Signed On', help='Date of the signature.', copy=False)
+    sale_order_ids = fields.One2many('sale.order', 'consumption_agreement_id')
+    sale_order_count = fields.Integer(compute='_compute_order_count')
+    purchase_order_ids = fields.One2many('purchase.order', 'consumption_agreement_id')
+    purchase_order_count = fields.Integer(compute='_compute_order_count')
+
+    def _compute_order_count(self):
+        for rec in self:
+            rec.sale_order_count = len(rec.sale_order_ids)
+            rec.purchase_order_count = len(rec.purchase_order_ids)
 
     def _compute_access_url(self):
         super(ConsumptionAgreement, self)._compute_access_url()
@@ -32,11 +42,41 @@ class ConsumptionAgreement(models.Model):
             rec.state = 'confirmed'
             if not rec.signed_date:
                 rec.signed_date = fields.Date.today()
+            rec.update_product_route_ids()
+
+    def update_product_route_ids(self):
+        products = self.line_ids.mapped('product_id')
+        cross_docks = self.env['stock.warehouse'].search([]).mapped('crossdock_route_id')
+        dropship_route = self.env.ref('stock_dropshipping.route_drop_shipping')
+        mto = self.env.ref('stock.route_warehouse0_mto')
+        routes_to_remove = cross_docks + dropship_route + mto
+        mto_mts = self.env.ref('stock_mts_mto_rule.route_mto_mts')
+        buy = self.env.ref('purchase_stock.route_warehouse0_buy')
+        products.write({'route_ids': [Command.link(mto_mts.id)] + [Command.unlink(r.id) for r in routes_to_remove]})
+
+    def open_sale_orders(self):
+        action = self.env["ir.actions.act_window"]._for_xml_id("sale.action_orders")
+        action['context'] = {'default_consumption_agreement_id': self.id}
+        action['domain'] = [('id', 'in', self.sale_order_ids.ids)]
+        if len(self.sale_order_ids) == 1:
+            action['views'] = [(self.env.ref('sale.view_order_form').id, 'form')]
+            action['res_id'] = self.sale_order_ids.id
+        return action
+
+    def open_purchase_orders(self):
+        action = self.env["ir.actions.act_window"]._for_xml_id("purchase.purchase_rfq")
+        action['context'] = {'default_consumption_agreement_id': self.id}
+        action['domain'] = [('id', 'in', self.purchase_order_ids.ids)]
+        if len(self.purchase_order_ids) == 1:
+            action['views'] = [(self.env.ref('purchase.purchase_order_form').id, 'form')]
+            action['res_id'] = self.purchase_order_ids.id
+        return action
 
     def create_sale_order(self, selected_line_ids):
         self.ensure_one()
         order = self.env['sale.order'].create({'access_token': self.access_token,
                                        'partner_id': self.partner_id.id,
+                                       'consumption_agreement_id': self.id,
                                        'order_line': [
                                             Command.create({
                                                 'product_id': p.product_id.id,
@@ -46,6 +86,22 @@ class ConsumptionAgreement(models.Model):
                                                 'consumption_agreement_line_id': p.id
                                             }) for p in self.line_ids.filtered(lambda l: l.id in selected_line_ids)]})
         return order
+
+    def generate_purchase_order(self):
+        self.ensure_one()
+        for line in self.line_ids:
+            seller = line.product_id._select_seller(quantity=line.qty_allowed)
+            if not line.vendor_id and not seller:
+                raise UserError(_('Please set a vendor on product %s.') % line.product_id.display_name)
+            self.env['purchase.order'].create({
+                'partner_id': line.vendor_id.id if line.vendor_id else seller.partner_id.id,
+                'consumption_agreement_id': self.id,
+                'order_line': [Command.create({
+                    'product_id': line.product_id.id,
+                    'product_qty': line.qty_allowed,
+                    'price_unit': line.price_unit,
+                })]
+            })
 
     @api.model
     def create(self, vals):
@@ -90,6 +146,7 @@ class ConsumptionAggreementLine(models.Model):
     qty_consumed = fields.Integer('Ordered Qty', compute="_compute_qty_consumed", store=True)
     qty_consumed_confirmed = fields.Integer('Confirmed Ordered Qty', compute="_compute_qty_consumed", store=True)
     qty_remaining = fields.Integer('Remaining Qty', compute="_compute_qty_consumed", store=True)
+    qty_available = fields.Float('Product On Hand Quantity', related='product_id.qty_available')
 
     price_unit = fields.Float(string='Unit Price', digits='Product Price')
     currency_id = fields.Many2one(related='agreement_id.currency_id', store=True)
@@ -97,6 +154,7 @@ class ConsumptionAggreementLine(models.Model):
     sale_order_line_ids = fields.One2many('sale.order.line', 'consumption_agreement_line_id')
     partner_id = fields.Many2one(related='agreement_id.partner_id', domain=[('contact_type', '=', 'customer')], store=True)
     allowed_partner_ids = fields.Many2many('res.partner', domain=[('contact_type', '=', 'customer')], string="Allowed Customers")
+    vendor_id = fields.Many2one('res.partner')
 
     @api.depends('qty_allowed', 'state', 'sale_order_line_ids', 'sale_order_line_ids.product_uom_qty')
     def _compute_qty_consumed(self):
@@ -118,4 +176,3 @@ class ConsumptionAggreementLine(models.Model):
             name = '%s - %s' % (rec.agreement_id.name, rec.product_id.name)
             result.append((rec.id, name))
         return result
-

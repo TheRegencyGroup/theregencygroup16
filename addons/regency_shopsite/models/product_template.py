@@ -23,39 +23,9 @@ class ProductTemplate(models.Model):
         for rec in self:
             rec.overlay_template_count = len(rec.overlay_template_ids)
 
-    def _check_image_in_overlay_template(self):
-        if self.env['overlay.template'].search([('product_template_id', 'in', self.ids),
-                                                ('use_product_template_image', '=', True)]):
-            raise UserError('The image is used in the model "overlay.template"')
-
-    def _compute_overlay_template_areas(self):
-        overlay_template_ids = self.env['overlay.template'].search([('product_template_id', 'in', self.ids)])
-        overlay_template_ids._compute_areas_json()
-
     def write(self, vals):
-        if 'image_1920' in vals:
-            self._check_image_in_overlay_template()
-        prev_attribute_line_ids = self.attribute_line_ids
         res = super(ProductTemplate, self).write(vals)
-        if any(x in ['image_1920', 'product_template_image_ids'] for x in vals):
-            self._compute_overlay_template_areas()
         return res
-
-    def _get_overlay_templates(self):
-        self.ensure_one()
-        overlay_attribute_id = self.env.ref('regency_shopsite.overlay_attribute').id
-        overlay_template_ids = self.attribute_line_ids.filtered(
-            lambda x: x.attribute_id.id == overlay_attribute_id).value_ids.mapped('overlay_template_id')
-        data = []
-        for template_id in overlay_template_ids:
-            ptav = template_id._get_product_template_attribute_value_id()
-            data.append({
-                'overlayAreasData': template_id.areas_json,
-                'overlayAttributeValueId': ptav.id if ptav else 0,
-            })
-        if data:
-            return Markup(json.dumps(data))
-        return False
 
     def open_pricelist_rules(self):
         """
