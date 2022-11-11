@@ -5,16 +5,21 @@ import { standardFieldProps } from "@web/views/fields/standard_field_props";
 import { OverlayAreasPositionComponent } from "./overlay_template_areas_position";
 import { useBus } from "@web/core/utils/hooks";
 import legacyEnv from "web.env";
+import {
+    PRODUCT_IMAGE_FIELD,
+    PRODUCT_IMAGE_MODEL,
+    AREAS_IMAGE_NON_ATTRIBUTE_VALUE_ID,
+    computeImageSrc,
+} from "../main";
 
 const { Component, onMounted, onPatched, useRef, useState, useEnv } = owl;
 
 const OVERLAY_AREAS_WIDGET_NAME = 'overlay_areas';
-const OVERLAY_AREAS_FIELD = 'areas_json';
 const PRODUCT_TEMPLATE_ID_FIELD = 'product_template_id';
+const PRODUCT_TEMPLATE_IMAGE_IDS_FIELD = 'product_template_image_ids';
 const OVERLAY_POSITION_IDS_FIELD = 'overlay_position_ids';
-const OVERLAY_ATTRIBUTE_LINE_IDS_FIELD = 'overlay_attribute_line_ids';
-const ATTRIBUTE_VALUE_IDS = 'value_ids';
-const COLOR_ATTRIBUTE_NAME = 'Color';
+const AREAS_IMAGE_ATTRIBUTE_ID_FIELD = 'areas_image_attribute_id';
+const AREAS_IMAGE_ATTRIBUTE_VALUE_LIST_FIELD = 'areas_image_attribute_value_list';
 
 class OverlayAreasWidget extends Component {
     setup() {
@@ -22,7 +27,7 @@ class OverlayAreasWidget extends Component {
         onMounted(this.onMounted);
 
         this.state = useState({});
-        this.imageListPopupRef = useRef('image_list_popup');
+        this.imageListPopupRef = useRef('image_list_modal');
 
         this.env = useEnv();
         useBus(this.env.bus, "RELATIONAL_MODEL:WILL_SAVE_URGENTLY", this.commitChanges.bind(this));
@@ -32,195 +37,265 @@ class OverlayAreasWidget extends Component {
         this.init();
     }
 
+    init() {
+        this.state.overlayPositions =  this.value || {};
+        this.state.productTemplateImages = [];
+        this.state.productTemplateImagesLoaded = false;
+        this.state.imagesListModalData = false;
+
+        this.lastRecordId = this.props.record.__bm_handle__;
+        this.lastProductTemplateId = this.productTemplateId;
+        this.lastOverlayPositionIds = [...this.overlayPositionIds];
+        this.lastAreasImageAttributeId = this.areasImageAttributeId;
+        this.lastAreasImageAttributeValueList = this.areasImageAttributeValueList.map(e => e.id);
+
+        this.downloadProductTemplateImages();
+    }
+
+    get editMode() {
+        return this.env.model.root.isDirty;
+    }
+
+    get value() {
+        return this.props.value || {};
+    }
+
+    get productTemplateId() {
+        const productTemplateIdField = this.props.record.data[PRODUCT_TEMPLATE_ID_FIELD];
+        return productTemplateIdField && productTemplateIdField.length
+            ? productTemplateIdField[0]
+            : false;
+    }
+
+    get productTemplateImageIds() {
+        return this.props.record.data[PRODUCT_TEMPLATE_IMAGE_IDS_FIELD].resIds;
+    }
+
+    get overlayPositionIds() {
+        return this.props.record.data[OVERLAY_POSITION_IDS_FIELD].resIds.sort((a, b) => a - b);
+    }
+
+    get areasImageAttributeId() {
+        const areasImageAttributeIdField = this.props.record.data[AREAS_IMAGE_ATTRIBUTE_ID_FIELD];
+        return areasImageAttributeIdField && areasImageAttributeIdField.length
+            ? areasImageAttributeIdField[0]
+            : false;
+    }
+
+    get areasImageAttributeValueList() {
+        return this.props.record.data[AREAS_IMAGE_ATTRIBUTE_VALUE_LIST_FIELD] || [{
+            id: AREAS_IMAGE_NON_ATTRIBUTE_VALUE_ID,
+            name: 'FOR ALL ATTRIBUTES',
+        }];
+    }
+
+    get filteredProductImageList() {
+        let selectedImageIds = [];
+        for (let position of Object.values(this.state.overlayPositions)) {
+            if (!!Object.values(position.selectedImages).length) {
+                selectedImageIds = [
+                    ...selectedImageIds,
+                    ...Object.values(position.selectedImages).map(e => e.imageId),
+                ];
+            }
+        }
+        const positionId = this.state.imagesListModalData.overlayPositionId;
+        const valueId = this.state.imagesListModalData.areasImageAttributeValueId;
+        const positionSelectedImageIds = Object.values(this.state.overlayPositions[positionId].selectedImages)
+            .map(e => e.imageId);
+        const positionSelectedImageValueIds = Object.values(this.state.overlayPositions[positionId].selectedImages)
+            .map(e => e.valueId);
+        let list = this.state.productTemplateImages.filter(e => !selectedImageIds.includes(e.id));
+        for (let item of list) {
+            let firstSelectedImage = false;
+            if (positionSelectedImageIds.length &&
+                !(positionSelectedImageValueIds.length === 1 && positionSelectedImageValueIds[0] === valueId)) {
+                firstSelectedImage = this.state.productTemplateImages.find(e => e.id === positionSelectedImageIds[0]).image;
+            }
+            item.isAvailable = firstSelectedImage
+                ? item.image.width === firstSelectedImage.width && item.image.height === firstSelectedImage.height
+                : true;
+        }
+        return list;
+    }
+
+    get overlayAreasPositions() {
+        return Object.values(this.__owl__.children)
+            .filter(e => e.component.constructor.name === 'OverlayAreasPositionComponent')
+            .map(e => e.component);
+    }
+
     onMounted() {
-        let popup = this.imageListPopupRef.el;
-        this.imageListPopupRef.el.remove();
-        document.body.appendChild(popup);
+
     }
 
     onPatched() {
-        if (this.currentRecordId !== this.props.record.__bm_handle__) {
+        if (this.lastRecordId !== this.props.record.__bm_handle__) {
             this.init();
         }
-    }
-
-    init() {
-        this.valueObj = JSON.parse(this.props.record.data[OVERLAY_AREAS_FIELD]);
-
-        this.state.productTemplateId = this.valueObj.productTemplateId;
-        this.state.productImageList = this.valueObj.productImageList || [];
-        this.state.overlayPositions = this.valueObj.overlayPositions || {};
-        this.state.showImageListForOverlayPosId = false;
-
-        this.productImageUnique = new Date().valueOf();
-
-        this.currentRecordId = this.props.record.__bm_handle__;
-        this.currentProductTemplateId = this.getProductTemplateId();
-        this.currentOverlayPositionIds = this.getOverlayPositionIds();
-        this.currentOverlayColorAttributeValueIds = this.getOverlayAttributeColorValueIds();
     }
 
     onChangeField(data) {
         const changedFields = Object.keys(data.changes || data);
         if (changedFields.includes(PRODUCT_TEMPLATE_ID_FIELD)) {
-            this.checkChangeProductTemplateId();
-        }
-        if (changedFields.includes(OVERLAY_POSITION_IDS_FIELD)) {
-            this.checkChangeOverlayPositionIds();
-        }
-        if (changedFields.includes(OVERLAY_ATTRIBUTE_LINE_IDS_FIELD)) {
-            this.checkChangeOverlayAttributeColorValueIds();
+            this.changeProductTemplateId();
+        } else if (changedFields.includes(OVERLAY_POSITION_IDS_FIELD)) {
+            this.changeOverlayPositionIds();
+        } else if (changedFields.filter(e =>
+            [AREAS_IMAGE_ATTRIBUTE_ID_FIELD, AREAS_IMAGE_ATTRIBUTE_VALUE_LIST_FIELD].includes(e))) {
+            this.changeAreasImageAttributeValueList();
         }
     }
 
-    getProductTemplateId() {
-        const productTemplateIdField = this.props.record.data[PRODUCT_TEMPLATE_ID_FIELD];
-        return productTemplateIdField && productTemplateIdField.length
-            ? productTemplateIdField[0]
-            : null;
-    }
-
-    getOverlayPositionIds() {
-        const overlayPositionIdsField = this.props.record.data[OVERLAY_POSITION_IDS_FIELD];
-        return overlayPositionIdsField && overlayPositionIdsField.records.length
-            ? overlayPositionIdsField.records.map(e => e.data.id)
-            : [];
-    }
-
-    getOverlayAttributeColorValueIds() {
-        const overlayAttributeLineIdsField = this.props.record.data[OVERLAY_ATTRIBUTE_LINE_IDS_FIELD];
-        if (!overlayAttributeLineIdsField) {
-            return [];
-        }
-        const overlayColorAttributeLineIdField = overlayAttributeLineIdsField.records
-            .find(e => {
-                const attributeIdField = e.data.attribute_id;
-                if (!attributeIdField.length) {
-                    return false;
-                }
-                return attributeIdField[1] === COLOR_ATTRIBUTE_NAME;
+    changeProductTemplateId() {
+        if (this.lastProductTemplateId !== this.productTemplateId) {
+            this.lastProductTemplateId = this.productTemplateId;
+            Object.values(this.state.overlayPositions).forEach(e => {
+                e.areaList = {};
+                e.selectedImages = {};
             });
-        if (!overlayColorAttributeLineIdField) {
-            return [];
+            this.downloadProductTemplateImages();
         }
-        const overlayColorAttributeValueIdsField = overlayColorAttributeLineIdField[ATTRIBUTE_VALUE_IDS];
-        return overlayColorAttributeValueIdsField && overlayColorAttributeValueIdsField.records.length
-            ? overlayColorAttributeValueIdsField.records.map(e => e.data.id)
-            : [];
     }
 
-    checkChangeProductTemplateId() {
-        const productTemplateId = this.getProductTemplateId();
-        if (this.currentProductTemplateId !== productTemplateId) {
-            this.currentProductTemplateId = productTemplateId;
+    changeOverlayPositionIds() {
+        if (JSON.stringify(this.lastOverlayPositionIds) !== JSON.stringify(this.overlayPositionIds)) {
+            this.lastOverlayPositionIds = [...this.overlayPositionIds];
 
-            this.valueObj = JSON.parse(this.props.record.data[OVERLAY_AREAS_FIELD]);
-            this.state.productTemplateId = this.valueObj.productTemplateId;
-            this.state.productImageList = this.valueObj.productImageList;
-            this.productImageUnique = new Date().valueOf();
-            for (let overlayPosition of Object.values(this.state.overlayPositions)) {
-                overlayPosition.areaList = {};
-                for (let colorImage of Object.values(overlayPosition.colorImages)) {
-                    colorImage.imageId = false;
-                    colorImage.imageModel = false;
+            let positionRecords = this.props.record.data[OVERLAY_POSITION_IDS_FIELD].records;
+            let existingPositionIds = [];
+            for (let position of Object.values(this.state.overlayPositions)) {
+                if (!this.overlayPositionIds.includes(position.id)) {
+                    delete this.state.overlayPositions[position.id];
+                } else {
+                    existingPositionIds.push(position.id);
+                }
+            }
+            let newOverlayPositionIds = this.overlayPositionIds.filter(e => !existingPositionIds.includes(e));
+            for (let positionId of newOverlayPositionIds) {
+                let record = positionRecords.find(e => e.resId === positionId);
+                this.state.overlayPositions[positionId] = {
+                    id: positionId,
+                    name: record.data.display_name,
+                    areaList: {},
+                    selectedImages: {},
                 }
             }
         }
     }
 
-    checkChangeOverlayPositionIds() {
-        const overlayPositionIds = this.getOverlayPositionIds();
-        if (JSON.stringify(this.currentOverlayPositionIds) !== JSON.stringify(overlayPositionIds)) {
-            this.currentOverlayPositionIds = overlayPositionIds;
-
-            this.valueObj = JSON.parse(this.props.record.data[OVERLAY_AREAS_FIELD]);
-            for (let overlayPosition of Object.values(this.valueObj.overlayPositions)) {
-                if (!this.state.overlayPositions[overlayPosition.id]) {
-                    this.state.overlayPositions[overlayPosition.id] = overlayPosition;
-                }
-            }
-            let removedOverlayPositionIds = Object.keys(this.state.overlayPositions)
-                .filter(e => !Object.keys(this.valueObj.overlayPositions).includes(e));
-            for (let overlayPositionId of removedOverlayPositionIds) {
-                delete this.state.overlayPositions[overlayPositionId];
-            }
-        }
-    }
-
-    checkChangeOverlayAttributeColorValueIds() {
-        const overlayColorAttributeValueIds = this.getOverlayAttributeColorValueIds();
-        if (JSON.stringify(this.currentOverlayColorAttributeValueIds) !== JSON.stringify(overlayColorAttributeValueIds)) {
-            this.currentOverlayColorAttributeValueIds = overlayColorAttributeValueIds;
-
-            this.valueObj = JSON.parse(this.props.record.data[OVERLAY_AREAS_FIELD]);
-            for (let overlayPosition of Object.values(this.valueObj.overlayPositions)) {
-                for (let colorImage of Object.values(overlayPosition.colorImages)) {
-                    if (!this.state.overlayPositions[overlayPosition.id].colorImages[colorImage.id]) {
-                        this.state.overlayPositions[overlayPosition.id].colorImages[colorImage.id] = colorImage;
+    changeAreasImageAttributeValueList() {
+        const lastValueIds = this.lastAreasImageAttributeValueList.map(e => e.id).sort((a, b) => a - b);
+        const currentValueIds = this.areasImageAttributeValueList.map(e => e.id).sort((a, b) => a - b);
+        if (this.lastAreasImageAttributeId !== this.areasImageAttributeId ||
+           JSON.stringify(lastValueIds) !== JSON.stringify(currentValueIds)) {
+            for (let position of Object.values(this.state.overlayPositions)) {
+                let valueIds = this.areasImageAttributeValueList.map(e => e.id);
+                for (let selectedImage of Object.values(position.selectedImages)) {
+                    if (this.lastAreasImageAttributeId !== this.areasImageAttributeId) {
+                        if (valueIds.length) {
+                            let newValueId = valueIds.shift();
+                            position.selectedImages[newValueId] = {
+                                imageId: selectedImage.imageId,
+                                valueId: newValueId,
+                            };
+                        }
+                        delete position.selectedImages[selectedImage.valueId];
+                    } else {
+                        if (!valueIds.includes(selectedImage.valueId)) {
+                            delete position.selectedImages[selectedImage.valueId];
+                        }
                     }
                 }
-                let removedColorIds = Object.keys(this.state.overlayPositions[overlayPosition.id].colorImages)
-                    .filter(e => !Object.keys(overlayPosition.colorImages).includes(e));
-                for (let colorId of removedColorIds) {
-                    delete this.state.overlayPositions[overlayPosition.id].colorImages[colorId];
-                }
             }
+            this.lastAreasImageAttributeId = this.areasImageAttributeId;
+            this.lastAreasImageAttributeValueList = this.areasImageAttributeValueList.map(e => e.id);
         }
     }
 
-    get editMode() {
-        // return this.props.record.mode === 'edit';
-        return this.env.model.root.isDirty;
-    }
-
-    get filteredProductImageList() {
-        let selectedImages = Object.values(this.state.overlayPositions)
-            .map(e => Object.values(e.colorImages))
-            .flat()
-            .filter(e => !!e.imageId && !!e.imageModel);
-        if (!selectedImages) {
-            return this.state.productImageList;
+    downloadProductTemplateImages() {
+        let promises = [];
+        for (let imageId of this.productTemplateImageIds) {
+            promises.push(new Promise(async resolve => {
+                const imageUrl = computeImageSrc({
+                    id: imageId,
+                    model: PRODUCT_IMAGE_MODEL,
+                    field: 'image_1920',
+                });
+                const image = new Image();
+                const res = await fetch(imageUrl);
+                const blob = await res.blob();
+                image.src = await new Promise(resolve => {
+                    const reader = new FileReader();
+                    reader.onloadend = () => resolve(reader.result);
+                    reader.readAsDataURL(blob);
+                });
+                image.onload = () => {
+                    resolve({
+                        id: imageId,
+                        image,
+                    });
+                };
+            }));
         }
-        return this.state.productImageList.filter(e => {
-            for (let image of selectedImages) {
-                if (e.id === image.imageId && e.model === image.imageModel) {
-                    return false;
-                }
-            }
-            return true;
-        })
+        Promise.all(promises).then((data) => {
+            this.state.productTemplateImages = data;
+            this.state.productTemplateImagesLoaded = true;
+        });
     }
 
-    getProductImageSrc(id, model) {
-        let baseUrl = window.location.origin;
-        return `${baseUrl}/web/image?model=${model}&id=${id}&field=image_512&unique=${this.productImageUnique}`;
+    openImageListModal({ overlayPositionId, areasImageAttributeValueId, }) {
+        this.state.imagesListModalData = { overlayPositionId, areasImageAttributeValueId };
     }
 
-    changeOverlayAreasImage({ id, colorId, }) {
-        this.state.showImageListForOverlayPosId = { id, colorId };
+    closeImageListModal() {
+        this.state.imagesListModalData = false;
+    }
+
+    onClickImage(imageId) {
+        if (imageId !== false && !this.state.productTemplateImages.find(e => e.id === imageId)?.isAvailable) {
+            return;
+        }
+        let overlayPositionId = this.state.imagesListModalData.overlayPositionId;
+        let valueId = this.state.imagesListModalData.areasImageAttributeValueId;
+        if (overlayPositionId === undefined || !valueId === undefined) {
+            return;
+        }
+        const selectedImages = this.state.overlayPositions[overlayPositionId].selectedImages;
+        if (imageId) {
+            selectedImages[valueId] = { valueId, imageId };
+        } else {
+            delete selectedImages[valueId];
+        }
+        this.closeImageListModal();
+    }
+
+    onClickCloseImageListModal(event) {
+        this.closeImageListModal();
+    }
+
+    onClickToEditMode(event) {
+        this.env.model.__bm__.setDirtyForce(this.props.record.__bm_handle__);
+        this.env.model.root.update();
     }
 
     async commitChanges() {
         if (!this.editMode) {
             return;
         }
-        let val = {
-            productTemplateId: this.state.productTemplateId || false,
-            productImageList: this.state.productImageList,
-            overlayPositions: {},
+        for (let position of this.overlayAreasPositions) {
+            if (!!position.state.editorImage && !position.firstEditorImageLoad) {
+                this.props.update({
+                    errors: ['Wait for images to load!']
+                });
+                return;
+            }
         }
-        let OverlayAreasPositionComponents = Object.values(this.__owl__.children)
-            .filter(e => e.component.constructor.name === 'OverlayAreasPositionComponent')
-            .map(e => e.component);
-        for (let component of OverlayAreasPositionComponents) {
-            let overlayPositionId = component.props.overlayPositionId;
-            // if (!component.state.imageLoad) {
-            //     val.overlayPositions[overlayPositionId] = this.valueObj.overlayPositions[overlayPositionId];
-            //     continue;
-            // }
+        let value = {}
+        for (let position of this.overlayAreasPositions) {
             let areaList = {};
-            if (component.overlay) {
-                for (let area of Object.values(component.overlay.areaList)) {
+            if (position.overlay) {
+                for (let area of Object.values(position.overlay.areaList)) {
                     let objectBoundingRect = area.object.getBoundingRect();
                     areaList[area.index] = {
                         index: area.index,
@@ -237,57 +312,31 @@ class OverlayAreasWidget extends Component {
                     }
                 }
             }
-            let name = component.props.overlayPositionName;
-            let imageId = component.props.imageId;
-            let imageModel = component.props.imageModel;
-            let canvasSize = false;
-            // if (component.overlay?.canvas) {
-            //     canvasSize = {
-            //         width: component.overlay.canvas.width,
-            //         height: component.overlay.canvas.height,
-            //     };
-            // }
-            canvasSize = {
-                width: 500,
-                height: 500,
-            };
-            let colorImages = component.props.colorImages;
-            val.overlayPositions[overlayPositionId] = {
-                id: overlayPositionId,
-                name,
-                imageId,
-                imageModel,
+            value[position.props.overlayPositionId] = {
+                id: position.props.overlayPositionId,
+                name: position.props.overlayPositionName,
                 areaList,
-                canvasSize,
-                colorImages,
+                selectedImages: position.props.selectedImages,
+                canvasSize: {
+                    width: position.state.editorImage.width,
+                    height: position.state.editorImage.height,
+                },
             };
         }
-        this.props.update(JSON.stringify(val));
-    }
-
-    closeImageListPopup() {
-        this.state.showImageListForOverlayPosId = false;
-    }
-
-    onClickImage(id, model, event) {
-        let overlayPositionId = this.state.showImageListForOverlayPosId.id;
-        let colorId = this.state.showImageListForOverlayPosId.colorId;
-        if (!overlayPositionId || !colorId) {
+        let errors = [];
+        const positionSelectedImages = Object.values(value).map(e => !!Object.keys(e.selectedImages).length);
+        if (positionSelectedImages.some(e => !e)) {
+            errors.push('All positions must have at least one selected image!');
+        }
+        const positionAreas = Object.values(value).map(e => !!Object.keys(e.areaList).length);
+        if (positionAreas.every(e => !e)) {
+            errors.push('At least one position must have areas!');
+        }
+        if (errors.length) {
+            this.props.update({ errors });
             return;
         }
-        this.state.overlayPositions[overlayPositionId].colorImages[colorId].imageId = id;
-        this.state.overlayPositions[overlayPositionId].colorImages[colorId].imageModel = model;
-        this.state.overlayPositions[overlayPositionId].areaList = {};
-        this.closeImageListPopup();
-    }
-
-    onClickCloseImageListPopup(event) {
-        this.closeImageListPopup();
-    }
-
-    onClickToEditMode(event) {
-        this.env.model.__bm__.setDirtyForce(this.props.record.__bm_handle__);
-        this.env.model.root.update();
+        this.props.update(value);
     }
 }
 
@@ -295,7 +344,7 @@ OverlayAreasWidget.props = {
     ...standardFieldProps,
 };
 
-OverlayAreasWidget.supportedTypes = ["char"];
+OverlayAreasWidget.supportedTypes = ["json"];
 OverlayAreasWidget.template = "overlay_areas";
 OverlayAreasWidget.components = {
     OverlayAreasPositionComponent,
