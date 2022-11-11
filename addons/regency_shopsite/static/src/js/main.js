@@ -4,6 +4,7 @@ export const RECTANGLE_AREA_TYPE = 'rectangle';
 export const ELLIPSE_AREA_TYPE = 'ellipse';
 export const TEXT_AREA_TYPE = 'text';
 export const PRODUCT_IMAGE_MODEL = 'product.image';
+export const OVERLAY_PRODUCT_AREA_IMAGE = 'overlay.product.area.image';
 export const PRODUCT_IMAGE_FIELD = 'image_512';
 export const AREAS_IMAGE_NON_ATTRIBUTE_VALUE_ID = 0;
 

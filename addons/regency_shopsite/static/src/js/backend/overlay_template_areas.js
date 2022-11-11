@@ -47,7 +47,7 @@ class OverlayAreasWidget extends Component {
         this.lastProductTemplateId = this.productTemplateId;
         this.lastOverlayPositionIds = [...this.overlayPositionIds];
         this.lastAreasImageAttributeId = this.areasImageAttributeId;
-        this.lastAreasImageAttributeValueList = [...this.areasImageAttributeValueList];
+        this.lastAreasImageAttributeValueList = this.areasImageAttributeValueList.map(e => e.id);
 
         this.downloadProductTemplateImages();
     }
@@ -189,22 +189,27 @@ class OverlayAreasWidget extends Component {
         const currentValueIds = this.areasImageAttributeValueList.map(e => e.id).sort((a, b) => a - b);
         if (this.lastAreasImageAttributeId !== this.areasImageAttributeId ||
            JSON.stringify(lastValueIds) !== JSON.stringify(currentValueIds)) {
-            this.lastAreasImageAttributeId = this.areasImageAttributeId;
-            this.lastAreasImageAttributeValueList = [...this.areasImageAttributeValueList];
-
             for (let position of Object.values(this.state.overlayPositions)) {
                 let valueIds = this.areasImageAttributeValueList.map(e => e.id);
                 for (let selectedImage of Object.values(position.selectedImages)) {
-                    if (valueIds.length) {
-                        let newValueId = valueIds.shift();
-                        position.selectedImages[newValueId] = {
-                            imageId: selectedImage.imageId,
-                            valueId: newValueId,
-                        };
+                    if (this.lastAreasImageAttributeId !== this.areasImageAttributeId) {
+                        if (valueIds.length) {
+                            let newValueId = valueIds.shift();
+                            position.selectedImages[newValueId] = {
+                                imageId: selectedImage.imageId,
+                                valueId: newValueId,
+                            };
+                        }
+                        delete position.selectedImages[selectedImage.valueId];
+                    } else {
+                        if (!valueIds.includes(selectedImage.valueId)) {
+                            delete position.selectedImages[selectedImage.valueId];
+                        }
                     }
-                    delete position.selectedImages[selectedImage.valueId];
                 }
             }
+            this.lastAreasImageAttributeId = this.areasImageAttributeId;
+            this.lastAreasImageAttributeValueList = this.areasImageAttributeValueList.map(e => e.id);
         }
     }
 
@@ -215,7 +220,7 @@ class OverlayAreasWidget extends Component {
                 const imageUrl = computeImageSrc({
                     id: imageId,
                     model: PRODUCT_IMAGE_MODEL,
-                    field: PRODUCT_IMAGE_FIELD,
+                    field: 'image_1920',
                 });
                 const image = new Image();
                 const res = await fetch(imageUrl);

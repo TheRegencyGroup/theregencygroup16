@@ -39,17 +39,12 @@ export class OverlayTemplatePageComponent extends Component {
     }
 
     get sortedAttributeList() {
-        let initAttributeList = Object.values(this.store.otPage.attributeList);
-        let sizeAttributeId = this.store.otPage.sizeAttributeId;
-        let attributeList = initAttributeList.filter(e => this.store.otPage.colorAttributeId !== e.id);
-        if (this.store.otPage.attributeList[sizeAttributeId]) {
-            attributeList = attributeList.filter(e => this.store.otPage.sizeAttributeId !== e.id);
-            attributeList = [
-                this.store.otPage.attributeList[sizeAttributeId],
-                ...attributeList,
-            ];
-        }
-        return attributeList;
+        let initAttributeList = Object.values(this.store.otPage.attributeList);;
+        return initAttributeList.filter(e => this.store.otPage.colorAttributeId !== e.id);
+    }
+
+    get showColorAttributeSelector() {
+        return Object.values(this.store.otPage.attributeList).find(e => this.store.otPage.colorAttributeId === e.id);
     }
 
     get overlayEditor() {
