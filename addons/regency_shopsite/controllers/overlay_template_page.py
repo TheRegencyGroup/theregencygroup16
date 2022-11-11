@@ -53,6 +53,8 @@ class OverlayTemplatePage(http.Controller):
     @classmethod
     def _create_overlay_product_preview_images(cls, overlay_product_id, preview_images_data):
         for image_with_overlay in preview_images_data:
+            if not image_with_overlay.get('images', False):
+                continue
             overlay_position_id = request.env['overlay.position'].sudo().browse(
                 image_with_overlay['overlayPositionId']).exists()
             if not overlay_position_id:
