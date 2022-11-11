@@ -11,8 +11,6 @@
                                 title="Create new Purchase Requisition"/>
                            <button string="New Price Sheet" name="action_new_price_sheet" type="object" class="oe_highlight" data-hotkey="q"
                                 title="Create new Price Sheet"/>
-                           <button string="New Sale Order" name="action_new_sale_order" type="object" class="oe_highlight" data-hotkey="s"
-                                title="Create new Sale Order"/>
                            <field name="stage_id" widget="statusbar"
                                 options="{'clickable': '1', 'fold_field': 'fold'}"/>
                     </header>
