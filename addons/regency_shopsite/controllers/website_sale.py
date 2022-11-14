@@ -73,3 +73,9 @@ class WebsiteSaleRegency(WebsiteSale):
         }
         return self.cart_update_json(product_id=sale_order_line.product_id.id, add_qty=sale_order_line.product_uom_qty,
                                      kw=data)
+
+    @http.route(['/shop/cart/save_delivery_address'],
+                type='json', auth="public", methods=['POST'], website=True, csrf=False)
+    def update_sale_order_line_delivery_address(self, sale_order_line_id, delivery_address_id, **kw):
+        sale_order_line = request.env['sale.order.line'].browse(sale_order_line_id)
+        sale_order_line.write({'delivery_address_id': delivery_address_id})

@@ -47,6 +47,7 @@
             'regency_shopsite/static/src/js/frontend/header/*.js',
             'regency_shopsite/static/src/js/frontend/overlay_template_page/**/*.js',
             'regency_shopsite/static/src/js/frontend/cart/**/*.js',
+            'regency_shopsite/static/src/js/frontend/cart_line/**/*.js',
             'regency_shopsite/static/src/js/frontend/shop_catalog/*.js',
             'regency_shopsite/static/src/js/frontend/list_pagination/*.js',
 
