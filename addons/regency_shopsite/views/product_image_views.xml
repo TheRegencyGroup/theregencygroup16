@@ -7,11 +7,11 @@
         <field name="arch" type="xml">
             <xpath expr="//field[@name='video_url']" position="after">
                 <field name="is_fit_for_overlay" invisible="1"/>
-                <div>
-                    <button name="action_set_as_main_image" type="object"
-                            attrs="{'invisible': [('is_fit_for_overlay', '=', False)]}"
-                            class="btn btn-primary" string="Set as main"/>
-                </div>
+<!--                <div>-->
+<!--                    <button name="action_set_as_main_image" type="object"-->
+<!--                            attrs="{'invisible': [('is_fit_for_overlay', '=', False)]}"-->
+<!--                            class="btn btn-primary" string="Set as main"/>-->
+<!--                </div>-->
             </xpath>
         </field>
     </record>
