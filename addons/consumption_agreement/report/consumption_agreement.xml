@@ -16,7 +16,192 @@
         <t t-call="web.basic_layout">
             <div class="page">
                 <t t-foreach="docs" t-as="employee">
-                    Test CA
+
+                    <style>
+                        html {
+                            font-size: 16px;
+                        }
+                        body {
+                            color: #000;
+                        }
+                        .title {
+                            font-size: 2rem;
+                            margin-bottom: 10px;
+                        }
+                        .w100pr {
+                            width: 100%;
+                        }
+                        .table {
+                            border-collapse: collapse;
+                            margin: 0;
+                        }
+                        .table td {
+                            padding: 10px 15px;
+                            border: 1px solid #000;
+                            vertical-align: top;
+                        }
+                        .table thead td {
+                            text-align: center;
+                            background: #eee;
+                            vertical-align: middle;
+                        }
+                        .subtitle {
+                            font-size: 1.2rem;
+                        }
+
+                        .breakpage {
+                            page-break-after: always;
+                        }
+                    </style>
+
+                    <table style="width: 100%; border-collapse: collapse; border: none; margin-bottom: 20px;">
+                        <tr>
+                            <td valign="top" style="text-align: center; width: 40%">
+                                <p>Regency Group</p>
+                                <p>32 West 39th Street, 12th Floor
+                                    <br/>New York NY 10018
+                                    <br/>212 714 0006</p>
+                            </td>
+                            <td></td>
+                            <td valign="top" style="width: 30%; text-align: center;">
+                                <div class="title">Consumption <br/>Agreement</div>
+                                <table class="table">
+                                    <tr>
+                                        <td>Date</td>
+                                        <td>Estimate #</td>
+                                    </tr>
+                                    <tr>
+                                        <td>7/16/2022</td>
+                                        <td>8201</td>
+                                    </tr>
+                                </table>
+                            </td>
+                        </tr>
+                    </table>
+
+                    <table style="width: 100%; border-collapse: collapse; border: none; margin-bottom: 20px;">
+                        <tr>
+                            <td valign="top" style="width: 40%">
+                                <table class="table">
+                                    <tr>
+                                        <td style="width: 50%; border-right: none;">Name / Address</td>
+                                        <td style="border-left: none;"></td>
+                                    </tr>
+                                    <tr>
+                                        <td style="width: 50%; border-right: none;">Hard Rock Hotel New YorkDaniel Moskowitz</td>
+                                        <td style="border-left: none;"></td>
+                                    </tr>
+                                </table>
+                            </td>
+                            <td></td>
+                            <td valign="top" style="width: 40%;">
+                                <table class="table w100pr">
+                                    <tr>
+                                        <td style="border-right: none;">Ship To</td>
+                                        <td style="border-left: none;"></td>
+                                    </tr>
+                                    <tr>
+                                        <td style="border-right: none;"></td>
+                                        <td style="border-left: none;"></td>
+                                    </tr>
+                                </table>
+                            </td>
+                        </tr>
+                    </table>
+
+                    <div style="text-align: right; clear: both;">
+                        <table class="table" style="text-align: center; width: auto; margin-bottom: -1px; float: right;">
+                            <tr>
+                                <td>P.O. No.</td>
+                                <td>Terms</td>
+                                <td>Rep</td>
+                                <td>project</td>
+                            </tr>
+                            <tr>
+                                <td></td>
+                                <td>Net 30</td>
+                                <td>Yossi LoebSubtotal</td>
+                                <td></td>
+                            </tr>
+                        </table>
+                    </div>
+
+                    <table class="table w100pr">
+                        <thead>
+                            <tr>
+                                <td>Item</td>
+                                <td>Description</td>
+                                <td>Qty</td>
+                                <td>U/M</td>
+                                <td>Cost</td>
+                                <td>Total</td>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Coaster</td>
+                                <td>
+                                    Material: Touche black 24pt cover uncoated
+                                    <br/>Size: 4 inch circle
+                                    <br/>Printing: Black foil over foil metallic silver foil 110
+                                    <br/>Finishing: 4 lots
+                                    <br/><br/>1000/case
+                                </td>
+                                <td style="text-align: right;">50000</td>
+                                <td style="text-align: right;"></td>
+                                <td style="text-align: right;">$ 0.59</td>
+                                <td style="text-align: right;">$ 29,500.00</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <div style="text-align: right;">
+                        <table class="table" style="margin-top: -1px; margin-bottom: 20px; width: 40%; display: inline-table; text-align: left;">
+                            <tr>
+                                <td class="subtitle"  style="border-right: none;">Subtotal</td>
+                                <td style="text-align: right; border-left: none;">$ 29,500.00</td>
+                            </tr>
+                            <tr>
+                                <td class="subtitle" style="border-right: none;">Shipping Fee</td>
+                                <td style="text-align: right; border-left: none;">$ 0.00</td>
+                            </tr>
+                            <tr>
+                                <td class="subtitle" style="border-right: none;"><strong>Total</strong></td>
+                                <td style="text-align: right; border-left: none;"><strong>$ 29,500.00</strong></td>
+                            </tr>
+                        </table>
+                    </div>
+
+
+                    <div class="breakpage"></div>
+
+                    <div style="text-align: center">Consumption Agreement</div>
+                    <br/><br/><br/><br/><br/><br/><br/>
+                    <p>Consumption AgreementThe above items and quantities are to be extend to be held in inventory by
+                        The Regency Group for the Hard Rock Hotel New York for the duration of 12 month(s) from the
+                        effective start date of signed agreement. This Inventory program is designed for the Client
+                        to pay as they pull, payment shall be due within thirty (30) days of issuance of an invoice for same,
+                        if the 12 month(s) has passed and there is still inventory left from this agreement,
+                        the Client shall be invoiced and shipped the remaining balance left, payment shall be due within thirty
+                        (30) days of issuance of an invoice for same The Regency Group may elect to extend the program and
+                        will need an extension signed from the hotel to be in effect.. If the Client wishes to
+                        change one or more of the said products, they are obligated to deplete the stock of the initial order
+                        first. Client shall be liable for this inventory as committed and signed in case of
+                        change of management or ownership Client must notify The Regency Group and of the buyer
+                        wants to continue this program a new CA should be introduced and commenced if Client fails
+                        to do Client is liable for this inventory to get paid in full. Client shall be liable for
+                        interest at the maximum rate permitted by law for late payments, and for attorneys’ fees and
+                        all costs incurred by Regency Group in connection with collecting payments from Client.</p>
+                    <br/><br/>
+                    <p>Client: Hard Rock Hotel New York</p>
+                    <p>CManaged By ______________________</p>
+                    <p>CAuthorized Signature: ____________________</p>
+                    <p>CPrint Name :________________________</p>
+                    <p>CTitle: ____________________</p>
+                    <p>CDate: _______________</p>
+
+
+
 
                     <xpath expr="//div[hasclass('footer')]" position="replace"></xpath>
                 </t>
