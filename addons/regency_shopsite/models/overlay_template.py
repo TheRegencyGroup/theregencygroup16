@@ -116,6 +116,7 @@ class OverlayTemplate(models.Model):
                     selected_images = overlay_position['selectedImages'].values()
                     image_ids += list(map(lambda x: x['imageId'], selected_images))
                     value_ids += list(map(lambda x: x['valueId'], selected_images))
+                value_ids = filter(lambda x: x != 0, value_ids)
                 rec.areas_product_image_ids = [Command.set(image_ids)]
                 rec.areas_image_attribute_selected_value_ids = [Command.set(value_ids)]
 
