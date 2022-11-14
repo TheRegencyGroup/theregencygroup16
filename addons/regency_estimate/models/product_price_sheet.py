@@ -317,7 +317,7 @@ class ProductPriceSheetLine(models.Model):
     price = fields.Float(string='Customer Price', digits='Product Price', store=True)
     sale_estimate_line_ids = fields.Many2many('sale.estimate.line', 'product_price_sheet_line_sale_estimate_line_relation',
                                          'price_sheet_line_id', 'sale_estimate_line_id')
-    total = fields.Float(compute='_compute_total', store=True)
+    total = fields.Float()
     shipping_options = fields.Char()
     partner_id = fields.Many2one('res.partner', 'Vendor')
     duty = fields.Float(digits='Product Price')
