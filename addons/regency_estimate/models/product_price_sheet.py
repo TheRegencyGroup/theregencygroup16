@@ -245,7 +245,6 @@ class ProductPriceSheet(models.Model):
                                                 'product_uom': p.product_id.uom_id.id,
                                                 'pricesheet_line_id': p.id,
                                                 'name': p.name,
-                                                # 'vendor_id': p.vendor_id
                                             }) for p in lines_to_order]})
         sequence = 10
         for line in order.order_line:

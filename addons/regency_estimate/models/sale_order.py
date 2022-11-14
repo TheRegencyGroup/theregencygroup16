@@ -36,8 +36,3 @@ class SaleOrderLine(models.Model):
         return self.purchase_line_ids |\
                self.order_id.procurement_group_id.stock_move_ids.filtered(lambda x: x.product_id == self.product_id).created_purchase_line_id |\
                self.order_id.procurement_group_id.stock_move_ids.filtered(lambda x: x.product_id == self.product_id).move_orig_ids.purchase_line_id
-
-    # def _prepare_procurement_values(self, group_id=False):
-    #     res = super(SaleOrderLine, self)._prepare_procurement_values(group_id)
-    #     res.update({'pricesheet_vendor_id': self.pricesheet_line_id.partner_id, 'pricesheet_vendor_price': self.pricesheet_line_id.vendor_price})
-    #     return res
