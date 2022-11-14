@@ -153,6 +153,7 @@ class OverlayTemplatePage(http.Controller):
 
             cls._create_overlay_product_preview_images(overlay_product, preview_images_data)
 
+            image_attachment_ids = []
             for item in overlay_area_list.values():
                 overlay_position_id = item.get('overlayPositionId', False)
                 if overlay_position_id:
@@ -167,18 +168,28 @@ class OverlayTemplatePage(http.Controller):
                     data = area.get('data', [])
                     if not data:
                         continue
+                    area_index = area.get('index')
                     for obj in data:
                         image_bytes = obj.get('image', False)
                         if not image_bytes:
                             continue
+                        area_object_index = obj.get('index')
+                        attachment_id = request.env['ir.attachment'].sudo().create([{
+                            'name': f'{overlay_product.name}__{overlay_position_id.name}_{area_index}_{area_object_index}',
+                            'datas': image_bytes.encode(),
+                            'type': 'binary',
+                        }])
+                        image_attachment_ids.append(attachment_id.id)
                         request.env['overlay.product.area.image'].sudo().create({
-                            'image': image_bytes.encode(),
+                            'image_attachment_id': attachment_id.id,
                             'overlay_position_id': overlay_position_id.id,
-                            'area_index': area.get('index'),
-                            'area_object_index': obj.get('index'),
+                            'area_index': area_index,
+                            'area_object_index': area_object_index,
                             'overlay_product_id': overlay_product.id,
                         })
+                        obj['attachmentId'] = attachment_id.id
                         del obj['image']
+            overlay_product.overlay_product_area_image_attachment_ids = [Command.set(image_attachment_ids)]
             overlay_product.area_list_data = overlay_area_list
 
         overlay_product._set_update_info()
@@ -204,7 +215,6 @@ class OverlayTemplatePage(http.Controller):
         overlay_attribute_id = request.env.ref('regency_shopsite.overlay_attribute')
         customization_attribute_id = request.env.ref('regency_shopsite.customization_attribute')
         color_attribute_id = request.env.ref('regency_shopsite.color_attribute')
-        size_attribute_id = request.env.ref('regency_shopsite.size_attribute')
 
         overlay_template_attribute_ids = overlay_template_id.overlay_attribute_line_ids.mapped('attribute_id')
         product_template_attribute_ids = product_template_id.attribute_line_ids.mapped('attribute_id')

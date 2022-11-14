@@ -37,6 +37,9 @@
                             </templates>
                         </kanban>
                     </field>
+                    <group>
+                        <field name="overlay_product_area_image_attachment_ids" widget="many2many_binary" string="Attachments" readonly="1"/>
+                    </group>
                 </sheet>
             </form>
         </field>
