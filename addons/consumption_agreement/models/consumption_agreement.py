@@ -138,8 +138,7 @@ class ConsumptionAgreement(models.Model):
         so_wizard = self.env['sale.order.ca.wizard'].create(
             {
                 'consumption_agreement_id': self.id,
-                'ca_line_ids': [(0, 0, {'product_id': ca_line.product_id.id, 'selected_qty': ca_line.qty_allowed}) for
-                                ca_line in self.line_ids]
+                'ca_line_ids': [(0, 0, {'consumption_agreement_line_id': ca_line.id}) for ca_line in self.line_ids]
             })
         return {
             'name': _('Create SO'),
