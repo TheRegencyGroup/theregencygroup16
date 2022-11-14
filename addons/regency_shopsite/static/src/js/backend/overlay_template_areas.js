@@ -318,8 +318,8 @@ class OverlayAreasWidget extends Component {
                 areaList,
                 selectedImages: position.props.selectedImages,
                 canvasSize: {
-                    width: position.state.editorImage.width,
-                    height: position.state.editorImage.height,
+                    width: position.canvasContainerRef.el.clientWidth,
+                    height: position.canvasContainerRef.el.clientHeight,
                 },
             };
         }

@@ -63,21 +63,13 @@ class OverlayTemplatePage(http.Controller):
             back_image = Image.open(io.BytesIO(base64.b64decode(back_image_id.image_1920)))
             width = image_with_overlay['backgroundImageSize']['width']
             height = image_with_overlay['backgroundImageSize']['height']
-            delta_x = 0
-            delta_y = 0
-            if back_image.width >= back_image.height:
-                height = int(width * (back_image.height / back_image.width))
-                delta_y = int((image_with_overlay['backgroundImageSize']['height'] - height) / 2)
-            else:
-                width = int(height * (back_image.width / back_image.height))
-                delta_x = int((image_with_overlay['backgroundImageSize']['width'] - width) / 2)
             back_image = back_image.resize((width, height))
             for image_data in image_with_overlay['images']:
                 image = Image.open(io.BytesIO(base64.b64decode(image_data['data'].encode())))
                 scale = image_data['scale']
                 image = image.resize((int(image.width * scale), int(image.height * scale)))
-                x = image_data['size']['x'] - delta_x
-                y = image_data['size']['y'] - delta_y
+                x = image_data['size']['x']
+                y = image_data['size']['y']
                 back_image.paste(image, (int(x), int(y)), image)
 
             result_image = io.BytesIO()
