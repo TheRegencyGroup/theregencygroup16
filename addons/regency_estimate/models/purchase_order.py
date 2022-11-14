@@ -1,4 +1,4 @@
-from odoo import fields, models, api, Command
+from odoo import fields, models, api
 from odoo.tools import get_lang
 from odoo.addons.purchase_requisition.models.purchase import PurchaseOrderLine
 
@@ -86,33 +86,14 @@ class MyPurchaseOrderLine(models.Model):
                     break
         super(PurchaseOrderLine, po_lines_without_requisition)._compute_price_unit_and_date_planned_and_name()
 
-    def _prepare_purchase_order_line(self, product_id, product_qty, product_uom, company_id, supplier, po, values=None):
-        res = super()._prepare_purchase_order_line(product_id, product_qty, product_uom, company_id, supplier, po)
+    @api.model
+    def _prepare_purchase_order_line_from_procurement(self, product_id, product_qty, product_uom, company_id, values,
+                                                      po):
+        res = super()._prepare_purchase_order_line_from_procurement(product_id, product_qty, product_uom, company_id,
+                                                                    values, po)
         if values['pricesheet_vendor_id']:
             res.update({'price_unit': values['pricesheet_vendor_price']})
         return res
 
-    @api.model
-    def _prepare_purchase_order_line_from_procurement(self, product_id, product_qty, product_uom, company_id, values,
-                                                      po):
-        line_description = ''
-        if values.get('product_description_variants'):
-            line_description = values['product_description_variants']
-        supplier = values.get('supplier')
-        # added 'values' to list of arguments:
-        res = self._prepare_purchase_order_line(product_id, product_qty, product_uom, company_id, supplier, po, values)
-        # We need to keep the vendor name set in _prepare_purchase_order_line. To avoid redundancy
-        # in the line name, we add the line_description only if different from the product name.
-        # This way, we shoud not lose any valuable information.
-        if line_description and product_id.name != line_description:
-            res['name'] += '\n' + line_description
-        res['date_planned'] = values.get('date_planned')
-        res['move_dest_ids'] = [(4, x.id) for x in values.get('move_dest_ids', [])]
-        res['orderpoint_id'] = values.get('orderpoint_id', False) and values.get('orderpoint_id').id
-        res['propagate_cancel'] = values.get('propagate_cancel')
-        res['product_description_variants'] = values.get('product_description_variants')
-        return res
-
 
 PurchaseOrderLine._compute_price_unit_and_date_planned_and_name = MyPurchaseOrderLine._new_compute_price_unit_and_date_planned_and_name
-
