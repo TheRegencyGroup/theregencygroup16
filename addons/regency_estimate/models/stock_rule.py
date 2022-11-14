@@ -129,9 +129,7 @@ class StockRule(models.Model):
                     # If it does not exist a PO line for current procurement.
                     # Generate the create values for it and add it to a list in
                     # order to create it in batch.
-                    # partner = procurement.values['supplier'].partner_id
-                    # if procurement.values['pricesheet_vendor_id']:
-                    #     partner = procurement.values['pricesheet_vendor_id']
+
                     po_line_values.append(self.env['purchase.order.line']._prepare_purchase_order_line_from_procurement(
                         procurement.product_id, procurement.product_qty,
                         procurement.product_uom, procurement.company_id,
