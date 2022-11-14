@@ -15,7 +15,7 @@
     <template id="consumption_agreement_report_tmpl">
         <t t-call="web.basic_layout">
             <div class="page">
-                <t t-foreach="docs" t-as="employee">
+                <t t-foreach="docs" t-as="ca">
 
                     <style>
                         html {
@@ -57,10 +57,13 @@
                     <table style="width: 100%; border-collapse: collapse; border: none; margin-bottom: 20px;">
                         <tr>
                             <td valign="top" style="text-align: center; width: 40%">
-                                <p>Regency Group</p>
-                                <p>32 West 39th Street, 12th Floor
-                                    <br/>New York NY 10018
-                                    <br/>212 714 0006</p>
+                                <p>
+                                    <t t-out="ca.env.company.name"/>
+                                </p>
+                                <p>
+                                    <t t-out="ca.env.company.street or ''"/>
+                                    <br/><t t-out="ca.env.company.city or ''"/> <t t-out="ca.env.company.state_id.code or ''"/> <t t-out="ca.env.company.zip or ''"/>
+                                    <br/><t t-out="ca.env.company.phone or ''"/></p>
                             </td>
                             <td></td>
                             <td valign="top" style="width: 30%; text-align: center;">
@@ -71,8 +74,12 @@
                                         <td>Estimate #</td>
                                     </tr>
                                     <tr>
-                                        <td>7/16/2022</td>
-                                        <td>8201</td>
+                                        <td>
+                                            <t t-out="ca.signed_date.strftime('%m/%d/%Y') if ca.signed_date else ''"/>
+                                        </td>
+                                        <td>
+                                            <t t-out="ca.name"/>
+                                        </td>
                                     </tr>
                                 </table>
                             </td>
@@ -88,7 +95,11 @@
                                         <td style="border-left: none;"></td>
                                     </tr>
                                     <tr>
-                                        <td style="width: 50%; border-right: none;">Hard Rock Hotel New YorkDaniel Moskowitz</td>
+                                        <td style="width: 50%; border-right: none;">
+                                            <t t-out="ca.partner_id.name"/>
+                                            <br/><t t-out="ca.partner_id.street or ''"/>
+                                            <br/><t t-out="ca.partner_id.city or ''"/> <t t-out="ca.partner_id.state_id.code or ''"/> <t t-out="ca.partner_id.zip or ''"/>
+                                        </td>
                                         <td style="border-left: none;"></td>
                                     </tr>
                                 </table>
@@ -119,8 +130,8 @@
                             </tr>
                             <tr>
                                 <td></td>
-                                <td>Net 30</td>
-                                <td>Yossi LoebSubtotal</td>
+                                <td></td>
+                                <td></td>
                                 <td></td>
                             </tr>
                         </table>
@@ -138,20 +149,28 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr>
-                                <td>Coaster</td>
-                                <td>
-                                    Material: Touche black 24pt cover uncoated
-                                    <br/>Size: 4 inch circle
-                                    <br/>Printing: Black foil over foil metallic silver foil 110
-                                    <br/>Finishing: 4 lots
-                                    <br/><br/>1000/case
-                                </td>
-                                <td style="text-align: right;">50000</td>
-                                <td style="text-align: right;"></td>
-                                <td style="text-align: right;">$ 0.59</td>
-                                <td style="text-align: right;">$ 29,500.00</td>
-                            </tr>
+                            <t t-foreach="ca.line_ids" t-as="ca_line">
+                                <tr>
+                                    <td>
+                                        <t t-out="ca_line.product_id.name"/>
+                                    </td>
+                                    <td>
+                                        <t t-out="ca_line.name"/>
+                                    </td>
+                                    <td style="text-align: right;">
+                                        <t t-out="ca_line.qty_allowed"/>
+                                    </td>
+                                    <td style="text-align: right;"></td>
+                                    <td style="text-align: right;">
+                                        <t t-esc="ca_line.price_unit"
+                                                   t-options='{"widget": "monetary", "display_currency": ca_line.currency_id}'/>
+                                    </td>
+                                    <td style="text-align: right;">
+                                        <t t-esc="ca_line.untaxed_amount"
+                                                   t-options='{"widget": "monetary", "display_currency": ca_line.currency_id}'/>
+                                    </td>
+                                </tr>
+                            </t>
                         </tbody>
                     </table>
 
@@ -159,15 +178,15 @@
                         <table class="table" style="margin-top: -1px; margin-bottom: 20px; width: 40%; display: inline-table; text-align: left;">
                             <tr>
                                 <td class="subtitle"  style="border-right: none;">Subtotal</td>
-                                <td style="text-align: right; border-left: none;">$ 29,500.00</td>
+                                <td style="text-align: right; border-left: none;"></td>
                             </tr>
                             <tr>
                                 <td class="subtitle" style="border-right: none;">Shipping Fee</td>
-                                <td style="text-align: right; border-left: none;">$ 0.00</td>
+                                <td style="text-align: right; border-left: none;"></td>
                             </tr>
                             <tr>
                                 <td class="subtitle" style="border-right: none;"><strong>Total</strong></td>
-                                <td style="text-align: right; border-left: none;"><strong>$ 29,500.00</strong></td>
+                                <td style="text-align: right; border-left: none;"><strong></strong></td>
                             </tr>
                         </table>
                     </div>
