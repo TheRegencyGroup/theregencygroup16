@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="action_product_attribute_values" model="ir.actions.act_window">
+        <field name="name">Product Attribute Values</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">product.attribute.value</field>
+        <field name="view_mode">tree</field>
+    </record>
+
+     <record id="action_product_template_attribute_lines" model="ir.actions.act_window">
+        <field name="name">Product Template Attribute Lines</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">product.template.attribute.line</field>
+        <field name="view_mode">tree</field>
+    </record>
+
+    <menuitem id="product_attribute_values_menu"
+        name="Attribute Values"
+        action="action_product_attribute_values"
+        parent="sale.prod_config_main"
+        sequence="10"/>
+
+    <menuitem id="product_template_attribute_lines_menu"
+        name="Product Template Attribute Lines"
+        action="action_product_template_attribute_lines"
+        parent="sale.prod_config_main"
+        sequence="10"/>
+</odoo>
