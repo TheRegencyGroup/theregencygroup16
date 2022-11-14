@@ -18,6 +18,10 @@ class StockRule(models.Model):
         return domain
 
     def _run_buy(self, procurements):
+        """
+        Copied to add logic if SO line created from pricrsheet line and vendor defined on pricesheet line
+        """
+
         procurements_by_po_domain = defaultdict(list)
         errors = []
         for procurement, rule in procurements:
@@ -41,6 +45,7 @@ class StockRule(models.Model):
                 lambda s: not s.company_id or s.company_id == procurement.company_id
             )[:1]
 
+            ####################
             # start custom logic
             partner = self.env['res.partner']
             if procurement.values['pricesheet_vendor_id']:
@@ -53,6 +58,7 @@ class StockRule(models.Model):
             if not partner:  # added this condition if not partner in pricesheet line
                 partner = supplier.partner_id
             # end custom logic
+            ##################
 
             # we put `supplier_info` in values for extensibility purposes
             procurement.values['supplier'] = supplier
@@ -84,10 +90,12 @@ class StockRule(models.Model):
                     # should only uses the common rules's fields.
                     vals = rules[0]._prepare_purchase_order(company_id, origins, positive_values)
 
+                    ####################
                     # start custom logic
                     if positive_values[0]['pricesheet_vendor_id']:
                         vals['partner_id'] = positive_values[0]['pricesheet_vendor_id'].id
                     # end custom logic
+                    ##################
 
                     # The company_id is the same for all procurements since
                     # _make_po_get_domain add the company in the domain.
