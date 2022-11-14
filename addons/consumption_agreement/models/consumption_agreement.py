@@ -134,6 +134,23 @@ class ConsumptionAgreement(models.Model):
             'url': self.get_portal_url(),
         }
 
+    def action_create_so(self):
+        so_wizard = self.env['sale.order.ca.wizard'].create(
+            {
+                'consumption_agreement_id': self.id,
+                'ca_line_ids': [(0, 0, {'consumption_agreement_line_id': ca_line.id}) for ca_line in self.line_ids]
+            })
+        return {
+            'name': _('Create SO'),
+            'type': 'ir.actions.act_window',
+            'view_mode': 'form',
+            'views': [(self.env.ref('consumption_agreement.create_so_wizard_form_view').id, 'form'),
+                      (False, 'tree')],
+            'res_model': 'sale.order.ca.wizard',
+            'res_id': so_wizard.id,
+            'target': 'new'
+        }
+
 
 class ConsumptionAggreementLine(models.Model):
     _name = 'consumption.agreement.line'
