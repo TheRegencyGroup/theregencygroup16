@@ -5,7 +5,7 @@ _logger = logging.getLogger(__name__)
 
 
 class Product(models.Model):
-    _inherit = 'product.product'
+    _inherit = 'product.template'
 
     ext_overseas = fields.Char()
     ext_routes_type = fields.Char()
@@ -39,3 +39,13 @@ class Product(models.Model):
         recs.set_routes_from_import_data()
         return recs
 
+    def clear_imported(self):
+        sql = """select pp.product_tmpl_id from ir_model_data
+        left join product_product pp on pp.id = res_id
+         where model = 'product.product' and module = '__import__'
+        """
+        self.env.cr.execute(sql)
+        results = self.env.cr.fetchall()
+        product_ids = [res[0] for res in results]
+        products = self.env['product.template'].browse(product_ids)
+        products.unlink()

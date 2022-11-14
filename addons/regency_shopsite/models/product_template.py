@@ -12,13 +12,6 @@ class ProductTemplate(models.Model):
     overlay_template_count = fields.Integer(compute='_compute_overlay_template_count')
     overlay_template_ids = fields.One2many('overlay.template', 'product_template_id')
 
-    @api.constrains('attribute_line_ids', 'is_fit_for_overlay')
-    def _constrains_attribute_line_ids(self):
-        color_attribute_id = self.env.ref('regency_shopsite.color_attribute')
-        for rec in self:
-            if rec.is_fit_for_overlay and color_attribute_id.id not in rec.attribute_line_ids.mapped('attribute_id').ids:
-                raise UserError('Product for overlay template must have color attribute')
-
     def _compute_overlay_template_count(self):
         for rec in self:
             rec.overlay_template_count = len(rec.overlay_template_ids)

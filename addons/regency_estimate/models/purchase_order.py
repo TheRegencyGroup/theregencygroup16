@@ -1,4 +1,4 @@
-from odoo import fields, models, api, Command
+from odoo import fields, models, api
 from odoo.tools import get_lang
 from odoo.addons.purchase_requisition.models.purchase import PurchaseOrderLine
 
@@ -86,6 +86,14 @@ class MyPurchaseOrderLine(models.Model):
                     break
         super(PurchaseOrderLine, po_lines_without_requisition)._compute_price_unit_and_date_planned_and_name()
 
+    @api.model
+    def _prepare_purchase_order_line_from_procurement(self, product_id, product_qty, product_uom, company_id, values,
+                                                      po):
+        res = super()._prepare_purchase_order_line_from_procurement(product_id, product_qty, product_uom, company_id,
+                                                                    values, po)
+        if values['pricesheet_vendor_id']:
+            res.update({'price_unit': values['pricesheet_vendor_price']})
+        return res
+
 
 PurchaseOrderLine._compute_price_unit_and_date_planned_and_name = MyPurchaseOrderLine._new_compute_price_unit_and_date_planned_and_name
-

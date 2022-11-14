@@ -7,8 +7,10 @@
              <form string="Consumption Agreement">
                 <header>
                     <button name="action_confirm" data-hotkey="v"
-                        string="Confirm" type="object"
-                        attrs="{'invisible': [('state', 'not in', ['draft'])]}"/>
+                            string="Confirm" type="object"
+                            attrs="{'invisible': [('state', 'not in', ['draft'])]}"/>
+                    <button name="action_create_so" string="Create Sale Order" type="object"
+                            attrs="{'invisible': [('state', '!=', 'confirmed')]}"/>
                     <field name="state" widget="statusbar" statusbar_visible="draft,confirmed"/>
                     <button name="generate_purchase_order" data-hotkey="g" type="object"
                             string="Generate Purchase Order"/>

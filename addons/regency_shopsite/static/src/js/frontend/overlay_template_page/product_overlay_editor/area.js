@@ -33,7 +33,7 @@ export class Area {
                 promises.push(new Promise(async resolve => {
                     const image = new Image();
                     let blob;
-                    let res = await fetch(imageObj.imageUrl);
+                    let res = await fetch(imageObj.attachmentUrl);
                     if (imageObj.imageFormat.includes(SVG_IMAGE_EXTENSION)) {
                         const svg = await res.text();
                         blob = new Blob([svg], { type: 'image/svg+xml' });
@@ -256,6 +256,12 @@ export class Area {
 
     enablePointerEvents(state) {
         this.canvas.upperCanvasEl.style.pointerEvents = state ? 'all' : 'none';
+    }
+
+    showMaskBorders(state) {
+        this.mask.set('stroke', state ? '#000000' : 'transparent');
+        this.canvas.backgroundColor = 'transparent';
+        this.canvas.renderAll();
     }
 
     destroy() {
