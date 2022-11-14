@@ -33,7 +33,7 @@ export class Area {
                 promises.push(new Promise(async resolve => {
                     const image = new Image();
                     let blob;
-                    let res = await fetch(imageObj.imageUrl);
+                    let res = await fetch(imageObj.attachmentUrl);
                     if (imageObj.imageFormat.includes(SVG_IMAGE_EXTENSION)) {
                         const svg = await res.text();
                         blob = new Blob([svg], { type: 'image/svg+xml' });

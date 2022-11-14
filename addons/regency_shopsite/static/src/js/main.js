@@ -16,3 +16,8 @@ export function computeImageSrc({ id, model, field, timestamp }) {
     }
     return `${baseUrl}/web/image?model=${model}&id=${id}&field=${field}&unique=${timestamp}`;
 }
+
+export function computeAttachmentLink(attachmentId) {
+    let baseUrl = window.location.origin;
+    return `${baseUrl}/web/content/${attachmentId}`;
+}
