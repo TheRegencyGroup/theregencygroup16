@@ -7,7 +7,7 @@ from odoo.tools.misc import clean_context, OrderedSet, groupby
 from collections import defaultdict
 
 
-class StockRule(models.Model):
+class StockMove(models.Model):
     _inherit = 'stock.move'
 
     def _action_confirm(self, merge=True, merge_into=False):
@@ -43,7 +43,8 @@ class StockRule(models.Model):
 
             # Start custom logic
             values.update({'pricesheet_vendor_id': move.sale_line_id.pricesheet_line_id.partner_id,
-                           'pricesheet_vendor_price': move.sale_line_id.pricesheet_line_id.vendor_price})
+                           'pricesheet_vendor_price': move.sale_line_id.pricesheet_line_id.vendor_price,
+                           'sale_line_id': move.sale_line_id.id})
             # End custom logic
 
             origin = move._prepare_procurement_origin()
