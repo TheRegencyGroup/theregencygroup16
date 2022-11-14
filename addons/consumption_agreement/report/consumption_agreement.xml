@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="consumption_agreement_report" model="ir.actions.report">
+        <field name="name">Print Consumption Agreement</field>
+        <field name="model">consumption.agreement</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">consumption_agreement.consumption_agreement_report_tmpl</field>
+        <field name="report_file">consumption_agreement.consumption_agreement_report_tmpl</field>
+        <field name="print_report_name">'Consumption agreement - %s' % (object.name).replace('/', '')</field>
+        <field name="binding_model_id" ref="model_consumption_agreement"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <template id="consumption_agreement_report_tmpl">
+        <t t-call="web.basic_layout">
+            <div class="page">
+                <t t-foreach="docs" t-as="employee">
+                    Test CA
+
+                    <xpath expr="//div[hasclass('footer')]" position="replace"></xpath>
+                </t>
+            </div>
+        </t>
+    </template>
+
+</odoo>
