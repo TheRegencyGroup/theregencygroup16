@@ -34,7 +34,7 @@ class SaleOrderLine(models.Model):
     def get_delivery_data(self):
         self.ensure_one()
         possible_addresses = [{'modelId': address.id,
-                               'addressStr': address.contact_address,
+                               'addressStr': address.name,
                                } for address in self.possible_delivery_address_ids]
         return json.dumps({'solId': self.id,
                            'currentDeliveryAddress': self.delivery_address_id.id,

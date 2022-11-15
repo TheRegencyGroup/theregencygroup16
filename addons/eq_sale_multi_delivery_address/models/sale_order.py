@@ -14,12 +14,16 @@ class SaleOrderLine(models.Model):
     delivery_partner_id = fields.Many2one('res.partner', string="Hotel Name")
     possible_delivery_address_ids = fields.Many2many('res.partner', compute='_compute_possible_delivery_address_id')
     delivery_address_id = fields.Many2one('res.partner', string='Delivery Address',
-                                          domain="[('id', 'in', possible_delivery_address_ids)]")
+                                          domain="[('id', 'in', possible_delivery_address_ids)]",
+                                          default=lambda self: self.possible_delivery_address_ids[0].id
+                                          if self.possible_delivery_address_ids else False)
 
     @api.onchange('delivery_partner_id')
     def _compute_possible_delivery_address_id(self):
         for sol in self:
-            sol.possible_delivery_address_ids = [Command.set(sol.delivery_partner_id.child_ids.ids)]
+            address_ids = sol.delivery_partner_id.child_ids.filtered(lambda partner: partner.type == 'delivery') \
+                          or sol.delivery_partner_id
+            sol.possible_delivery_address_ids = [Command.set(address_ids.ids)]
 
     def write(self, values):
         res = super(SaleOrderLine, self).write(values)

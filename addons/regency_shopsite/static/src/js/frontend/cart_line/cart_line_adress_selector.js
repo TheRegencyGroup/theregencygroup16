@@ -24,7 +24,10 @@ export class DeliveryAddressCartLine extends Component {
 
     async saveDeliveryAddress(ev) {
         let sale_order_line_id = this.solId
-        let delivery_address_id = Number(ev.target.value)
+        let delivery_address_id = ev.target.value
+        delivery_address_id = (
+            delivery_address_id && (typeof delivery_address_id === 'string' || typeof delivery_address_id === 'number')
+        ) ? Number(delivery_address_id) : false
         try {
             let res = await rpc.query({
                 route: '/shop/cart/save_delivery_address',
