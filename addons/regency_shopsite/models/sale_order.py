@@ -31,7 +31,7 @@ class SaleOrderLine(models.Model):
     image_snapshot = fields.Image('Product Image')
     image_snapshot_url = fields.Text(compute='_compute_image_snapshot_url')
 
-    def get_delivery_data(self):
+    def _get_delivery_data(self):
         self.ensure_one()
         possible_addresses = [{'modelId': address.id,
                                'addressStr': address.name,

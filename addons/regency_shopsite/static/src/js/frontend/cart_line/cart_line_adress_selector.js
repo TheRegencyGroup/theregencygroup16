@@ -6,9 +6,6 @@ import rpc from 'web.rpc';
 const { Component, onMounted } = owl;
 
 export class DeliveryAddressCartLine extends Component {
-    setup() {
-        console.log(this.props.solData)
-    }
 
     get solId() {
         return this.props.solData.solId
