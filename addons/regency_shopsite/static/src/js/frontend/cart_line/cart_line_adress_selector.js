@@ -2,8 +2,10 @@
 
 import { mountComponentAsWidget } from '@fe_owl_base/js/main';
 import rpc from 'web.rpc';
+import Concurrency from 'web.concurrency';
 
 const { Component, onMounted } = owl;
+const dropPrevious = new Concurrency.MutexedDropPrevious();
 
 export class DeliveryAddressCartLine extends Component {
 
@@ -26,13 +28,15 @@ export class DeliveryAddressCartLine extends Component {
             delivery_address_id && (typeof delivery_address_id === 'string' || typeof delivery_address_id === 'number')
         ) ? Number(delivery_address_id) : false
         try {
-            let res = await rpc.query({
-                route: '/shop/cart/save_delivery_address',
-                params: {
-                    sale_order_line_id,
-                    delivery_address_id,
-                },
-            });
+            dropPrevious.exec(() => {
+                return rpc.query({
+                    route: '/shop/cart/save_delivery_address',
+                    params: {
+                        sale_order_line_id,
+                        delivery_address_id,
+                    },
+                });
+            })
         } catch (e) {
             alert(e.message?.data?.message || e.toString())
         }
