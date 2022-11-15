@@ -8,6 +8,18 @@
 from odoo import api, models, fields, Command
 
 
+class SaleOrder(models.Model):
+    _inherit = 'sale.order'
+
+    delivery_address_ids = fields.Many2many('res.partner', relation='sale_order_delivery_address_rel', store=True,
+                                            string='Delivery Addresses', compute='_compute_delivery_address_ids')
+
+    @api.depends('order_line.delivery_address_id')
+    def _compute_delivery_address_ids(self):
+        for so in self:
+            so.delivery_address_ids = [Command.set(so.order_line.delivery_address_id.ids)]
+
+
 class SaleOrderLine(models.Model):
     _inherit = 'sale.order.line'
 
