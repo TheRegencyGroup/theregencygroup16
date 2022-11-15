@@ -254,7 +254,7 @@ class ProductPriceSheet(models.Model):
             if fee_value_ids:
                 sequence += 1
                 line.create({'display_type': 'line_note',
-                             'name': f'Additional Fees for {line.name}:',
+                             'name': f'Additional Fees for {line.product_id.name}:',
                              'order_id': line.order_id.id,
                              'pricesheet_line_id': line.pricesheet_line_id.id,
                              'sequence': sequence})
