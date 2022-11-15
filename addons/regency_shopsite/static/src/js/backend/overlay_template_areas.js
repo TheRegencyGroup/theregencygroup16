@@ -20,6 +20,7 @@ const PRODUCT_TEMPLATE_IMAGE_IDS_FIELD = 'product_template_image_ids';
 const OVERLAY_POSITION_IDS_FIELD = 'overlay_position_ids';
 const AREAS_IMAGE_ATTRIBUTE_ID_FIELD = 'areas_image_attribute_id';
 const AREAS_IMAGE_ATTRIBUTE_VALUE_LIST_FIELD = 'areas_image_attribute_value_list';
+const OVERLAY_PRODUCT_IDS_FIELD = 'overlay_product_ids';
 
 class OverlayAreasWidget extends Component {
     setup() {
@@ -109,7 +110,8 @@ class OverlayAreasWidget extends Component {
         for (let item of list) {
             let firstSelectedImage = false;
             if (positionSelectedImageIds.length &&
-                !(positionSelectedImageValueIds.length === 1 && positionSelectedImageValueIds[0] === valueId)) {
+                !(positionSelectedImageValueIds.length === 1 && positionSelectedImageValueIds[0] === valueId &&
+                    !this.withOverlayProducts)) {
                 firstSelectedImage = this.state.productTemplateImages.find(e => e.id === positionSelectedImageIds[0]).image;
             }
             item.isAvailable = firstSelectedImage
@@ -123,6 +125,10 @@ class OverlayAreasWidget extends Component {
         return Object.values(this.__owl__.children)
             .filter(e => e.component.constructor.name === 'OverlayAreasPositionComponent')
             .map(e => e.component);
+    }
+
+    get withOverlayProducts() {
+        return !!this.props.record.data[OVERLAY_PRODUCT_IDS_FIELD].records.length;
     }
 
     onMounted() {
