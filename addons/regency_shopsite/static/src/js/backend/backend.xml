@@ -56,6 +56,7 @@
                                                    selectedImages="position.selectedImages || {}"
                                                    areasImageValueList="areasImageAttributeValueList"
                                                    productTemplateImages="state.productTemplateImages"
+                                                   allowEditAreas="!withOverlayProducts"
                                                    openImageListModal="(args) => this.openImageListModal(args)"/>
                 </t>
             </t>
@@ -78,7 +79,7 @@
             </div>
             <div class="ot_areas_position_main" t-att-class="{ 'd-none': !props.productTemplateId }">
                 <div class="ot_areas_tab" t-att-class="{ 'ot_areas_tab_hide': state.activeTab !== AREAS_TAB }">
-                    <div t-if="props.editMode" class="ot_areas_position_tools">
+                    <div t-if="props.editMode and props.allowEditAreas" class="ot_areas_position_tools">
                         <t t-if="!!state.editorImage">
                             <button class="btn btn-primary" t-on-click="onClickAddRectangleArea">
                                 <i class="fa fa-plus-circle"/>Rectangle
@@ -131,47 +132,47 @@
                                     <div class="ot_areas_position_area_list_item_data_value">
                                         <span>Width</span>
                                         <input type="number" t-att-value="area.data.width"
-                                               t-att-disabled="!props.editMode"/>
+                                               t-att-disabled="!props.editMode || !props.allowEditAreas"/>
                                     </div>
                                     <div class="ot_areas_position_area_list_item_data_value">
                                         <span>Height</span>
                                         <input type="number" t-att-value="area.data.height"
-                                               t-att-disabled="!props.editMode"/>
+                                               t-att-disabled="!props.editMode || !props.allowEditAreas"/>
                                     </div>
                                 </t>
                                 <t t-if="area.areaType === 'ellipse'">
                                     <div class="ot_areas_position_area_list_item_data_value">
                                         <span>Rx</span>
                                         <input type="number" t-att-value="area.data.rx"
-                                               t-att-disabled="!props.editMode"/>
+                                               t-att-disabled="!props.editMode || !props.allowEditAreas"/>
                                     </div>
                                     <div class="ot_areas_position_area_list_item_data_value">
                                         <span>Ry</span>
                                         <input type="number" t-att-value="area.data.ry"
-                                               t-att-disabled="!props.editMode"/>
+                                               t-att-disabled="!props.editMode || !props.allowEditAreas"/>
                                     </div>
                                 </t>
                                 <t t-if="area.areaType === 'text'">
                                     <div class="ot_areas_position_area_list_item_data_value">
                                         <span>Width</span>
                                         <input type="number" t-att-value="area.data.width"
-                                               t-att-disabled="!props.editMode"/>
+                                               t-att-disabled="!props.editMode || !props.allowEditAreas"/>
                                     </div>
                                     <div class="ot_areas_position_area_list_item_data_value">
                                         <span>Font size</span>
                                         <input type="number" t-att-value="area.data.fontSize"
-                                               t-att-disabled="!props.editMode"
+                                               t-att-disabled="!props.editMode || !props.allowEditAreas"
                                                t-on-change="() => this.onChangeTextFontSize(area.index)"/>
                                     </div>
                                     <div class="ot_areas_position_area_list_item_data_value">
                                         <span>Lines</span>
                                         <input type="number" t-att-value="area.data.numberOfLines"
-                                               t-att-disabled="!props.editMode"
+                                               t-att-disabled="!props.editMode || !props.allowEditAreas"
                                                t-on-change="() => this.onChangeTextNumberOfLines(area.index)"/>
                                     </div>
                                     <div class="ot_areas_position_area_list_item_data_value">
                                         <span>Font</span>
-                                        <select t-att-disabled="!props.editMode"
+                                        <select t-att-disabled="!props.editMode || !props.allowEditAreas"
                                                 t-on-change="() => this.onChangeTextFont(area.index)">
                                             <option t-att-selected="area.data.font == 'Arial'" value="Arial">Arial</option>
                                             <option t-att-selected="area.data.font == 'Times New Roman'" value="Times New Roman">Times New Roman</option>
@@ -187,20 +188,20 @@
                                 <div class="ot_areas_position_area_list_item_data_value">
                                     <span>X</span>
                                     <input type="number" t-att-value="area.data.x"
-                                           t-att-disabled="!props.editMode"/>
+                                           t-att-disabled="!props.editMode || !props.allowEditAreas"/>
                                 </div>
                                 <div class="ot_areas_position_area_list_item_data_value">
                                     <span>Y</span>
                                     <input type="number" t-att-value="area.data.y"
-                                           t-att-disabled="!props.editMode"/>
+                                           t-att-disabled="!props.editMode || !props.allowEditAreas"/>
                                 </div>
                                 <div class="ot_areas_position_area_list_item_data_value">
                                     <span>Angle</span>
                                     <input type="number" t-att-value="area.data.angle"
-                                           t-att-disabled="!props.editMode"/>
+                                           t-att-disabled="!props.editMode || !props.allowEditAreas"/>
                                 </div>
                             </div>
-                            <div t-if="props.editMode"
+                            <div t-if="props.editMode and props.allowEditAreas"
                                  class="ot_areas_position_area_list_item_remove"
                                  t-on-click.stop="() => this.onClickRemoveArea(area.index)">
                                 <i class="fa fa-remove"/>

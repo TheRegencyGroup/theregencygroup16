@@ -96,7 +96,7 @@ class OverlayAreasPositionComponent extends Component {
         if (this.lastMode !== this.props.editMode) {
             this.lastMode = this.props.editMode;
             if (this.overlay) {
-                this.overlay.selectable = !!this.props.editMode;
+                this.overlay.selectable = !!this.props.editMode && this.props.allowEditAreas;
             }
         }
         if (this.lastAreasImageAttributeId !== this.props.areasImageAttributeId) {
@@ -267,6 +267,7 @@ OverlayAreasPositionComponent.props = {
     areasImageValueList: Array,
     productTemplateImages: Array,
     openImageListModal: Function,
+    allowEditAreas: Boolean,
 }
 
 OverlayAreasPositionComponent.template = 'overlay_areas_position'
