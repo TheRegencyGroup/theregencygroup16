@@ -15,8 +15,7 @@ class SaleOrderLine(models.Model):
     possible_delivery_address_ids = fields.Many2many('res.partner', compute='_compute_possible_delivery_address_id')
     delivery_address_id = fields.Many2one('res.partner', string='Delivery Address',
                                           domain="[('id', 'in', possible_delivery_address_ids)]",
-                                          default=lambda self: self.possible_delivery_address_ids[0].id
-                                          if self.possible_delivery_address_ids else False)
+                                          default=lambda self: self._get_default_delivery_address_id())
 
     @api.onchange('delivery_partner_id')
     def _compute_possible_delivery_address_id(self):
@@ -24,6 +23,14 @@ class SaleOrderLine(models.Model):
             address_ids = sol.delivery_partner_id.child_ids.filtered(lambda partner: partner.type == 'delivery') \
                           or sol.delivery_partner_id
             sol.possible_delivery_address_ids = [Command.set(address_ids.ids)]
+
+    @api.onchange('delivery_partner_id', 'possible_delivery_address_ids')
+    def _compute_default_delivery_address_id(self):
+        for sol in self:
+            sol.delivery_address_id = sol._get_default_delivery_address_id()
+
+    def _get_default_delivery_address_id(self):
+        return self.possible_delivery_address_ids.ids[0] if self.possible_delivery_address_ids else False
 
     def write(self, values):
         res = super(SaleOrderLine, self).write(values)
