@@ -20,4 +20,30 @@
         </field>
     </record>
 
+    <record id="inherit_view_quotation_tree" model="ir.ui.view">
+        <field name="name">sale.order.tree</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_quotation_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='partner_id']" position="after">
+                <field name="delivery_address_ids" widget="many2many_tags"/>
+                <field name="partner_invoice_id"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="inherit_view_sales_order_filter" model="ir.ui.view">
+        <field name="name">sale.order.list.group_by</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_sales_order_filter"/>
+        <field name="arch" type="xml">
+            <xpath expr="//filter[@name='order_month']" position="after">
+                <filter string="Delivery Addresses" name="sol_delivery_addresses" domain="[]"
+                        context="{'group_by': 'delivery_address_ids'}"/>
+                <filter string="Invoice Address" name="so_invoice_address" domain="[]"
+                        context="{'group_by': 'partner_invoice_id'}"/>
+            </xpath>
+        </field>
+    </record>
+
 </odoo>
