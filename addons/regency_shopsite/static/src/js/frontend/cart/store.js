@@ -10,6 +10,7 @@ if (cartData) {
             for (let [key, value] of Object.entries(cartData)) {
                 this[key] = value;
             }
+            this.addingToCart = false;
         }
 
         async addOverlayToCart({
@@ -22,6 +23,8 @@ if (cartData) {
                                    previewImagesData,
                                    overlayProductWasChanged,
         }) {
+            this.addingToCart = true;
+            let data = false;
             try {
                 let params = {
                     qty: quantity,
@@ -51,12 +54,13 @@ if (cartData) {
                     Object.assign(this, res.cartData);
                 }
                 if (res && res.overlayProductData) {
-                    return res.overlayProductData;
+                    data = res.overlayProductData;
                 }
-                return false;
             } catch (e) {
                 alert(e.message?.data?.message || e.toString());
             }
+            this.addingToCart = false;
+            return data;
         }
     }
 

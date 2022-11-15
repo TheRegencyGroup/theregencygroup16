@@ -25,6 +25,7 @@
         <field name="arch" type="xml">
             <form>
                 <field name="active" invisible="1"/>
+                <field name="allow_edit" invisible="1"/>
                 <sheet>
                     <div class="oe_button_box" name="button_box">
                         <button name="show_on_website" type="object"
@@ -34,12 +35,12 @@
                         <group>
                             <field name="name"/>
                             <field name="product_template_id"
-                                   attrs="{'readonly': [('overlay_product_ids', '!=', False)]}"/>
+                                   attrs="{'readonly': [('allow_edit', '=', False)]}"/>
                             <field name="overlay_attribute_value_id"/>
                             <field name="show_hotels_without_prices" invisible="1"/>
                             <field name="hotels_without_prices" widget="many2many_tags" attrs="{'invisible': [('show_hotels_without_prices', '=', False)]}"/>
                             <field name="overlay_position_ids" widget="many2many_tags"
-                                   attrs="{'readonly': [('overlay_product_ids', '!=', False)]}"/>
+                                   attrs="{'readonly': [('allow_edit', '=', False)]}"/>
                             <field name="areas_image_attribute_id" options="{'no_create': True, 'no_create_edit':True}"/>
                             <field name="possible_areas_image_attribute_ids" invisible="1"/>
                             <field name="areas_image_attribute_value_list" invisible="1"/>
