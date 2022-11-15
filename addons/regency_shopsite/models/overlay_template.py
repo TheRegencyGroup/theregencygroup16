@@ -45,6 +45,7 @@ class OverlayTemplate(models.Model):
                                                                 compute='_compute_areas_data_values',
                                                                 store=True, ondelete='restrict')
     hotels_without_prices = fields.One2many('res.partner', compute='_compute_hotels_without_prices')
+    show_hotels_without_prices = fields.Boolean(compute='_compute_hotels_without_prices')
 
     @api.constrains('areas_data')
     def _check_areas_data(self):
@@ -61,9 +62,11 @@ class OverlayTemplate(models.Model):
     def _compute_hotels_without_prices(self):
         for rec in self:
             rec.hotels_without_prices = False
+            rec.show_hotels_without_prices = False
             for hotel in rec.hotel_ids:
                 if not hotel.property_product_pricelist.item_ids.filtered(lambda f: f.overlay_tmpl_id == rec):
                     rec.hotels_without_prices += hotel
+                    rec.show_hotels_without_prices = True
 
     @api.depends('product_template_id')
     def _compute_possible_areas_image_attribute_ids(self):
