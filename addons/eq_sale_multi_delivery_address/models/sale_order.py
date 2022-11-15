@@ -32,9 +32,6 @@ class SaleOrderLine(models.Model):
     def _get_default_delivery_address_id(self):
         return self.possible_delivery_address_ids.ids[0] if self.possible_delivery_address_ids else False
 
-    def write(self, values):
-        res = super(SaleOrderLine, self).write(values)
-        return res
 
     @api.onchange('product_id')
     def onchange_product_partner(self):

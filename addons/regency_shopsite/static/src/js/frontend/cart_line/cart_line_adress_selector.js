@@ -4,14 +4,10 @@ import { mountComponentAsWidget } from '@fe_owl_base/js/main';
 import rpc from 'web.rpc';
 import Concurrency from 'web.concurrency';
 
-const { Component, onMounted } = owl;
+const { Component } = owl;
 const dropPrevious = new Concurrency.MutexedDropPrevious();
 
 export class DeliveryAddressCartLine extends Component {
-
-    get solId() {
-        return this.props.solData.solId
-    }
 
     get currentDeliveryAddress() {
         return this.props.solData.currentDeliveryAddress
@@ -22,24 +18,22 @@ export class DeliveryAddressCartLine extends Component {
     }
 
     async saveDeliveryAddress(ev) {
-        let sale_order_line_id = this.solId
-        let delivery_address_id = ev.target.value
+        let sale_order_line_id = this.props.solData.solId;
+        let delivery_address_id = ev.target.value;
         delivery_address_id = (
             delivery_address_id && (typeof delivery_address_id === 'string' || typeof delivery_address_id === 'number')
-        ) ? Number(delivery_address_id) : false
-        try {
-            dropPrevious.exec(() => {
-                return rpc.query({
-                    route: '/shop/cart/save_delivery_address',
-                    params: {
-                        sale_order_line_id,
-                        delivery_address_id,
-                    },
-                });
+        ) ? Number(delivery_address_id) : false;
+        dropPrevious.exec(() => {
+            return rpc.query({
+                route: '/shop/cart/save_delivery_address',
+                params: {
+                    sale_order_line_id,
+                    delivery_address_id,
+                },
+            }).catch((e) => {
+                alert(e.message?.data?.message || e.toString())
             })
-        } catch (e) {
-            alert(e.message?.data?.message || e.toString())
-        }
+        })
     }
 }
 
