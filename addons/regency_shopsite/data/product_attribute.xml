@@ -26,7 +26,7 @@
     </record>
 
     <record id="customization_attribute" model="product.attribute">
-        <field name="name">Customization</field>
+        <field name="name">Overlay Customization</field>
         <field name="create_variant">dynamic</field>
         <field name="display_type">radio</field>
     </record>
