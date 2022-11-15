@@ -1,3 +1,5 @@
+import json
+
 from odoo import fields, models, api
 
 
@@ -28,6 +30,16 @@ class SaleOrderLine(models.Model):
     price_list_id = fields.Many2one('product.pricelist', string='Pricelist')
     image_snapshot = fields.Image('Product Image')
     image_snapshot_url = fields.Text(compute='_compute_image_snapshot_url')
+
+    def _get_delivery_data(self):
+        self.ensure_one()
+        possible_addresses = [{'modelId': address.id,
+                               'addressStr': address.name,
+                               } for address in self.possible_delivery_address_ids]
+        return json.dumps({'solId': self.id,
+                           'currentDeliveryAddress': self.delivery_address_id.id,
+                           'possibleDeliveryAddresses': possible_addresses,
+                           })
 
 
     @api.model_create_multi
