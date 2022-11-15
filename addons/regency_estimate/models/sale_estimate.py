@@ -84,6 +84,15 @@ class SaleEstimate(models.Model):
     order_line = fields.One2many('sale.estimate.line', compute='_compute_order_line')
     sold_product_ids = fields.Many2many('product.template', 'sold_templ_rel', compute='_compute_sold_product_ids',
                                         store=True, index=True)
+    purchase_order_ids = fields.One2many('purchase.order', compute='_compute_purchase_orders')
+    purchase_order_count = fields.Integer(compute='_compute_purchase_orders')
+
+    def _compute_purchase_orders(self):
+        for rec in self:
+            rec.purchase_order_ids = False
+            for so in rec.sale_order_ids:
+                rec.purchase_order_ids += so._get_purchase_orders()
+            rec.purchase_order_count = len(rec.purchase_order_ids)
 
     @api.depends('partner_id', 'partner_id.sale_order_ids')
     def _compute_sold_product_ids(self):
@@ -236,6 +245,14 @@ class SaleEstimate(models.Model):
         if len(self.sale_order_ids) == 1:
             action['views'] = [(self.env.ref('sale.view_order_form').id, 'form')]
             action['res_id'] = self.sale_order_ids.id
+        return action
+
+    def action_view_purchase_order(self):
+        action = self.env["ir.actions.actions"]._for_xml_id("purchase.purchase_rfq")
+        action['domain'] = [('id', 'in', self.purchase_order_ids.ids)]
+        if self.purchase_order_count == 1:
+            action['views'] = [(self.env.ref('purchase.purchase_order_form').id, 'form')]
+            action['res_id'] = self.purchase_order_ids.id
         return action
 
     def action_new_price_sheet(self):
