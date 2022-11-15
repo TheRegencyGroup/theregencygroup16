@@ -178,6 +178,9 @@ export class OverlayTemplatePageComponent extends Component {
     }
 
     async onClickAddToCart() {
+        if (this.store.cart.addingToCart) {
+            return;
+        }
         if (!this.store.otPage.canAddedToCart) {
             return;
         }

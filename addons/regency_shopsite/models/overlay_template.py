@@ -46,6 +46,7 @@ class OverlayTemplate(models.Model):
                                                                 store=True, ondelete='restrict')
     hotels_without_prices = fields.One2many('res.partner', compute='_compute_hotels_without_prices')
     show_hotels_without_prices = fields.Boolean(compute='_compute_hotels_without_prices')
+    allow_edit = fields.Boolean(compute='_compute_allow_edit')
 
     @api.constrains('areas_data')
     def _check_areas_data(self):
@@ -138,6 +139,11 @@ class OverlayTemplate(models.Model):
                 rec.overlay_attribute_value_id = rec.overlay_attribute_value_ids[0]
             else:
                 rec.overlay_attribute_value_id = False
+
+    @api.depends('overlay_product_ids')
+    def _compute_allow_edit(self):
+        for rec in self:
+            rec.allow_edit = not bool(rec.overlay_product_ids) or not rec.id
 
     @api.onchange('product_template_id')
     @api.constrains('product_template_id')

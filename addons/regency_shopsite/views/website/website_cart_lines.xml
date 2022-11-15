@@ -1,6 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
+     <template id="cart" inherit_id="website_sale.cart">
+         <xpath expr="//t[@t-call='website_sale.wizard_checkout']/parent::div" position="replace">
+             <div class="mt-4"/>
+         </xpath>
+         <xpath expr="//a[contains(@href, '/shop/checkout')]/parent::div" position="replace"/>
+     </template>
+
+    <template id="short_cart_summary" inherit_id="website_sale.short_cart_summary">
+         <xpath expr="//a[contains(@href, '/shop/checkout')]" position="replace">
+             <button t-if="website_sale_order and website_sale_order.website_order_line"
+                class="btn btn-secondary float-end d-none d-xl-inline-block submit_cart">
+                 <span>Submit</span>
+             </button>
+         </xpath>
+     </template>
+
     <template id="cart_lines" inherit_id="website_sale.cart_lines">
         <xpath expr="//td[hasclass('td-img') and @align='center']" position="replace">
             <t t-if="line.product_id.overlay_product_id">

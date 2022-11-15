@@ -79,3 +79,11 @@ class WebsiteSaleRegency(WebsiteSale):
     def update_sale_order_line_delivery_address(self, sale_order_line_id, delivery_address_id, **kw):
         sale_order_line = request.env['sale.order.line'].browse(sale_order_line_id)
         sale_order_line.write({'delivery_address_id': delivery_address_id})
+
+    @http.route(['/shop/submit_cart'], type='json', auth='user', methods=['POST'], website=True, csrf=False)
+    def submit_cart(self):
+        order = request.website.sale_get_order(force_create=True)
+        if not order or order.state != 'draft':
+            return False
+        order.state = 'sent'
+        return order.state == 'sent'

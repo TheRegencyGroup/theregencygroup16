@@ -133,7 +133,7 @@
                             <QuantitySelector t-if="showQuantitySelector"/>
 
                             <button t-if="showAddToCartBtn" class="btn btn-block btn-dark product-add-to-cart"
-                                    t-att-class="{ 'product-add-to-cart-disabled': !store.otPage.canAddedToCart }"
+                                    t-att-class="{ 'product-add-to-cart-disabled': !store.otPage.canAddedToCart || store.cart.addingToCart }"
                                     t-on-click="onClickAddToCart">
                                 <span>Add to cart</span>
                                 <span class="icon-cart"></span>
