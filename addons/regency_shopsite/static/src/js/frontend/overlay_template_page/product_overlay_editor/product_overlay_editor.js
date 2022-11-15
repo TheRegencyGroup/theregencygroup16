@@ -4,6 +4,10 @@ import { useStore } from '@fe_owl_base/js/main';
 import { ProductOverlayPositionComponent } from './product_overlay_position';
 import Dialog from 'web.Dialog';
 import env from 'web.public_env';
+import {
+    PRODUCT_IMAGE_MODEL,
+    computeImageSrc
+} from "../../../main";
 
 const { Component, useRef, useState, onMounted } = owl;
 
@@ -18,7 +22,7 @@ export class ProductOverlayEditorComponent extends Component {
 
         this.imageUploadRef = useRef('image_upload_ref');
 
-        env.bus.on('get-overlay-editor-data', null, this.getOverlayAreaList.bind(this));
+        this.imageTimestamp = new Date().valueOf();
     }
 
     async onMounted() {
@@ -29,6 +33,26 @@ export class ProductOverlayEditorComponent extends Component {
         return Object.values(this.__owl__.children)
             .filter(e => e.component.constructor.name === 'ProductOverlayPositionComponent')
             .map(e => e.component);
+    }
+
+    get overlayPositionSwitcherList() {
+        return Object.values(this.store.otPage.overlayPositions).map(e => {
+            const valueId = this.store.otPage.selectedAreasImageAttributeValueId;
+            let imageId = e.selectedImages[valueId]?.imageId;
+            if (!imageId) {
+                imageId = Object.values(e.selectedImages)[0].imageId;
+            }
+            return {
+                id: e.id,
+                name: e.name,
+                previewImageSrc: computeImageSrc({
+                    id: imageId,
+                    model: PRODUCT_IMAGE_MODEL,
+                    field: 'image_128',
+                    timestamp: this.imageTimestamp,
+                }),
+            }
+        });
     }
 
     checkAreasWasChanged() {
@@ -45,18 +69,8 @@ export class ProductOverlayEditorComponent extends Component {
     getOverlayAreaList() {
         let data = {};
         for (let component of this.overlayPositionComponents) {
-            let overlayPosition = component.props.overlayPosition;
-            let image = component.getColorImage();
-            let imageData = {
-                position_name: overlayPosition.name,
-                background_image_size: {
-                    width: overlayPosition.canvasSize.width,
-                    height: overlayPosition.canvasSize.height,
-                },
-                background_image_id: image.imageId,
-                background_image_model: image.imageModel,
-            }
-            let areaList = {};
+            const overlayPosition = component.props.overlayPosition;
+            const areaList = {};
             for (let area of Object.values(component.areas)) {
                 let areaData = area.getOverlayImagesData();
                 if (!areaData.length) {
@@ -81,18 +95,16 @@ export class ProductOverlayEditorComponent extends Component {
         let data = [];
         for (let component of this.overlayPositionComponents) {
             let overlayPosition = component.props.overlayPosition;
-            let image = component.getColorImage();
+            let backgroundImageId = component.state.backgroundImage.id;
             let imageData = {
-                position_name: overlayPosition.name,
                 overlayPositionId: overlayPosition.id,
-                background_image_size: {
+                backgroundImageSize: {
                     width: overlayPosition.canvasSize.width,
                     height: overlayPosition.canvasSize.height,
                 },
-                background_image_id: image.imageId,
-                background_image_model: image.imageModel,
+                backgroundImageId,
             }
-            let areaList = [];
+            const areaList = [];
             for (let area of Object.values(component.areas)) {
                 areaList.push(await area.getPreviewImageData());
             }
@@ -102,27 +114,6 @@ export class ProductOverlayEditorComponent extends Component {
             data.push(imageData);
         }
         return data;
-    }
-
-    getImageSrc(colorImages) {
-        let baseUrl = window.location.origin;
-        let timestamp = new Date().valueOf();
-        if (!colorImages) {
-            return false;
-        }
-        let image = colorImages[this.store.otPage.selectedColorValueId];
-        if (!image) {
-            image = Object.values(colorImages).find(e => !!e.imageId && !!e.imageModel);
-        }
-        let id;
-        let model;
-        if (image) {
-            id = image.imageId;
-            model = image.imageModel;
-        }
-        return (id && model)
-            ? `${baseUrl}/web/image?model=${model}&id=${id}&field=image_128&unique=${timestamp}`
-            : false;
     }
 
     onClickSelectOverlayPosition(id, event) {

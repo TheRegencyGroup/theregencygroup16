@@ -30,7 +30,8 @@ class OverlayProduct(models.Model):
                                                 copy=False)
     overlay_product_area_image_ids = fields.One2many('overlay.product.area.image', 'overlay_product_id', readonly=True,
                                                      copy=False)
-    area_list_json = fields.Char(readonly=True)
+    overlay_product_area_image_attachment_ids = fields.Many2many('ir.attachment')
+    area_list_data = fields.Json()
     last_updated_date = fields.Datetime(readonly=True, copy=False)
     updated_by_id = fields.Many2one('res.users', readonly=True, copy=False)
 

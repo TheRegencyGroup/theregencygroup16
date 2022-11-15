@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="create_so_wizard_form_view" model="ir.ui.view">
+        <field name="name">sale_order.ca.form</field>
+        <field name="model">sale.order.ca.wizard</field>
+        <field name="arch" type="xml">
+             <form>
+                <sheet>
+                    <group>
+                        <field name="ca_line_ids" string="">
+                            <tree delete="0" create="0" editable="top">
+                                <field name="selected"/>
+                                <field name="product_id" readonly="1"/>
+                                <field name="selected_qty" readonly="1"/>
+                            </tree>
+                        </field>
+                    </group>
+                    <footer>
+                        <button string="Create SO" class="oe_highlight" type="object" name="create_so_from_ca"/>
+                        <button string="Cancel" special="cancel"/>
+                    </footer>
+                </sheet>
+              </form>
+        </field>
+    </record>
+
+</odoo>

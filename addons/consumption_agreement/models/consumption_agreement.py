@@ -11,7 +11,7 @@ class ConsumptionAgreement(models.Model):
     partner_id = fields.Many2one('res.partner', domain=[('contact_type', '=', 'customer')], string='Primary Customer')
     allowed_partner_ids = fields.Many2many('res.partner',  domain=[('contact_type', '=', 'customer')], string="Allowed Customers")
     line_ids = fields.One2many('consumption.agreement.line', 'agreement_id')
-    currency_id = fields.Many2one('res.currency')
+    currency_id = fields.Many2one('res.currency', default=lambda self: self.env.user.company_id.currency_id)
     state = fields.Selection([
         ('draft', 'Draft'),
         ('confirmed', 'Confirmed'),
@@ -134,6 +134,23 @@ class ConsumptionAgreement(models.Model):
             'url': self.get_portal_url(),
         }
 
+    def action_create_so(self):
+        so_wizard = self.env['sale.order.ca.wizard'].create(
+            {
+                'consumption_agreement_id': self.id,
+                'ca_line_ids': [(0, 0, {'consumption_agreement_line_id': ca_line.id}) for ca_line in self.line_ids]
+            })
+        return {
+            'name': _('Create SO'),
+            'type': 'ir.actions.act_window',
+            'view_mode': 'form',
+            'views': [(self.env.ref('consumption_agreement.create_so_wizard_form_view').id, 'form'),
+                      (False, 'tree')],
+            'res_model': 'sale.order.ca.wizard',
+            'res_id': so_wizard.id,
+            'target': 'new'
+        }
+
 
 class ConsumptionAggreementLine(models.Model):
     _name = 'consumption.agreement.line'
@@ -152,9 +169,13 @@ class ConsumptionAggreementLine(models.Model):
     currency_id = fields.Many2one(related='agreement_id.currency_id', store=True)
     state = fields.Selection(related='agreement_id.state', store=True)
     sale_order_line_ids = fields.One2many('sale.order.line', 'consumption_agreement_line_id')
-    partner_id = fields.Many2one(related='agreement_id.partner_id', domain=[('contact_type', '=', 'customer')], store=True)
-    allowed_partner_ids = fields.Many2many('res.partner', domain=[('contact_type', '=', 'customer')], string="Allowed Customers")
+    partner_id = fields.Many2one(related='agreement_id.partner_id', domain=[('contact_type', '=', 'customer')],
+                                 store=True)
+    allowed_partner_ids = fields.Many2many('res.partner', domain=[('contact_type', '=', 'customer')],
+                                           string="Allowed Customers")
     vendor_id = fields.Many2one('res.partner')
+    untaxed_amount = fields.Monetary(compute='_compute_untaxed_amount', store=True)
+    name = fields.Text(string='Description')
 
     @api.depends('qty_allowed', 'state', 'sale_order_line_ids', 'sale_order_line_ids.product_uom_qty')
     def _compute_qty_consumed(self):
@@ -176,3 +197,8 @@ class ConsumptionAggreementLine(models.Model):
             name = '%s - %s' % (rec.agreement_id.name, rec.product_id.name)
             result.append((rec.id, name))
         return result
+
+    @api.depends('price_unit', 'qty_allowed')
+    def _compute_untaxed_amount(self):
+        for line in self:
+            line.untaxed_amount = line.price_unit * line.qty_allowed

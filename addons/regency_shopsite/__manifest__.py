@@ -1,6 +1,6 @@
 {
     'name': 'Regency Shopsite',
-    'version': '16.0.0.9',
+    'version': '16.0.0.11',
     'author': 'OpsWay',
     'license': "Other proprietary",
     'depends': [
@@ -36,6 +36,7 @@
         'views/res_partner.xml',
         'views/res_config_settings.xml',
         'views/sale_portal_templates.xml',
+        'views/product_image_views.xml'
     ],
     'demo': [
         'data/demo/product_demo.xml',

@@ -53,33 +53,23 @@ class OverlayTemplatePage(http.Controller):
     @classmethod
     def _create_overlay_product_preview_images(cls, overlay_product_id, preview_images_data):
         for image_with_overlay in preview_images_data:
+            if not image_with_overlay.get('images', False):
+                continue
             overlay_position_id = request.env['overlay.position'].sudo().browse(
                 image_with_overlay['overlayPositionId']).exists()
             if not overlay_position_id:
                 continue
-            if image_with_overlay['background_image_model'] == 'product.template':
-                back_image_id = overlay_product_id.product_tmpl_id.image_1920
-            else:
-                back_image_id = request.env['product.image'].browse(
-                    image_with_overlay['background_image_id']).image_1920
-            back_image = Image.open(io.BytesIO(base64.b64decode(back_image_id)))
-            width = image_with_overlay['background_image_size']['width']
-            height = image_with_overlay['background_image_size']['height']
-            delta_x = 0
-            delta_y = 0
-            if back_image.width >= back_image.height:
-                height = int(width * (back_image.height / back_image.width))
-                delta_y = int((image_with_overlay['background_image_size']['height'] - height) / 2)
-            else:
-                width = int(height * (back_image.width / back_image.height))
-                delta_x = int((image_with_overlay['background_image_size']['width'] - width) / 2)
+            back_image_id = request.env['product.image'].browse(image_with_overlay['backgroundImageId'])
+            back_image = Image.open(io.BytesIO(base64.b64decode(back_image_id.image_1920)))
+            width = image_with_overlay['backgroundImageSize']['width']
+            height = image_with_overlay['backgroundImageSize']['height']
             back_image = back_image.resize((width, height))
             for image_data in image_with_overlay['images']:
                 image = Image.open(io.BytesIO(base64.b64decode(image_data['data'].encode())))
                 scale = image_data['scale']
                 image = image.resize((int(image.width * scale), int(image.height * scale)))
-                x = image_data['size']['x'] - delta_x
-                y = image_data['size']['y'] - delta_y
+                x = image_data['size']['x']
+                y = image_data['size']['y']
                 back_image.paste(image, (int(x), int(y)), image)
 
             result_image = io.BytesIO()
@@ -155,6 +145,7 @@ class OverlayTemplatePage(http.Controller):
 
             cls._create_overlay_product_preview_images(overlay_product, preview_images_data)
 
+            image_attachment_ids = []
             for item in overlay_area_list.values():
                 overlay_position_id = item.get('overlayPositionId', False)
                 if overlay_position_id:
@@ -169,19 +160,29 @@ class OverlayTemplatePage(http.Controller):
                     data = area.get('data', [])
                     if not data:
                         continue
+                    area_index = area.get('index')
                     for obj in data:
                         image_bytes = obj.get('image', False)
                         if not image_bytes:
                             continue
+                        area_object_index = obj.get('index')
+                        attachment_id = request.env['ir.attachment'].sudo().create([{
+                            'name': f'{overlay_product.name}__{overlay_position_id.name}_{area_index}_{area_object_index}',
+                            'datas': image_bytes.encode(),
+                            'type': 'binary',
+                        }])
+                        image_attachment_ids.append(attachment_id.id)
                         request.env['overlay.product.area.image'].sudo().create({
-                            'image': image_bytes.encode(),
+                            'image_attachment_id': attachment_id.id,
                             'overlay_position_id': overlay_position_id.id,
-                            'area_index': area.get('index'),
-                            'area_object_index': obj.get('index'),
+                            'area_index': area_index,
+                            'area_object_index': area_object_index,
                             'overlay_product_id': overlay_product.id,
                         })
+                        obj['attachmentId'] = attachment_id.id
                         del obj['image']
-            overlay_product.area_list_json = json.dumps(overlay_area_list)
+            overlay_product.overlay_product_area_image_attachment_ids = [Command.set(image_attachment_ids)]
+            overlay_product.area_list_data = overlay_area_list
 
         overlay_product._set_update_info()
 
@@ -206,7 +207,6 @@ class OverlayTemplatePage(http.Controller):
         overlay_attribute_id = request.env.ref('regency_shopsite.overlay_attribute')
         customization_attribute_id = request.env.ref('regency_shopsite.customization_attribute')
         color_attribute_id = request.env.ref('regency_shopsite.color_attribute')
-        size_attribute_id = request.env.ref('regency_shopsite.size_attribute')
 
         overlay_template_attribute_ids = overlay_template_id.overlay_attribute_line_ids.mapped('attribute_id')
         product_template_attribute_ids = product_template_id.attribute_line_ids.mapped('attribute_id')
@@ -257,9 +257,9 @@ class OverlayTemplatePage(http.Controller):
             'productName': product_template_id.name,
             'productDescription': product_template_id.description_sale,
             'attributeList': attribute_list,
-            'overlayTemplateAreasData': json.loads(overlay_template_id.areas_json),
+            'areasImageAttributeId': overlay_template_id.areas_image_attribute_id.id,
             'colorAttributeId': color_attribute_id.id,
-            'sizeAttributeId': size_attribute_id.id,
+            'overlayPositionsData': overlay_template_id.areas_data or {},
             'priceList': price_list,
             'options': {
                 'overlayProductIdUrlParameter': OVERLAY_PRODUCT_ID_URL_PARAMETER,
@@ -296,9 +296,8 @@ class OverlayTemplatePage(http.Controller):
                 'overlayProductId': overlay_product_id.id,
                 'overlayProductActive': overlay_product_id.active,
                 'overlayProductName': overlay_product_id.name if overlay_product_id else False,
-                'overlayProductAreaList': json.loads(overlay_product_id.area_list_json) or {},
+                'overlayProductAreaList': overlay_product_id.area_list_data or {},
                 'overlayProductAreaImageList': overlay_product_area_image_list,
-                'overlayProductAreaImageModel': overlay_product_id.overlay_product_area_image_ids._name,
                 'productId': product_id.id,
                 'attributeList': attribute_list,
             })

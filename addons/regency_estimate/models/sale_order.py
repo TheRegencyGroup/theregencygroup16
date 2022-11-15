@@ -22,6 +22,8 @@ class SaleOrder(models.Model):
 class SaleOrderLine(models.Model):
     _inherit = 'sale.order.line'
 
+    pricesheet_line_id = fields.Many2one('product.price.sheet.line')
+
     def _compute_tax_id(self):
         """
             Temporary disable taxes calculation

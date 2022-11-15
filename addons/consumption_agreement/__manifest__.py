@@ -18,7 +18,9 @@
         'views/consumption_agreement.xml',
         'views/consumption_agreement_portal.xml',
         'views/sale_order_portal.xml',
-        'security/ir.model.access.csv'
+        'security/ir.model.access.csv',
+        'wizard/create_so_wizard.xml',
+        'report/consumption_agreement.xml'
     ],
     'assets': {
         'web.assets_frontend': [

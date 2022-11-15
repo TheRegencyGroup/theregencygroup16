@@ -33,11 +33,6 @@ class SaleOrderLine(models.Model):
         return self.possible_delivery_address_ids.ids[0] if self.possible_delivery_address_ids else False
 
 
-    @api.onchange('product_id')
-    def onchange_product_partner(self):
-        if not self.delivery_partner_id:
-            self.delivery_partner_id = self.order_id.partner_shipping_id
-
     def _prepare_procurement_values(self, group_id=False):
         res = super()._prepare_procurement_values(group_id)
         if self.delivery_partner_id:
