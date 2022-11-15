@@ -82,7 +82,7 @@ class WebsiteSaleRegency(WebsiteSale):
 
     @http.route(['/shop/submit_cart'], type='json', auth='user', methods=['POST'], website=True, csrf=False)
     def submit_cart(self):
-        order = request.website.sale_get_order(force_create=True)
+        order = request.website.sale_get_order()
         if not order or order.state != 'draft':
             return False
         order.state = 'sent'
