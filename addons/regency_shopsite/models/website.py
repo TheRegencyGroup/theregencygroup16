@@ -51,3 +51,10 @@ class Website(models.Model):
             return Markup(json.dumps(cart_data))
 
         return cart_data
+
+    def _default_salesteam_id(self):
+        team = self.env.ref('regency_shopsite.team_shopsite_department', False)
+        if team and team.active:
+            return team.id
+        else:
+            return None
