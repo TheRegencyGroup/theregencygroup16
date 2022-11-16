@@ -71,8 +71,8 @@
                             >
                                 <tree editable="bottom">
                                     <field name="product_id"/>
-                                    <field name="allowed_partner_ids" widget="many2many_tags"/>
                                     <field name="name" string="Description"/>
+                                    <field name="allowed_partner_ids" widget="many2many_tags"/>
                                     <field name="vendor_id" optional="hide"/>
                                     <field name="qty_allowed"/>
                                     <field name="qty_available" string="Qty On Hand"/>
