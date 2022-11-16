@@ -83,11 +83,9 @@ class WebsiteSaleRegency(WebsiteSale):
     @http.route(['/shop/cart/add_new_address'],
                 type='json', auth="user", methods=['POST'], website=True, csrf=False)
     def create_and_link_delivery_address(self, sale_order_line_id, address_name: str, **kw):
+        new_address_creation = Command.create({'name': address_name, 'type': 'delivery', })
         sol = request.env['sale.order.line'].browse(sale_order_line_id)
-        new_address_vals = {'name': address_name,
-                            'type': 'delivery',
-                            'parent_id': sol.delivery_partner_id.id}
-        request.env['res.partner'].create(new_address_vals)
+        sol.delivery_partner_id.write({'child_ids': [new_address_creation]})
 
     @http.route(['/shop/submit_cart'], type='json', auth='user', methods=['POST'], website=True, csrf=False)
     def submit_cart(self):
