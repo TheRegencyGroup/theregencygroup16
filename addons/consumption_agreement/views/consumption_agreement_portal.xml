@@ -336,13 +336,16 @@
                 <table t-att-data-order-id="consumption.id" t-att-data-token="consumption.access_token" class="table table-sm" id="consumption_table">
                     <thead class="bg-100">
                         <tr>
-                            <th class="text-left"></th>
+                            <t t-if="consumption.state != 'draft'">
+                                <th class="text-left"></th>
+                            </t>
                             <th class="text-left">Products</th>
                             <th class="text-right">Allowed Customers</th>
                             <th class="text-right">Agreement Qty</th>
                             <th class="text-right">Ordered Qty</th>
                             <th class="text-right">Remaining Qty</th>
-                            <th t-attf-class="text-right {{ 'd-none d-sm-table-cell' if report_type == 'html' else '' }}">Unit Price</th>
+                            <th t-attf-class="text-right {{ 'd-none d-sm-table-cell' if report_type == 'html' else '' }}">
+                                Unit Price</th>
                         </tr>
                     </thead>
                     <tbody class="consumption_tbody">
@@ -356,7 +359,9 @@
                             <tr>
 <!--                                'bg-200 font-weight-bold o_line_section' if line.display_type == 'line_section' else 'font-italic o_line_note' if line.display_type == 'line_note' else ''-->
 <!--                                <t t-if="not line.display_type">-->
+                                <t t-if="consumption.state != 'draft'">
                                     <td id="selection"><input t-att-select-id="line.id" type="checkbox"/></td>
+                                </t>
                                     <td id="product_name"><span t-field="line.product_id.name"/></td>
                                     <td class="text-right">
                                         <div id="quote_qty">
