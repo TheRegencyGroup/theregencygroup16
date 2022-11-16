@@ -8,8 +8,7 @@ class ConsumptionAgreement(models.Model):
 
     name = fields.Char(required=True, copy=False, index=True, default=lambda self: _('New'))
     signed_date = fields.Date()
-    partner_id = fields.Many2one('res.partner', domain=[('contact_type', '=', 'customer')], string='Primary Customer',
-                                 required=True)
+    partner_id = fields.Many2one('res.partner', domain=[('contact_type', '=', 'customer')], string='Primary Customer')
     allowed_partner_ids = fields.Many2many('res.partner',  domain=[('contact_type', '=', 'customer')], string="Allowed Customers")
     line_ids = fields.One2many('consumption.agreement.line', 'agreement_id')
     currency_id = fields.Many2one('res.currency', default=lambda self: self.env.user.company_id.currency_id)
