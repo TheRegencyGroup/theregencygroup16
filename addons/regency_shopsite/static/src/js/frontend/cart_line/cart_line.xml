@@ -5,7 +5,7 @@
         <div>
             <select t-on-change="processDeliveryAddressChanging">
                 <option t-if="!currentDeliveryAddress" t-att-selected="!currentDeliveryAddress"/>
-                <option t-foreach="possibleDeliveryAddresses" t-as="address" t-key="address" t-att-value="address.modelId"
+                <option t-foreach="possibleDeliveryAddresses" t-as="address" t-key="address.modelId" t-att-value="address.modelId"
                         t-att-selected="address.modelId === currentDeliveryAddress"
                         t-esc="address.addressStr"/>
                 <option value="add_new_address">&lt; Add New Address &gt;</option>

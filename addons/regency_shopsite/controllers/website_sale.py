@@ -87,7 +87,12 @@ class WebsiteSaleRegency(WebsiteSale):
         new_address_vals = {'name': address_name,
                             'type': 'delivery',
                             'parent_id': sol.delivery_partner_id.id}
-        request.env['res.partner'].create(new_address_vals)
+        new_address = request.env['res.partner'].create(new_address_vals)
+        sol.delivery_address_id = new_address.id
+
+    @http.route(['/shop/cart/get_delivery_addresses_data'], type='json', methods=['POST'], auth='user', website=True)
+    def get_delivery_address_data(self, sale_order_line_id):
+        return request.env['sale.order.line'].browse(sale_order_line_id)._get_delivery_data()
 
     @http.route(['/shop/submit_cart'], type='json', auth='user', methods=['POST'], website=True, csrf=False)
     def submit_cart(self):
