@@ -27,10 +27,7 @@ export class DeliveryAddressCartLine extends Component {
             let address_name = 'Some Address Name' // TODO REG-312
             await this.createNewDeliveryAddress(address_name);
         } else {
-            let deliveryAddressId = (
-                selectionTagVal && (typeof selectionTagVal === 'string' || typeof selectionTagVal === 'number')
-            ) ? Number(selectionTagVal) : false;
-            await this.saveDeliveryAddress(deliveryAddressId);
+            await this.saveDeliveryAddress(selectionTagVal);
         }
     }
 
@@ -47,11 +44,13 @@ export class DeliveryAddressCartLine extends Component {
                 alert(e.message?.data?.message || e.toString())
             })
         })
-
     }
 
-    async saveDeliveryAddress(delivery_address_id) {
+    async saveDeliveryAddress(deliveryAddressId) {
         let sale_order_line_id = this.solId
+        let delivery_address_id = (
+            deliveryAddressId && (typeof deliveryAddressId === 'string' || typeof deliveryAddressId === 'number')
+        ) ? Number(deliveryAddressId) : false;
         dropPrevious.exec(() => {
             return rpc.query({
                 route: '/shop/cart/save_delivery_address',

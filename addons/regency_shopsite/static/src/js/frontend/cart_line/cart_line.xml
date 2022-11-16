@@ -3,12 +3,12 @@
 
     <t t-name="address_cart_line" owl="1">
         <div>
-            <select t-on-change="saveDeliveryAddress">
-                <option t-if="!currentDeliveryAddress"/>
+            <select t-on-change="processDeliveryAddressChanging">
+                <option t-if="!currentDeliveryAddress" t-att-selected="!currentDeliveryAddress"/>
                 <option t-foreach="possibleDeliveryAddresses" t-as="address" t-key="address" t-att-value="address.modelId"
-                        t-att-selected="address.modelId === currentDeliveryAddress">
-                    <t t-esc="address.addressStr"/>
-                </option>
+                        t-att-selected="address.modelId === currentDeliveryAddress"
+                        t-esc="address.addressStr"/>
+                <option value="add_new_address">&lt; Add New Address &gt;</option>
             </select>
         </div>
     </t>
