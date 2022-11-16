@@ -4,6 +4,7 @@
     <t t-name="address_cart_line" owl="1">
         <div>
             <select t-on-change="saveDeliveryAddress">
+                <option t-if="!currentDeliveryAddress"/>
                 <option t-foreach="possibleDeliveryAddresses" t-as="address" t-key="address" t-att-value="address.modelId"
                         t-att-selected="address.modelId === currentDeliveryAddress">
                     <t t-esc="address.addressStr"/>
