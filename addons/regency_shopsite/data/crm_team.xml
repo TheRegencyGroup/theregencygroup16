@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+
+    <record id="team_shopsite_department" model="crm.team">
+        <field name="name">Shopsite</field>
+        <field name="sequence">2</field>
+        <field name="company_id" eval="False"/>
+    </record>
+
+</odoo>
