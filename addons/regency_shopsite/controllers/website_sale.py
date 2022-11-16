@@ -85,5 +85,5 @@ class WebsiteSaleRegency(WebsiteSale):
         order = request.website.sale_get_order()
         if not order or order.state != 'draft':
             return False
-        order.state = 'sent'
-        return order.state == 'sent'
+        order.submit_so_and_send_notify()
+        return True

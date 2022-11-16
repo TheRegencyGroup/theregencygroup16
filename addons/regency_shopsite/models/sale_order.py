@@ -22,6 +22,14 @@ class SaleOrder(models.Model):
             result['price_list_id'] = kwargs['price_list_id']
         return result
 
+    def submit_so_and_send_notify(self):
+        self.state = 'sent'
+        email_template = self.env.ref('regency_shopsite.so_submitted')
+        email_values = {
+            'recipient_ids': [(4, pid) for pid in self.team_id.message_follower_ids.mapped('partner_id').ids],
+        }
+        email_template.send_mail(self.partner_id.id, email_values=email_values)
+
 
 class SaleOrderLine(models.Model):
     _inherit = 'sale.order.line'
