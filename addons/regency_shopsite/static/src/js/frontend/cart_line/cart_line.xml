@@ -3,7 +3,7 @@
 
     <t t-name="address_cart_line" owl="1">
         <div>
-            <select t-on-change="processDeliveryAddressChanging">
+            <select class="form-select" t-on-change="processDeliveryAddressChanging">
                 <option t-if="!currentDeliveryAddress" t-att-selected="!currentDeliveryAddress"/>
                 <option t-foreach="possibleDeliveryAddresses" t-as="address" t-key="address.modelId"
                         t-att-value="address.modelId"
@@ -20,8 +20,8 @@
             <div class="r_cart_add_address_modal_container">
                 <div class="r_cart_add_address_modal">
                     <input type="text" name="Name" class="form-control" t-ref="new_address_name_input"/>
-                    <button t-on-click="createNewDeliveryAddress">Submit</button>
-                    <button t-on-click="hideInputFormModal">Cancel</button>
+                    <button class='btn btn-primary mb32' t-on-click="createNewDeliveryAddress">Submit</button>
+                    <button class='btn btn-secondary mb32' t-on-click="hideInputFormModal">Cancel</button>
                 </div>
             </div>
         </t>
