@@ -13,6 +13,9 @@ export class DeliveryAddressCartLine extends Component {
     setup() {
         this.newAddressInputEls = {
             name: useRef('new_address_name_input'),
+            street: useRef('new_address_street_input'),
+            street2: useRef('new_address_street2_input'),
+            city: useRef('new_address_city_input'),
         }
         this.state = useState({
             showModal: false,
@@ -49,20 +52,28 @@ export class DeliveryAddressCartLine extends Component {
     }
 
     async createNewDeliveryAddress() {
-        let sale_order_line_id = this.solId;
-        let address_name = this.newAddressInputEls.name.el.value;
+        let addressParams = this.getParamsForAddressCreation()
         await dropPrevious.exec(() => {
             return rpc.query({
                 route: '/shop/cart/add_new_address',
                 params: {
-                    sale_order_line_id,
-                    address_name,
+                    ...addressParams
                 },
             }).catch((e) => {
                 alert(e.message?.data?.message || e.toString());
             });
         });
         env.bus.trigger('delivery-addresses-data-changed');
+    }
+
+    getParamsForAddressCreation(){
+        return {
+            sale_order_line_id: this.solId,
+            address_name: this.newAddressInputEls.name.el.value,
+            street: this.newAddressInputEls.street.el.value,
+            street2: this.newAddressInputEls.street2.el.value,
+            city: this.newAddressInputEls.city.el.value,
+        };
     }
 
     async saveDeliveryAddress(deliveryAddressId) {

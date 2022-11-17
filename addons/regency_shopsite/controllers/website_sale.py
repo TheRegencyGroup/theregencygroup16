@@ -86,7 +86,9 @@ class WebsiteSaleRegency(WebsiteSale):
         sol = request.env['sale.order.line'].browse(sale_order_line_id)
         new_address_vals = {'name': address_name,
                             'type': 'delivery',
-                            'parent_id': sol.delivery_partner_id.id}
+                            'parent_id': sol.delivery_partner_id.id,
+                            **kw
+                            }
         new_address = request.env['res.partner'].create(new_address_vals)
         sol.delivery_address_id = new_address.id
 
