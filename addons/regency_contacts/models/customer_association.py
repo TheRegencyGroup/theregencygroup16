@@ -11,9 +11,9 @@ class CustomerAssociation(models.Model):
     partner_ids = fields.Many2many('res.partner', relation="customer_association_res_partner_rel",
                                    column1='customer_association_id', column2='res_partner_id')
     left_partner_id = fields.Many2one('res.partner', store=True, compute_sudo=True, compute="_compute_partners",
-                                      inverse="_inverse_left")
+                                      inverse="_inverse_sides")
     right_partner_id = fields.Many2one('res.partner', store=True, compute_sudo=True, compute="_compute_partners",
-                                       inverse="_inverse_right")
+                                       inverse="_inverse_sides")
     display_partner_id = fields.Many2one('res.partner', compute="_compute_display_values")
     display_assoc_title = fields.Char(compute="_compute_display_values")
 
@@ -32,12 +32,13 @@ class CustomerAssociation(models.Model):
 
     @api.onchange('left_partner_id')
     def _onchange_left_partner_id(self):
+        entity_type = self.left_partner_id.entity_type if self.left_partner_id else False
         return {
             'domain': {
                 'association_type_id': [
                     "|",
-                    ('left_tech_name', "=", self.left_partner_id.entity_type if self.left_partner_id else False),
-                    ('right_tech_name', "=", self.left_partner_id.entity_type if self.left_partner_id else False),
+                    ('left_tech_name', "=", entity_type),
+                    ('right_tech_name', "=", entity_type),
                 ]
             }
         }
@@ -55,37 +56,22 @@ class CustomerAssociation(models.Model):
             }
         }
 
-    def _inverse_left(self):
-        for entry in self:
-            new_ids = set([])
-            if entry.left_partner_id:
-                new_ids.add(entry.left_partner_id.id)
-            right_ids = entry.partner_ids.filtered(lambda x: x.entity_type == entry.association_type_id.right_tech_name)
-            if right_ids:
-                new_ids.add(right_ids[0].id)
-            elif entry.right_partner_id:
-                new_ids.add(entry.right_partner_id.id)
-            entry.partner_ids = [Command.set(list(new_ids))]
+    def _set_sides(self, source):
+        left_ids = source.filtered(lambda x: x.entity_type == self.association_type_id.left_tech_name)
+        self.left_partner_id = left_ids[0] if left_ids else False
+        right_ids = source.filtered(lambda x: x.entity_type == self.association_type_id.right_tech_name)
+        self.right_partner_id = right_ids[0] if right_ids else False
 
-    def _inverse_right(self):
+    def _inverse_sides(self):
         for entry in self:
-            new_ids = set([])
-            left_ids = entry.partner_ids.filtered(lambda x: x.entity_type == entry.association_type_id.left_tech_name)
-            if left_ids:
-                new_ids.add(left_ids[0].id)
-            elif entry.left_partner_id:
-                new_ids.add(entry.left_partner_id.id)
-            if entry.right_partner_id:
-                new_ids.add(entry.right_partner_id.id)
-            entry.partner_ids = [Command.set(list(new_ids))]
+            sides = entry.left_partner_id + entry.right_partner_id
+            entry._set_sides(sides)
+            entry.partner_ids = [Command.set(sides.ids)]
 
     @api.depends('partner_ids')
     def _compute_partners(self):
         for entry in self:
-            left_ids = entry.partner_ids.filtered(lambda x: x.entity_type == entry.association_type_id.left_tech_name)
-            entry.left_partner_id = left_ids[0] if left_ids else False
-            right_ids = entry.partner_ids.filtered(lambda x: x.entity_type == entry.association_type_id.right_tech_name)
-            entry.right_partner_id = right_ids[0] if right_ids else False
+            entry._set_sides(entry.partner_ids)
 
     def _delete_incomplete(self):
         to_delete = self.env[self._name]
