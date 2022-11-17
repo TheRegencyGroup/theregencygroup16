@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="overlay_color_tree_view" model="ir.ui.view">
+        <field name="name">overlay.color.view.tree</field>
+        <field name="model">overlay.color</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="overlay_color_form_view" model="ir.ui.view">
+        <field name="name">overlay.color.view.form</field>
+        <field name="model">overlay.color</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="color" widget="color"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="overlay_color_action" model="ir.actions.act_window">
+        <field name="name">Overlay colors</field>
+        <field name="res_model">overlay.color</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <menuitem id="overlay_color_menuitem"
+              parent="sale.menu_sale_config"
+              action="overlay_color_action"/>
+
+</odoo>

@@ -2,6 +2,14 @@
 <templates>
 
     <t t-name="product_overlay_editor" owl="1">
+        <t t-foreach="fontList" t-as="font" t-key="font.id">
+             <style type="text/css">
+                 @font-face {
+                     font-family: '<t t-esc="font.name"/>';
+                     src: url(/web/content/overlay.font/<t t-esc="font.id"/>/font);
+                 }
+             </style>
+        </t>
         <div class="product_overlay_editor">
             <div class="product_overlay_editor_positions">
                 <t t-foreach="Object.values(store.otPage.overlayPositions)" t-as="position"
@@ -30,21 +38,45 @@
 
     <t t-name="product_overlay_position" owl="1">
         <div class="product_overlay_position_editor">
-            <div t-if="!store.otPage.hasOverlayProductId || store.otPage.editMode" class="product_overlay_position_editor_tools">
-                <label t-att-class="{ 'product_overlay_disabled': !state.selectedAreaIndex }"
-                       t-attf-for="upload_area_image_{{props.overlayPosition.id}}"
-                       title="Upload image">
-                    <i class="fa fa-upload"/>
-                </label>
-                <input type="file" t-att-accept="acceptFileExtensionsForAreas"
-                       t-attf-id="upload_area_image_{{props.overlayPosition.id}}"
-                       t-on-change="onChangeUploadImage"
-                       t-ref="image_upload_ref"/>
-                <button class="product_overlay_position_remove_active_obj"
+            <div t-if="!store.otPage.hasOverlayProductId || store.otPage.editMode"
+                 class="product_overlay_position_editor_tools">
+                <t t-if="selectedAreaIsText">
+                    <div class="ot_add_text_block">
+                        <button class="ot_tools_btn"
+                                t-att-class="{ 'product_overlay_disabled': !state.selectedAreaIndex }"
+                                t-on-click="onClickOpenAddTextPopover"
+                                title="Add text">
+                            <i class="fa fa-font"/>
+                        </button>
+                        <div t-if="state.showAddTextPopover" class="ot_add_text_popover">
+                            <div class="ot_add_text_popover_top">
+                                <textarea t-ref="add_text_input"/>
+                            </div>
+                            <div class="ot_add_text_popover_bottom">
+                                <button t-on-click="onClickCloseAddTextPopover">CANCEL</button>
+                                <button t-on-click="onClickAddText">ADD</button>
+                            </div>
+                        </div>
+                    </div>
+                </t>
+                <t t-else="">
+                    <label class="ot_tools_btn"
+                           t-att-class="{ 'product_overlay_disabled': !state.selectedAreaIndex }"
+                           t-attf-for="upload_area_image_{{props.overlayPosition.id}}"
+                           title="Upload image">
+                        <i class="fa fa-upload"/>
+                    </label>
+                    <input type="file" t-att-accept="acceptFileExtensionsForAreas"
+                           t-attf-id="upload_area_image_{{props.overlayPosition.id}}"
+                           t-on-change="onChangeUploadImage"
+                           t-ref="image_upload_ref"/>
+                </t>
+                <button class="ot_tools_btn product_overlay_position_remove_active_obj"
                         t-att-class="{ 'product_overlay_disabled': !state.selectedAreaIndex }"
                         t-on-click="onClickRemoveActiveObject"
                         title="Remove active object"/>
-                <button t-att-class="{ 'product_overlay_disabled': !state.selectedAreaIndex }"
+                <button class="ot_tools_btn"
+                        t-att-class="{ 'product_overlay_disabled': !state.selectedAreaIndex }"
                         t-on-click="onClickRemoveAllObjects"
                         title="Remove all objects">
                     <i class="fa fa-close"/>

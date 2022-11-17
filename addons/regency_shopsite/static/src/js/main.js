@@ -21,3 +21,7 @@ export function computeAttachmentLink(attachmentId) {
     let baseUrl = window.location.origin;
     return `${baseUrl}/web/content/${attachmentId}`;
 }
+
+export function enableCanvasPointerEvents(canvas, state) {
+    canvas.upperCanvasEl.style.pointerEvents = state ? 'all' : 'none';
+}

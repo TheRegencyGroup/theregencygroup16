@@ -31,12 +31,14 @@ export class ProductOverlayPositionComponent extends Component {
         this.state = useState({
             backgroundImage: {},
             selectedAreaIndex: null,
+            showAddTextPopover: false,
         });
 
         this.areas = {};
 
         this.imageRef = useRef('image_ref');
         this.canvasContainerRef = useRef('canvas_container_ref');
+        this.addTextInput = useRef('add_text_input');
 
         this.loadImage = false;
         this.lastSelectedAreasImageAttributeValueId = this.store.otPage.selectedAreasImageAttributeValueId;
@@ -73,6 +75,13 @@ export class ProductOverlayPositionComponent extends Component {
 
     get overlayPositionId() {
         return this.props.overlayPosition.id;
+    }
+
+    get selectedAreaIsText() {
+        if (this.state.selectedAreaIndex) {
+            return this.areas[this.state.selectedAreaIndex].type === TEXT_AREA_TYPE;
+        }
+        return false;
     }
 
     updateImageSrc() {
@@ -121,11 +130,11 @@ export class ProductOverlayPositionComponent extends Component {
                     }
                 }
                 if (areaData.areaType === RECTANGLE_AREA_TYPE) {
-                    area = new RectangleArea(areaData.data, this.canvasContainerRef.el, areaData.index, areaObjList);
+                    area = new RectangleArea(areaData, this.canvasContainerRef.el, areaObjList);
                 } else if (areaData.areaType === ELLIPSE_AREA_TYPE) {
-                    area = new EllipseArea(areaData.data, this.canvasContainerRef.el, areaData.index, areaObjList);
+                    area = new EllipseArea(areaData, this.canvasContainerRef.el, areaObjList);
                 } else if (areaData.areaType === TEXT_AREA_TYPE) {
-                    area = new TextArea(areaData.data, this.canvasContainerRef.el, areaData.index, areaObjList);
+                    area = new TextArea(areaData, this.canvasContainerRef.el, areaObjList);
                 }
                 if (area) {
                     area.onSelectedArea(this.onSelectedArea.bind(this));
@@ -147,6 +156,31 @@ export class ProductOverlayPositionComponent extends Component {
         }
     }
 
+    closeAddTextPopover() {
+        this.state.showAddTextPopover = false;
+        this.addTextInput.el.value = '';
+    }
+
+    onClickOpenAddTextPopover() {
+        this.state.showAddTextPopover = true;
+    }
+
+    onClickCloseAddTextPopover() {
+        this.closeAddTextPopover();
+    }
+
+    onClickAddText() {
+        const value = this.addTextInput.el.value.trim();
+        if (!value) {
+            return;
+        }
+        this.closeAddTextPopover();
+        this.areas[this.state.selectedAreaIndex].addObject({
+            text: value,
+            addByUser: true,
+        });
+    }
+
     onChangeUploadImage(event) {
         if (!this.state.selectedAreaIndex) {
             return;
@@ -156,9 +190,9 @@ export class ProductOverlayPositionComponent extends Component {
             const image = new Image();
             image.src = reader.result;
             image.onload = () => {
-                this.areas[this.state.selectedAreaIndex].addImageObject({
+                this.areas[this.state.selectedAreaIndex].addObject({
                     image,
-                    uploadedByUser: true,
+                    addByUser: true,
                 });
                 event.target.value = '';
             };
