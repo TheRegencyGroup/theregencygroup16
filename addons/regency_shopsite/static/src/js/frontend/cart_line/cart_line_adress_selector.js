@@ -4,13 +4,18 @@ import { mountComponentAsWidget } from '@fe_owl_base/js/main';
 import rpc from 'web.rpc';
 import Concurrency from 'web.concurrency';
 import env from 'web.public_env';
-import { useBus } from "@web/core/utils/hooks";
 
-const { Component } = owl;
+const { Component, useState, useRef} = owl;
 const dropPrevious = new Concurrency.MutexedDropPrevious();
 
 export class DeliveryAddressCartLine extends Component {
     setup() {
+        this.newAddressInputEls = {
+            name: useRef('new_address_name_input'),
+        }
+        this.state = useState({
+            showModal: false,
+        });
         env.bus.on('delivery-addresses-data-changed', null, this.onChangedDeliveryAddressData.bind(this));
     }
 
@@ -26,18 +31,24 @@ export class DeliveryAddressCartLine extends Component {
         return this.props.solData.possibleDeliveryAddresses
     }
 
+    hideInputFormModal() {
+        this.state.showModal = false;
+    }
+
     async processDeliveryAddressChanging(ev) {
         let selectionTagVal = ev.target.value
         if (selectionTagVal === 'add_new_address') {
-            let address_name = 'Some Address Name' // TODO REG-312
-            await this.createNewDeliveryAddress(address_name);
+            this.state.showModal = true
+            // let address_name = 'Some Address Name' // TODO REG-312
+            // await this.createNewDeliveryAddress(address_name);
         } else {
             await this.saveDeliveryAddress(selectionTagVal);
         }
     }
 
-    async createNewDeliveryAddress(address_name) {
+    async createNewDeliveryAddress() {
         let sale_order_line_id = this.solId
+        let address_name = this.newAddressInputEls.name.el.value
         await dropPrevious.exec(() => {
             return rpc.query({
                 route: '/shop/cart/add_new_address',
@@ -83,6 +94,7 @@ export class DeliveryAddressCartLine extends Component {
         // updates props
         this.props.solData = JSON.parse(deliveryAddressData)
         this.render()
+        this.hideInputFormModal()
 
     }
 }
