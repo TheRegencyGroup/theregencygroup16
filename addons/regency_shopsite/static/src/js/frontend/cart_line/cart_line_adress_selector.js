@@ -11,10 +11,10 @@ const dropPrevious = new Concurrency.MutexedDropPrevious();
 
 export class DeliveryAddressCartLine extends Component {
     setup() {
-        useBus(this.env.bus, 'delivery-addresses-data-changed', this.onChangedDeliveryAddressData.bind(this));
+        env.bus.on('delivery-addresses-data-changed', null, this.onChangedDeliveryAddressData.bind(this));
     }
 
-    get solId() { // 'sol' = 'sale order line'
+    get solId() { // 'sol' means 'sale order line'
         return this.props.solData.solId
     }
 
