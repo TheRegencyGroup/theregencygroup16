@@ -54,6 +54,11 @@ class PurchaseOrder(models.Model):
                         'produced_overseas': line.produced_overseas,
                     })
 
+    def _prepare_invoice(self):
+        invoice_vals = super()._prepare_invoice()
+        invoice_vals['invoice_date'] = fields.Datetime.now()
+        return invoice_vals
+
 
 class MyPurchaseOrderLine(models.Model):
     _inherit = 'purchase.order.line'
