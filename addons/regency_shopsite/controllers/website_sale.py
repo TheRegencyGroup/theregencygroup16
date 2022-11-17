@@ -1,4 +1,4 @@
-from odoo import _, http
+from odoo import _, http, Command
 from odoo.exceptions import ValidationError
 from odoo.http import request
 from odoo.addons.website_sale.controllers.main import WebsiteSale
@@ -79,6 +79,22 @@ class WebsiteSaleRegency(WebsiteSale):
     def update_sale_order_line_delivery_address(self, sale_order_line_id, delivery_address_id, **kw):
         sale_order_line = request.env['sale.order.line'].browse(sale_order_line_id)
         sale_order_line.write({'delivery_address_id': delivery_address_id})
+
+    @http.route(['/shop/cart/add_new_address'],
+                type='json', auth="user", methods=['POST'], website=True, csrf=False)
+    def create_and_link_delivery_address(self, sale_order_line_id, address_name: str, **kw):
+        sol = request.env['sale.order.line'].browse(sale_order_line_id)
+        new_address_vals = {'name': address_name,
+                            'type': 'delivery',
+                            'parent_id': sol.delivery_partner_id.id,
+                            **kw
+                            }
+        new_address = request.env['res.partner'].create(new_address_vals)
+        sol.delivery_address_id = new_address.id
+
+    @http.route(['/shop/cart/get_delivery_addresses_data'], type='json', methods=['POST'], auth='user', website=True)
+    def get_delivery_address_data(self, sale_order_line_id):
+        return request.env['sale.order.line'].browse(sale_order_line_id)._get_delivery_data()
 
     @http.route(['/shop/submit_cart'], type='json', auth='user', methods=['POST'], website=True, csrf=False)
     def submit_cart(self):

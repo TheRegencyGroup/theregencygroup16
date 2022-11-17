@@ -3,14 +3,43 @@
 
     <t t-name="address_cart_line" owl="1">
         <div>
-            <select t-on-change="saveDeliveryAddress">
-                <option t-if="!currentDeliveryAddress"/>
-                <option t-foreach="possibleDeliveryAddresses" t-as="address" t-key="address" t-att-value="address.modelId"
-                        t-att-selected="address.modelId === currentDeliveryAddress">
-                    <t t-esc="address.addressStr"/>
-                </option>
+            <select class="form-select" t-on-change="processDeliveryAddressChanging">
+                <option t-if="!currentDeliveryAddress" t-att-selected="!currentDeliveryAddress"/>
+                <option t-foreach="possibleDeliveryAddresses" t-as="address" t-key="address.modelId"
+                        t-att-value="address.modelId"
+                        t-att-selected="address.modelId === currentDeliveryAddress"
+                        t-esc="address.addressStr"/>
+                <option value="add_new_address">&lt; Add New Address &gt;</option>
             </select>
+            <t t-call="new_address_form_input"/>
         </div>
     </t>
+
+    <t t-name="new_address_form_input" owl="1">
+        <t t-if="this.state.showModal" t-portal="'body'">
+            <div class="r_cart_add_address_modal_container">
+            <div class="r_cart_add_address_modal" style="padding: 20px">
+                <div>
+                    <span>Address Name</span>
+                    <input type="text" name="Name" class="form-control" t-ref="new_address_name_input"/>
+                    <span>Street</span>
+                    <input type="text" name="Street" class="form-control" t-ref="new_address_street_input"/>
+                    <span>Street2</span>
+                    <input type="text" name="Street 2" class="form-control" t-ref="new_address_street2_input"/>
+                    <span>City</span>
+                    <input type="text" name="City" class="form-control" t-ref="new_address_city_input"/>
+                </div>
+                <div class="d-flex justify-content-between" style="padding: 10px">
+                    <button t-on-click="createNewDeliveryAddress" class='btn btn-primary mb32' style="margin:20px 60px;">
+                        Submit
+                    </button>
+                    <button t-on-click="hideInputFormModal" class='btn btn-secondary mb32' style="margin:20px 60px;">
+                        Cancel
+                    </button>
+                </div>
+            </div>
+        </t>
+    </t>
+
 
 </templates>
