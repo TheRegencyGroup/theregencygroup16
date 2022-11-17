@@ -452,7 +452,7 @@
                 <t t-else="">
                     <em t-field="consumption.note"/>
                 </t>
-                <div t-if="consumption.state == 'draft'" class="consumption_legal_accept">
+                <div t-if="consumption.state == 'draft'" class="regency_legal_accept">
                     <input class="form-check-input" id="consumption_legal_accept" type="checkbox"
                            t-att-checked="consumption.legal_accepted" t-att-data-consumption-id="consumption.id"/>
                     <label class="form-check-label" for="consumption_legal_accept">By checking this box, you are agreeing to our

@@ -1,6 +1,7 @@
 from odoo import api, fields, models, _, Command
 from odoo.exceptions import UserError
 from odoo.tools import html_keep_url, is_html_empty
+from odoo.addons.regency_tools import SystemMessages
 
 
 class ConsumptionAgreement(models.Model):
@@ -107,6 +108,7 @@ class ConsumptionAgreement(models.Model):
 
     def create_sale_order(self, selected_line_ids):
         self.ensure_one()
+        order_count = self.sale_order_count
         order = self.env['sale.order'].create({'access_token': self.access_token,
                                        'partner_id': self.partner_id.id,
                                        'consumption_agreement_id': self.id,
@@ -118,10 +120,11 @@ class ConsumptionAgreement(models.Model):
                                                 'product_uom': p.product_id.uom_id.id,
                                                 'consumption_agreement_line_id': p.id
                                             }) for p in self.line_ids.filtered(lambda l: l.id in selected_line_ids)]})
-        return order
+        return order, order_count
 
     def generate_purchase_order(self):
         self.ensure_one()
+        order_count = self.purchase_order_count
         new_purchase_orders = self.env['purchase.order']
         for line in self.line_ids:
             seller = line.product_id._select_seller(quantity=line.qty_allowed)
@@ -137,12 +140,24 @@ class ConsumptionAgreement(models.Model):
                 })]
             })
             new_purchase_orders += po
-        action = self.env["ir.actions.act_window"]._for_xml_id("purchase.purchase_rfq")
-        action['domain'] = [('id', 'in', new_purchase_orders.ids)]
-        if len(new_purchase_orders) == 1:
-            action['views'] = [(self.env.ref('purchase.purchase_order_form').id, 'form')]
-            action['res_id'] = new_purchase_orders
-        return action
+        if not order_count:
+            action = self.env["ir.actions.act_window"]._for_xml_id("purchase.purchase_rfq")
+            action['domain'] = [('id', 'in', new_purchase_orders.ids)]
+            if len(new_purchase_orders) == 1:
+                action['views'] = [(self.env.ref('purchase.purchase_order_form').id, 'form')]
+                action['res_id'] = new_purchase_orders
+            return action
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'display_notification',
+            'params': {
+                'title': _(SystemMessages.get('M-009') % (
+                ', '.join([o.name for o in new_purchase_orders]), 'are' if len(new_purchase_orders) > 1 else 'is')),
+                'type': 'success',
+                'sticky': False,
+                'next': {'type': 'ir.actions.act_window_close'}
+            }
+        }
 
     @api.model
     def create(self, vals):
