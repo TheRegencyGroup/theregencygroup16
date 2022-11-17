@@ -9,6 +9,7 @@ const { Component, useState, useRef} = owl;
 const dropPrevious = new Concurrency.MutexedDropPrevious();
 
 export class DeliveryAddressCartLine extends Component {
+    // TODO REG-312 1) minimal address vals:
     setup() {
         this.newAddressInputEls = {
             name: useRef('new_address_name_input'),
@@ -20,51 +21,52 @@ export class DeliveryAddressCartLine extends Component {
     }
 
     get solId() { // 'sol' means 'sale order line'
-        return this.props.solData.solId
+        return this.props.solData.solId;
     }
 
     get currentDeliveryAddress() {
-        return this.props.solData.currentDeliveryAddress
+        return this.props.solData.currentDeliveryAddress;
     }
 
     get possibleDeliveryAddresses() {
-        return this.props.solData.possibleDeliveryAddresses
+        return this.props.solData.possibleDeliveryAddresses;
     }
 
     hideInputFormModal() {
         this.state.showModal = false;
     }
+    displayInputFormModal() {
+        this.state.showModal = true;
+    }
 
     async processDeliveryAddressChanging(ev) {
-        let selectionTagVal = ev.target.value
+        let selectionTagVal = ev.target.value;
         if (selectionTagVal === 'add_new_address') {
-            this.state.showModal = true
-            // let address_name = 'Some Address Name' // TODO REG-312
-            // await this.createNewDeliveryAddress(address_name);
+            this.displayInputFormModal();
         } else {
             await this.saveDeliveryAddress(selectionTagVal);
         }
     }
 
     async createNewDeliveryAddress() {
-        let sale_order_line_id = this.solId
-        let address_name = this.newAddressInputEls.name.el.value
+        let sale_order_line_id = this.solId;
+        let address_name = this.newAddressInputEls.name.el.value;
         await dropPrevious.exec(() => {
             return rpc.query({
                 route: '/shop/cart/add_new_address',
                 params: {
                     sale_order_line_id,
-                    address_name, // TODO REG-312 clarify and add other params
+                    address_name,
                 },
             }).catch((e) => {
-                alert(e.message?.data?.message || e.toString())
+                alert(e.message?.data?.message || e.toString());
             });
         });
         env.bus.trigger('delivery-addresses-data-changed');
     }
 
     async saveDeliveryAddress(deliveryAddressId) {
-        let sale_order_line_id = this.solId
+        let sale_order_line_id = this.solId;
         let delivery_address_id = (
             deliveryAddressId && (typeof deliveryAddressId === 'string' || typeof deliveryAddressId === 'number')
         ) ? Number(deliveryAddressId) : false;
@@ -76,9 +78,9 @@ export class DeliveryAddressCartLine extends Component {
                     delivery_address_id,
                 },
             }).catch((e) => {
-                alert(e.message?.data?.message || e.toString())
-            })
-        })
+                alert(e.message?.data?.message || e.toString());
+            });
+        });
     }
 
     async onChangedDeliveryAddressData() {
@@ -89,13 +91,12 @@ export class DeliveryAddressCartLine extends Component {
                     sale_order_line_id,
                 },
             }).catch((e) => {
-                alert(e.message?.data?.message || e.toString())
+                alert(e.message?.data?.message || e.toString());
             });
         // updates props
-        this.props.solData = JSON.parse(deliveryAddressData)
-        this.render()
-        this.hideInputFormModal()
-
+        this.props.solData = JSON.parse(deliveryAddressData);
+        this.render();
+        this.hideInputFormModal();
     }
 }
 
