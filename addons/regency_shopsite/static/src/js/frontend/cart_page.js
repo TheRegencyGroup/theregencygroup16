@@ -11,10 +11,13 @@ publicWidget.registry.SubmitCart = publicWidget.Widget.extend({
 
     async _onClickSubmit(event) {
         new Promise((resolve, reject) => {
-            Dialog.confirm(this, 'You want to submit the order?', {
-                confirm_callback: resolve,
-                cancel_callback: reject,
-            }).on('closed', null, reject);
+            Dialog.confirm(
+                this,
+                'Are you sure that you want to submit the cart? Once you submit, the cart will become unavailable for editing',
+                {
+                    confirm_callback: resolve,
+                    cancel_callback: reject,
+                }).on('closed', null, reject);
         }).then(confirm => {
             if (!confirm) {
                 return;
