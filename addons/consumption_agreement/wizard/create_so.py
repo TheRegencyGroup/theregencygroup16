@@ -9,8 +9,12 @@ class SaleOrderCAWizard(models.TransientModel):
     ca_line_ids = fields.One2many('sale.order.ca.line.wizard', 'sale_order_ca_id')
 
     def create_so_from_ca(self):
-        self.consumption_agreement_id.create_sale_order(
+        order = self.consumption_agreement_id.create_sale_order(
             selected_line_ids=self.ca_line_ids.filtered(lambda f: f.selected).mapped('consumption_agreement_line_id').ids)
+        action = self.env["ir.actions.act_window"]._for_xml_id("sale.action_orders")
+        action['views'] = [(self.env.ref('sale.view_order_form').id, 'form')]
+        action['res_id'] = order.id
+        return action
 
 
 class SaleOrderCALineWizard(models.TransientModel):

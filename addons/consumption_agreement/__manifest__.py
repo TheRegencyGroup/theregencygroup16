@@ -25,6 +25,7 @@
     'assets': {
         'web.assets_frontend': [
             'consumption_agreement/static/src/js/**/*',
+            'consumption_agreement/static/src/frontend/js/**/*.js',
         ],
     },
     'installable': True,

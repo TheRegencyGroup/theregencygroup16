@@ -72,7 +72,7 @@
                                 mode="tree"
                                 attrs="{'readonly': [('state', 'not in', ['draft'])]}"
                             >
-                                <tree editable="bottom">
+                                <tree editable="bottom" no_open="1">
                                     <field name="product_id"/>
                                     <field name="name" string="Description"/>
                                     <field name="allowed_partner_ids" widget="many2many_tags"/>
