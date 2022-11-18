@@ -47,6 +47,7 @@
         'views/fee_value.xml',
         'data/fee_type.xml',
         'views/stock_picking.xml',
+        'views/account_move.xml',
     ],
     'demo': [
     ],
