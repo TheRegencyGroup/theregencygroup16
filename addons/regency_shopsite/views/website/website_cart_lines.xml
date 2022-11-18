@@ -47,11 +47,11 @@
         <xpath expr="//span[@t-field='line.price_reduce_taxinc']" position="attributes">
             <attribute name="t-field">line.price_total</attribute>
         </xpath>
-        <xpath expr="//table[@id='cart_products']/thead//th[hasclass('td-img')]" position="after">
+        <xpath expr="//table[@id='cart_products']/thead//th[hasclass('td-qty')]" position="before">
             <th class="text-center">Hotel</th>
             <th class="text-center">Address</th>
         </xpath>
-        <xpath expr="//td[hasclass('td-product_name')]" position="before">
+        <xpath expr="//td[hasclass('td-product_name')]" position="after">
             <td align="center">
                 <div>
                     <t t-esc="line.delivery_partner_id.name"/>
