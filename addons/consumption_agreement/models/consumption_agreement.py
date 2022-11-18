@@ -9,7 +9,7 @@ class ConsumptionAgreement(models.Model):
     def _get_partner_id_domain(self):
         association_type_ids = [self.env.ref('regency_contacts.hotel_group_to_management_group').id,
                                 self.env.ref('regency_contacts.management_group_to_hotel').id]
-        return [('association_ids.association_type_id.left_to_right_name', 'in', association_type_ids)]
+        return [('association_ids.association_type_id.id', 'in', association_type_ids)]
 
     name = fields.Char(required=True, copy=False, index=True, default=lambda self: _('New'))
     signed_date = fields.Date()
