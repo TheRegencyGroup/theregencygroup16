@@ -34,12 +34,16 @@ class OverlayAreasWidget extends Component {
         useBus(this.env.bus, "RELATIONAL_MODEL:WILL_SAVE_URGENTLY", this.commitChanges.bind(this));
         useBus(this.env.bus, "RELATIONAL_MODEL:NEED_LOCAL_CHANGES", this.commitChanges.bind(this));
         legacyEnv.bus.on("change-field", this, this.onChangeField.bind(this));
+        this.env.bus.on("discard-changes", this, this.discardChanges.bind(this));
+
+        this.fontList = this.getFontList();
+        this.colorList = this.getColorList();
 
         this.init();
     }
 
     init() {
-        this.state.overlayPositions =  this.value || {};
+        this.state.overlayPositions =  this.value;
         this.state.productTemplateImages = [];
         this.state.productTemplateImagesLoaded = false;
         this.state.imagesListModalData = false;
@@ -53,12 +57,17 @@ class OverlayAreasWidget extends Component {
         this.downloadProductTemplateImages();
     }
 
+    discardChanges() {
+        this.state.overlayPositions = {};
+        this.reInitOverlayPositions = true;
+    }
+
     get editMode() {
         return this.env.model.root.isDirty;
     }
 
     get value() {
-        return this.props.value || {};
+        return JSON.parse(JSON.stringify((this.props.value || {})));
     }
 
     get productTemplateId() {
@@ -138,6 +147,10 @@ class OverlayAreasWidget extends Component {
     onPatched() {
         if (this.lastRecordId !== this.props.record.__bm_handle__) {
             this.init();
+        }
+        if (this.reInitOverlayPositions) {
+            this.reInitOverlayPositions = false;
+            this.state.overlayPositions = this.value;
         }
     }
 
@@ -300,8 +313,8 @@ class OverlayAreasWidget extends Component {
         let value = {}
         for (let position of this.overlayAreasPositions) {
             let areaList = {};
-            if (position.overlay) {
-                for (let area of Object.values(position.overlay.areaList)) {
+            if (position.canvas) {
+                for (let area of Object.values(position.state.areaList)) {
                     let objectBoundingRect = area.object.getBoundingRect();
                     areaList[area.index] = {
                         index: area.index,
@@ -343,6 +356,21 @@ class OverlayAreasWidget extends Component {
             return;
         }
         this.props.update(value);
+    }
+
+    getFontList() {
+        let list = [{ id: 'default_0', name: 'Arial' }];
+        if (this.props.record.data.all_overlay_fonts) {
+            list = [
+                ...list,
+                ...this.props.record.data.all_overlay_fonts.map(e => ({ id: e.id, name: e.font_name })),
+            ];
+        }
+        return list;
+    }
+
+    getColorList() {
+        return this.props.record.data.all_overlay_colors || [];
     }
 }
 

@@ -22,7 +22,7 @@
 
   .o_field_overlay_areas {
     width: 100%;
-    margin-top: -33px;
+    margin-top: 10px;
     display: flex;
     flex-direction: column;
     align-items: end;
@@ -32,7 +32,7 @@
     width: 100%;
 
     .ot_areas_position {
-      margin-top: 16px;
+      margin-top: 10px;
       display: flex;
       flex-direction: column;
       border: 1px solid map-get($theme-colors, 'primary');
@@ -154,68 +154,87 @@
             background-color: #FFFFFF;
           }
 
-          .ot_areas_position_area_list {
+          .ot_area_list {
+            width: 100%;
             margin-left: 8px;
             display: flex;
             flex-direction: column;
 
-            &_item {
+            .ot_area_list_item {
               margin-bottom: 8px;
               display: flex;
               align-items: stretch;
-              background-color: #828c8c;
-              color: #FFFFFF;
+              justify-content: space-between;
+              background-color: #c0d1d1;
+              color: #463b3b;
               cursor: pointer;
 
-              &_selected, &:hover {
+              &.selected, &:hover {
                 background-color: map-get($theme-colors, 'primary');
+                color: #ffffff;
               }
 
-              &_index {
-                padding: 5px 10px 5px 10px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                border-right: 1px solid #f6f7fa;
-                font-weight: bold;
-              }
-
-              &_data {
+              .ot_area_list_item_left {
                 display: flex;
 
-                &_value {
-                  padding: 5px;
+                .ot_area_list_item_index {
+                  padding: 5px 10px 5px 10px;
+                  display: flex;
+                  align-items: center;
+                  justify-content: center;
+                  border-right: 1px solid #f6f7fa;
+                  font-weight: bold;
+                }
+
+                .ot_area_list_item_data {
                   display: flex;
                   flex-direction: column;
 
-                  span {
-                    text-transform: uppercase;
-                    font-weight: bold;
-                    white-space: nowrap;
-                  }
+                  .ot_area_list_item_data_row {
+                    padding-top: 5px;
+                    display: flex;
 
-                  input {
-                    background-color: #FFFFFF;
-                    border: none;
-                    outline: none;
-                    height: 22px;
-                  }
+                    &:last-child {
+                      padding-bottom: 5px;
+                    }
 
-                  select {
-                    padding: 0 4px;
-                    height: 22px;
-                    background-color: #FFFFFF;
-                    border: none;
-                    outline: none;
+                    .ot_area_list_item_param {
+                      padding: 0 5px;
+                      display: flex;
+                      flex-direction: column;
 
-                    &:disabled {
-                      opacity: 1;
+                      span {
+                        text-transform: uppercase;
+                        font-weight: bold;
+                        white-space: nowrap;
+                      }
+
+                      input {
+                        width: 80px;
+                        height: 22px;
+                        background-color: #FFFFFF;
+                        border: none;
+                        outline: none;
+                      }
+
+                      select {
+                        width: 150px;
+                        padding: 0 4px;
+                        height: 22px;
+                        background-color: #FFFFFF;
+                        border: none;
+                        outline: none;
+
+                        &:disabled {
+                          opacity: 1;
+                        }
+                      }
                     }
                   }
                 }
               }
 
-              &_remove {
+              .ot_area_list_item_remove {
                 padding: 5px 10px 5px 10px;
                 display: flex;
                 align-items: center;

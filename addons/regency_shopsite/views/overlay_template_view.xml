@@ -26,6 +26,8 @@
             <form>
                 <field name="active" invisible="1"/>
                 <field name="allow_edit" invisible="1"/>
+                <field name="all_overlay_fonts" invisible="1"/>
+                <field name="all_overlay_colors" invisible="1"/>
                 <sheet>
                     <div class="oe_button_box" name="button_box">
                         <button name="show_on_website" type="object"

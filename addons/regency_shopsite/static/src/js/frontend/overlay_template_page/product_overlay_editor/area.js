@@ -1,17 +1,20 @@
 /** @odoo-module **/
 
+import { enableCanvasPointerEvents } from '../../../main'
+
 const SVG_IMAGE_EXTENSION = 'svg';
 
 export class Area {
 
-    constructor(data, parent, areaIndex, areaObjectData) {
-        this.data = data;
+    constructor(areaInitData, parent, areaObjectData) {
+        this.data = areaInitData.data;
+        this.areaIndex = areaInitData.index;
+        this.type = areaInitData.areaType;
         this.parent = parent;
-        this.areaIndex = areaIndex;
         this.areaObjectData = areaObjectData;
 
-        this.imageObjectList = {};
-        this.imageObjectIndex = 1;
+        this.objectList = {};
+        this.objectIndex = 1;
 
         this.createCanvas();
         this.createMask();
@@ -27,7 +30,7 @@ export class Area {
 
     initAreaObjects() {
         if (this.areaObjectData && this.areaObjectData.length) {
-            this.imageObjectIndex = Math.max(...this.areaObjectData.map(e => e.index)) + 1;
+            this.objectIndex = Math.max(...this.areaObjectData.map(e => e.index)) + 1;
             let promises = []
             for (let imageObj of this.areaObjectData) {
                 promises.push(new Promise(async resolve => {
@@ -48,7 +51,7 @@ export class Area {
                     image.onload = () => {
                         resolve({
                             image,
-                            imgIndex: imageObj.index,
+                            objIndex: imageObj.index,
                             data: imageObj.objectData,
                         })
                     };
@@ -56,7 +59,7 @@ export class Area {
             }
             Promise.all(promises).then((res) => {
                 for (let obj of res) {
-                    this.addImageObject(obj);
+                    this.addObject(obj);
                 }
             });
         }
@@ -139,15 +142,14 @@ export class Area {
         this.canvas.renderAll();
     }
 
-    addImageObject({ image, imgIndex, data, uploadedByUser }) {
-        if (uploadedByUser) {
+    addObject({ image, objIndex, data, addByUser }) {
+        if (addByUser) {
             this.wasChanged = true;
         }
         const object = new fabric.Image(image, {});
-        let objIndex = imgIndex;
         if (!objIndex) {
-            objIndex = this.imageObjectIndex;
-            this.imageObjectIndex += 1;
+            objIndex = this.objectIndex;
+            this.objectIndex += 1;
         }
         object.objIndex = objIndex;
         if (!data) {
@@ -166,7 +168,7 @@ export class Area {
         }
 
         let imageSplit = image.src.split(',');
-        this.imageObjectList[objIndex] = {
+        this.objectList[objIndex] = {
             index: objIndex,
             image: imageSplit[1],
             imageFormat: imageSplit[0].split('/')[1].split(';')[0],
@@ -189,7 +191,7 @@ export class Area {
         if (!activeObj) {
             return;
         }
-        delete this.imageObjectList[activeObj.objIndex];
+        delete this.objectList[activeObj.objIndex];
         this.canvas.remove(activeObj);
         this.wasChanged = true;
     }
@@ -198,16 +200,16 @@ export class Area {
         this.canvas.clear();
         this.createMask();
         this.selectedArea();
-        this.imageObjectList = {};
+        this.objectList = {};
         this.wasChanged = true;
     }
 
-    getOverlayImagesData() {
+    getOverlayData() {
         this.canvas.discardActiveObject().renderAll();
         this.unselectedArea();
 
         let res = [];
-        for (let imageObj of Object.values(this.imageObjectList)) {
+        for (let imageObj of Object.values(this.objectList)) {
             res.push({
                 index: imageObj.index,
                 image: imageObj.image,
@@ -255,7 +257,7 @@ export class Area {
     reInit() {}
 
     enablePointerEvents(state) {
-        this.canvas.upperCanvasEl.style.pointerEvents = state ? 'all' : 'none';
+        enableCanvasPointerEvents(this.canvas, state);
     }
 
     showMaskBorders(state) {
