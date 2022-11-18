@@ -25,10 +25,19 @@ class SaleOrder(models.Model):
     def submit_so_and_send_notify(self):
         self.state = 'sent'
         email_template = self.env.ref('regency_shopsite.so_submitted')
-        email_values = {
-            'recipient_ids': [(4, pid) for pid in self.team_id.message_follower_ids.mapped('partner_id').ids],
-        }
-        email_template.send_mail(self.partner_id.id, email_values=email_values)
+        for partner in self.team_id.message_follower_ids.mapped('partner_id'):
+            email_values = {
+                'recipient_ids': [(4, partner.id)]
+            }
+            action_id = self.env.ref('sale.action_quotations_with_onboarding')
+            menu_id = self.env.ref('sale.menu_sale_quotations')
+            data = {
+                'partner_name': partner.name,
+                'so_ref': self.name,
+                'so_url': "/web#id=%d&action=%d&model=%s&view_type=form&menu_id=%d" % (
+                    self.id, action_id.id, self._name, menu_id.id)
+            }
+            email_template.with_context(data).send_mail(self.id, email_values=email_values)
 
 
 class SaleOrderLine(models.Model):
