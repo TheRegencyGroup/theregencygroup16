@@ -10,6 +10,7 @@
                 <t t-if="not request.env.user._is_public()">
                     PRELOADED_DATA.HEADER_DATA=<t t-out="request.env['website']._header_preloaded()"/>;
                     PRELOADED_DATA.CART_DATA=<t t-out="request.env['website']._get_cart_data(preloaded=True) or 'null'"/>;
+                    PRELOADED_DATA.COUNTRIES_DATA=<t t-out="request.env['website']._get_country_state_full_list_data()"/>;
                 </t>
             </script>
         </xpath>

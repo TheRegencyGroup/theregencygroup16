@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import { mountComponentAsWidget } from '@fe_owl_base/js/main';
+import { mountComponentAsWidget, useStore } from '@fe_owl_base/js/main';
 import rpc from 'web.rpc';
 import Concurrency from 'web.concurrency';
 import env from 'web.public_env';
@@ -9,16 +9,22 @@ const { Component, useState, useRef} = owl;
 const dropPrevious = new Concurrency.MutexedDropPrevious();
 
 export class DeliveryAddressCartLine extends Component {
-    // TODO REG-312 1) minimal address vals:
     setup() {
         this.newAddressInputEls = {
             name: useRef('new_address_name_input'),
             street: useRef('new_address_street_input'),
             street2: useRef('new_address_street2_input'),
             city: useRef('new_address_city_input'),
-        }
+            province: useRef('new_address_province_input'),
+            country: useRef('new_address_country_input'),
+        };
+        this.store = useStore();
+        this.provinceList = this.store.countriesWorldData.provinceList;
+        this.countryList = this.store.countriesWorldData.countryList;
         this.state = useState({
             showModal: false,
+            currentCountryId: this.store.countriesWorldData.defaultCountryId,
+            currentCountryHasProvinces: this.store.countriesWorldData.defaultCountryHasProvince,
         });
         env.bus.on('delivery-addresses-data-changed', null, this.onChangedDeliveryAddressData.bind(this));
     }
@@ -73,6 +79,8 @@ export class DeliveryAddressCartLine extends Component {
             street: this.newAddressInputEls.street.el.value,
             street2: this.newAddressInputEls.street2.el.value,
             city: this.newAddressInputEls.city.el.value,
+            state_id: this.newAddressInputEls.province.el?.value,
+            country_id: this.newAddressInputEls.country.el.value,
         };
     }
 
@@ -108,6 +116,11 @@ export class DeliveryAddressCartLine extends Component {
         this.props.solData = JSON.parse(deliveryAddressData);
         this.render();
         this.hideInputFormModal();
+    }
+
+    onChangedCountrySelection(ev) {
+        this.state.currentCountryHasProvinces = ev.target.selectedOptions[0].dataset.hasOwnProperty('hasProvince')
+        this.state.currentCountryId = ev.target.value;
     }
 }
 

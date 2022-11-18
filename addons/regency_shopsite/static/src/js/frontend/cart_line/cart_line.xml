@@ -28,9 +28,21 @@
                     <input type="text" name="Street 2" class="form-control" t-ref="new_address_street2_input"/>
                     <span>City</span>
                     <input type="text" name="City" class="form-control" t-ref="new_address_city_input"/>
+                    <span t-if="this.state.currentCountryHasProvinces">State</span>
+                    <select t-if="this.state.currentCountryHasProvinces" class="form-select" t-ref="new_address_province_input">
+                        <option t-foreach="provinceList" t-as="province" t-key="province.id" t-att-value="province.id"
+                                t-if="province.countryId == this.state.currentCountryId" t-esc="province.name"/>
+                    </select>
+                    <span>Country</span>
+                    <select t-on-change="onChangedCountrySelection" class="form-select" t-ref="new_address_country_input">
+                        <option t-foreach="countryList" t-as="country" t-key="country.id" t-att-value="country.id"
+                                t-att-data-has-province="country.hasProvince" t-esc="country.name"
+                                t-att-selected="this.state.currentCountryId == country.id"/>
+                    </select>
                 </div>
                 <div class="d-flex justify-content-between" style="padding: 10px">
-                    <button t-on-click="createNewDeliveryAddress" class='btn btn-primary mb32' style="margin:20px 60px;">
+                    <button t-on-click="createNewDeliveryAddress" class='btn btn-primary mb32'
+                            style="margin:20px 60px;">
                         Submit
                     </button>
                     <button t-on-click="hideInputFormModal" class='btn btn-secondary mb32' style="margin:20px 60px;">

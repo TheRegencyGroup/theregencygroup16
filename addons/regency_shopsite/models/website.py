@@ -58,3 +58,23 @@ class Website(models.Model):
             return team.id
         else:
             return None
+
+    @api.model
+    def _get_country_state_full_list_data(self):
+        countries_data = [{'id': country.id,
+                           'name': country.name,
+                           'isStateRequired': country.state_required,
+                           'hasProvince': bool(country.state_ids),
+                           } for country in self.env['res.country'].search([])]
+        states_data = [{'id': state.id,
+                        'name': state.name,
+                        'code': state.code,
+                        'countryId': state.country_id.id,
+                        } for state in self.env['res.country.state'].search([])]
+        default_country = self.env.ref('base.us')
+        return Markup(json.dumps({
+            'countryList': countries_data,
+            'provinceList': states_data,
+            'defaultCountryId': default_country.id,
+            'defaultCountryHasProvince': bool(default_country.state_ids)
+        }))
