@@ -8,12 +8,14 @@ class ConsumptionAgreement(models.Model):
     _name = 'consumption.agreement'
     _inherit = ['mail.thread', 'mail.activity.mixin', 'portal.mixin']
 
+    def _get_partner_id_domain(self):
+        association_type_ids = [self.env.ref('regency_contacts.hotel_group_to_management_group').id,
+                                self.env.ref('regency_contacts.management_group_to_hotel').id]
+        return [('association_ids.association_type_id.id', 'in', association_type_ids)]
+
     name = fields.Char(required=True, copy=False, index=True, default=lambda self: _('New'))
     signed_date = fields.Date()
-    partner_id = fields.Many2one('res.partner', domain=[('association_ids.association_type_id.name', '=', 'Owns'),
-                                                        ('association_ids.association_type_id.name', '=',
-                                                         'Hotel Management Company for')],
-                                 string='Primary Customer')
+    partner_id = fields.Many2one('res.partner', domain=_get_partner_id_domain, string='Primary Customer')
     allowed_partner_ids = fields.Many2many('res.partner', domain=[('contact_type', '=', 'customer')],
                                            string="Allowed Customers")
     line_ids = fields.One2many('consumption.agreement.line', 'agreement_id')
