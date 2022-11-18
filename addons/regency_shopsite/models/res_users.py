@@ -37,10 +37,8 @@ class ResUsers(models.Model):
         if parent_company_id:
             return partner_id, parent_company_id, parent_company_id
 
-        possible_associations = self.env.ref('regency_contacts.hotel_group_to_management_group') + self.env.ref(
-            'regency_contacts.management_group_to_hotel')
         association_partner_id = self.partner_id.association_ids.filtered(
-            lambda f: f.association_type_id in possible_associations)
+            lambda f: f.association_type_id == self.env.ref('regency_contacts.hotel_to_contact'))
         if len(association_partner_id) == 1:  # Correct case
             partner_invoice_id = association_partner_id
             partner_shipping_id = association_partner_id
