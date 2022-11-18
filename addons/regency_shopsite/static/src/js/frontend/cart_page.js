@@ -4,9 +4,9 @@ import publicWidget from 'web.public.widget';
 import Dialog from 'web.Dialog';
 
 publicWidget.registry.SubmitCart = publicWidget.Widget.extend({
-    selector: '.submit_cart',
+    selector: '.oe_website_sale',
     events: {
-        'click': '_onClickSubmit',
+        'click button.submit_cart': '_onClickSubmit',
     },
 
     async _onClickSubmit(event) {

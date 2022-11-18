@@ -1,5 +1,8 @@
 /** @odoo-module **/
 
+// The space is not considered a word joiner and the text breaks only when the user types Enter
+fabric.Textbox.prototype._wordJoiners = /[]/;
+
 export const RECTANGLE_AREA_TYPE = 'rectangle';
 export const ELLIPSE_AREA_TYPE = 'ellipse';
 export const TEXT_AREA_TYPE = 'text';
