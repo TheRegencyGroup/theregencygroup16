@@ -70,5 +70,12 @@
             <field name="left_to_right_name">Shopsite displayed for</field>
             <field name="right_to_left_name">Shopsite shows to</field>
         </record>
+
+        <record id="hotel_group_to_hotel" model="association.type">
+            <field name="left_tech_name">hotel_group</field>
+            <field name="right_tech_name">hotel</field>
+            <field name="left_to_right_name">Owns hotel</field>
+            <field name="right_to_left_name">Part of</field>
+        </record>
     </data>
 </odoo>
