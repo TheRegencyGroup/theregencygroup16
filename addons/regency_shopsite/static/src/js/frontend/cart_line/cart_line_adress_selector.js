@@ -15,6 +15,7 @@ export class DeliveryAddressCartLine extends Component {
             street: useRef('new_address_street_input'),
             street2: useRef('new_address_street2_input'),
             city: useRef('new_address_city_input'),
+            zip: useRef('new_address_zip_input'),
             province: useRef('new_address_province_input'),
             country: useRef('new_address_country_input'),
         };
@@ -79,6 +80,7 @@ export class DeliveryAddressCartLine extends Component {
             street: this.newAddressInputEls.street.el.value,
             street2: this.newAddressInputEls.street2.el.value,
             city: this.newAddressInputEls.city.el.value,
+            zip: this.newAddressInputEls.zip.el.value,
             state_id: this.newAddressInputEls.province.el?.value,
             country_id: this.newAddressInputEls.country.el.value,
         };

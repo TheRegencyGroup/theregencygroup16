@@ -28,6 +28,8 @@
                     <input type="text" name="Street 2" class="form-control" t-ref="new_address_street2_input"/>
                     <span>City</span>
                     <input type="text" name="City" class="form-control" t-ref="new_address_city_input"/>
+                    <input type="text" name="ZIP" placeholder="ZIP" class="form-control" t-ref="new_address_zip_input"
+                           style="width: 50%; margin: 10px 0px;"/>
                     <span t-if="this.state.currentCountryHasProvinces">State</span>
                     <select t-if="this.state.currentCountryHasProvinces" class="form-select" t-ref="new_address_province_input">
                         <option t-foreach="provinceList" t-as="province" t-key="province.id" t-att-value="province.id"
