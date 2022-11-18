@@ -142,7 +142,7 @@ class ConsumptionAgreement(models.Model):
             new_purchase_orders += po
         if not order_count:
             action = self.env["ir.actions.act_window"]._for_xml_id("purchase.purchase_rfq")
-            action['domain'] = [('id', 'in', new_purchase_orders.ids)]
+            action['domain'] = [('id', 'in', [x.id for x in new_purchase_orders])]
             if len(new_purchase_orders) == 1:
                 action['views'] = [(self.env.ref('purchase.purchase_order_form').id, 'form')]
                 action['res_id'] = new_purchase_orders
