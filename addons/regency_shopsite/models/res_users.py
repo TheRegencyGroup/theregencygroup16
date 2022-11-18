@@ -25,3 +25,27 @@ class ResUsers(models.Model):
 
     def _active_hotel_background_url(self) -> str:
         return self._active_hotel_id().background_url
+
+    def _get_so_partners(self):
+        """
+        Docs:
+        https://theregencygroup.atlassian.net/wiki/spaces/RAINDROP/pages/72843268/Customer+BDD
+        https://app.diagrams.net/#G1H27FaUZSqMAaTDnubIw0TwnfyvU-TkTi
+        """
+        partner_id = self.partner_id
+        parent_company_id = self.partner_id.parent_id
+        if parent_company_id:
+            return partner_id, parent_company_id, parent_company_id
+
+        possible_associations = self.env.ref('regency_contacts.hotel_group_to_management_group') + self.env.ref(
+            'regency_contacts.management_group_to_hotel')
+        association_partner_id = self.partner_id.association_ids.filtered(
+            lambda f: f.association_type_id in possible_associations)
+        if len(association_partner_id) == 1:  # Correct case
+            partner_invoice_id = association_partner_id
+            partner_shipping_id = association_partner_id
+            return partner_id, partner_invoice_id, partner_shipping_id
+        else:
+            # Other cases, invalid
+            # For correct work return all expected vars
+            return partner_id, partner_id, partner_id
