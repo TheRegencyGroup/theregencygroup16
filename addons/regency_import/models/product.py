@@ -13,6 +13,7 @@ class Product(models.Model):
     ext_qty_per_carton = fields.Float()
     ext_reorder_point = fields.Float()
     ext_all_customers = fields.Boolean()
+    ext_customers = fields.One2many('res.partner', compute='_compute_ext_customers', inverse="_set_ext_customers")
 
     def after_import_update(self):
         all = self.search([])
@@ -32,6 +33,13 @@ class Product(models.Model):
                 rec.route_ids = [Command.link(mto.id), Command.link(buy.id)] + [Command.link(r.id) for r in cross_docks]
             elif rec.ext_routes_type[:7] == 'Service':
                 rec.detailed_type == 'service'
+
+    def _compute_ext_customers(self):
+        for rec in self:
+            rec.ext_customers = rec.allowed_partner_ids.ids
+    def _set_ext_customers(self):
+        for rec in self:
+            rec.allowed_partner_ids = [Command.link(x.id) for x in rec.ext_customers]
 
     @api.model_create_multi
     def create(self, val_list):
