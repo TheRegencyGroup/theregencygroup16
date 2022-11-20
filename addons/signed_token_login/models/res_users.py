@@ -29,7 +29,7 @@ class ResUsers(models.Model):
                         user.tz = tz
                     user._update_last_login()
         except AccessDenied:
-            _logger.info("Login failed for db:%s login:%s from %s", db, login, ip)
+            _logger.info("Auto login failed for db:%s login:%s from %s", db, login, ip)
             raise
-        _logger.info("Login successful for db:%s login:%s from %s", db, login, ip)
+        _logger.info("Auto login successful for db:%s login:%s from %s", db, login, ip)
         return user.id
