@@ -209,6 +209,11 @@ class ConsumptionAgreement(models.Model):
             'target': 'new'
         }
 
+    @api.onchange('partner_id')
+    def _onchange_partner_id(self):
+        for ca in self:
+            ca.allowed_partner_ids += ca.partner_id
+
 
 class ConsumptionAggreementLine(models.Model):
     _name = 'consumption.agreement.line'
