@@ -40,8 +40,8 @@ class ResUsers(models.Model):
         association_partner_id = self.partner_id.association_ids.filtered(
             lambda f: f.association_type_id == self.env.ref('regency_contacts.hotel_to_contact'))
         if len(association_partner_id) == 1:  # Correct case
-            partner_invoice_id = association_partner_id
-            partner_shipping_id = association_partner_id
+            partner_invoice_id = association_partner_id.left_partner_id
+            partner_shipping_id = association_partner_id.left_partner_id
             return partner_id, partner_invoice_id, partner_shipping_id
         else:
             # Other cases, invalid
