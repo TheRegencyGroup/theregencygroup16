@@ -77,24 +77,31 @@ class WebsiteSaleRegency(WebsiteSale):
     @http.route(['/shop/cart/save_delivery_address'],
                 type='json', auth="user", methods=['POST'], website=True, csrf=False)
     def update_sale_order_line_delivery_address(self, sale_order_line_id, delivery_address_id, **kw):
-        sale_order_line = request.env['sale.order.line'].browse(sale_order_line_id)
-        sale_order_line.write({'delivery_address_id': delivery_address_id})
+        order = request.website.sale_get_order(force_create=False)
+        order = order.with_company(order.company_id)  # from core, don't know why it is used in such way
+        sol = order.order_line.filtered_domain([('id', '=', sale_order_line_id)])
+        sol.write({'delivery_address_id': delivery_address_id})
 
     @http.route(['/shop/cart/add_new_address'],
                 type='json', auth="user", methods=['POST'], website=True, csrf=False)
     def create_and_link_delivery_address(self, sale_order_line_id, address_name: str, **kw):
-        sol = request.env['sale.order.line'].browse(sale_order_line_id)
+        order = request.website.sale_get_order(force_create=False)
+        order = order.with_company(order.company_id)  # from core, don't know why it is used in such way
+        sol = order.order_line.filtered_domain([('id', '=', sale_order_line_id)])
         new_address_vals = {'name': address_name,
                             'type': 'delivery',
                             'parent_id': sol.delivery_partner_id.id,
                             **kw
                             }
-        new_address = request.env['res.partner'].create(new_address_vals)
-        sol.delivery_address_id = new_address.id
+        new_address = order.env['res.partner'].sudo().create(new_address_vals)
+        sol.sudo().write({'delivery_address_id': new_address.id})
 
     @http.route(['/shop/cart/get_delivery_addresses_data'], type='json', methods=['POST'], auth='user', website=True)
     def get_delivery_address_data(self, sale_order_line_id):
-        return request.env['sale.order.line'].browse(sale_order_line_id)._get_delivery_data()
+        order = request.website.sale_get_order(force_create=False)
+        order = order.with_company(order.company_id)  # from core, don't know why it is used in such way
+        sol = order.order_line.filtered_domain([('id', '=', sale_order_line_id)])
+        return sol._get_delivery_data()
 
     @http.route(['/shop/submit_cart'], type='json', auth='user', methods=['POST'], website=True, csrf=False)
     def submit_cart(self):
