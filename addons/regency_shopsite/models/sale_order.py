@@ -119,7 +119,8 @@ class SaleOrderLine(models.Model):
                     line.product_id,
                     line.product_uom_qty or 1.0,
                     uom=line.product_uom,
-                    date=line.order_id.date_order)
+                    date=line.order_id.date_order,
+                    overlay_tmpl_id=line.overlay_template_id.id)
             # end custom logic
             else:
                 line.pricelist_item_id = line.order_id.pricelist_id._get_product_rule(
