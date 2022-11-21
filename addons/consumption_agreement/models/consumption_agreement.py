@@ -8,16 +8,11 @@ class ConsumptionAgreement(models.Model):
     _name = 'consumption.agreement'
     _inherit = ['mail.thread', 'mail.activity.mixin', 'portal.mixin']
 
-    def _get_partner_id_domain(self):
-        association_type_ids = [self.env.ref('regency_contacts.hotel_group_to_management_group').id,
-                                self.env.ref('regency_contacts.management_group_to_hotel').id]
-        return [('association_ids.association_type_id.id', 'in', association_type_ids)]
-
     name = fields.Char(required=True, copy=False, index=True, default=lambda self: _('New'))
     signed_date = fields.Date()
-    partner_id = fields.Many2one('res.partner', domain=_get_partner_id_domain, string='Primary Customer')
-    allowed_partner_ids = fields.Many2many('res.partner', domain=[('contact_type', '=', 'customer')],
-                                           string="Allowed Customers")
+    partner_id = fields.Many2one('res.partner', domain=[('contact_type', '=', 'customer')], string='Primary Customer')
+    possible_partners = fields.One2many('res.partner', compute='_compute_possible_partners')
+    allowed_partner_ids = fields.Many2many('res.partner', string="Allowed Customers")
     line_ids = fields.One2many('consumption.agreement.line', 'agreement_id')
     currency_id = fields.Many2one('res.currency', default=lambda self: self.env.user.company_id.currency_id)
     state = fields.Selection([
@@ -72,6 +67,14 @@ class ConsumptionAgreement(models.Model):
         super(ConsumptionAgreement, self)._compute_access_url()
         for rec in self:
             rec.access_url = '/my/consumptions/%s' % (rec.id)
+
+    @api.depends('partner_id')
+    def _compute_possible_partners(self):
+        for ca in self:
+            association_type_ids = [self.env.ref('regency_contacts.hotel_group_to_management_group'),
+                                    self.env.ref('regency_contacts.management_group_to_hotel')]
+            ca.possible_partners = ca.partner_id.association_ids.filtered(
+                lambda f: f.association_type_id in association_type_ids).mapped('right_partner_id.id')
 
     def action_confirm(self):
         for rec in self:
@@ -212,7 +215,10 @@ class ConsumptionAgreement(models.Model):
     @api.onchange('partner_id')
     def _onchange_partner_id(self):
         for ca in self:
-            ca.allowed_partner_ids += ca.partner_id
+            if ca.partner_id:
+                ca.allowed_partner_ids = ca.partner_id
+            else:
+                ca.allowed_partner_ids = False
 
 
 class ConsumptionAggreementLine(models.Model):
@@ -234,8 +240,7 @@ class ConsumptionAggreementLine(models.Model):
     sale_order_line_ids = fields.One2many('sale.order.line', 'consumption_agreement_line_id')
     partner_id = fields.Many2one(related='agreement_id.partner_id', domain=[('contact_type', '=', 'customer')],
                                  store=True)
-    allowed_partner_ids = fields.Many2many('res.partner', domain=[('contact_type', '=', 'customer')],
-                                           string="Allowed Customers")
+    allowed_partner_ids = fields.Many2many('res.partner', string="Allowed Customers")
     vendor_id = fields.Many2one('res.partner')
     untaxed_amount = fields.Monetary(compute='_compute_untaxed_amount', store=True)
     name = fields.Text(string='Description')
