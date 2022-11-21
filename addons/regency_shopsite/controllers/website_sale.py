@@ -84,12 +84,12 @@ class WebsiteSaleRegency(WebsiteSale):
                 type='json', auth="user", methods=['POST'], website=True, csrf=False)
     def create_and_link_delivery_address(self, sale_order_line_id, address_name: str, **kw):
         sol = self._get_sol_id_from_current_cart(sale_order_line_id)
-        new_address_vals = {'name': address_name,
-                            'type': 'delivery',
-                            'parent_id': sol.delivery_partner_id.id,
-                            **kw
-                            }
         if sol:
+            new_address_vals = {'name': address_name,
+                                'type': 'delivery',
+                                'parent_id': sol.delivery_partner_id.id,
+                                **kw
+                                }
             new_address = sol.env['res.partner'].create(new_address_vals)
             sol.write({'delivery_address_id': new_address.id})
 
