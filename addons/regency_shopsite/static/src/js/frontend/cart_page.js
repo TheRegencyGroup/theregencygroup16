@@ -4,17 +4,20 @@ import publicWidget from 'web.public.widget';
 import Dialog from 'web.Dialog';
 
 publicWidget.registry.SubmitCart = publicWidget.Widget.extend({
-    selector: '.submit_cart',
+    selector: '.oe_website_sale',
     events: {
-        'click': '_onClickSubmit',
+        'click button.submit_cart': '_onClickSubmit',
     },
 
     async _onClickSubmit(event) {
         new Promise((resolve, reject) => {
-            Dialog.confirm(this, 'You want to submit the order?', {
-                confirm_callback: resolve,
-                cancel_callback: reject,
-            }).on('closed', null, reject);
+            Dialog.confirm(
+                this,
+                'Are you sure that you want to submit the cart? Once you submit, the cart will become unavailable for editing',
+                {
+                    confirm_callback: resolve,
+                    cancel_callback: reject,
+                }).on('closed', null, reject);
         }).then(confirm => {
             if (!confirm) {
                 return;

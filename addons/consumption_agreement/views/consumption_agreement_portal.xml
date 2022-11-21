@@ -79,7 +79,7 @@
                     <t t-set="entries">
                         <ul class="list-group list-group-flush flex-wrap flex-row flex-lg-column">
                             <li class="list-group-item flex-grow-1">
-                                <a t-if="consumption.has_to_be_signed()" role="button" class="btn btn-primary btn-block mb8" data-toggle="modal" data-target="#modalaccept_consumption" href="#">
+                                <a t-if="consumption.has_to_be_signed()" role="button" class="btn btn-primary btn-block mb8" data-bs-toggle="modal" data-bs-target="#modalaccept_consumption" href="#">
                                     <i class="fa fa-check"/> Accept &amp; Sign
                                 </a>
                                 <a t-if="consumption.state == 'confirmed'" id="create_sale_order_button" role="button" class="btn btn-primary btn-block mb8" href="#">
@@ -148,7 +148,7 @@
                             <form id="accept" method="POST" t-att-data-order-id="consumption.id" t-att-data-token="consumption.access_token" class="js_accept_json modal-content js_website_submit_form">
                                 <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
                                 <header class="modal-header">
-                                    <h4 class="modal-title">Validate Order</h4>
+                                    <h4 class="modal-title">Validate Consumption Agreement</h4>
                                     <button type="button" id="decline_sign" class="close" data-dismiss="modal" aria-label="Close">×</button>
                                 </header>
                                 <main class="modal-body" id="sign-dialog">
@@ -231,7 +231,7 @@
 
                         <t t-if="consumption.has_to_be_signed()">
                             <div class="col-sm-auto mt8">
-                                <a role="button" id="accept_sign" class="btn btn-primary" data-toggle="modal" data-target="#modalaccept_consumption" href="#"><i class="fa fa-check"/> Accept &amp; Sign</a>
+                                <a role="button" id="accept_sign" class="btn btn-primary" data-toggle="modal" data-bs-target="#modalaccept_consumption" href="#"><i class="fa fa-check"/> Accept &amp; Sign</a>
                             </div>
                             <div class="col-sm-auto mt8">
                                 <a role="button" class="btn btn-secondary" href="#discussion"><i class="fa fa-comment"/> Feedback</a>
@@ -351,18 +351,24 @@
                 </div>
             </section>
 
-<!--            <section id="terms" class="mt-5" t-if="not is_html_empty(sale_order.note)">-->
-<!--                <h3 class="">Terms &amp; Conditions</h3>-->
-<!--                <hr class="mt-0 mb-1"/>-->
-<!--                <t t-if="sale_order.terms_type == 'html'">-->
-<!--                    &lt;!&ndash; Note is plain text. This ensures a clickable link  &ndash;&gt;-->
-<!--                    <t t-set="tc_url" t-value="'%s/terms' % (sale_order.get_base_url())"/>-->
-<!--                    <em>Terms &amp; Conditions: <a href="/terms"><t t-esc="tc_url"/></a></em>-->
-<!--                </t>-->
-<!--                <t t-else="">-->
-<!--                    <em t-field="sale_order.note"/>-->
-<!--                </t>-->
-<!--            </section>-->
+            <section id="terms" class="mt-5" t-if="not is_html_empty(consumption.note)">
+                <h3 class="">Terms &amp; Conditions</h3>
+                <hr class="mt-0 mb-1"/>
+                <t t-if="consumption.terms_type == 'html'">
+                    <!-- Note is plain text. This ensures a clickable link  -->
+                    <t t-set="tc_url" t-value="'%s/terms' % (consumption.get_base_url())"/>
+                    <em>Terms &amp; Conditions: <a href="/terms"><t t-esc="tc_url"/></a></em>
+                </t>
+                <t t-else="">
+                    <em t-field="consumption.note"/>
+                </t>
+                <div t-if="consumption.state == 'draft'" class="regency_legal_accept">
+                    <input class="form-check-input" id="consumption_legal_accept" type="checkbox"
+                           t-att-checked="consumption.legal_accepted" t-att-data-consumption-id="consumption.id"/>
+                    <label class="form-check-label" for="consumption_legal_accept">By checking this box, you are agreeing to our
+                        Terms &amp; Conditions</label>
+                </div>
+            </section>
 
 <!--            <section class="mt-5" t-if="sale_order.payment_term_id">-->
 <!--                <h3 class="">Payment terms</h3>-->

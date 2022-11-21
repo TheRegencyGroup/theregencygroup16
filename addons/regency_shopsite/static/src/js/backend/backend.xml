@@ -5,6 +5,18 @@
         <xpath expr="//div[hasclass('o_form_view_container')]" position="attributes">
             <attribute name="t-att-class" add="model.root.resModel === 'overlay.template' ? 'form_view_for_overlay_template' : ''" separator=" "/>
         </xpath>
+        <xpath expr="//div[hasclass('o_form_view_container')]" position="before">
+            <t t-if="model.root.resModel === 'overlay.template'">
+                <style type="text/css">
+                    <t t-foreach="model.root.data.all_overlay_fonts || []" t-as="font" t-key="font_index">
+                        @font-face {
+                            font-family: '<t t-esc="font.font_name"/>';
+                            src: url(/web/content/overlay.font/<t t-esc="font.id"/>/font);
+                        }
+                    </t>
+                </style>
+            </t>
+        </xpath>
     </t>
 
     <t t-name="overlay_areas" owl="1">
@@ -57,7 +69,9 @@
                                                    areasImageValueList="areasImageAttributeValueList"
                                                    productTemplateImages="state.productTemplateImages"
                                                    allowEditAreas="!withOverlayProducts"
-                                                   openImageListModal="(args) => this.openImageListModal(args)"/>
+                                                   openImageListModal="(args) => this.openImageListModal(args)"
+                                                   fontList="fontList"
+                                                   colorList="colorList"/>
                 </t>
             </t>
         </div>
@@ -81,13 +95,13 @@
                 <div class="ot_areas_tab" t-att-class="{ 'ot_areas_tab_hide': state.activeTab !== AREAS_TAB }">
                     <div t-if="props.editMode and props.allowEditAreas" class="ot_areas_position_tools">
                         <t t-if="!!state.editorImage">
-                            <button class="btn btn-primary" t-on-click="onClickAddRectangleArea">
+                            <button class="btn btn-primary" t-on-click="() => this.addRectangleArea({})">
                                 <i class="fa fa-plus-circle"/>Rectangle
                             </button>
-                            <button class="btn btn-primary" t-on-click="onClickAddEllipseArea">
+                            <button class="btn btn-primary" t-on-click="() => this.addEllipseArea({})">
                                 <i class="fa fa-plus-circle"/>Ellipse
                             </button>
-                            <button class="btn btn-primary" t-on-click="onClickAddTextArea">
+                            <button class="btn btn-primary" t-on-click="() => this.addTextArea({})">
                                 <i class="fa fa-plus-circle"/>Text
                             </button>
                         </t>
@@ -119,94 +133,15 @@
                             Please select image to start editing
                         </div>
                     </t>
-                    <div class="ot_areas_position_area_list">
-                    <t t-foreach="overlay ? Object.values(overlay.areaList) : []" t-as="area"
-                       t-key="area.index">
-                        <div class="ot_areas_position_area_list_item" t-on-click="() => this.onClickAreaListItem(area.index)"
-                             t-att-class="{ 'ot_areas_position_area_list_item_selected': state.selectedAreaIndex === area.index }">
-                            <div class="ot_areas_position_area_list_item_index">
-                                <t t-esc="area.index"/>
-                            </div>
-                            <div class="ot_areas_position_area_list_item_data">
-                                <t t-if="area.areaType === 'rectangle'">
-                                    <div class="ot_areas_position_area_list_item_data_value">
-                                        <span>Width</span>
-                                        <input type="number" t-att-value="area.data.width"
-                                               t-att-disabled="!props.editMode || !props.allowEditAreas"/>
-                                    </div>
-                                    <div class="ot_areas_position_area_list_item_data_value">
-                                        <span>Height</span>
-                                        <input type="number" t-att-value="area.data.height"
-                                               t-att-disabled="!props.editMode || !props.allowEditAreas"/>
-                                    </div>
-                                </t>
-                                <t t-if="area.areaType === 'ellipse'">
-                                    <div class="ot_areas_position_area_list_item_data_value">
-                                        <span>Rx</span>
-                                        <input type="number" t-att-value="area.data.rx"
-                                               t-att-disabled="!props.editMode || !props.allowEditAreas"/>
-                                    </div>
-                                    <div class="ot_areas_position_area_list_item_data_value">
-                                        <span>Ry</span>
-                                        <input type="number" t-att-value="area.data.ry"
-                                               t-att-disabled="!props.editMode || !props.allowEditAreas"/>
-                                    </div>
-                                </t>
-                                <t t-if="area.areaType === 'text'">
-                                    <div class="ot_areas_position_area_list_item_data_value">
-                                        <span>Width</span>
-                                        <input type="number" t-att-value="area.data.width"
-                                               t-att-disabled="!props.editMode || !props.allowEditAreas"/>
-                                    </div>
-                                    <div class="ot_areas_position_area_list_item_data_value">
-                                        <span>Font size</span>
-                                        <input type="number" t-att-value="area.data.fontSize"
-                                               t-att-disabled="!props.editMode || !props.allowEditAreas"
-                                               t-on-change="() => this.onChangeTextFontSize(area.index)"/>
-                                    </div>
-                                    <div class="ot_areas_position_area_list_item_data_value">
-                                        <span>Lines</span>
-                                        <input type="number" t-att-value="area.data.numberOfLines"
-                                               t-att-disabled="!props.editMode || !props.allowEditAreas"
-                                               t-on-change="() => this.onChangeTextNumberOfLines(area.index)"/>
-                                    </div>
-                                    <div class="ot_areas_position_area_list_item_data_value">
-                                        <span>Font</span>
-                                        <select t-att-disabled="!props.editMode || !props.allowEditAreas"
-                                                t-on-change="() => this.onChangeTextFont(area.index)">
-                                            <option t-att-selected="area.data.font == 'Arial'" value="Arial">Arial</option>
-                                            <option t-att-selected="area.data.font == 'Times New Roman'" value="Times New Roman">Times New Roman</option>
-                                            <option t-att-selected="area.data.font == 'Lato'" value="Lato">Lato</option>
-                                            <option t-att-selected="area.data.font == 'Montserrat'" value="Montserrat">Montserrat</option>
-                                            <option t-att-selected="area.data.font == 'Open_Sans'" value="Open_Sans">Open_Sans</option>
-                                            <option t-att-selected="area.data.font == 'Oswald'" value="Oswald">Oswald</option>
-                                            <option t-att-selected="area.data.font == 'Raleway'" value="Raleway">Raleway</option>
-                                            <option t-att-selected="area.data.font == 'Roboto'" value="Roboto">Roboto</option>
-                                        </select>
-                                    </div>
-                                </t>
-                                <div class="ot_areas_position_area_list_item_data_value">
-                                    <span>X</span>
-                                    <input type="number" t-att-value="area.data.x"
-                                           t-att-disabled="!props.editMode || !props.allowEditAreas"/>
-                                </div>
-                                <div class="ot_areas_position_area_list_item_data_value">
-                                    <span>Y</span>
-                                    <input type="number" t-att-value="area.data.y"
-                                           t-att-disabled="!props.editMode || !props.allowEditAreas"/>
-                                </div>
-                                <div class="ot_areas_position_area_list_item_data_value">
-                                    <span>Angle</span>
-                                    <input type="number" t-att-value="area.data.angle"
-                                           t-att-disabled="!props.editMode || !props.allowEditAreas"/>
-                                </div>
-                            </div>
-                            <div t-if="props.editMode and props.allowEditAreas"
-                                 class="ot_areas_position_area_list_item_remove"
-                                 t-on-click.stop="() => this.onClickRemoveArea(area.index)">
-                                <i class="fa fa-remove"/>
-                            </div>
-                        </div>
+                    <div class="ot_area_list">
+                    <t t-foreach="Object.values(state.areaList)" t-as="area" t-key="area.index">
+                        <AreaParameters area="area"
+                                        editMode="props.editMode and props.allowEditAreas"
+                                        selectedAreaIndex="state.selectedAreaIndex || 0"
+                                        selectArea="(args) => this.selectAreaListItem(args)"
+                                        removeArea="(args) => this.removeArea(args)"
+                                        fontList="props.fontList"
+                                        colorList="props.colorList"/>
                     </t>
                 </div>
                 </div>
@@ -240,6 +175,116 @@
                     Please select product to start editing
                 </div>
             </t>
+        </div>
+    </t>
+
+    <t t-name="areas_parameters" owl="1">
+        <div class="ot_area_list_item"
+             t-on-click="onClickAreaListItem"
+             t-att-class="{ 'selected': props.selectedAreaIndex === props.area.index }">
+            <div class="ot_area_list_item_left">
+                <div class="ot_area_list_item_index">
+                    <t t-esc="props.area.index"/>
+                </div>
+                <div class="ot_area_list_item_data">
+                    <div class="ot_area_list_item_data_row">
+                        <t t-if="['rectangle', 'text'].includes(props.area.areaType)">
+                            <AreaParametersNumberInput areaIndex="props.area.index"
+                                                       label="'Width'"
+                                                       value="props.area.data.width"
+                                                       disabled="!props.editMode"
+                                                       changeValue="props.area.change.width"/>
+                            <AreaParametersNumberInput areaIndex="props.area.index"
+                                                       label="'Height'"
+                                                       value="props.area.data.height"
+                                                       disabled="!props.editMode"
+                                                       changeValue="props.area.change.height"/>
+                        </t>
+                        <t t-if="props.area.areaType === 'ellipse'">
+                            <AreaParametersNumberInput areaIndex="props.area.index"
+                                                       label="'Rx'"
+                                                       value="props.area.data.rx"
+                                                       disabled="!props.editMode"
+                                                       changeValue="props.area.change.rx"/>
+                            <AreaParametersNumberInput areaIndex="props.area.index"
+                                                       label="'Ry'"
+                                                       value="props.area.data.ry"
+                                                       disabled="!props.editMode"
+                                                       changeValue="props.area.change.ry"/>
+                        </t>
+                        <AreaParametersNumberInput areaIndex="props.area.index"
+                                                   label="'X'"
+                                                   value="props.area.data.x"
+                                                   disabled="!props.editMode"
+                                                   changeValue="props.area.change.x"/>
+                        <AreaParametersNumberInput areaIndex="props.area.index"
+                                                   label="'Y'"
+                                                   value="props.area.data.y"
+                                                   disabled="!props.editMode"
+                                                   changeValue="props.area.change.y"/>
+                        <AreaParametersNumberInput areaIndex="props.area.index"
+                                                   label="'Angle'"
+                                                   value="props.area.data.angle"
+                                                   disabled="!props.editMode"
+                                                   changeValue="props.area.change.angle"/>
+                    </div>
+                    <div t-if="props.area.areaType === 'text'" class="ot_area_list_item_data_row">
+                        <div class="ot_area_list_item_param">
+                            <span>Font</span>
+                            <select t-attf-style="font-family: '{{props.area.data.font.name}}';"
+                                    t-att-disabled="!props.editMode"
+                                    t-on-change="onChangeFont">
+                                <t t-foreach="props.fontList" t-as="font" t-key="font_index">
+                                    <option t-att-value="font.id"
+                                            t-att-selected="font.id === props.area.data.font.id"
+                                            t-att-data-name="font.name"
+                                            t-attf-style="font-family: '{{font.name}}';">
+                                        <t t-esc="font.name"/>
+                                    </option>
+                                </t>
+                            </select>
+                        </div>
+                        <AreaParametersNumberInput areaIndex="props.area.index"
+                                                   label="'Font size'"
+                                                   value="props.area.data.fontSize"
+                                                   disabled="!props.editMode"
+                                                   inputMin="0"
+                                                   inputMax="100"
+                                                   changeValue="props.area.change.fontSize"/>
+                        <div t-if="props.colorList.length" class="ot_area_list_item_param">
+                            <span>Color</span>
+                            <select t-att-disabled="!props.editMode"
+                                    t-on-change="onChangeTextColor">
+                                <t t-foreach="props.colorList" t-as="color" t-key="color_index">
+                                    <option t-att-value="color.id"
+                                            t-att-selected="color.id === props.area.data.color.id"
+                                            t-att-data-color="color.color"
+                                            t-att-data-name="color.name">
+                                        <t t-esc="color.name"/>
+                                    </option>
+                                </t>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div t-if="props.editMode"
+                 class="ot_area_list_item_remove"
+                 t-on-click.stop="onClickRemoveArea">
+                <i class="fa fa-remove"/>
+            </div>
+        </div>
+    </t>
+
+    <t t-name="areas_parameters_number_input" owl="1">
+        <div class="ot_area_list_item_param">
+            <span><t t-esc="props.label"/></span>
+            <input type="number" t-ref="input"
+                   t-att-value="props.value.toString()"
+                   t-att-min="props.inputMin" t-att-step="props.inputStep"
+                   t-att-disabled="props.disabled"
+                   t-on-change="onChangeInput"
+                   t-on-input="onInput"/>
         </div>
     </t>
 

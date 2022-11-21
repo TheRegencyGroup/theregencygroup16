@@ -1,6 +1,6 @@
 import json
 
-from odoo import fields, models, api
+from odoo import fields, models, api, Command
 
 
 class SaleOrder(models.Model):
@@ -21,6 +21,24 @@ class SaleOrder(models.Model):
         if 'price_list_id' in kwargs:
             result['price_list_id'] = kwargs['price_list_id']
         return result
+
+    def submit_so_and_send_notify(self):
+        self.state = 'sent'
+        self.message_partner_ids = [Command.link(self.env.user.partner_id.id)]
+        email_template = self.env.ref('regency_shopsite.so_submitted')
+        for partner in self.team_id.message_follower_ids.mapped('partner_id'):
+            email_values = {
+                'recipient_ids': [(4, partner.id)]
+            }
+            action_id = self.env.ref('sale.action_quotations_with_onboarding')
+            menu_id = self.env.ref('sale.menu_sale_quotations')
+            data = {
+                'partner_name': partner.name,
+                'so_ref': self.name,
+                'so_url': "/web#id=%d&action=%d&model=%s&view_type=form&menu_id=%d" % (
+                    self.id, action_id.id, self._name, menu_id.id)
+            }
+            email_template.with_context(data).send_mail(self.id, email_values=email_values)
 
 
 class SaleOrderLine(models.Model):
@@ -101,7 +119,8 @@ class SaleOrderLine(models.Model):
                     line.product_id,
                     line.product_uom_qty or 1.0,
                     uom=line.product_uom,
-                    date=line.order_id.date_order)
+                    date=line.order_id.date_order,
+                    overlay_tmpl_id=line.overlay_template_id.id)
             # end custom logic
             else:
                 line.pricelist_item_id = line.order_id.pricelist_id._get_product_rule(

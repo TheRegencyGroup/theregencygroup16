@@ -1,6 +1,6 @@
 {
     'name': 'Regency Consumption Agreement',
-    'version': '16.0.0.1',
+    'version': '16.0.0.2',
     'summary': '',
     'author': 'OpsWay',
     'description': "",
@@ -25,6 +25,7 @@
     'assets': {
         'web.assets_frontend': [
             'consumption_agreement/static/src/js/**/*',
+            'consumption_agreement/static/src/frontend/js/**/*.js',
         ],
     },
     'installable': True,

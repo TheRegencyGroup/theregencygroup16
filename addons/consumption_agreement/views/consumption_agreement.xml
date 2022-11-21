@@ -46,7 +46,10 @@
                     </div>
                     <group name="agreement_header">
                         <group name="partner_details">
-                            <field name="partner_id" attrs="{'readonly': [('state', 'not in', ['draft'])]}" widget="res_partner_many2one" context="{'res_partner_search_mode': 'customer', 'show_address': 1, 'show_vat': True}" options='{"always_reload": True}'/>
+                            <field name="partner_id" attrs="{'readonly': [('state', 'not in', ['draft'])]}"
+                                   widget="res_partner_many2one"
+                                   context="{'res_partner_search_mode': 'customer', 'show_address': 1, 'show_vat': True}"
+                                   options='{"always_reload": True}' required="1"/>
                         </group>
                         <group name="other_details">
                             <field name="signed_date" />
@@ -71,7 +74,7 @@
                                 mode="tree"
                                 attrs="{'readonly': [('state', 'not in', ['draft'])]}"
                             >
-                                <tree editable="bottom">
+                                <tree editable="bottom" no_open="1">
                                     <field name="product_id"/>
                                     <field name="allowed_partner_ids" widget="many2many_tags" domain="[('id', 'in', parent.possible_partners)]"/>
                                     <field name="name" string="Description"/>

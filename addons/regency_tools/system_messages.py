@@ -25,4 +25,6 @@ SystemMessages = {
     "M-003": "Quantity is not set! Please, populate Quantity field with the necessary value.",
     "M-004": "Please, make sure you’ve allowed Consumption Agreement creation!",
     "M-005": "%s is confirmed. Please, send it the customer!<br/>The link to portal: %s",
+    "M-009": "%s %s created!",
+    "M-010": "%s is created!",
 }

@@ -326,12 +326,13 @@ class SaleEstimate(models.Model):
             action['views'] = [(self.env.ref('regency_estimate.product_price_sheet_view_inherit').id, 'form')]
             action['res_id'] = pricesheet.id
         else:
+            new_pricesheet = existing_draft_pricesheets.create({
+                'estimate_id': self.id,
+                'partner_id': self.partner_id,
+                'item_ids': sheet_lines,
+            })
             action = self.env["ir.actions.actions"]._for_xml_id("regency_estimate.action_product_price_sheet_new")
-            action['context'] = {
-                'search_default_estimate_id': self.id,
-                'default_estimate_id': self.id,
-                'default_item_ids': sheet_lines
-            }
+            action['res_id'] = new_pricesheet.id
         self.product_lines.filtered('selected').write({'selected': False})
         return action
 

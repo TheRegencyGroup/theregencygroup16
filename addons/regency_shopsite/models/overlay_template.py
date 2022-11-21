@@ -5,6 +5,7 @@ from odoo.exceptions import ValidationError, UserError
 from odoo import fields, models, api, Command, _
 
 from odoo.addons.regency_contacts.models.const import HOTEL
+from odoo.addons.regency_shopsite.const import TEXT_AREA_TYPE
 
 
 class OverlayTemplate(models.Model):
@@ -47,6 +48,12 @@ class OverlayTemplate(models.Model):
     hotels_without_prices = fields.One2many('res.partner', compute='_compute_hotels_without_prices')
     show_hotels_without_prices = fields.Boolean(compute='_compute_hotels_without_prices')
     allow_edit = fields.Boolean(compute='_compute_allow_edit')
+    all_overlay_fonts = fields.Json(compute='_compute_all_overlay_fonts')
+    areas_overlay_font_ids = fields.Many2many('overlay.font', compute='_compute_areas_data_values', store=True,
+                                              ondelete='restrict')
+    all_overlay_colors = fields.Json(compute='_compute_all_overlay_colors')
+    areas_overlay_color_ids = fields.Many2many('overlay.color', compute='_compute_areas_data_values', store=True,
+                                               ondelete='restrict')
 
     @api.constrains('areas_data')
     def _check_areas_data(self):
@@ -124,13 +131,26 @@ class OverlayTemplate(models.Model):
             else:
                 image_ids = []
                 value_ids = []
+                font_ids = []
+                color_ids = []
                 for overlay_position in rec.areas_data.values():
                     selected_images = overlay_position['selectedImages'].values()
                     image_ids += list(map(lambda x: x['imageId'], selected_images))
                     value_ids += list(map(lambda x: x['valueId'], selected_images))
-                value_ids = filter(lambda x: x != 0, value_ids)
+                    for area in overlay_position['areaList'].values():
+                        if area['areaType'] != TEXT_AREA_TYPE:
+                            continue
+                        font = area['data'].get('font', False)
+                        if font and isinstance(font, dict) and isinstance(font['id'], int):
+                            font_ids.append(font['id'])
+                        color = area['data'].get('color', False)
+                        if color and isinstance(color, dict) and isinstance(color['id'], int):
+                            color_ids.append(color['id'])
+                value_ids = list(filter(lambda x: x != 0, value_ids))
                 rec.areas_product_image_ids = [Command.set(image_ids)]
                 rec.areas_image_attribute_selected_value_ids = [Command.set(value_ids)]
+                rec.areas_overlay_font_ids = [Command.set(font_ids)]
+                rec.areas_overlay_color_ids = [Command.set(color_ids)]
 
     @api.depends('overlay_attribute_value_ids')
     def _compute_overlay_attribute_value_id(self):
@@ -144,6 +164,16 @@ class OverlayTemplate(models.Model):
     def _compute_allow_edit(self):
         for rec in self:
             rec.allow_edit = not bool(rec.overlay_product_ids) or not rec.id
+
+    def _compute_all_overlay_fonts(self):
+        all_overlay_fonts = self.env['overlay.font'].search([]).read(['id', 'font_name'])
+        for rec in self:
+            rec.all_overlay_fonts = all_overlay_fonts
+
+    def _compute_all_overlay_colors(self):
+        all_overlay_colors = self.env['overlay.color'].search([]).read(['id', 'name', 'color'])
+        for rec in self:
+            rec.all_overlay_colors = all_overlay_colors
 
     @api.onchange('product_template_id')
     @api.constrains('product_template_id')
@@ -205,6 +235,13 @@ class OverlayTemplate(models.Model):
     def _clear_overlay_attribute_line_ids(self):
         for rec in self:
             rec.overlay_attribute_line_ids.unlink()
+
+    @api.model
+    def default_get(self, fields):
+        defaults = super().default_get(fields)
+        defaults['all_overlay_fonts'] = self.env['overlay.font'].search([]).read(['id', 'font_name'])
+        defaults['all_overlay_colors'] = self.env['overlay.color'].search([]).read(['id', 'name', 'color'])
+        return defaults
 
     def write(self, vals):
         change_product_template_id = 'product_template_id' in vals

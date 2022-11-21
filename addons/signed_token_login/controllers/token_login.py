@@ -4,9 +4,11 @@ from ast import literal_eval
 import jwt
 
 from odoo import http
-from odoo.addons.web.controllers import main
 from odoo.addons.web.controllers.main import ensure_db
+from odoo.addons.website.controllers.main import Website
+from odoo.api import Environment
 from odoo.http import request
+from odoo.modules.registry import Registry
 from werkzeug.exceptions import BadRequest, InternalServerError, NotFound
 
 DEFAULT_ALG = "HS512"
@@ -14,7 +16,7 @@ DEFAULT_ALG = "HS512"
 _logger = logging.getLogger(__name__)
 
 
-class TokenLogin(main.Home):
+class TokenLogin(Website):
     @http.route("/token_login", type='http', auth="none")
     def token_login(self, token, redirect="", db=""):
         ensure_db()
@@ -51,20 +53,26 @@ class TokenLogin(main.Home):
         except Exception:
             _logger.warning(f"Token login: Invalid or expired token, {header}, {token}")
             raise BadRequest("Invalid or expired token")
-        uid = self.authenticate(db or request.session.db, payload['login'])
+        uid = self._insert_session(db or request.session.db, payload['login'])
         _logger.info(f"Token login: {payload['login']}")
         return request.redirect(self._login_redirect(uid, redirect=redirect))
 
     @classmethod
-    def authenticate(cls, db, login):
+    def _insert_session(cls, dbname, login):
+        registry = Registry(dbname)
+        pre_uid = registry['res.users']._auto_login(dbname, login)
         session = request.session
-        uid = request.env['res.users']._auto_login(db, login)
-        session.pre_uid = uid
-        session.rotate = True
-        session.db = db
-        session.login = login
-        request.disable_db = False
-        user = request.env['res.users'].browse(uid)
-        if not user._mfa_url():
-            session.finalize()
-        return uid
+        session.uid = None
+        session.pre_login = login
+        session.pre_uid = pre_uid
+
+        with registry.cursor() as cr:
+            env = Environment(cr, pre_uid, {})
+            session.finalize(env)
+
+        if request and request.db == dbname:
+            # Like update_env(user=request.session.uid) but works when uid is None
+            request.env = Environment(request.env.cr, session.uid, session.context)
+            request.update_context(**session.context)
+        session.db = dbname
+        return session.uid

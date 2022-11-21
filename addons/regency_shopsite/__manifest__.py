@@ -1,6 +1,6 @@
 {
     'name': 'Regency Shopsite',
-    'version': '16.0.0.11',
+    'version': '16.0.0.12',
     'author': 'OpsWay',
     'license': "Other proprietary",
     'depends': [
@@ -30,6 +30,8 @@
         'views/website/website_shop_catalog_page.xml',
         'views/overlay_template_view.xml',
         'views/overlay_position_view.xml',
+        'views/overlay_font_view.xml',
+        'views/overlay_color_view.xml',
         'views/overlay_product.xml',
         'views/product_pricelist_item_view.xml',
         'views/product_product.xml',
@@ -37,7 +39,8 @@
         'views/res_partner.xml',
         'views/res_config_settings.xml',
         'views/sale_portal_templates.xml',
-        'views/product_image_views.xml'
+        'views/product_image_views.xml',
+        'views/email_templates.xml'
     ],
     'demo': [
         'data/demo/product_demo.xml',
@@ -68,7 +71,7 @@
             'regency_shopsite/static/src/scss/frontend/designer.scss',
         ],
         'web.assets_backend': [
-            'regency_shopsite/static/lib/*.js',
+            'regency_shopsite/static/lib/fabric_js/fabric.min.js',
             'regency_shopsite/static/src/js/main.js',
             'regency_shopsite/static/src/js/backend/*.js',
 

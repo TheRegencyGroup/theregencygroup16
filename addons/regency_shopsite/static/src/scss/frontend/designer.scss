@@ -20,11 +20,54 @@
       .product_overlay_position_editor_tools {
         padding-right: 5px;
 
-        input {
+        .ot_add_text_block {
+          position: relative;
+
+          .ot_add_text_popover {
+            position: absolute;
+            left: 100%;
+            top: 0;
+            margin-left: 5px;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            background-color: $grey10;
+            z-index: 9;
+
+            .ot_add_text_popover_top {
+              textarea {
+                outline: none;
+              }
+            }
+
+            .ot_add_text_popover_bottom {
+              display: flex;
+              justify-content: end;
+
+              button {
+                margin-right: 5px;
+                padding: 5px 15px;
+                outline: none;
+                border: none;
+                background-color: $grey90;
+                font-size: 14px;
+                line-height: 16px;
+                color: $grey10;
+                transition: all 0.2s;
+
+                &:hover {
+                  background-color: darken($grey90, 10);
+                }
+              }
+            }
+          }
+        }
+
+        & > input {
           display: none;
         }
 
-        label, button {
+        .ot_tools_btn {
           width: 40px;
           height: 40px;
           margin: 0 0 5px;
@@ -32,7 +75,6 @@
           align-items: center;
           justify-content: center;
           border: none;
-          border-radius: 0.3rem;
           background-color: $grey10;
           cursor: pointer;
           outline: none;
@@ -66,6 +108,7 @@
         .product_overlay_position {
           position: relative;
           border: 1px solid $grey10;
+          overflow: hidden;
 
           img {
             max-width: 500px;

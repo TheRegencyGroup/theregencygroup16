@@ -39,7 +39,7 @@
                         </div>
                         <group>
                             <group name="opportunity_partner">
-                                <field name="partner_id"
+                                <field name="partner_id" required="1"
                                     widget="res_partner_many2one"
                                     string="Customer"
                                     context="{'res_partner_search_mode': 'customer',

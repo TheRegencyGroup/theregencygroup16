@@ -6,7 +6,7 @@ import Dialog from 'web.Dialog';
 import env from 'web.public_env';
 import {
     PRODUCT_IMAGE_MODEL,
-    computeImageSrc
+    computeImageSrc, TEXT_AREA_TYPE
 } from "../../../main";
 
 const { Component, useRef, useState, onMounted } = owl;
@@ -20,13 +20,13 @@ export class ProductOverlayEditorComponent extends Component {
             selectedOverlayPositionId: Object.values(this.store.otPage.overlayPositions)[0].id,
         });
 
-        this.imageUploadRef = useRef('image_upload_ref');
-
         this.imageTimestamp = new Date().valueOf();
+
+        this.fontList = this.getFontList();
     }
 
     async onMounted() {
-
+        this.loadFontsForCanvas();
     }
 
     get overlayPositionComponents() {
@@ -55,6 +55,17 @@ export class ProductOverlayEditorComponent extends Component {
         });
     }
 
+    getFontList() {
+        const positions = Object.values(this.store.otPage.overlayPositions);
+        const textAreas = positions.map(e => Object.values(e.areaList)).flat()
+            .filter(e => e.areaType === TEXT_AREA_TYPE);
+        return textAreas.filter(e => typeof e.data.font.id === 'number').map(e => e.data.font);
+    }
+
+    loadFontsForCanvas() {
+        this.fontList.forEach(e => new FontFaceObserver(e.name).load());
+    }
+
     checkAreasWasChanged() {
        for (let component of this.overlayPositionComponents) {
            for (let area of Object.values(component.areas)) {
@@ -72,19 +83,20 @@ export class ProductOverlayEditorComponent extends Component {
             const overlayPosition = component.props.overlayPosition;
             const areaList = {};
             for (let area of Object.values(component.areas)) {
-                let areaData = area.getOverlayImagesData();
+                let areaData = area.getOverlayData();
                 if (!areaData.length) {
                     alert('All area must be filled!');
                     return false;
                 }
                 areaList[area.areaIndex] = {
                     'index': area.areaIndex,
-                    'type': area.areaType,
+                    'type': area.type,
                     'data': areaData,
                 };
             }
             data[overlayPosition.id] = {
                 overlayPositionId: overlayPosition.id,
+                overlayPositionName: overlayPosition.name,
                 areaList,
             };
         }

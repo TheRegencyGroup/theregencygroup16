@@ -6,7 +6,7 @@ ImageParams = namedtuple('ImageParams', ['model_name', 'rec_id', 'field_name'])
 from odoo import api, Command, fields, models, _
 from odoo.exceptions import ValidationError
 from odoo.addons.http_routing.models.ir_http import slug
-from odoo.addons.regency_shopsite.const import OVERLAY_PRODUCT_ID_URL_PARAMETER
+from odoo.addons.regency_shopsite.const import OVERLAY_PRODUCT_ID_URL_PARAMETER, TEXT_AREA_TYPE
 
 
 class OverlayProduct(models.Model):
@@ -32,6 +32,7 @@ class OverlayProduct(models.Model):
                                                      copy=False)
     overlay_product_area_image_attachment_ids = fields.Many2many('ir.attachment')
     area_list_data = fields.Json()
+    areas_text_table = fields.Html(compute='_compute_areas_text_table', store=True)
     last_updated_date = fields.Datetime(readonly=True, copy=False)
     updated_by_id = fields.Many2one('res.users', readonly=True, copy=False)
 
@@ -42,6 +43,50 @@ class OverlayProduct(models.Model):
                 rec.customize_attribute_value_id = rec.customize_attribute_value_ids[0]
             else:
                 rec.customize_attribute_value_id = False
+
+    @api.depends('area_list_data')
+    def _compute_areas_text_table(self):
+        for rec in self:
+            if not rec.area_list_data:
+                rec.areas_text_table = False
+                continue
+            table_content = ''
+            for position in rec.area_list_data.values():
+                text_areas = list(filter(lambda x: x['type'] == TEXT_AREA_TYPE, position['areaList'].values()))
+                text_objects = list(map(lambda x: x['data'], text_areas))
+                text_objects = [item for sublist in text_objects for item in sublist]
+                for index, area in enumerate(text_objects):
+                    first_cell = ''
+                    if index == 0:
+                        first_cell = f'''
+                            <td rowspan={len(text_objects)}>
+                                {position.get('overlayPositionName') or ''}
+                            </td>
+                        '''
+                    table_content += f'''
+                        <tr>
+                            {first_cell}
+                            <td>{area['objectData'].get('text') or ''}</td>
+                            <td>{area['objectData'].get('fontName') or ''}</td>
+                            <td>{area['objectData'].get('fontSize') or ''}</td>
+                            <td>{area['objectData'].get('fontColor') or ''}</td>
+                        </tr>
+                    '''
+            table = f'''
+                <table class="table table-bordered">
+                    <thead>
+                        <th>Position</th>
+                        <th>Text</th>
+                        <th>Font</th>
+                        <th>Font size</th>
+                        <th>Color</th>
+                    </thead>
+                    <tbody>
+                        {table_content}
+                    </tbody>
+                </table>
+            '''
+            rec.areas_text_table = table
 
     @api.model_create_multi
     def create(self, vals):
