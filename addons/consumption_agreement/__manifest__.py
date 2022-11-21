@@ -1,6 +1,6 @@
 {
     'name': 'Regency Consumption Agreement',
-    'version': '16.0.0.1',
+    'version': '16.0.0.2',
     'summary': '',
     'author': 'OpsWay',
     'description': "",
@@ -18,11 +18,14 @@
         'views/consumption_agreement.xml',
         'views/consumption_agreement_portal.xml',
         'views/sale_order_portal.xml',
-        'security/ir.model.access.csv'
+        'security/ir.model.access.csv',
+        'wizard/create_so_wizard.xml',
+        'report/consumption_agreement.xml'
     ],
     'assets': {
         'web.assets_frontend': [
             'consumption_agreement/static/src/js/**/*',
+            'consumption_agreement/static/src/frontend/js/**/*.js',
         ],
     },
     'installable': True,

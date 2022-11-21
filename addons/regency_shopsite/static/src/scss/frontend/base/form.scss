@@ -219,13 +219,12 @@ button, input, textarea {
   justify-content: center;
 }
 
-
-.radio-lines {
-  margin: 0 0 24px;
+.price-lines {
+  margin: 0 0 30px;
   font-family: 'Raleway', sans-serif;
 }
 
-.radio-line {
+.price-line {
   overflow: hidden;
   margin: 0 0 8px;
   cursor: pointer;
@@ -238,54 +237,42 @@ button, input, textarea {
     top: -20px;
 
     &:checked {
-      + .radio-line-in {
-        &:after {
-          display: block;
-        }
+      + .price-line-in {
+        border-color: $grey10;
       }
     }
   }
 }
 
-.radio-line-in {
-  border: 1px solid $grey70;
-  position: relative;
-  padding: 13px 16px 13px 52px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+.price-line-in {
+  padding: 13px 16px 13px 16px;
+  background-color: $grey90;
+  border: 1px solid transparent;
   color: $grey10;
   min-height: 50px;
   font-size: 16px;
   line-height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: relative;
+  transition: all 0.2s;
+}
 
-  &:before {
-    content: "";
-    position: absolute;
-    left: 18px;
-    top: 50%;
-    width: 20px;
-    height: 20px;
-    border-radius: 50%;
-    transform: translateY(-50%);
-    border: 2px solid $grey10;
-  }
+.price-line-number {
+  display: flex;
+  flex-direction: column;
 
-  &:after {
-    display: none;
-    content: "";
-    position: absolute;
-    left: 23px;
-    top: 50%;
-    width: 10px;
-    height: 10px;
-    background: $grey10;
-    border-radius: 50%;
-    transform: translateY(-50%);
+  span {
+    margin-bottom: 4px;
+    font-size: 14px;
+    line-height: 16px;
+    font-weight: 400;
+    color: $grey40;
   }
 }
 
-.radio-line-price {
+.price-line-value {
   font-size: 18px;
   line-height: 24px;
   font-family: $font-family-secondary;
@@ -293,6 +280,76 @@ button, input, textarea {
   color: $grey10;
 }
 
+.qty-selector-block {
+  position: relative;
+  margin-top: 12px;
+  display: flex;
+  align-items: center;
+
+  .qty-selector {
+    flex: 1;
+    width: 100%;
+    margin-right: 32px;
+    padding: 8px 16px;
+    display: flex;
+    flex-direction: column;
+    border: 1px solid $grey70;
+
+    span {
+      margin-bottom: 6px;
+      font-size: 14px;
+      line-height: 16px;
+      color: $grey40;
+    }
+
+    input {
+      width: 100%;
+      padding: 0;
+      background-color: transparent;
+      border: none;
+      outline: none;
+      color: $grey10;
+      font-size: 16px;
+      line-height: 19px;
+      -moz-appearance: textfield;
+
+      &::-webkit-outer-spin-button,
+      &::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+      }
+    }
+  }
+
+  .qty-selector-price {
+    flex: 1;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    font-family: 'Playfair Display', sans-serif;
+    font-size: 24px;
+    line-height: 32px;
+
+    span {
+      font-family: 'Raleway', sans-serif;
+      font-size: 16px;
+      line-height: 19px;
+    }
+  }
+
+  .qty-selector-invalid-message {
+    position: absolute;
+    bottom: -20px;
+    left: 0;
+    font-size: 13px;
+    color: $red;
+
+    sup {
+      top: 12px;
+      font-size: 30px;
+    }
+  }
+}
 
 .form-set {
   margin-bottom: 24px;

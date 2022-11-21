@@ -1,6 +1,6 @@
 {
     'name': 'Regency Sales Estimates',
-    'version': '16.0.0.4',
+    'version': '16.0.0.5',
     'summary': '',
     'author': 'OpsWay',
     'description': "",
@@ -14,7 +14,9 @@
         'sale_management',
         'web_one2many_duplicate_cr',
         'delivery',
-        'stock_mts_mto_rule'
+        'stock_mts_mto_rule',
+        'custom_list_view',
+        'mail_chatter_customization',
     ],
     'category': 'Regency/Sales',
     'sequence': 10,
@@ -23,6 +25,7 @@
         'data/sale_estimate_stages.xml',
         'data/purchase_requisition_data.xml',
         'security/ir.model.access.csv',
+        'security/groups.xml',
         'views/sale_estimate.xml',
         'views/sale_estimate_stage_views.xml',
         'views/purchase_requisition_views.xml',
@@ -39,17 +42,23 @@
         'wizard/portal_link.xml',
         'views/product_views.xml',
         'views/delivery_carrier.xml',
+        'views/portal_templates.xml',
+        'views/fee_type.xml',
+        'views/fee_value.xml',
+        'data/fee_type.xml',
+        'views/stock_picking.xml',
+        'views/account_move.xml',
     ],
     'demo': [
-        'data/product_demo.xml',
     ],
     'assets': {
         'web.assets_frontend': [
-            'regency_estimate/static/src/frontend/js/**/*'
+            'regency_estimate/static/src/frontend/js/**/*.js',
+            'regency_estimate/static/src/scss/frontend/*.scss',
         ],
         'web.assets_backend': [
             'regency_estimate/static/src/js/**/*',
-            'regency_estimate/static/src/scss/**/*',
+            'regency_estimate/static/src/scss/backend/*.scss',
             'regency_estimate/static/src/xml/qty_at_date_widget.xml'
         ]
     },

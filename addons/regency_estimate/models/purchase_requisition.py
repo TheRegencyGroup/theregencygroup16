@@ -86,7 +86,7 @@ class PurchaseRequisition(models.Model):
                 'channel_type': 'chat',
             })
         if ch:
-            ch.message_post(body=message, author_id=self.env.user.partner_id.id)
+            ch.message_post(body=message, author_id=self.env.user.partner_id.id, message_type='comment')
 
     def action_in_progress(self):
         super(PurchaseRequisition, self).action_in_progress()
@@ -107,6 +107,12 @@ class PurchaseRequisitionLine(models.Model):
         ('done', 'Done')
     ], compute='_compute_state', store=True)
     color = fields.Integer('Color Index', compute='_compute_color')
+
+    @api.onchange('partner_id')
+    def _onchange_partner(self):
+        self.produced_overseas = self.partner_id.is_company\
+                                 and self.partner_id.contact_type == 'vendor'\
+                                 and self.partner_id.vendor_type == 'overseas'
 
     def _compute_display_name(self):
         for prl in self:

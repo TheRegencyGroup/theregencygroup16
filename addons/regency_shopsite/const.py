@@ -22,3 +22,5 @@ SHOP_CATALOG_TAB_MODELS = {
     OVERLAY_TEMPLATE_CATALOG_TAB_KEY: 'overlay.template',
     OVERLAY_PRODUCT_CATALOG_TAB_KEY: 'overlay.product',
 }
+
+TEXT_AREA_TYPE = 'text'

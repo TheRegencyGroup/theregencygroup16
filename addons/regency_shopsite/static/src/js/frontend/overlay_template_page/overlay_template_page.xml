@@ -27,6 +27,10 @@
                                        t-on-focusin="onInputNameFocusin"
                                        t-on-focusout="onInputNameFocusout"/>
                             </div>
+                            <div class="listing-name-info"
+                                 t-att-class="{ 'd-none': !showListingNameInfoPopover }">
+                                <i class="icon-info" t-ref="listing_name_info"/>
+                            </div>
                         </div>
                         <div class="product-top-right">
                             <button t-if="showEditBtn"
@@ -62,7 +66,9 @@
 
                     <div class="product-row">
                         <div class="product-left">
+
                             <ProductOverlayEditorComponent/>
+
                             <div class="banner">
                                 <div class="banner-in">
                                     <div class="banner-logo">
@@ -81,7 +87,8 @@
 
                             <div class="line"></div>
 
-                            <ColorAttributeSelector attributeId="store.otPage.colorAttributeId"/>
+                            <ColorAttributeSelector t-if="showColorAttributeSelector"
+                                                    attributeId="store.otPage.colorAttributeId"/>
                             <t t-foreach="sortedAttributeList" t-as="attribute" t-key="attribute.id">
                                 <AttributeSelector t-if="attribute.id" attributeId="attribute.id"/>
                             </t>
@@ -123,10 +130,10 @@
 <!--                                </div>-->
 <!--                            </div>-->
 
-                            <PriceSelector t-if="showPriceSelector"/>
+                            <QuantitySelector t-if="showQuantitySelector"/>
 
                             <button t-if="showAddToCartBtn" class="btn btn-block btn-dark product-add-to-cart"
-                                    t-att-class="{ 'product-add-to-cart-disabled': !store.otPage.canAddedToCart }"
+                                    t-att-class="{ 'product-add-to-cart-disabled': !store.otPage.canAddedToCart || store.cart.addingToCart }"
                                     t-on-click="onClickAddToCart">
                                 <span>Add to cart</span>
                                 <span class="icon-cart"></span>
@@ -184,21 +191,43 @@
         </xpath>
     </t>
 
-    <t t-name="overlay_template_page_price_selector" owl="1">
-        <t t-if="priceList.length">
+    <t t-name="overlay_template_page_quantity_selector" owl="1">
+        <t t-if="store.otPage.sortedPriceList.length">
             <div class="line"></div>
-            <div class="radio-lines">
-                <t t-foreach="priceList" t-as="price_item" t-key="price_item.id">
-                    <label class="radio-line">
+            <div class="price-lines">
+                <t t-foreach="store.otPage.sortedPriceList" t-as="price_item" t-key="price_item.id">
+                    <label class="price-line">
                         <input type="radio" name="number"
                                t-att-checked="price_item.id === store.otPage.selectedPriceId"
                                t-on-click="() => this.onChangePrice(price_item.id)"/>
-                        <div class="radio-line-in">
-                            <div class="radio-line-number"><t t-esc="price_item.quantity"/></div>
-                            <div class="radio-line-price"><t t-esc="formatPrice(price_item.totalPrice)"/></div>
+                        <div class="price-line-in">
+                            <div class="price-line-number">
+                                <span>Qty</span>
+                                <t t-esc="price_item.quantity"/>
+                            </div>
+                            <div class="price-line-value"><t t-esc="formatPrice(price_item.totalPrice)"/></div>
                         </div>
                     </label>
                 </t>
+                <div class="qty-selector-block">
+                    <div class="qty-selector">
+                        <span>Order quantity</span>
+                        <input type="number" name="quantity"
+                               min="0" step="1"
+                               t-ref="quantity_input"
+                               t-att-value="store.otPage.quantity"
+                               t-on-input="onInputQuantity"
+                               t-on-change="onChangeQuantity"
+                               t-on-keypress="onKeypressQuantity"/>
+                    </div>
+                    <div class="qty-selector-price">
+                        <span>Price</span>
+                        <t t-esc="totalPrice"/>
+                    </div>
+                    <div t-if="invalidQuantity" class="qty-selector-invalid-message">
+                        <sup>*</sup>The minimum order quantity is <t t-esc="store.otPage.minimumOrderQuantity"/>
+                    </div>
+                </div>
             </div>
         </t>
     </t>

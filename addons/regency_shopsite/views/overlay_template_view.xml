@@ -25,6 +25,9 @@
         <field name="arch" type="xml">
             <form>
                 <field name="active" invisible="1"/>
+                <field name="allow_edit" invisible="1"/>
+                <field name="all_overlay_fonts" invisible="1"/>
+                <field name="all_overlay_colors" invisible="1"/>
                 <sheet>
                     <div class="oe_button_box" name="button_box">
                         <button name="show_on_website" type="object"
@@ -33,19 +36,20 @@
                     <group>
                         <group>
                             <field name="name"/>
-                            <field name="product_template_id"/>
+                            <field name="product_template_id"
+                                   attrs="{'readonly': [('allow_edit', '=', False)]}"/>
                             <field name="overlay_attribute_value_id"/>
+                            <field name="show_hotels_without_prices" invisible="1"/>
+                            <field name="hotels_without_prices" widget="many2many_tags" attrs="{'invisible': [('show_hotels_without_prices', '=', False)]}"/>
+                            <field name="overlay_position_ids" widget="many2many_tags"
+                                   attrs="{'readonly': [('allow_edit', '=', False)]}"/>
+                            <field name="areas_image_attribute_id" options="{'no_create': True, 'no_create_edit':True}"/>
+                            <field name="possible_areas_image_attribute_ids" invisible="1"/>
+                            <field name="areas_image_attribute_value_list" invisible="1"/>
+                            <field name="product_template_image_ids" invisible="1"/>
                         </group>
                     </group>
                     <notebook>
-                        <page string="Overlay Editor" id="editor">
-                            <group>
-                                <group>
-                                    <field name="overlay_position_ids" widget="many2many_tags"/>
-                                </group>
-                            </group>
-                            <field name="areas_json" widget="overlay_areas"/>
-                        </page>
                         <page string="Attributes &amp; Variants" id="attributes">
                             <field name="overlay_attribute_line_ids" widget="one2many" context="{'show_attribute': False}">
                                 <tree string="Variants" editable="bottom">
@@ -83,6 +87,7 @@
                             <field name="overlay_product_ids" context="{'default_overlay_template_id': id}"/>
                         </page>
                     </notebook>
+                    <field name="areas_data" widget="overlay_areas"/>
                 </sheet>
             </form>
         </field>

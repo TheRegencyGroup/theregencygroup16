@@ -1,0 +1,11 @@
+.regency_legal_accept {
+  input {
+    &.highlight + label {
+      color: $red;
+    }
+  }
+
+  label {
+    font-style: italic;
+  }
+}

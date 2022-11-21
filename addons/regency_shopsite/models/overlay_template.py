@@ -1,8 +1,11 @@
 import json
 
 from odoo.addons.http_routing.models.ir_http import slug
-from odoo.exceptions import ValidationError
+from odoo.exceptions import ValidationError, UserError
 from odoo import fields, models, api, Command, _
+
+from odoo.addons.regency_contacts.models.const import HOTEL
+from odoo.addons.regency_shopsite.const import TEXT_AREA_TYPE
 
 
 class OverlayTemplate(models.Model):
@@ -21,18 +24,84 @@ class OverlayTemplate(models.Model):
                                                   string="Overlay attribute values")
     product_variant_ids = fields.One2many('product.product', compute='_compute_product_variant_ids')
     sale_order_line_ids = fields.One2many('sale.order.line', 'overlay_template_id')
-    overlay_position_ids = fields.Many2many('overlay.position', required=True, string='Positions', ondelete='restrict')
     overlay_attribute_line_ids = fields.One2many('overlay.template.attribute.line', 'overlay_tmpl_id',
                                                  'Overlay Attributes', copy=True)
-    product_image_ids = fields.Many2many('product.image', compute='_compute_images', store=True, ondelete='restrict')
-
-    use_product_template_image = fields.Boolean(compute='_compute_images', store=True)
-    areas_json = fields.Char()
     overlay_product_ids = fields.One2many('overlay.product', 'overlay_template_id')
     price_item_ids = fields.One2many('product.pricelist.item', 'overlay_tmpl_id', copy=True)
     display_name = fields.Char(compute='_compute_display_name')
     hotel_ids = fields.Many2many('res.partner', 'hotel_template_rel', 'template_id', 'hotel_id', string='Hotels',
-                                 domain=[('company_type', '=', 'company'), ('contact_type', '=', 'customer')])
+                                 domain=[('entity_type', "=", HOTEL)])
+
+    areas_data = fields.Json()
+    overlay_position_ids = fields.Many2many('overlay.position', required=True, string='Positions', ondelete='restrict')
+    areas_image_attribute_id = fields.Many2one('product.attribute',
+                                               domain="[('id', 'in', possible_areas_image_attribute_ids)]")
+    possible_areas_image_attribute_ids = fields.Many2many('product.attribute',
+                                                          compute='_compute_possible_areas_image_attribute_ids')
+    areas_image_attribute_value_list = fields.Json(compute='_compute_areas_image_attribute_value_list')
+    product_template_image_ids = fields.One2many(related='product_template_id.product_template_image_ids')
+    areas_product_image_ids = fields.Many2many('product.image', compute='_compute_areas_data_values', store=True,
+                                               ondelete='restrict')
+    areas_image_attribute_selected_value_ids = fields.Many2many('product.attribute.value',
+                                                                compute='_compute_areas_data_values',
+                                                                store=True, ondelete='restrict')
+    hotels_without_prices = fields.One2many('res.partner', compute='_compute_hotels_without_prices')
+    show_hotels_without_prices = fields.Boolean(compute='_compute_hotels_without_prices')
+    allow_edit = fields.Boolean(compute='_compute_allow_edit')
+    all_overlay_fonts = fields.Json(compute='_compute_all_overlay_fonts')
+    areas_overlay_font_ids = fields.Many2many('overlay.font', compute='_compute_areas_data_values', store=True,
+                                              ondelete='restrict')
+    all_overlay_colors = fields.Json(compute='_compute_all_overlay_colors')
+    areas_overlay_color_ids = fields.Many2many('overlay.color', compute='_compute_areas_data_values', store=True,
+                                               ondelete='restrict')
+
+    @api.constrains('areas_data')
+    def _check_areas_data(self):
+        for rec in self:
+            if rec.areas_data and isinstance(rec.areas_data, dict) and rec.areas_data.get('errors', False):
+                raise UserError('\n'.join(rec.areas_data['errors']))
+
+    @api.onchange('product_template_id')
+    def _onchange_product_template_id(self):
+        attribute_ids = self.product_template_id.attribute_line_ids.mapped('attribute_id')
+        if self.areas_image_attribute_id and self.areas_image_attribute_id.id not in attribute_ids.ids:
+            self.areas_image_attribute_id = False
+
+    def _compute_hotels_without_prices(self):
+        for rec in self:
+            rec.hotels_without_prices = False
+            rec.show_hotels_without_prices = False
+            for hotel in rec.hotel_ids:
+                if not hotel.property_product_pricelist.item_ids.filtered(lambda f: f.overlay_tmpl_id == rec):
+                    rec.hotels_without_prices += hotel
+                    rec.show_hotels_without_prices = True
+
+    @api.depends('product_template_id')
+    def _compute_possible_areas_image_attribute_ids(self):
+        overlay_attribute_id = self.env.ref('regency_shopsite.overlay_attribute')
+        customize_attribute_id = self.env.ref('regency_shopsite.customization_attribute')
+        for rec in self:
+            rec.possible_areas_image_attribute_ids = rec.product_template_id.attribute_line_ids \
+                .filtered(lambda x: x.attribute_id.id not in [overlay_attribute_id.id, customize_attribute_id.id]) \
+                .mapped('attribute_id').ids
+
+    @api.depends('product_template_id', 'areas_image_attribute_id', 'overlay_attribute_line_ids')
+    def _compute_areas_image_attribute_value_list(self):
+        for rec in self:
+            data = []
+            if rec.areas_image_attribute_id:
+                overlay_attribute_line_id = self.overlay_attribute_line_ids\
+                    .filtered(lambda x: x.attribute_id.id == rec.areas_image_attribute_id.id)
+                if overlay_attribute_line_id:
+                    value_ids = overlay_attribute_line_id.value_ids
+                else:
+                    value_ids = self.product_template_id.attribute_line_ids \
+                        .filtered(lambda x: x.attribute_id.id == self.areas_image_attribute_id.id).value_ids
+                data = [{
+                    'id': x.id,
+                    'name': x.name,
+                } for x in self.env['product.attribute.value'].search([('id', 'in', value_ids.ids)])]
+            rec.areas_image_attribute_value_list = data
 
     def _compute_display_name(self):
         for rec in self:
@@ -53,92 +122,35 @@ class OverlayTemplate(models.Model):
                 if all(product_template_attributes.get(k) in v for k, v in overlay_template_attributes.items()):
                     rec.product_variant_ids += product_variant
 
-    @api.onchange('product_template_id', 'overlay_position_ids', 'overlay_attribute_line_ids')
-    def _compute_areas_json(self):
+    @api.depends('areas_data')
+    def _compute_areas_data_values(self):
         for rec in self:
-            json_val = json.loads(rec.areas_json) if rec.areas_json else {}
-
-            product_template_id = json_val.get('productTemplateId', False)
-            product_template_changed = False
-            if product_template_id != rec.product_template_id.id:
-                product_template_changed = True
-
-            image_list = []
-            if rec.product_template_id:
-                for product_image in rec.product_template_id._get_images():
-                    if product_image.image_1920:
-                        image_list.append({
-                            'id': product_image.id,
-                            'model': product_image._name,
-                        })
-            json_val['productTemplateId'] = rec.product_template_id.id
-            json_val['productImageList'] = image_list
-
-            overlay_positions = json_val.get('overlayPositions', {})
-            for overlay_position_id in rec.overlay_position_ids.ids:
-                overlay_position = overlay_positions.get(str(overlay_position_id))
-                if not overlay_position:
-                    overlay_position = {
-                        'id': overlay_position_id,
-                        'name': self.env['overlay.position'].browse(overlay_position_id).name,
-                        'imageColorId': False,
-                        'areaList': {}
-                    }
-                color_images = overlay_position.get('colorImages', {})
-                overlay_attribute_line_ids = rec.overlay_attribute_line_ids
-                color_attribute_id = self.env.ref('regency_shopsite.color_attribute')
-                overlay_color_attribute_line_id = overlay_attribute_line_ids.filtered(
-                    lambda x: x.attribute_id.id == color_attribute_id.id)
-                if not overlay_color_attribute_line_id or not overlay_color_attribute_line_id.value_ids:
-                    color_attribute_line_id = rec.product_template_id.attribute_line_ids.filtered(
-                        lambda x: x.attribute_id.id == color_attribute_id.id)
-                    color_attribute_value_ids = color_attribute_line_id.value_ids
-                else:
-                    color_attribute_value_ids = overlay_color_attribute_line_id.value_ids
-                for color_value in color_attribute_value_ids:
-                    color_value_id = color_value.ids[0]
-                    if not color_images.get(str(color_value_id)):
-                        color_images[str(color_value_id)] = {
-                            'id': color_value_id,
-                            'name': color_value.name,
-                            'imageId': False,
-                            'imageModel': False,
-                        }
-                removed_images_color_ids = list(
-                    set(map(int, color_images.keys())).difference(set(color_attribute_value_ids.ids)))
-                for color_id in removed_images_color_ids:
-                    del color_images[str(color_id)]
-                overlay_position['colorImages'] = color_images
-                overlay_positions[str(overlay_position_id)] = overlay_position
-
-            removed_overlay_position_ids = list(
-                set(map(int, overlay_positions.keys())).difference(set(rec.overlay_position_ids.ids)))
-            for overlay_position_id in removed_overlay_position_ids:
-                del overlay_positions[str(overlay_position_id)]
-            if product_template_changed:
-                for overlay_position in overlay_positions.values():
-                    overlay_position['areaList'] = {}
-            json_val['overlayPositions'] = overlay_positions
-
-            rec.areas_json = json.dumps(json_val)
-
-    @api.depends('areas_json')
-    def _compute_images(self):
-        for rec in self:
-            json_val = json.loads(rec.areas_json) if rec.areas_json else {}
-            product_image_ids = []
-            use_product_template_image = False
-            overlay_positions = json_val.get('overlayPositions', {})
-            for overlay_pos in overlay_positions.values():
-                for image in overlay_pos.get('colorImages', {}).values():
-                    image_id = image.get('imageId', False)
-                    image_model = image.get('imageModel', False)
-                    if image_id and image_model == 'product.image':
-                        product_image_ids.append(image_id)
-                    elif image_id and image_model == 'product.template':
-                        use_product_template_image = True
-            rec.product_image_ids = [Command.set(product_image_ids)]
-            rec.use_product_template_image = use_product_template_image
+            if not rec.areas_data or not isinstance(rec.areas_data, dict):
+                rec.areas_product_image_ids = False
+                rec.areas_image_attribute_selected_value_ids = False
+            else:
+                image_ids = []
+                value_ids = []
+                font_ids = []
+                color_ids = []
+                for overlay_position in rec.areas_data.values():
+                    selected_images = overlay_position['selectedImages'].values()
+                    image_ids += list(map(lambda x: x['imageId'], selected_images))
+                    value_ids += list(map(lambda x: x['valueId'], selected_images))
+                    for area in overlay_position['areaList'].values():
+                        if area['areaType'] != TEXT_AREA_TYPE:
+                            continue
+                        font = area['data'].get('font', False)
+                        if font and isinstance(font, dict) and isinstance(font['id'], int):
+                            font_ids.append(font['id'])
+                        color = area['data'].get('color', False)
+                        if color and isinstance(color, dict) and isinstance(color['id'], int):
+                            color_ids.append(color['id'])
+                value_ids = list(filter(lambda x: x != 0, value_ids))
+                rec.areas_product_image_ids = [Command.set(image_ids)]
+                rec.areas_image_attribute_selected_value_ids = [Command.set(value_ids)]
+                rec.areas_overlay_font_ids = [Command.set(font_ids)]
+                rec.areas_overlay_color_ids = [Command.set(color_ids)]
 
     @api.depends('overlay_attribute_value_ids')
     def _compute_overlay_attribute_value_id(self):
@@ -148,16 +160,38 @@ class OverlayTemplate(models.Model):
             else:
                 rec.overlay_attribute_value_id = False
 
+    @api.depends('overlay_product_ids')
+    def _compute_allow_edit(self):
+        for rec in self:
+            rec.allow_edit = not bool(rec.overlay_product_ids) or not rec.id
+
+    def _compute_all_overlay_fonts(self):
+        all_overlay_fonts = self.env['overlay.font'].search([]).read(['id', 'font_name'])
+        for rec in self:
+            rec.all_overlay_fonts = all_overlay_fonts
+
+    def _compute_all_overlay_colors(self):
+        all_overlay_colors = self.env['overlay.color'].search([]).read(['id', 'name', 'color'])
+        for rec in self:
+            rec.all_overlay_colors = all_overlay_colors
+
     @api.onchange('product_template_id')
     @api.constrains('product_template_id')
-    def _constrains_changes_if_has_sale(self):
-        for record in self:
-            if not record.active:
-                continue
-            if record.sale_order_line_ids:
-                raise ValidationError(_("The '%s' shopsite item template (ID%s) has sales."
+    def _constrains_changes_if_has_overlay_product(self):
+        for rec in self:
+            if rec.overlay_product_ids:
+                raise ValidationError(_("The '%s' shopsite item template (ID%s) has customize items."
                                         "A product template shouldn't be change for it.")
-                                      % (record.name, record.id,))
+                                      % (rec.name, rec.id,))
+
+    @api.constrains('active')
+    def _constrains_archive_and_deletion(self):
+        """ to restrict deletion the method should be used in def unlink"""
+        for ot in self:
+            active_overlay_product_ids = ot.overlay_product_ids.filtered(lambda op: op.active)
+            if active_overlay_product_ids:
+                raise ValidationError(f"Overlay template '{ot.name}' has active overlay product "
+                                      f"'{active_overlay_product_ids[0].name}', cause could not be delete or archived")
 
     def _create_overlay_attribute_value(self):
         overlay_attribute_id = self.env.ref('regency_shopsite.overlay_attribute')
@@ -202,6 +236,13 @@ class OverlayTemplate(models.Model):
         for rec in self:
             rec.overlay_attribute_line_ids.unlink()
 
+    @api.model
+    def default_get(self, fields):
+        defaults = super().default_get(fields)
+        defaults['all_overlay_fonts'] = self.env['overlay.font'].search([]).read(['id', 'font_name'])
+        defaults['all_overlay_colors'] = self.env['overlay.color'].search([]).read(['id', 'name', 'color'])
+        return defaults
+
     def write(self, vals):
         change_product_template_id = 'product_template_id' in vals
         if change_product_template_id:
@@ -219,7 +260,7 @@ class OverlayTemplate(models.Model):
         return res
 
     def unlink(self):
-        self._constrains_changes_if_has_sale()
+        self._constrains_archive_and_deletion()
         self._unlink_overlay_attribute_value()
         return super().unlink()
 

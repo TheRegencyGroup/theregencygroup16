@@ -1,8 +1,16 @@
+import json
+
 from odoo import fields, models, api
 
 
 class SaleOrder(models.Model):
     _inherit = 'sale.order'
+
+    def action_confirm(self):
+        res = super(SaleOrder, self).action_confirm()
+        for order in self:
+            order.order_line._write_image_snapshot()
+        return res
 
     def _prepare_order_line_values(self, product_id, quantity, linked_line_id=False, no_variant_attribute_values=None,
                                    product_custom_attribute_values=None, **kwargs):
@@ -20,12 +28,39 @@ class SaleOrderLine(models.Model):
 
     overlay_template_id = fields.Many2one('overlay.template', compute='_compute_overlay_template_id')
     price_list_id = fields.Many2one('product.pricelist', string='Pricelist')
+    image_snapshot = fields.Image('Product Image')
+    image_snapshot_url = fields.Text(compute='_compute_image_snapshot_url')
+
+    def _get_delivery_data(self):
+        self.ensure_one()
+        possible_addresses = [{'modelId': address.id,
+                               'addressStr': address.name,
+                               } for address in self.possible_delivery_address_ids]
+        return json.dumps({'solId': self.id,
+                           'currentDeliveryAddress': self.delivery_address_id.id,
+                           'possibleDeliveryAddresses': possible_addresses,
+                           })
+
 
     @api.model_create_multi
     def create(self, vals):
         res = super().create(vals)
         res._link_overlay_product_to_product_variant()
         return res
+
+    def _write_image_snapshot(self):
+        """should be called manually in right moment of business logic
+        (if you really should synchronize image for order lines in existing order)"""
+        for sol in self:
+            overlay_product_id = sol.product_id.overlay_product_id
+            if overlay_product_id:
+                sol.image_snapshot = overlay_product_id._preview_image()
+            else:
+                sol.image_snapshot = False
+
+    def _compute_image_snapshot_url(self):
+        for sol in self:
+            sol.image_snapshot_url = f'/web/image?model={sol._name}&id={sol.id}&field={"image_snapshot"}'
 
     def _link_overlay_product_to_product_variant(self):
         customization_attribute_id = self.env.ref('regency_shopsite.customization_attribute')
@@ -39,6 +74,7 @@ class SaleOrderLine(models.Model):
 
     @api.depends('product_id', 'product_id.product_template_attribute_value_ids')
     def _compute_overlay_template_id(self):
+        # TODO not correct result - overlay.template without sales has sale_order_line_ids
         overlay_attribute_id = self.env.ref('regency_shopsite.overlay_attribute')
         for line in self:
             product_template_attribute_value_ids = line.product_id.product_template_attribute_value_ids

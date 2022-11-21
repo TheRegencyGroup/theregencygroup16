@@ -7,6 +7,12 @@
         <field name="display_type">radio</field>
     </record>
 
+    <!--Fix an issue in demo data mode. product.attribute name must be unique -->
+    <function model="product.attribute" name="write">
+        <value model="product.attribute" eval="ref('product.product_attribute_2', raise_if_not_found=False)"/>
+        <value eval="{'name': 'Color core demo data',}"/>
+    </function>
+
     <record id="color_attribute" model="product.attribute">
         <field name="name">Color</field>
         <field name="create_variant">always</field>
@@ -20,7 +26,7 @@
     </record>
 
     <record id="customization_attribute" model="product.attribute">
-        <field name="name">Customization</field>
+        <field name="name">Overlay Customization</field>
         <field name="create_variant">dynamic</field>
         <field name="display_type">radio</field>
     </record>

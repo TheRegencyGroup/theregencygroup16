@@ -19,11 +19,15 @@
             <field name="name">product.price.sheet.form</field>
             <field name="model">product.price.sheet</field>
             <field name="arch" type="xml">
-                 <form string="Products Price Sheet">
+                 <form string="Products Price Sheet" create="0">
                     <header>
 <!--                        <button string="New Quotation" name="action_new_quotation" type="object" class="oe_highlight"-->
 <!--                                data-hotkey="q"-->
 <!--                                title="Create new quotation"/>-->
+                        <button string="Confirm" name="action_confirm" type="object" class="oe_highlight"
+                                data-hotkey="c" states="draft"/>
+                        <button string="Reset to Draft" name="action_draft" states="confirmed,closed" type="object"
+                                data-hotkey="r" groups="regency_estimate.group_estimate_manager"/>
                         <button string="Generate Portal Link" name="action_get_portal_link" type="object" class="oe_highlight"
                                 data-hotkey="q"
                                 attrs="{'invisible':[('state', '=', 'confirmed')]}"
@@ -33,6 +37,7 @@
                                 attrs="{'invisible':[('state', '=', 'draft')]}"
                                 title="Get Portal Link"/>
                         <field name="state" widget="statusbar" statusbar_visible="draft,confirmed"/>
+                        <field name="has_produced_overseas_items" invisible="1"/>
                     </header>
                      <sheet>
                         <div class="oe_button_box" name="button_box">
@@ -63,7 +68,7 @@
                         <notebook>
                             <page name="pricelist" string="Price Sheet Items">
                               <field name="item_ids"  widget="section_and_note_one2many" mode="tree">
-                                  <tree string="Price Sheet Items" editable="bottom" default_order='product_id asc, min_quantity asc'>
+                                  <tree string="Price Sheet Items" class="custom_list_header" editable="bottom" options="{'no_open': True}">
                                       <control>
                                         <create name="add_product_control" string="Add a product"/>
                                         <create name="add_section_control" string="Add a section" context="{'default_display_type': 'line_section'}"/>
@@ -72,30 +77,37 @@
                                       <field name="sequence" widget="handle" />
                                       <!-- We do not display the type because we don't want the user to be bothered with that information if he has no section or note. -->
                                       <field name="display_type" invisible="1"/>
-                                      <field name="product_id"/>
-                                      <field name="name" widget="section_and_note_text" optional="show"/>
-                                      <field name="min_quantity"/>
+                                      <field name="product_id" options="{'hide_sort_icon': True}"/>
+                                      <field name="name" widget="section_and_note_text" optional="show" options="{'hide_sort_icon': True}"/>
+                                      <field name="min_quantity" optional="hide"/>
                                       <field name="max_quantity" invisible="1"/>
                                       <field name="insection_rownumber" invisible="1"/>
                                       <field name="qty_range_str"/>
-                                      <field name="vendor_price" string="Vendor Price per Unit"/>
-                                      <field name="duty"/>
-                                      <field name="freight"/>
+                                      <field name="vendor_price" string="Vendor Price" options="{'hide_sort_icon': True, 'width': '70px'}"/>
+                                      <field name="duty" options="{'hide_sort_icon': True,  'width': '70px'}"
+                                             attrs="{'column_invisible': [('parent.has_produced_overseas_items', '=', False)]}"/>
+                                      <field name="freight" options="{'hide_sort_icon': True, 'width': '70px'}"
+                                             attrs="{'column_invisible': [('parent.has_produced_overseas_items', '=', False)]}"/>
                                       <field name="currency_id" invisible="1"/>
                                       <field name="unit_price" string="Unit Price"/>
-                                      <field name="production_lead_time"/>
-                                      <field name="shipping_lead_time"/>
-                                      <field name="shipping_options"/>
-                                      <field name="partner_id"/>
-                                      <field name="produced_overseas"/>
-                                      <field name="price" string="Customer Price" />
+                                      <field name="production_lead_time" options="{'hide_sort_icon': True, 'width': '80px'}"/>
+                                      <field name="shipping_lead_time" options="{'hide_sort_icon': True, 'width': '80px'}"
+                                             string="ETA for delivery"/>
+                                      <field name="shipping_options" options="{'hide_sort_icon': True, 'width': '80px'}"/>
+                                      <field name="partner_id"  optional="hide"/>
+                                      <field name="produced_overseas"  optional="hide"/>
+                                      <field name="price" string="Customer Price" options="{'hide_sort_icon': True, 'width': '70px'}"/>
+                                      <field name="fee"/>
+                                      <button class="float-end" name="action_edit_fee_value" type="object"
+                                              icon="fa-pencil"/>
                                       <field name="total"/>
                                       <field name="margin"/>
-                                      <field name="allow_consumption_agreement"/>
+                                      <field name="allow_consumption_agreement"  options="{'hide_sort_icon': True, 'width': '50px'}"
+                                             string="Allow CA"/>
                                       <field name="sale_estimate_line_ids" invisible="1"/>
                                       <button name="action_check_prices" type="object" class="fa fa-history"/>
                                       <field name="attachment_id" string="Attach a file" widget="binary"
-                                             filename="attachment_name" class="r_binary_widget"/>
+                                             filename="attachment_name" class="r_binary_widget" options="{'hide_sort_icon': True, 'width': '50px'}" />
                                       <field name="attachment_name" invisible="1"/>
                                   </tree>
                               </field>
@@ -103,10 +115,11 @@
                         </notebook>
                     </sheet>
 <!--                    <div class="o_attachment_preview"/>-->
-<!--                    <div class="oe_chatter">-->
-<!--                        <field name="message_follower_ids"/>-->
-<!--                        <field name="message_ids"/>-->
-<!--                    </div>-->
+                    <div class="oe_chatter oe_chatter_bottom">
+                        <field name="message_follower_ids"/>
+                        <field name="activity_ids"/>
+                        <field name="message_ids"/>
+                    </div>
                 </form>
 
             </field>
@@ -116,7 +129,7 @@
             <field name="name">product.price.sheet.tree</field>
             <field name="model">product.price.sheet</field>
             <field name="arch" type="xml">
-                <tree>
+                <tree create="0">
                     <field name="name"/>
                     <field name="currency_id"/>
                     <field name="opportunity_id"/>

@@ -11,8 +11,6 @@
                                 title="Create new Purchase Requisition"/>
                            <button string="New Price Sheet" name="action_new_price_sheet" type="object" class="oe_highlight" data-hotkey="q"
                                 title="Create new Price Sheet"/>
-                           <button string="New Sale Order" name="action_new_sale_order" type="object" class="oe_highlight" data-hotkey="s"
-                                title="Create new Sale Order"/>
                            <field name="stage_id" widget="statusbar"
                                 options="{'clickable': '1', 'fold_field': 'fold'}"/>
                     </header>
@@ -30,6 +28,10 @@
                                     name="action_view_sale_order" icon="fa-pencil-square-o">
                                     <field name="sale_order_count" widget="statinfo" string="Sale Orders"/>
                            </button>
+                            <button class="oe_stat_button" type="object"
+                                    name="action_view_purchase_order" icon="fa-pencil-square-o">
+                                    <field name="purchase_order_count" widget="statinfo" string="Purchase Orders"/>
+                           </button>
                         </div>
                         <div class="oe_title">
                             <label for="name" string="Estimate"/>>
@@ -37,7 +39,7 @@
                         </div>
                         <group>
                             <group name="opportunity_partner">
-                                <field name="partner_id"
+                                <field name="partner_id" required="1"
                                     widget="res_partner_many2one"
                                     string="Customer"
                                     context="{'res_partner_search_mode': 'customer',

@@ -4,6 +4,7 @@ from odoo.tools.misc import formatLang
 from odoo.exceptions import AccessError
 MAX_QUANTITY = 999999999999
 from odoo.tools import html_keep_url
+from odoo.addons.regency_tools import SystemMessages
 
 
 class ProductPriceSheet(models.Model):
@@ -28,16 +29,19 @@ class ProductPriceSheet(models.Model):
             return _('Terms & Conditions: %s', baseurl)
         return use_invoice_terms and self.env.company.invoice_terms or ''
 
-    name = fields.Char('Pricelist Name', required=True, translate=True, default=_get_default_name)
+    name = fields.Char('Pricesheet Name', required=True, translate=True, default=_get_default_name, readonly=True,
+                       states={'draft': [('readonly', False)]})
     item_ids = fields.One2many(
         'product.price.sheet.line', 'price_sheet_id', 'Price sheet lines',
-        copy=True)
-    currency_id = fields.Many2one('res.currency', 'Currency', default=_get_default_currency_id, required=True)
+        copy=True, readonly=True, states={'draft': [('readonly', False)]})
+    has_produced_overseas_items = fields.Boolean(compute='_compute_has_produced_overseas_items')
+    currency_id = fields.Many2one('res.currency', 'Currency', default=_get_default_currency_id, required=True,
+                                  readonly=True, states={'draft': [('readonly', False)]})
     opportunity_id = fields.Many2one(related='estimate_id.opportunity_id')
-    estimate_id = fields.Many2one('sale.estimate')
+    estimate_id = fields.Many2one('sale.estimate', readonly=True, states={'draft': [('readonly', False)]})
     partner_id = fields.Many2one(related='estimate_id.partner_id')
     quotation_count = fields.Integer(compute='_compute_sale_order_data',
-                                       string="Number of Quotations")
+                                     string="Number of Quotations")
     sale_order_ids = fields.One2many('sale.order', 'price_sheet_id', string='Quotations')
     state = fields.Selection([('draft', 'Draft'),
                               ('confirmed', 'Confirmed'),
@@ -75,6 +79,12 @@ class ProductPriceSheet(models.Model):
                 'amount_total': amount_untaxed + amount_tax,
             })
 
+    @api.depends('item_ids.produced_overseas')
+    def _compute_has_produced_overseas_items(self):
+        for ps in self:
+            ps.has_produced_overseas_items = any(ps.mapped('item_ids.produced_overseas'))
+
+
     def _compute_access_url(self):
         # super(ProductPriceSheet, self)._compute_access_url()
         for rec in self:
@@ -82,7 +92,6 @@ class ProductPriceSheet(models.Model):
 
     def action_new_quotation(self):
         action = self.env["ir.actions.actions"]._for_xml_id("sale_crm.sale_action_quotations_new")
-        sol = self.env['sale.order_line']
         selected_lines = self.item_ids
         action['context'] = {
             'search_default_price_sheet_id': self.id,
@@ -109,10 +118,6 @@ class ProductPriceSheet(models.Model):
                     'price_unit': p.price,
                     'product_uom': p.product_id.uom_id.id,
                     'shipping_options': p.shipping_options,
-                    'route_id': self.env.ref('stock_dropshipping.route_drop_shipping').id if
-                            self._is_dropship_needed(p.produced_overseas,
-                                                     p.product_id, self.partner_id)
-                            else self.env.ref("stock_mts_mto_rule.route_mto_mts").id,
                     'allow_consumption_agreement': p.allow_consumption_agreement
                 }) for p in selected_lines.sorted('sequence')]
         }
@@ -170,10 +175,17 @@ class ProductPriceSheet(models.Model):
                 except AccessError:  # no write access rights -> just ignore
                     break
         self.write({'state': 'confirmed'})
+        if self.estimate_id.user_id:
+            url = f'{self.get_base_url()}{self.get_portal_url()}'
+            message = SystemMessages['M-005'] % (
+                f'<a href="/web#id={self.id}&amp;model={self._name}&amp;view_type=form">{self.name}</a>',
+                f'<a href={url}>{url}</a>')
+            self.env['purchase.requisition'].send_notification(message=message, user_id=self.estimate_id.user_id)
+
+    def action_draft(self):
+        self.write({'state': 'draft'})
 
     def action_get_portal_link(self):
-        if self.state == 'draft':
-            self.action_confirm()
         base_url = self.get_base_url()
         wiz = self.env['portal.link.wizard'].create({'name': f'{base_url}{self.get_portal_url()}'})
         return {
@@ -231,30 +243,43 @@ class ProductPriceSheet(models.Model):
                                                 'product_uom_qty': p.product_uom_qty,
                                                 'price_unit': p.price,
                                                 'product_uom': p.product_id.uom_id.id,
-                                                'route_id': self.env.ref('stock_dropshipping.route_drop_shipping').id if
-                                                        self._is_dropship_needed(p.produced_overseas,
-                                                                                 p.product_id, self.partner_id) else
-                                                        self.env.ref("stock_mts_mto_rule.route_mto_mts").id,
+                                                'pricesheet_line_id': p.id,
+                                                'name': p.name,
                                             }) for p in lines_to_order]})
+        sequence = 10
+        for line in order.order_line:
+            sequence += 1
+            line.sequence = sequence
+            fee_value_ids = line.pricesheet_line_id.fee_value_ids
+            if fee_value_ids:
+                sequence += 1
+                line.create({'display_type': 'line_note',
+                             'name': f'Additional Fees for {line.product_id.name}:',
+                             'order_id': line.order_id.id,
+                             'pricesheet_line_id': line.pricesheet_line_id.id,
+                             'sequence': sequence})
+                for fee in fee_value_ids:
+                    sequence += 1
+                    line.create({'product_id': fee.fee_type_id.product_id.id,
+                                 'price_unit': fee.portal_value,
+                                 'order_id': line.order_id.id,
+                                 'pricesheet_line_id': line.pricesheet_line_id.id,
+                                 'sequence': sequence})
         lines_to_order.write({'product_uom_qty': 0})
         return order
-
-    def _is_dropship_needed(self, produced_overseas, product_id, partner_id):
-        sol = self.env['sale.order.line']
-        return not produced_overseas and product_id.qty_available <= 0 and \
-               not sol.find_consumption_agreement(product_id, partner_id)
 
     def create_consumption_agreement(self, lines_to_order):
         self.ensure_one()
         order = self.env['consumption.agreement'].create({'access_token': self.access_token,
-                                               'partner_id': self.partner_id.id,
-                                               'line_ids': [
-                                                   Command.create({
-                                                       'product_id': p.product_id.id,
-                                                       'qty_allowed': p.product_uom_qty,
-                                                       'price_unit': p.price,
-                                                    #   'product_uom': p.product_id.uom_id.id
-                                                   }) for p in lines_to_order]})
+                                                          'partner_id': self.partner_id.id,
+                                                          'line_ids': [
+                                                              Command.create({
+                                                                  'product_id': p.product_id.id,
+                                                                  'qty_allowed': p.product_uom_qty,
+                                                                  'price_unit': p.price,
+                                                                  'vendor_id': p.partner_id.id,
+                                                                  'name': p.name
+                                                              }) for p in lines_to_order]})
         lines_to_order.write({'product_uom_qty': 0})
         return order
 
@@ -302,7 +327,7 @@ class ProductPriceSheetLine(models.Model):
     shipping_lead_time = fields.Char()
     allow_consumption_agreement = fields.Boolean(default=True)
     consumption_type = fields.Selection([('consumption', 'Consumption Agreement'),
-                                         ('dropship', 'Dropship')], default='dropship')
+                                         ('dropship', 'Dropship')], default='dropship')  # TODO: delete?
     price_subtotal = fields.Monetary(compute='_compute_amount', string='Subtotal', store=True)
     price_tax = fields.Float(compute='_compute_amount', string='Total Tax', store=True)
     price_total = fields.Monetary(compute='_compute_amount', string='Total', store=True)
@@ -314,6 +339,16 @@ class ProductPriceSheetLine(models.Model):
     produced_overseas = fields.Boolean('Produced Overseas')
     display_name = fields.Char(compute='_compute_display_name')
     color = fields.Integer('Color Index', compute='_compute_color')
+    fee = fields.Float(readonly=True, compute='_compute_fee', store=True)
+    fee_value_ids = fields.One2many('fee.value', 'price_sheet_line_id')
+    portal_fee = fields.Float(compute='_compute_fee', store=True)
+
+    @api.depends('fee_value_ids', 'fee_value_ids.value', 'fee_value_ids.portal_value')
+    def _compute_fee(self):
+        for rec in self:
+            rec.fee = sum(rec.fee_value_ids.mapped('value'))
+            rec.portal_fee = sum(rec.fee_value_ids.mapped('portal_value'))
+            rec.onchange_price()
 
     def _compute_display_name(self):
         for psl in self:
@@ -374,7 +409,7 @@ class ProductPriceSheetLine(models.Model):
     @api.onchange('price')
     def onchange_price(self):
         for rec in self:
-            rec.total = rec.price * rec.min_quantity
+            rec.total = rec.price * rec.min_quantity + rec.fee
 
     def _compute_max_quantity(self):
         for rec in self.sorted('sequence'):
@@ -398,8 +433,7 @@ class ProductPriceSheetLine(models.Model):
                                             product=line.product_id, partner=line.price_sheet_id.partner_id)
             line.update({
                 'price_tax': taxes['total_included'] - taxes['total_excluded'],
-                'price_total': taxes['total_included'],
-                'price_subtotal': taxes['total_excluded'],
+                'price_subtotal': taxes['total_excluded'] + line.portal_fee,
             })
             # if self.env.context.get('import_file', False) and not self.env.user.user_has_groups(
             #         'account.group_account_manager'):
@@ -440,3 +474,10 @@ class ProductPriceSheetLine(models.Model):
                 'target': 'new'
             }
             return res
+
+    def action_edit_fee_value(self):
+        self.ensure_one()
+        action = self.env["ir.actions.actions"]._for_xml_id("regency_estimate.action_fee_value")
+        action['domain'] = [('price_sheet_line_id', '=', self.id)]
+        action['context'] = {'default_price_sheet_line_id': self.id}
+        return action

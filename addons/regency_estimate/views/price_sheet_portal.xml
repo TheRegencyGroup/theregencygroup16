@@ -332,10 +332,12 @@
                 <table t-att-data-order-id="price_sheet.id" t-att-data-token="price_sheet.access_token" class="table table-sm" id="price_sheet_table">
                     <thead class="bg-100">
                         <tr>
+                            <th/>
                             <th class="text-left">Products</th>
                             <th class="text-center">Qty Range</th>
                             <th class="text-right">Quantity</th>
                             <th t-attf-class="text-right {{ 'd-none d-sm-table-cell' if report_type == 'html' else '' }}">Customer Price</th>
+                            <th class="text-right">Fee</th>
 <!--                            <th t-if="display_discount" t-attf-class="text-right {{ 'd-none d-sm-table-cell' if report_type == 'html' else '' }}">-->
 <!--                                <span>Disc.%</span>-->
 <!--                            </th>-->
@@ -346,7 +348,6 @@
                             <th class="text-center">Shipping options</th>
                             <th class="text-center">Production Delay</th>
                             <th class="text-center">Shipping Delay</th>
-                            <th class="text-center">Order Type</th>
                             <th/>
                         </tr>
                     </thead>
@@ -357,10 +358,12 @@
                         <t t-foreach="price_sheet.item_ids" t-as="line">
 
                             <t t-set="current_subtotal" t-value="current_subtotal + line.price_subtotal" groups="account.group_show_line_subtotals_tax_excluded"/>
-                            <t t-set="current_subtotal" t-value="current_subtotal + line.price_total" groups="account.group_show_line_subtotals_tax_included"/>
 
                             <tr t-att-class="'bg-200 font-weight-bold o_line_section' if line.display_type == 'line_section' else 'font-italic o_line_note' if line.display_type == 'line_note' else ''">
                                 <t t-if="not line.display_type">
+                                    <td id="selection">
+                                        <input t-att-select-id="line.id" type="checkbox"/>
+                                    </td>
                                     <t t-if="line.insection_rownumber == 1">
                                        <td  t-att-rowspan="line.insection_total_rows" id="product_name"><span t-field="line.name"/></td>
                                     </t>
@@ -397,10 +400,11 @@
 <!--                                            <t t-esc="((line.discount % 1) and '%s' or '%d') % line.discount"/>%-->
 <!--                                        </strong>-->
 <!--                                    </td>-->
-
                                     <td class="text-right">
-                                        <span class="oe_order_line_price_subtotal" t-field="line.price_subtotal" groups="account.group_show_line_subtotals_tax_excluded"/>
-                                        <span class="oe_order_line_price_total" t-field="line.price_total" groups="account.group_show_line_subtotals_tax_included"/>
+                                        <span class="oe_order_line_portal_fee" t-field="line.portal_fee"/>
+                                    </td>
+                                    <td class="text-right">
+                                        <span class="oe_order_line_price_subtotal" t-field="line.price_subtotal"/>
                                     </td>
                                     <t t-if="line.insection_rownumber == 1">
                                            <td t-att-rowspan="line.insection_total_rows" class="text-center" id="shipping_options"><span t-field="line.shipping_options"/></td>
@@ -410,12 +414,6 @@
                                      </td>
                                     <td>
                                       <span t-field="line.shipping_lead_time"/>
-                                     </td>
-                                    <td>
-                                      <select  t-att-data-line-id="line.id" class="form-control js_price_sheet_selection_type">
-                                            <option value="dropship" t-att-selected="line.consumption_type == 'dropship'">Dropship</option>
-                                            <option t-if="line.allow_consumption_agreement" value="consumption" t-att-selected="line.consumption_type == 'consumption'">Consumption Agreement</option>
-                                      </select>
                                      </td>
                                     <td>
                                         <t t-if="line.attachment_id">

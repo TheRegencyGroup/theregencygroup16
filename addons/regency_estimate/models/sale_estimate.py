@@ -34,7 +34,7 @@ class SaleEstimate(models.Model):
         'res.company', string='Company', index=True,
         compute='_compute_company_id', readonly=False, store=True)
     user_id = fields.Many2one(
-        'res.users', string='Assignee', default=lambda self: self.env.user,
+        'res.users', string='Salesperson', default=lambda self: self.env.user,
         domain="[('share', '=', False)]",
         check_company=True, index=True, tracking=True)
     priority = fields.Selection(
@@ -84,6 +84,15 @@ class SaleEstimate(models.Model):
     order_line = fields.One2many('sale.estimate.line', compute='_compute_order_line')
     sold_product_ids = fields.Many2many('product.template', 'sold_templ_rel', compute='_compute_sold_product_ids',
                                         store=True, index=True)
+    purchase_order_ids = fields.One2many('purchase.order', compute='_compute_purchase_orders')
+    purchase_order_count = fields.Integer(compute='_compute_purchase_orders')
+
+    def _compute_purchase_orders(self):
+        for rec in self:
+            rec.purchase_order_ids = False
+            for so in rec.sale_order_ids:
+                rec.purchase_order_ids += so._get_purchase_orders()
+            rec.purchase_order_count = len(rec.purchase_order_ids)
 
     @api.depends('partner_id', 'partner_id.sale_order_ids')
     def _compute_sold_product_ids(self):
@@ -238,12 +247,20 @@ class SaleEstimate(models.Model):
             action['res_id'] = self.sale_order_ids.id
         return action
 
+    def action_view_purchase_order(self):
+        action = self.env["ir.actions.actions"]._for_xml_id("purchase.purchase_rfq")
+        action['domain'] = [('id', 'in', self.purchase_order_ids.ids)]
+        if self.purchase_order_count == 1:
+            action['views'] = [(self.env.ref('purchase.purchase_order_form').id, 'form')]
+            action['res_id'] = self.purchase_order_ids.id
+        return action
+
     def action_new_price_sheet(self):
         confirmed_requisition_lines = self.purchase_agreement_ids.mapped('line_ids').filtered(lambda a: a.state == 'done')
         products_to_estimate = self.product_lines.mapped(lambda x: (x.product_id, x.product_uom_qty))
         new_requisition_lines = confirmed_requisition_lines.filtered(lambda x: (x.product_id, x.product_qty) not in products_to_estimate)
         sheet_lines = []
-        for p in self.product_lines.filtered('selected').sorted('sequence'):
+        for p in self.product_lines.filtered(lambda x: x.selected or x.display_type).sorted('sequence'):
             seq = p.sequence
             if p.display_type:
                 sheet_lines.append(Command.create({
@@ -309,12 +326,13 @@ class SaleEstimate(models.Model):
             action['views'] = [(self.env.ref('regency_estimate.product_price_sheet_view_inherit').id, 'form')]
             action['res_id'] = pricesheet.id
         else:
+            new_pricesheet = existing_draft_pricesheets.create({
+                'estimate_id': self.id,
+                'partner_id': self.partner_id,
+                'item_ids': sheet_lines,
+            })
             action = self.env["ir.actions.actions"]._for_xml_id("regency_estimate.action_product_price_sheet_new")
-            action['context'] = {
-                'search_default_estimate_id': self.id,
-                'default_estimate_id': self.id,
-                'default_item_ids': sheet_lines
-            }
+            action['res_id'] = new_pricesheet.id
         self.product_lines.filtered('selected').write({'selected': False})
         return action
 

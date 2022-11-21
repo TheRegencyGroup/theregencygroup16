@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+
+        <record id="product_template_bag" model="product.template">
+            <field name="name">Bag</field>
+            <field name="categ_id" ref="product.product_category_all"/>
+            <field name="standard_price">50.0</field>
+            <field name="list_price">75.0</field>
+            <field name="detailed_type">product</field>
+            <field name="image_1920" type="base64" file="regency_shopsite/data/demo/img/demo_bag_1_1920.jpeg"/>
+        </record>
+
+        <record id="attribute_value_white" model="product.attribute.value">
+            <field name="name">White</field>
+            <field name="attribute_id" eval="ref('regency_shopsite.color_attribute')"/>
+        </record>
+
+        <record id="regency_shopsite.product_template_bag" model="product.template">
+            <field name="attribute_line_ids"
+                   eval="[Command.create({'attribute_id': ref('regency_shopsite.color_attribute'),
+                                                       'value_ids': [Command.set([ref('regency_shopsite.attribute_value_white'), ])],
+                                                       'product_tmpl_id': ref('regency_shopsite.product_template_bag'),
+                                                       })]"/>
+        </record>
+
+        <record id="regency_shopsite.product_template_bag" model="product.template">
+            <field name="is_fit_for_overlay" eval="True"/>
+        </record>
+
+    </data>
+</odoo>

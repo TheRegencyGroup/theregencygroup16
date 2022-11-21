@@ -9,4 +9,22 @@
         </field>
     </record>
 
+    <record id="ir_actions_server_action_after_import_products_update" model="ir.actions.server">
+        <field name="name">Update Products After Import</field>
+        <field name="model_id" ref="product.model_product_template" />
+        <field name="state">code</field>
+        <field name="code">
+            action = env['product.template'].after_import_update()
+        </field>
+    </record>
+
+    <record id="ir_actions_server_action_clear_imported" model="ir.actions.server">
+        <field name="name">Clear Imported</field>
+        <field name="model_id" ref="product.model_product_template" />
+        <field name="state">code</field>
+        <field name="code">
+            action = env['product.template'].clear_imported()
+        </field>
+    </record>
+
 </odoo>

@@ -1,12 +1,22 @@
 /** @odoo-module **/
 
-import { Overlay } from './overlay';
+import {
+    PRODUCT_IMAGE_MODEL,
+    PRODUCT_IMAGE_FIELD,
+    AREAS_IMAGE_NON_ATTRIBUTE_VALUE_ID,
+    computeImageSrc, RECTANGLE_AREA_TYPE, ELLIPSE_AREA_TYPE, TEXT_AREA_TYPE,
+    enableCanvasPointerEvents,
+} from '../main';
+import { AreaParameters } from './area_parameters';
 
-const { Component, onMounted, onPatched, useState, useRef } = owl;
+const { Component, onMounted, onPatched, useState, useRef, reactive, useBus } = owl;
 
 const OVERLAY_AREAS_WIDGET_NAME = 'overlay_areas';
 const AREAS_TAB = 'areas_tab';
 const IMAGES_TAB = 'images_tab';
+const DEFAULT_TEXT_AREA_FONT_SIZE = 14;
+const DEFAULT_TEXT_FONT_ID = 'default_0';
+const DEFAULT_TEXT_FONT_NAME = 'Arial';
 
 class OverlayAreasPositionComponent extends Component {
     setup() {
@@ -17,160 +27,201 @@ class OverlayAreasPositionComponent extends Component {
         onMounted(this.onMounted);
 
         this.state = useState({
-            imageLoad: false,
-            imageSrc: null,
-            selectedAreaIndex: null,
+            editorImageLoaded: false,
+            editorImage: false,
+            editorSwitcherImageValueId: false,
+            selectedAreaIndex: false,
             activeTab: AREAS_TAB,
+            areaList: {},
         });
 
         this.canvasRef = useRef('canvas_ref');
         this.imageRef = useRef('image_ref');
         this.canvasContainerRef = useRef('canvas_container_ref');
 
-        this.setCurrentData();
-        this.currentMode = this.mode;
+        this.lastMode = this.mode;
+        this.lastSelectedImageIds = this.selectedImageIds;
+        this.lastAreasImageAttributeId = this.props.areasImageAttributeId;
+        this.areaList = this.props.areaList;
 
-        this.currentImageTimestamp = new Date().valueOf();
+        this.firstEditorImageLoad = false;
+        this.imageTimestamp = new Date().valueOf();
+
+        this.changeAreaFunctions = {
+            width: this.changeAreaWidth.bind(this),
+            height: this.changeAreaHeight.bind(this),
+            rx: this.changeAreaRx.bind(this),
+            ry: this.changeAreaRy.bind(this),
+            x: this.changeAreaX.bind(this),
+            y: this.changeAreaY.bind(this),
+            angle: this.changeAreaAngle.bind(this),
+            font: this.changeTextAreaFont.bind(this),
+            fontSize: this.changeTextAreaFontSize.bind(this),
+            color: this.changeTextAreaColor.bind(this),
+        };
+
+        this.defaultTextColor = this.props.colorList.length ? this.props.colorList[0] : null;
+    }
+
+    get areasImageValueList() {
+        return this.props.areasImageValueList.map(e => {
+            let selectedImageId = false;
+            if (this.props.selectedImages[e.id]) {
+               selectedImageId = this.props.selectedImages[e.id].imageId;
+            }
+            const selectedImageSrc = selectedImageId
+                ? computeImageSrc({
+                    id: selectedImageId,
+                    model: PRODUCT_IMAGE_MODEL,
+                    field: PRODUCT_IMAGE_FIELD,
+                    timestamp: this.imageTimestamp,
+                })
+                : false;
+            return {
+                ...e,
+                selectedImageSrc,
+            };
+        });
+    }
+    
+    get selectedImageIds() {
+        return Object.values(this.props.selectedImages).map(e => e.imageId).sort((a, b) => a - b);
+    }
+
+    get showEditorImageSwitcher() {
+        const selectedImages = Object.values(this.props.selectedImages);
+        return selectedImages.length && !selectedImages.find(e => e.valueId === AREAS_IMAGE_NON_ATTRIBUTE_VALUE_ID);
+    }
+
+    get editorSwitcherImageList() {
+        return Object.values(this.props.selectedImages).map(e => ({
+            ...e,
+            imageSrc: computeImageSrc({
+                id: e.imageId,
+                model: PRODUCT_IMAGE_MODEL,
+                field: PRODUCT_IMAGE_FIELD,
+                timestamp: this.imageTimestamp,
+            }),
+            name: this.props.areasImageValueList.find(f => f.id === e.valueId).name,
+        }));
     }
 
     onMounted() {
         this.setImageOnloadCallback();
-        // TODO: implement proper solution
-        this.updateCanvas(); //TEMPORARY!!!!!!!!!!!!!!!
-        let image = this.getImageForOverlay();
-        if (image) {
-            this.state.imageSrc = this.getImageSrc(image.imageId, image.imageModel);
-            this.setCurrentData();
-        }
+        this.updateEditorSwitcherImageValueId();
+        this.updateEditorImage();
     }
 
     onPatched() {
-        if (this.currentMode !== this.props.editMode) {
-            this.currentMode = this.props.editMode;
-            if (this.overlay) {
-                this.overlay.selectable = !!this.props.editMode;
+        if (this.lastMode !== this.props.editMode) {
+            this.lastMode = this.props.editMode;
+            if (this.canvas) {
+                this.selectableCanvas(this.props.editMode && this.props.allowEditAreas);
+                this.highlightArea();
+                this.selectArea();
             }
         }
-        let colorImages = Object.values(this.props.colorImages).filter(e => !!e.imageId && !!e.imageModel);
-        let imageIds = colorImages.map(e => e.imageId);
-        let imageModel = colorImages.map(e => e.imageModel);
-        if (!imageIds.includes(this.state.currentData.imageId) ||
-            !imageModel.includes(this.state.currentData.imageModel)) {
-            this.setCurrentData();
-            if (this.overlay) {
-                this.overlay.destroy();
-                this.overlay = null;
-            }
-            this.state.imageLoad = false;
-            this.state.imageSrc = this.getImageSrc(this.state.currentData.imageId, this.state.currentData.imageModel);
-            this.updateCanvas(); //TEMPORARY!!!!!!!!!!!!!!!
+        if (this.lastAreasImageAttributeId !== this.props.areasImageAttributeId) {
+            this.lastAreasImageAttributeId = this.props.areasImageAttributeId;
+            this.state.editorSwitcherImageValueId = false;
+            this.updateEditorSwitcherImageValueId();
+            this.updateEditorImage();
+        }
+        if (JSON.stringify(this.lastSelectedImageIds) !== JSON.stringify(this.selectedImageIds)) {
+            this.lastSelectedImageIds = this.selectedImageIds;
+            this.updateEditorSwitcherImageValueId();
+            this.updateEditorImage();
+        }
+        if (!!Object.keys(this.areaList).length && !Object.keys(this.props.areaList).length) {
+            this.areaList = this.props.areaList;
         }
     }
 
-    setCurrentData(colorId) {
-        let imageId = false;
-        let imageModel = false;
-        if (colorId) {
-            imageId = this.props.colorImages[colorId]?.imageId;
-            imageModel = this.props.colorImages[colorId]?.imageModel;
+    createCanvas(target, areaList) {
+        this.canvas = new fabric.Canvas(target);
+
+        for (let area of Object.values(areaList)) {
+            if (area.areaType === RECTANGLE_AREA_TYPE) {
+                this.addRectangleArea({
+                    area,
+                    select: false,
+                });
+            } else if (area.areaType === ELLIPSE_AREA_TYPE) {
+                this.addEllipseArea({
+                    area,
+                    select: false,
+                });
+            } else if (area.areaType === TEXT_AREA_TYPE) {
+                this.addTextArea({
+                    area,
+                    select: false,
+                });
+            }
+        }
+    }
+
+    updateEditorSwitcherImageValueId() {
+        if ((!this.state.editorSwitcherImageValueId ||
+                !this.props.selectedImages[this.state.editorSwitcherImageValueId]) &&
+            !!this.selectedImageIds.length) {
+            this.state.editorSwitcherImageValueId = Object.values(this.props.selectedImages)
+                .find(e => e.imageId === this.selectedImageIds[0])
+                .valueId;
+        } else if (this.state.editorSwitcherImageValueId && !this.selectedImageIds.length) {
+            this.state.editorSwitcherImageValueId = false;
+        }
+    }
+    
+    updateEditorImage() {
+        let data = false;
+        if (Object.values(this.props.selectedImages).length && this.state.editorSwitcherImageValueId !== false) {
+            const newImageId = this.props.selectedImages[this.state.editorSwitcherImageValueId].imageId;
+            const newProductTemplateImage = this.props.productTemplateImages.find(e => e.id === newImageId);
+            const newWidth = newProductTemplateImage.image.width;
+            const newHeight = newProductTemplateImage.image.height;
+            if (newWidth !== this.state.editorImage.width || newHeight !== this.state.editorImage.height) {
+                this.state.editorImageLoaded = false;
+            }
+            data = {
+                width: newWidth,
+                height: newHeight,
+                src: computeImageSrc({
+                    id: newImageId,
+                    model: PRODUCT_IMAGE_MODEL,
+                    field: 'image_1920',
+                    timestamp: this.imageTimestamp,
+                })
+            };
         } else {
-            let image = this.getImageForOverlay();
-            if (image) {
-                imageId = image.imageId;
-                imageModel = image.imageModel;
+            this.state.editorImageLoaded = false;
+            if (this.canvas) {
+                this.destroyCanvas();
             }
         }
-        this.state.currentData = { imageId, imageModel };
-    }
-
-    getImageForOverlay() {
-        return Object.values(this.props.colorImages).find(e => !!e.imageId && !!e.imageModel);
+        this.state.editorImage = data;
     }
 
     setImageOnloadCallback() {
-        if (!this.imageRef.el) {
-            return;
-        }
         this.imageRef.el.onload = () => {
-            if (!this.state.imageLoad) {
-                this.state.imageLoad = true;
-                // this.updateCanvas();
+            if (!this.firstEditorImageLoad) {
+                this.firstEditorImageLoad = true;
+            }
+            if (!this.state.editorImageLoaded) {
+                this.state.editorImageLoaded = true;
+                this.updateCanvas();
             }
         };
     }
 
-    getImageSrc(id, model) {
-        let baseUrl = window.location.origin;
-        return (id && model)
-            ? `${baseUrl}/web/image?model=${model}&id=${id}&field=image_512&unique=${this.currentImageTimestamp}`
-            : false;
-    }
-
     updateCanvas() {
-        if (this.overlay) {
-            this.overlay.destroy();
+        if (this.canvas) {
+            this.destroyCanvas();
         }
-        // if (this.imageRef.el) {
-        // this.canvasRef.el.width = this.imageRef.el.clientWidth;
-        // this.canvasRef.el.height = this.imageRef.el.clientHeight;
-        this.canvasRef.el.width = 500;
-        this.canvasRef.el.height = 500;
+        this.canvasRef.el.width = this.imageRef.el.clientWidth;
+        this.canvasRef.el.height = this.imageRef.el.clientHeight;
 
-        this.overlay = new Overlay(this.canvasRef.el, this.props.areaList);
-        this.overlay.selectable = this.props.editMode;
-        this.overlay.onSelectedArea = (areaIndex) => {
-            this.state.selectedAreaIndex = areaIndex;
-        };
-        // }
-    }
-
-    // onClickChangeImage(event) {
-    //     this.trigger('change-overlay-image', {
-    //         id: this.props.overlayPositionId,
-    //     });
-    // }
-
-    onClickAddRectangleArea(event) {
-        this.overlay.addRectangleArea();
-    }
-
-    onClickAddEllipseArea(event) {
-        this.overlay.addEllipseArea();
-    }
-
-    onClickAddTextArea(event) {
-        // this.overlay.addTextArea();
-    }
-
-    onClickAreaListItem(areaIndex, event) {
-        if (this.props.editMode) {
-            this.overlay.selectArea(areaIndex);
-        } else {
-            this.overlay.highlightArea(areaIndex);
-        }
-        this.state.selectedAreaIndex = areaIndex;
-    }
-
-    onClickRemoveArea(areaIndex, event) {
-        if (this.state.selectedAreaIndex === areaIndex) {
-            this.state.selectedAreaIndex = null;
-        }
-        this.overlay.removeArea(areaIndex);
-    }
-
-    onChangeTextFontSize(areaIndex, event) {
-        let newFontSize = parseInt(event.target.value);
-        this.overlay.changeTextAreaFontSize(areaIndex, newFontSize);
-    }
-
-    onChangeTextNumberOfLines(areaIndex, event) {
-        let newNumberOfLines = parseInt(event.target.value);
-        this.overlay.changeTextAreaNumberOfLines(areaIndex, newNumberOfLines);
-    }
-
-    onChangeTextFont(areaIndex, event) {
-        let font = event.target.value;
-        this.overlay.changeTextAreaFont(areaIndex, font);
+        this.createCanvas(this.canvasRef.el, this.areaList);
+        this.selectableCanvas(this.props.editMode);
     }
 
     onClickOpenAreasTab(event) {
@@ -185,27 +236,328 @@ class OverlayAreasPositionComponent extends Component {
         }
     }
 
-    onClickChangeColorImage(colorId) {
-        this.props.changeOverlayImage({
-            id: this.props.overlayPositionId,
-            colorId,
+    onClickChangeValueImage(areasImageAttributeValueId) {
+        this.props.openImageListModal({
+            overlayPositionId: this.props.overlayPositionId,
+            areasImageAttributeValueId,
         });
     }
 
-    onClickOverlayColorImage(colorId, event) {
-        this.setCurrentData(colorId);
-        this.state.imageSrc = this.getImageSrc(this.state.currentData.imageId, this.state.currentData.imageModel);
+    onChangeEditorImage(valueId) {
+        this.state.editorSwitcherImageValueId = valueId;
+        this.updateEditorImage();
+    }
+    
+    selectAreaListItem(areaIndex) {
+        this.state.selectedAreaIndex = areaIndex;
+        this.selectArea();
+        this.highlightArea();
+    }
+
+    selectableCanvas(state) {
+        for (let area of Object.values(this.state.areaList)) {
+            area.object.selectable = state;
+        }
+        enableCanvasPointerEvents(this.canvas, state);
+    }
+
+    get sizeForNewArea() {
+        return Math.floor(Math.min(this.canvas.width, this.canvas.height) / 4);
+    }
+
+    get newAreaIndex() {
+        let areaListKeys = Object.keys(this.state.areaList).map(e => parseInt(e));
+        return (areaListKeys.length ? Math.max(...areaListKeys) : 0) + 1;
+    }
+
+    getAreaObjectByIndex(areaIndex) {
+        return this.canvas.getObjects().find(e => e.areaIndex === areaIndex);
+    }
+
+    getRectangleObjData(object) {
+        return {
+            width: (!object.scaleX || object.scaleX === 1)  ? object.width : Math.ceil(object.getScaledWidth()),
+            height: (!object.scaleY || object.scaleY === 1) ? object.height : Math.ceil(object.getScaledHeight()),
+            x: Math.ceil(object.left || 0),
+            y: Math.ceil(object.top || 0),
+            angle: Math.ceil(object.angle),
+        }
+    }
+
+    getEllipseObjData(object) {
+        return {
+            rx: (!object.scaleX || object.scaleX === 1) ? object.width : Math.ceil(object.getRx()),
+            ry: (!object.scaleY || object.scaleY === 1) ? object.height : Math.ceil(object.getRy()),
+            x: Math.ceil(object.left || 0),
+            y: Math.ceil(object.top || 0),
+            angle: Math.ceil(object.angle),
+        }
+    }
+
+    getTextObjData(object) {
+        return  {
+            ...this.getRectangleObjData(object),
+            fontSize: object.textAreaFontSize,
+            font: object.textAreaFont,
+            color: object.textAreaColor
+        };
+    }
+
+    createRectangle(index, { width, height, x, y, angle }, select) {
+        let object = new fabric.Rect({
+            width: width || this.sizeForNewArea,
+            height: height || this.sizeForNewArea,
+            top: y || 0,
+            left: x || 0,
+            angle: angle || 0,
+            fill: '#0000003D',
+        });
+        object.areaIndex = index;
+        object.areaType = RECTANGLE_AREA_TYPE;
+        object.on('modified', this.onObjectModified.bind(this));
+        object.on('selected', this.onObjectSelected.bind(this));
+        this.canvas.add(object);
+        if (select) {
+            this.canvas.setActiveObject(object);
+        }
+        this.canvas.renderAll();
+        return object;
+    }
+
+    createEllipse(index, { rx, ry, x, y, angle }, select) {
+        let defaultRadius = Math.floor(this.sizeForNewArea / 2);
+        let object = new fabric.Ellipse({
+            rx: rx || defaultRadius,
+            ry: ry || defaultRadius,
+            top: y || 0,
+            left: x || 0,
+            angle: angle || 0,
+            fill: '#0000003D',
+        });
+        object.areaIndex = index;
+        object.areaType = ELLIPSE_AREA_TYPE;
+        object.on('modified', this.onObjectModified.bind(this));
+        object.on('selected', this.onObjectSelected.bind(this));
+        this.canvas.add(object);
+        if (select) {
+            this.canvas.setActiveObject(object);
+        }
+        return object;
+    }
+
+    getTextLineHeight(fontSize, font) {
+        let tempTb = new fabric.Textbox('123', {
+            fontSize: fontSize,
+            lineHeight: 1,
+            fontFamily: font,
+        });
+        return tempTb.getScaledHeight();
+    }
+
+    createTextRectangle(index, { width, height, x, y, angle, fontSize, font, color }, select) {
+        let object = new fabric.Rect({
+            width: width || this.sizeForNewArea,
+            height: height || this.sizeForNewArea,
+            top: y || 0,
+            left: x || 0,
+            angle: angle || 0,
+            fill: '#0000003D',
+            textAreaFontSize: fontSize || DEFAULT_TEXT_AREA_FONT_SIZE,
+            textAreaFont: {
+                id: font ? font.id : DEFAULT_TEXT_FONT_ID,
+                name: font ? font.name : DEFAULT_TEXT_FONT_NAME,
+            },
+            textAreaColor: {
+                id: color ? color.id : (this.defaultTextColor ? this.defaultTextColor.id : null),
+                name: color ? color.name : (this.defaultTextColor ? this.defaultTextColor.name : null),
+                color: color ? color.color : (this.defaultTextColor ? this.defaultTextColor.color : null),
+            },
+        });
+        object.areaIndex = index;
+        object.areaType = TEXT_AREA_TYPE;
+        object.on('modified', this.onObjectModified.bind(this));
+        object.on('selected', this.onObjectSelected.bind(this));
+        this.canvas.add(object);
+        if (select) {
+            this.canvas.setActiveObject(object);
+        }
+        return object;
+    }
+
+    onObjectModified(event) {
+        this.updateAreaData(this.state.areaList[event.target.areaIndex]);
+    }
+
+    onObjectSelected(event) {
+         this.state.selectedAreaIndex = event.target.areaIndex;
+    }
+
+    addRectangleArea({ area, select=true }) {
+        const index = area ? area.index : this.newAreaIndex;
+        const data = area ? area.data : {};
+        let object = this.createRectangle(index, data, select);
+        this.state.areaList[index] = {
+            object,
+            index,
+            areaType: RECTANGLE_AREA_TYPE,
+            change: this.changeAreaFunctions,
+            data: this.getRectangleObjData(object),
+        }
+    }
+
+    addEllipseArea({ area, select=true }) {
+        const index = area ? area.index : this.newAreaIndex;
+        const data = area ? area.data : {};
+        let object = this.createEllipse(index, data, select);
+        this.state.areaList[index] = {
+            object,
+            index,
+            areaType: ELLIPSE_AREA_TYPE,
+            change: this.changeAreaFunctions,
+            data: this.getEllipseObjData(object),
+        }
+    }
+
+    addTextArea({ area, select=true }) {
+        const index = area ? area.index : this.newAreaIndex;
+        const data = area ? area.data : {};
+        let object = this.createTextRectangle(index, data, select);
+        this.state.areaList[index] = {
+            object,
+            index,
+            areaType: TEXT_AREA_TYPE,
+            change: this.changeAreaFunctions,
+            data: this.getTextObjData(object),
+        }
+    }
+
+    updateAreaData(area) {
+        let data = {};
+        if (area.areaType === RECTANGLE_AREA_TYPE) {
+            data = this.getRectangleObjData(area.object);
+        } else if (area.areaType === ELLIPSE_AREA_TYPE) {
+            data = this.getEllipseObjData(area.object);
+        } else if (area.areaType === TEXT_AREA_TYPE) {
+            data = this.getTextObjData(area.object);
+        }
+        area.data = data;
+    }
+
+    changeAreaObjectParam(param, areaIndex, val) {
+        const area = this.state.areaList[areaIndex];
+        area.object.set(param, val);
+        this.canvas.renderAll();
+        this.updateAreaData(area);
+    }
+
+    changeAreaWidth(areaIndex, val) {
+        const area = this.state.areaList[areaIndex];
+        area.object.scale(1, 1);
+        area.object.set('height', area.data.height);
+        area.object.set('width', val);
+        this.canvas.renderAll();
+        this.updateAreaData(area);
+    }
+
+    changeAreaHeight(areaIndex, val) {
+        const area = this.state.areaList[areaIndex];
+        area.object.scale(1, 1);
+        area.object.set('width', area.data.width);
+        area.object.set('height', val);
+        this.canvas.renderAll();
+        this.updateAreaData(area);
+    }
+
+    changeAreaX(areaIndex, val) {
+        this.changeAreaObjectParam('left', areaIndex, val);
+    }
+
+    changeAreaY(areaIndex, val) {
+        this.changeAreaObjectParam('top', areaIndex, val);
+    }
+
+    changeAreaRx(areaIndex, val) {
+        this.changeAreaObjectParam('rx', areaIndex, val);
+    }
+
+    changeAreaRy(areaIndex, val) {
+        this.changeAreaObjectParam('ry', areaIndex, val);
+    }
+
+    changeAreaAngle(areaIndex, val) {
+        this.changeAreaObjectParam('angle', areaIndex, val);
+    }
+
+    changeTextAreaFontSize(areaIndex, fontSize) {
+        const area = this.state.areaList[areaIndex];
+        area.object.textAreaFontSize = fontSize;
+        this.updateAreaData(area);
+    }
+
+    changeTextAreaFont(areaIndex, font) {
+        const area = this.state.areaList[areaIndex];
+        area.object.textAreaFont = font;
+        this.updateAreaData(area);
+    }
+    
+    changeTextAreaColor(areaIndex, color) {
+        const area = this.state.areaList[areaIndex];
+        area.object.textAreaColor = color;
+        this.updateAreaData(area);
+    }
+
+    removeArea(areaIndex) {
+        if (this.state.selectedAreaIndex === areaIndex) {
+            this.state.selectedAreaIndex = null;
+        }
+        this.canvas.remove(this.getAreaObjectByIndex(areaIndex));
+        delete this.state.areaList[areaIndex];
+    }
+
+    selectArea() {
+        if (this.props.editMode && this.props.allowEditAreas && this.state.selectedAreaIndex) {
+            this.canvas.setActiveObject(this.state.areaList[this.state.selectedAreaIndex].object).renderAll();
+        } else {
+            this.canvas.discardActiveObject().renderAll();
+        }
+    }
+
+    highlightArea() {
+        for (let area of Object.values(this.state.areaList)) {
+            area.object.set('fill', '#0000003D');
+        }
+        if (!(this.props.editMode && this.props.allowEditAreas) && this.state.selectedAreaIndex) {
+            this.state.areaList[this.state.selectedAreaIndex].object.set('fill', '#E5112473');
+        }
+        this.canvas.renderAll();
+    }
+
+    destroyCanvas() {
+        this.canvas.dispose();
+        this.canvas = null;
+        this.state.areaList = {};
+        this.areaList = {};
     }
 }
 
+OverlayAreasPositionComponent.components = {
+  AreaParameters,
+};
+
 OverlayAreasPositionComponent.props = {
+    editMode: Boolean,
+    productTemplateId: Number,
     overlayPositionId: Number,
     overlayPositionName: String,
-    productTemplateId: Number,
+    areasImageAttributeId: Number,
     areaList: Object,
-    editMode: Boolean,
-    colorImages: Object,
-    changeOverlayImage: Function,
+    selectedImages: Object,
+    areasImageValueList: Array,
+    productTemplateImages: Array,
+    openImageListModal: Function,
+    allowEditAreas: Boolean,
+    fontList: Array,
+    colorList: Array,
 }
 
 OverlayAreasPositionComponent.template = 'overlay_areas_position'

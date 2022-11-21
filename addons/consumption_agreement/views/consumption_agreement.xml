@@ -7,9 +7,13 @@
              <form string="Consumption Agreement">
                 <header>
                     <button name="action_confirm" data-hotkey="v"
-                        string="Confirm" type="object"
-                        attrs="{'invisible': [('state', 'not in', ['draft'])]}"/>
+                            string="Confirm" type="object"
+                            attrs="{'invisible': [('state', 'not in', ['draft'])]}"/>
+                    <button name="action_create_so" string="Create Sale Order" type="object"
+                            attrs="{'invisible': [('state', '!=', 'confirmed')]}"/>
                     <field name="state" widget="statusbar" statusbar_visible="draft,confirmed"/>
+                    <button name="generate_purchase_order" data-hotkey="g" type="object"
+                            string="Generate Purchase Order"/>
                 </header>
                 <sheet>
                      <div class="oe_button_box" name="button_box">
@@ -22,6 +26,18 @@
                                 <span class="o_stat_text">Preview</span>
                             </div>
                         </button>
+                        <button class="oe_stat_button"
+                                name="open_sale_orders"
+                                type="object"
+                                icon="fa-bars">
+                            <field string="Sale Orders" name="sale_order_count" widget="statinfo" />
+                        </button>
+                        <button class="oe_stat_button"
+                                name="open_purchase_orders"
+                                type="object"
+                                icon="fa-bars">
+                            <field string="Purchase Orders" name="purchase_order_count" widget="statinfo" />
+                        </button>
                     </div>
                     <div class="oe_title">
                         <h1>
@@ -30,7 +46,10 @@
                     </div>
                     <group name="agreement_header">
                         <group name="partner_details">
-                            <field name="partner_id" attrs="{'readonly': [('state', 'not in', ['draft'])]}" widget="res_partner_many2one" context="{'res_partner_search_mode': 'customer', 'show_address': 1, 'show_vat': True}" options='{"always_reload": True}'/>
+                            <field name="partner_id" attrs="{'readonly': [('state', 'not in', ['draft'])]}"
+                                   widget="res_partner_many2one"
+                                   context="{'res_partner_search_mode': 'customer', 'show_address': 1, 'show_vat': True}"
+                                   options='{"always_reload": True}' required="1"/>
                         </group>
                         <group name="other_details">
                             <field name="signed_date" />
@@ -53,16 +72,26 @@
                                 mode="tree"
                                 attrs="{'readonly': [('state', 'not in', ['draft'])]}"
                             >
-                                <tree editable="bottom">
+                                <tree editable="bottom" no_open="1">
                                     <field name="product_id"/>
+                                    <field name="name" string="Description"/>
                                     <field name="allowed_partner_ids" widget="many2many_tags"/>
+                                    <field name="vendor_id" optional="hide"/>
                                     <field name="qty_allowed"/>
+                                    <field name="qty_available" string="Qty On Hand"/>
                                     <field name="qty_consumed"/>
                                     <field name="qty_remaining"/>
                                     <field name="price_unit"/>
                                 </tree>
                             </field>
                         </page>
+                        <page string="Customer Signature" name="customer_signature" attrs="{'invisible': [('signed_by', '=', False), ('signature', '=', False), ('signed_on', '=', False)]}">
+                        <group>
+                            <field name="signed_by"/>
+                            <field name="signed_on"/>
+                            <field name="signature" widget="image"/>
+                        </group>
+                    </page>
                     </notebook>
                 </sheet>
                 <div class="oe_chatter">
@@ -94,6 +123,7 @@
                        </group>
                        <group>
                             <field name="allowed_partner_ids" widget="many2many_tags" readonly="1"/>
+                            <field name="vendor_id" readonly="1"/>
                             <field name="sale_order_line_ids" readonly="1"/>
                        </group>
                    </sheet>

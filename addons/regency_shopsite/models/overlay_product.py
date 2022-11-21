@@ -1,8 +1,12 @@
 from datetime import datetime
+from collections import namedtuple
 
-from odoo import api, Command, fields, models
+ImageParams = namedtuple('ImageParams', ['model_name', 'rec_id', 'field_name'])
+
+from odoo import api, Command, fields, models, _
+from odoo.exceptions import ValidationError
 from odoo.addons.http_routing.models.ir_http import slug
-from odoo.addons.regency_shopsite.const import OVERLAY_PRODUCT_ID_URL_PARAMETER
+from odoo.addons.regency_shopsite.const import OVERLAY_PRODUCT_ID_URL_PARAMETER, TEXT_AREA_TYPE
 
 
 class OverlayProduct(models.Model):
@@ -10,7 +14,7 @@ class OverlayProduct(models.Model):
     _description = 'Overlay product'
 
     active = fields.Boolean(default=True)
-    overlay_template_id = fields.Many2one('overlay.template', required=True)
+    overlay_template_id = fields.Many2one('overlay.template', required=True, ondelete='restrict')
     product_tmpl_id = fields.Many2one(string="Product template", related='overlay_template_id.product_template_id',
                                       store=True)
     website_published = fields.Boolean(related='product_tmpl_id.website_published')
@@ -26,7 +30,9 @@ class OverlayProduct(models.Model):
                                                 copy=False)
     overlay_product_area_image_ids = fields.One2many('overlay.product.area.image', 'overlay_product_id', readonly=True,
                                                      copy=False)
-    area_list_json = fields.Char(readonly=True)
+    overlay_product_area_image_attachment_ids = fields.Many2many('ir.attachment')
+    area_list_data = fields.Json()
+    areas_text_table = fields.Html(compute='_compute_areas_text_table', store=True)
     last_updated_date = fields.Datetime(readonly=True, copy=False)
     updated_by_id = fields.Many2one('res.users', readonly=True, copy=False)
 
@@ -38,11 +44,79 @@ class OverlayProduct(models.Model):
             else:
                 rec.customize_attribute_value_id = False
 
+    @api.depends('area_list_data')
+    def _compute_areas_text_table(self):
+        for rec in self:
+            if not rec.area_list_data:
+                rec.areas_text_table = False
+                continue
+            table_content = ''
+            for position in rec.area_list_data.values():
+                text_areas = list(filter(lambda x: x['type'] == TEXT_AREA_TYPE, position['areaList'].values()))
+                text_objects = list(map(lambda x: x['data'], text_areas))
+                text_objects = [item for sublist in text_objects for item in sublist]
+                for index, area in enumerate(text_objects):
+                    first_cell = ''
+                    if index == 0:
+                        first_cell = f'''
+                            <td rowspan={len(text_objects)}>
+                                {position.get('overlayPositionName') or ''}
+                            </td>
+                        '''
+                    table_content += f'''
+                        <tr>
+                            {first_cell}
+                            <td>{area['objectData'].get('text') or ''}</td>
+                            <td>{area['objectData'].get('fontName') or ''}</td>
+                            <td>{area['objectData'].get('fontSize') or ''}</td>
+                            <td>{area['objectData'].get('fontColor') or ''}</td>
+                        </tr>
+                    '''
+            table = f'''
+                <table class="table table-bordered">
+                    <thead>
+                        <th>Position</th>
+                        <th>Text</th>
+                        <th>Font</th>
+                        <th>Font size</th>
+                        <th>Color</th>
+                    </thead>
+                    <tbody>
+                        {table_content}
+                    </tbody>
+                </table>
+            '''
+            rec.areas_text_table = table
+
     @api.model_create_multi
     def create(self, vals):
         res = super().create(vals)
         res._create_attribute_value()
         return res
+
+    def unlink(self):
+        self._constrains_if_has_sale()
+        res = super(OverlayProduct, self).unlink()
+        return res
+
+    def write(self, vals):
+        res = super(OverlayProduct, self).write(vals)
+        if 'active' in vals.keys():
+            self.product_id.active = vals['active']
+        return res
+
+    def _constrains_if_has_sale(self):
+        sales = self._get_sale_order_line_ids(limit=1)
+        if sales:
+            model_name, model_id = sales._name, sales.id
+            raise ValidationError(_("The operation cannot be completed: another model requires "
+                                    "the record being deleted. If possible, archive it instead.\n\n"
+                                    f"Model: {model_name}s, ID: {model_id}"
+                                    ))
+
+    def _get_sale_order_line_ids(self, limit=None):
+        # TODO [REF] if necessary: add field sale_order_line_ids instead and add ondelete=restrict (tech debt from REG-151)
+        return self.env['sale.order.line'].search([('product_id', 'in', self.product_id.ids)], limit=limit)
 
     def _create_attribute_value(self):
         customization_attr = self.env.ref('regency_shopsite.customization_attribute')
@@ -72,15 +146,22 @@ class OverlayProduct(models.Model):
 
     def _preview_image_url(self):
         self.ensure_one()
+        params = self._preview_image_params()
+        return f'/web/image?model={params.model_name}&id={params.rec_id}&field={params.field_name}'
+
+    def _preview_image(self):
+        self.ensure_one()
+        params = self._preview_image_params()
+        return self.env[params.model_name].browse(params.rec_id)[params.field_name]
+
+    def _preview_image_params(self):
+        self.ensure_one()
         if self.overlay_product_image_ids:
-            image_model = self.overlay_product_image_ids._name
-            image_id = self.overlay_product_image_ids[0].id
-            image_field = 'image'
+            image_params = ImageParams(self.overlay_product_image_ids._name, self.overlay_product_image_ids[0].id,
+                                       'image')
         else:
-            image_id = self.product_tmpl_id.id
-            image_model = self.product_tmpl_id._name
-            image_field = 'image_512'
-        return f'/web/image?model={image_model}&id={image_id}&field={image_field}'
+            image_params = ImageParams(self.product_tmpl_id._name, self.product_tmpl_id.id, 'image_512')
+        return image_params
 
     @property
     def url(self):

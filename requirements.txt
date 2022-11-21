@@ -1,3 +1,4 @@
 PyJWT==2.5.0
 xlrd
 pyotp
+fonttools==4.38.0

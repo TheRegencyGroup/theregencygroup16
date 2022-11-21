@@ -15,8 +15,53 @@
 
 .product-top-left {
   width: 530px;
+  display: flex;
+  border-radius: 4px;
+  border: 1px solid $grey70;
+
   @include media-breakpoint-down(xl) {
     width: 430px;
+  }
+
+  .form-group {
+    width: 100%;
+
+    input {
+      border: none !important;
+    }
+  }
+
+  .listing-name-info {
+    padding: 0 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    i {
+      font-size: 24px;
+      line-height: 24px;
+      color: $grey50;
+    }
+  }
+}
+
+.tippy-box[data-theme~='listing-name-info'] {
+  padding: 12px;
+  background-color: $white;
+  border: none;
+  border-radius: 4px;
+  filter: drop-shadow(0px 10px 10px rgba(38, 50, 56, 0.08));
+  font-family: 'Raleway', sans-serif;
+  font-size: 12px;
+  line-height: 14px;
+  color: $grey10;
+
+  .tippy-content {
+    padding: 0;
+  }
+
+  .tippy-arrow {
+    color: $white;
   }
 }
 

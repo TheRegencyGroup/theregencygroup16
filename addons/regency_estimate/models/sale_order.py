@@ -7,13 +7,22 @@ class SaleOrder(models.Model):
 
     price_sheet_id = fields.Many2one('product.price.sheet')
     estimate_id = fields.Many2one('sale.estimate')
+    legal_accepted = fields.Boolean(default=False)
 
     def _has_to_be_signed(self, include_draft=False):
         return super(SaleOrder, self)._has_to_be_signed(include_draft=True)
 
+    def toggle_legal_accepted(self, checked):
+        self.ensure_one()
+        if self.state == 'draft':
+            self.legal_accepted = checked
+        return self.legal_accepted
+
 
 class SaleOrderLine(models.Model):
     _inherit = 'sale.order.line'
+
+    pricesheet_line_id = fields.Many2one('product.price.sheet.line')
 
     def _compute_tax_id(self):
         """

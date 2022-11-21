@@ -37,6 +37,13 @@
                             </templates>
                         </kanban>
                     </field>
+                    <group>
+                        <group>
+                            <field name="areas_text_table" string="Areas text"/>
+                            <field name="overlay_product_area_image_attachment_ids" widget="many2many_binary"
+                                   string="Attachments" readonly="1"/>
+                        </group>
+                    </group>
                 </sheet>
             </form>
         </field>

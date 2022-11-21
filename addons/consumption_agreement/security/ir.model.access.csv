@@ -1,4 +1,5 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 access_consumption_agreement_users,access.consumption_agreement.internal_users,model_consumption_agreement,base.group_user,1,1,1,1
 access_consumption_agreement_line_users,access.consumption_agreement.internal_users,model_consumption_agreement_line,base.group_user,1,1,1,1
-
+access_sale_order_ca_wizard,access.sale.order.ca.wizard,model_sale_order_ca_wizard,base.group_user,1,1,1,1
+access_sale_order_ca_line_wizard,access.sale.order.ca.line.wizard,model_sale_order_ca_line_wizard,base.group_user,1,1,1,1

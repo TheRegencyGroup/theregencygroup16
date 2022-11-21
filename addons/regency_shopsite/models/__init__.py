@@ -3,6 +3,8 @@ from . import (
     product_image,
     sale_order,
     overlay_template,
+    overlay_font,
+    overlay_color,
     overlay_position,
     overlay_template_attribute_line,
     product_pricelist_item,
