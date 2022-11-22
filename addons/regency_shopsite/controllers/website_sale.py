@@ -110,3 +110,8 @@ class WebsiteSaleRegency(WebsiteSale):
             return False
         order.submit_so_and_send_notify()
         return True
+
+    @http.route(['/shop/cart/submit_customer_comment'], type='json', auth='user', methods=['POST'], website=True, csrf=False)
+    def submit_cart_customer_comment(self, customer_comment):
+        order = request.website.sale_get_order()
+        order.customer_comment = customer_comment or ''

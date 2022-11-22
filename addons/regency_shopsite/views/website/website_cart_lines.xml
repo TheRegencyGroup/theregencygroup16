@@ -17,6 +17,16 @@
          </xpath>
      </template>
 
+    <template id="customer_comment" inherit_id="website_sale.total">
+        <xpath expr="//div[@id='cart_total']//table/tr[@id='order_total']" position="after">
+            <div class="input-group w-100">
+                <input name="Customer Comment" class="form-control customer_comment_input" type="text" placeholder="leave your message here..."
+                       t-att-value="website_sale_order.customer_comment or None"/>
+                <a href="#" role="button" class="btn btn-secondary a-submit-customer-comment">Apply</a>
+            </div>
+        </xpath>
+    </template>
+
     <template id="cart_lines" inherit_id="website_sale.cart_lines">
         <xpath expr="//td[hasclass('td-img') and @align='center']" position="replace">
             <t t-if="line.product_id.overlay_product_id">

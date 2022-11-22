@@ -35,3 +35,23 @@ publicWidget.registry.SubmitCart = publicWidget.Widget.extend({
         });
     },
 });
+
+
+publicWidget.registry.SubmitCustomerComment = publicWidget.Widget.extend({
+    selector: '.oe_website_sale',
+    events: {
+        'click a.a-submit-customer-comment': '_onClickSubmit',
+    },
+
+    async _onClickSubmit(event) {
+        let customer_comment = document.querySelectorAll('.customer_comment_input')[1].value || ''
+        this._rpc({
+            route: '/shop/cart/submit_customer_comment',
+            params: {
+                customer_comment
+            },
+        }).catch(e => {
+            alert(e.message?.data?.message || e.toString())
+        });
+    },
+});
