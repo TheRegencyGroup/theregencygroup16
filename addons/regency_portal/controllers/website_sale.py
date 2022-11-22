@@ -6,22 +6,17 @@ from odoo.addons.portal.controllers.portal import pager as portal_pager
 
 class RegencyCustomerPortal(CustomerPortal):
 
+    def _get_page_view_values(self, document, access_token, values, session_history, no_breadcrumbs, **kwargs):
+        values = super()._get_page_view_values(document, access_token, values, session_history, no_breadcrumbs, **kwargs)
+        query_string = request.httprequest.query_string.decode()
+        values['from_all_orders'] = 'from_all_orders' in query_string
+        return values
+
     def _prepare_all_orders_domain(self, partner):
         return [
             ('message_partner_ids', 'child_of', [partner.commercial_partner_id.id]),
-            ('state', 'in', ['sent', 'sale', 'done'])
+            ('state', 'in', ['sent', 'cancel', 'sale', 'done'])
         ]
-
-    def _prepare_home_portal_values(self, counters):
-        values = super()._prepare_home_portal_values(counters)
-        partner = request.env.user.partner_id
-
-        SaleOrder = request.env['sale.order']
-        if 'all_orders_count' in counters:
-            values['all_orders_count'] = SaleOrder.search_count(self._prepare_all_orders_domain(partner)) \
-                if SaleOrder.check_access_rights('read', raise_exception=False) else 0
-
-        return values
 
     def _prepare_sale_portal_rendering_values_all_orders(self, page=1, date_begin=None, date_end=None, sortby=None,
                                                          **kwargs):
@@ -61,6 +56,11 @@ class RegencyCustomerPortal(CustomerPortal):
             'default_url': url,
             'searchbar_sortings': searchbar_sortings,
             'sortby': sortby,
+            'title': 'All orders',
+            'shopsite_status_names': {
+                'sent': 'Pending',
+                'sale': 'Confirmed',
+            },
         })
 
         return values

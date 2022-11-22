@@ -1,38 +1,52 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <template id="portal_my_orders" inherit_id="sale.portal_my_orders">
+    <template id="portal_my_all_orders" inherit_id="sale.portal_my_orders" primary="True">
         <xpath expr="//thead/tr" position="inside">
-            <th t-if="for_all_orders" class="text-start">Status</th>
+            <th class="text-start">Status</th>
         </xpath>
         <xpath expr="//t[@t-foreach='orders']/tr" position="inside">
-            <td t-if="for_all_orders" class="text-start">
-                <span t-field="order.state"/>
+            <td class="text-start">
+                <t t-if="shopsite_status_names.get(order.state)">
+                    <span t-esc="shopsite_status_names.get(order.state)"/>
+                </t>
+                <t t-else="">
+                     <span t-field="order.state"/>
+                </t>
+            </td>
+        </xpath>
+        <xpath expr="//t[@t-foreach='orders']/tr/td[1]" position="replace">
+            <td>
+                <a t-att-href="order.get_portal_url(query_string='&amp;from_all_orders')">
+                    <t t-out="order.name"/>
+                </a>
             </td>
         </xpath>
     </template>
 
-    <template id="portal_my_all_orders">
-        <t t-call="sale.portal_my_orders">
-            <t t-set="for_all_orders" t-value="True"/>
-        </t>
-    </template>
-
-    <template id="portal_my_home" inherit_id="portal.portal_my_home" priority="10">
-        <xpath expr="//div[hasclass('o_portal_docs')]" position="inside">
-            <t t-call="portal.portal_docs_entry">
-                <t t-set="title">All orders</t>
-                <t t-set="url" t-value="'/my/all_orders'"/>
-                <t t-set="placeholder_count" t-value="'all_orders_count'"/>
-            </t>
-        </xpath>
-    </template>
-
     <template id="portal_breadcrumbs" inherit_id="portal.portal_breadcrumbs" priority="1">
+        <xpath expr="//a[@href='/my/home']/parent::li" position="attributes">
+            <attribute name="t-if">page_name != 'all_orders' and not from_all_orders</attribute>
+        </xpath>
         <xpath expr="//ol[hasclass('o_portal_submenu')]" position="inside">
-            <li t-if="page_name == 'all_orders'" t-attf-class="breadcrumb-item #{'active ' if not sale_order else ''}">
+            <li t-if="page_name == 'all_orders' or from_all_orders" t-attf-class="breadcrumb-item #{'active ' if not sale_order else ''}">
                 <a t-if="sale_order" t-attf-href="/my/all_orders?{{ keep_query() }}">All orders</a>
                 <t t-else="">All orders</t>
             </li>
+        </xpath>
+    </template>
+
+    <template id="portal_my_home_menu_sale" inherit_id="sale.portal_my_home_menu_sale" priority="30">
+        <xpath expr="//li[contains(@t-if, 'sale_order.state in')]" position="attributes">
+            <attribute name="t-if" add="and not from_all_orders" separator=" "/>
+        </xpath>
+        <xpath expr="//li[contains(@t-if, 'sale_order.state not in')]" position="attributes">
+            <attribute name="t-if" add="and not from_all_orders" separator=" "/>
+        </xpath>
+    </template>
+
+    <template id="record_pager" inherit_id="portal.record_pager" priority="30">
+        <xpath expr="//div[hasclass('record_pager')]" position="attributes">
+            <attribute name="t-if">not from_all_orders</attribute>
         </xpath>
     </template>
 </odoo>

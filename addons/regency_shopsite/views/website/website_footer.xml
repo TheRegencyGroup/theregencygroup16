@@ -5,7 +5,6 @@
             <footer class="footer">
                 <div class="container">
                     <a href="http://theregencygroup.net">© theregencygroup.net</a>
-                    <div  t-esc="1231231231233453" t-options="{'widget': 'barcode'}"/>
                 </div>
             </footer>
         </xpath>
