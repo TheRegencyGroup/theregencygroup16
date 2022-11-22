@@ -2,12 +2,37 @@
 <odoo>
     <template id="portal_my_orders" inherit_id="sale.portal_my_orders">
         <xpath expr="//thead/tr" position="inside">
-            <th class="text-start">Status</th>
+            <th t-if="for_all_orders" class="text-start">Status</th>
         </xpath>
         <xpath expr="//t[@t-foreach='orders']/tr" position="inside">
-            <td class="text-start">
+            <td t-if="for_all_orders" class="text-start">
                 <span t-field="order.state"/>
             </td>
+        </xpath>
+    </template>
+
+    <template id="portal_my_all_orders">
+        <t t-call="sale.portal_my_orders">
+            <t t-set="for_all_orders" t-value="True"/>
+        </t>
+    </template>
+
+    <template id="portal_my_home" inherit_id="portal.portal_my_home" priority="10">
+        <xpath expr="//div[hasclass('o_portal_docs')]" position="inside">
+            <t t-call="portal.portal_docs_entry">
+                <t t-set="title">All orders</t>
+                <t t-set="url" t-value="'/my/all_orders'"/>
+                <t t-set="placeholder_count" t-value="'all_orders_count'"/>
+            </t>
+        </xpath>
+    </template>
+
+    <template id="portal_breadcrumbs" inherit_id="portal.portal_breadcrumbs" priority="1">
+        <xpath expr="//ol[hasclass('o_portal_submenu')]" position="inside">
+            <li t-if="page_name == 'all_orders'" t-attf-class="breadcrumb-item #{'active ' if not sale_order else ''}">
+                <a t-if="sale_order" t-attf-href="/my/all_orders?{{ keep_query() }}">All orders</a>
+                <t t-else="">All orders</t>
+            </li>
         </xpath>
     </template>
 </odoo>
