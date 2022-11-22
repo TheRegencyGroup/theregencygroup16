@@ -216,7 +216,7 @@ class ConsumptionAgreement(models.Model):
     def _onchange_partner_id(self):
         for ca in self:
             if ca.partner_id:
-                ca.allowed_partner_ids = ca.partner_id
+                ca.allowed_partner_ids = ca.partner_id + ca.possible_partners
             else:
                 ca.allowed_partner_ids = False
 
