@@ -1,5 +1,5 @@
 from odoo import _, http, Command
-from odoo.exceptions import ValidationError
+from odoo.exceptions import ValidationError, UserError
 from odoo.http import request
 from odoo.addons.website_sale.controllers.main import WebsiteSale
 
@@ -110,5 +110,10 @@ class WebsiteSaleRegency(WebsiteSale):
     def _get_sol_id_from_current_cart(sale_order_line_id):
         order = request.website.sale_get_order(force_create=False)
         order = order.with_company(order.company_id)  # from core, don't know why it is used in such way
-        return order.order_line.filtered_domain([('id', '=', sale_order_line_id)])
+        if not order or order.state != 'draft':
+            raise UserError('No draft sale order was found.')
+        sol = order.order_line.filtered_domain([('id', '=', sale_order_line_id)])
+        if not sol:
+            raise ValueError(f"There is no sale order line 'id: {sale_order_line_id}' in the order 'id: {order.id}'.")
+        return sol
 

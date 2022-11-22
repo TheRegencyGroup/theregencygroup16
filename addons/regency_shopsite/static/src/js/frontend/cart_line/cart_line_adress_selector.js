@@ -50,11 +50,11 @@ export class DeliveryAddressCartLine extends Component {
     }
 
     async processDeliveryAddressChanging(ev) {
-        let selectionTagVal = ev.target.value;
-        if (selectionTagVal === 'add_new_address') {
+        let selectionTag = ev.target;
+        if (selectionTag.value === 'add_new_address') {
             this.displayInputFormModal();
         } else {
-            await this.saveDeliveryAddress(selectionTagVal);
+            await this.saveDeliveryAddress(selectionTag);
         }
     }
 
@@ -66,11 +66,11 @@ export class DeliveryAddressCartLine extends Component {
                 params: {
                     ...addressParams
                 },
-            }).catch((e) => {
+            }).then(() => {env.bus.trigger('delivery-addresses-data-changed');}).catch((e) => {
                 alert(e.message?.data?.message || e.toString());
             });
         });
-        env.bus.trigger('delivery-addresses-data-changed');
+
     }
 
     getParamsForAddressCreation(){
@@ -86,11 +86,13 @@ export class DeliveryAddressCartLine extends Component {
         };
     }
 
-    async saveDeliveryAddress(deliveryAddressId) {
+    async saveDeliveryAddress(selectionTag) {
+        let prevAddressId = this.currentDeliveryAddress
+        let newAddressId = selectionTag.value
         let sale_order_line_id = this.solId;
         let delivery_address_id = (
-            deliveryAddressId && (typeof deliveryAddressId === 'string' || typeof deliveryAddressId === 'number')
-        ) ? Number(deliveryAddressId) : false;
+            newAddressId && (typeof newAddressId === 'string' || typeof newAddressId === 'number')
+        ) ? Number(newAddressId) : false;
         dropPrevious.exec(() => {
             return rpc.query({
                 route: '/shop/cart/save_delivery_address',
@@ -99,6 +101,7 @@ export class DeliveryAddressCartLine extends Component {
                     delivery_address_id,
                 },
             }).catch((e) => {
+                selectionTag.value = prevAddressId
                 alert(e.message?.data?.message || e.toString());
             });
         });
