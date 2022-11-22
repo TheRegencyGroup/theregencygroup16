@@ -1,5 +1,5 @@
 from odoo import _, http, Command
-from odoo.exceptions import ValidationError
+from odoo.exceptions import ValidationError, UserError
 from odoo.http import request
 from odoo.addons.website_sale.controllers.main import WebsiteSale
 
@@ -77,30 +77,25 @@ class WebsiteSaleRegency(WebsiteSale):
     @http.route(['/shop/cart/save_delivery_address'],
                 type='json', auth="user", methods=['POST'], website=True, csrf=False)
     def update_sale_order_line_delivery_address(self, sale_order_line_id, delivery_address_id, **kw):
-        order = request.website.sale_get_order(force_create=False)
-        order = order.with_company(order.company_id)  # from core, don't know why it is used in such way
-        sol = order.order_line.filtered_domain([('id', '=', sale_order_line_id)])
+        sol = self._get_sol_id_from_current_cart(sale_order_line_id)
         sol.write({'delivery_address_id': delivery_address_id})
 
     @http.route(['/shop/cart/add_new_address'],
                 type='json', auth="user", methods=['POST'], website=True, csrf=False)
     def create_and_link_delivery_address(self, sale_order_line_id, address_name: str, **kw):
-        order = request.website.sale_get_order(force_create=False)
-        order = order.with_company(order.company_id)  # from core, don't know why it is used in such way
-        sol = order.order_line.filtered_domain([('id', '=', sale_order_line_id)])
-        new_address_vals = {'name': address_name,
-                            'type': 'delivery',
-                            'parent_id': sol.delivery_partner_id.id,
-                            **kw
-                            }
-        new_address = order.env['res.partner'].sudo().create(new_address_vals)
-        sol.sudo().write({'delivery_address_id': new_address.id})
+        sol = self._get_sol_id_from_current_cart(sale_order_line_id)
+        if sol:
+            new_address_vals = {'name': address_name,
+                                'type': 'delivery',
+                                'parent_id': sol.delivery_partner_id.id,
+                                **kw
+                                }
+            new_address = sol.env['res.partner'].create(new_address_vals)
+            sol.write({'delivery_address_id': new_address.id})
 
     @http.route(['/shop/cart/get_delivery_addresses_data'], type='json', methods=['POST'], auth='user', website=True)
     def get_delivery_address_data(self, sale_order_line_id):
-        order = request.website.sale_get_order(force_create=False)
-        order = order.with_company(order.company_id)  # from core, don't know why it is used in such way
-        sol = order.order_line.filtered_domain([('id', '=', sale_order_line_id)])
+        sol = self._get_sol_id_from_current_cart(sale_order_line_id)
         return sol._get_delivery_data()
 
     @http.route(['/shop/submit_cart'], type='json', auth='user', methods=['POST'], website=True, csrf=False)
@@ -110,3 +105,15 @@ class WebsiteSaleRegency(WebsiteSale):
             return False
         order.submit_so_and_send_notify()
         return True
+
+    @staticmethod
+    def _get_sol_id_from_current_cart(sale_order_line_id):
+        order = request.website.sale_get_order(force_create=False)
+        order = order.with_company(order.company_id)  # from core, don't know why it is used in such way
+        if not order or order.state != 'draft':
+            raise UserError('No draft sale order was found.')
+        sol = order.order_line.filtered_domain([('id', '=', sale_order_line_id)])
+        if not sol:
+            raise ValueError(f"There is no sale order line 'id: {sale_order_line_id}' in the order 'id: {order.id}'.")
+        return sol
+
