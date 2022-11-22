@@ -76,7 +76,7 @@
                             >
                                 <tree editable="bottom" no_open="1">
                                     <field name="product_id"/>
-                                    <field name="allowed_partner_ids" widget="many2many_tags" domain="[('id', 'in', parent.possible_partners)]"/>
+                                    <field name="allowed_partner_ids" widget="many2many_tags" domain="[('id', 'in', parent.allowed_partner_ids)]"/>
                                     <field name="name" string="Description"/>
                                     <field name="vendor_id" optional="hide"/>
                                     <field name="qty_allowed"/>
