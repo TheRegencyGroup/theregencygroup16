@@ -73,7 +73,7 @@ class ConsumptionAgreement(models.Model):
         for ca in self:
             association_type_ids = [self.env.ref('regency_contacts.hotel_group_to_management_group'),
                                     self.env.ref('regency_contacts.management_group_to_hotel')]
-            ca.possible_partners = False
+            ca.possible_partners = False  # Need to avoid compute error
             ca.possible_partners = ca.partner_id.association_ids.filtered(
                 lambda f: f.association_type_id in association_type_ids).mapped('right_partner_id.id')
 
