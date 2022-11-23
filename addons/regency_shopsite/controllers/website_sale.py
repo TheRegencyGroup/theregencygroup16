@@ -114,4 +114,7 @@ class WebsiteSaleRegency(WebsiteSale):
     @http.route(['/shop/cart/submit_customer_comment'], type='json', auth='user', methods=['POST'], website=True, csrf=False)
     def submit_cart_customer_comment(self, customer_comment):
         order = request.website.sale_get_order()
-        order.customer_comment = customer_comment or ''
+        if not order or order.state != 'draft':
+            return False
+        return order.write({'customer_comment': customer_comment or ''})
+
