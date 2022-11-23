@@ -8,7 +8,7 @@ import {
     PRODUCT_IMAGE_MODEL,
     OVERLAY_PRODUCT_AREA_IMAGE,
     computeImageSrc,
-    computeAttachmentLink,
+    computeAreaImageLink,
 } from '../../../main';
 import { RectangleArea } from './rectangle_area';
 import { EllipseArea } from './ellipse_area';
@@ -126,7 +126,7 @@ export class ProductOverlayPositionComponent extends Component {
                 if (areaObjectData) {
                     areaObjList = areaObjectData.areaList[areaData.index].data;
                     for (let obj of areaObjList) {
-                        obj.attachmentUrl = computeAttachmentLink(obj.attachmentId);
+                        obj.attachmentUrl = computeAreaImageLink(obj.areaImageId);
                     }
                 }
                 if (areaData.areaType === RECTANGLE_AREA_TYPE) {

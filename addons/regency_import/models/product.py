@@ -17,7 +17,11 @@ class Product(models.Model):
 
     def after_import_update(self):
         all = self.search([])
-        all.set_routes_from_import_data()
+        all.create_packagings()
+
+    def create_packagings(self):
+        for rec in self.filtered(lambda x: x.ext_qty_per_carton > 0):
+            rec.write({'packaging_ids': [Command.create({'name': 'Carton', 'qty': rec.ext_qty_per_carton})]})
 
     def set_routes_from_import_data(self):
         mto_mts = self.env.ref('stock_mts_mto_rule.route_mto_mts')

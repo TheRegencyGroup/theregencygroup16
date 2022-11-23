@@ -20,9 +20,9 @@ export function computeImageSrc({ id, model, field, timestamp }) {
     return `${baseUrl}/web/image?model=${model}&id=${id}&field=${field}&unique=${timestamp}`;
 }
 
-export function computeAttachmentLink(attachmentId) {
+export function computeAreaImageLink(attachmentId) {
     let baseUrl = window.location.origin;
-    return `${baseUrl}/web/content/${attachmentId}`;
+    return `${baseUrl}/shop/area_image/${attachmentId}`;
 }
 
 export function enableCanvasPointerEvents(canvas, state) {
