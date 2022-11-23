@@ -11,5 +11,6 @@ class StockMove(models.Model):
         res = super()._prepare_procurement_values()
         res.update({'pricesheet_vendor_id': self.sale_line_id.pricesheet_line_id.partner_id,
                     'pricesheet_vendor_price': self.sale_line_id.pricesheet_line_id.vendor_price,
-                    'sale_line_id': self.sale_line_id.id})
+                    'sale_line_id': self.sale_line_id.id,
+                    'customer_id': self.sale_line_id.order_id.partner_id.id})
         return res

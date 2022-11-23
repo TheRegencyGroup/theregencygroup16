@@ -1,0 +1,53 @@
+<odoo>
+    <data>
+
+        <record id="paperformat_barcode_regency" model="report.paperformat">
+            <field name="name">Barcode</field>
+            <field name="default" eval="True" />
+            <field name="format">custom</field>
+            <field name="page_height">51</field>
+            <field name="page_width">102</field>
+            <field name="orientation">Portrait</field>
+            <field name="margin_top">0</field>
+            <field name="margin_bottom">0</field>
+            <field name="margin_left">0</field>
+            <field name="margin_right">0</field>
+            <field name="header_line" eval="False" />
+            <field name="header_spacing">0</field>
+            <field name="dpi">96</field>
+            <field name="disable_shrinking" eval="True"/>
+        </record>
+
+        <record id="action_report_quant_package_barcode_small_quants" model="ir.actions.report">
+            <field name="name">Regency Package Barcode (PDF)</field>
+            <field name="model">stock.quant</field>
+            <field name="report_type">qweb-pdf</field>
+            <field name="report_name">regency_stock.report_package_barcode_small_regency_quants</field>
+            <field name="report_file">stock.report_package_barcode</field>
+            <field name="binding_model_id" ref="stock.model_stock_quant_package"/>
+            <field name="binding_type">report</field>
+            <field name="paperformat_id" ref="paperformat_barcode_regency"/>
+        </record>
+
+        <record id="action_report_quant_package_barcode_small_packages" model="ir.actions.report">
+            <field name="name">Regency Package Barcode (PDF)</field>
+            <field name="model">stock.quant.package</field>
+            <field name="report_type">qweb-pdf</field>
+            <field name="report_name">regency_stock.report_package_barcode_small_regency_packages</field>
+            <field name="report_file">stock.report_package_barcode</field>
+            <field name="binding_model_id" ref="stock.model_stock_quant"/>
+            <field name="binding_type">report</field>
+            <field name="paperformat_id" ref="paperformat_barcode_regency"/>
+        </record>
+
+        <record id="stock.action_report_quant_package_barcode_small" model="ir.actions.report">
+            <field name="name">Package Barcode (PDF)</field>
+            <field name="model">stock.quant.package</field>
+            <field name="report_type">qweb-pdf</field>
+            <field name="report_name">stock.report_package_barcode_small</field>
+            <field name="report_file">stock.report_package_barcode</field>
+            <field name="binding_model_id" eval="False"/>
+            <field name="binding_type">report</field>
+        </record>
+    </data>
+</odoo>

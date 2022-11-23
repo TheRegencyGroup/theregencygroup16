@@ -1,1 +1,1 @@
-from . import stock_picking
+from . import stock_picking, stock_quant, stock_quant_package
