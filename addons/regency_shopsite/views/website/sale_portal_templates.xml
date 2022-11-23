@@ -5,4 +5,12 @@
             <a class="btn btn-primary btn-block mb8" role="button" id="reorder">Reorder</a>
         </xpath>
     </template>
+
+    <template id="sale_order_comment" inherit_id="sale.sale_order_portal_content" name="SaleOrderComment">
+        <xpath expr="//section[@id='details']//div[@id='total']" position="inside">
+            <div t-if="sale_order.customer_comment" class="customer_comment">
+                Comment: <t t-esc="sale_order.customer_comment"/>
+            </div>
+        </xpath>
+    </template>
 </odoo>

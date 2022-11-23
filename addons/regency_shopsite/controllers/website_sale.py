@@ -106,6 +106,13 @@ class WebsiteSaleRegency(WebsiteSale):
         order.submit_so_and_send_notify()
         return True
 
+    @http.route(['/shop/cart/submit_customer_comment'], type='json', auth='user', methods=['POST'], website=True, csrf=False)
+    def submit_cart_customer_comment(self, customer_comment):
+        order = request.website.sale_get_order()
+        if not order or order.state != 'draft':
+            return False
+        return order.write({'customer_comment': customer_comment or ''})
+
     @staticmethod
     def _get_sol_id_from_current_cart(sale_order_line_id):
         order = request.website.sale_get_order(force_create=False)
@@ -116,4 +123,3 @@ class WebsiteSaleRegency(WebsiteSale):
         if not sol:
             raise ValueError(f"There is no sale order line 'id: {sale_order_line_id}' in the order 'id: {order.id}'.")
         return sol
-

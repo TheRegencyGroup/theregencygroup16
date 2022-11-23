@@ -6,6 +6,8 @@ from odoo import fields, models, api, Command
 class SaleOrder(models.Model):
     _inherit = 'sale.order'
 
+    customer_comment = fields.Char()
+
     def action_confirm(self):
         res = super(SaleOrder, self).action_confirm()
         for order in self:

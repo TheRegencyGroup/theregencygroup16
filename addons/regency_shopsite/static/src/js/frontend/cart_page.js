@@ -6,10 +6,11 @@ import Dialog from 'web.Dialog';
 publicWidget.registry.SubmitCart = publicWidget.Widget.extend({
     selector: '.oe_website_sale',
     events: {
-        'click button.submit_cart': '_onClickSubmit',
+        'click button.submit_cart': '_onClickSubmitOrder',
+        'click a.a-submit-customer-comment': '_onClickSubmitComment',
     },
 
-    async _onClickSubmit(event) {
+    async _onClickSubmitOrder(event) {
         new Promise((resolve, reject) => {
             Dialog.confirm(
                 this,
@@ -32,6 +33,18 @@ publicWidget.registry.SubmitCart = publicWidget.Widget.extend({
             }).catch(e => {
                 alert(e.message?.data?.message || e.toString())
             });
+        });
+    },
+
+    async _onClickSubmitComment(event) {
+        let customer_comment = document.querySelector('.customer_comment_input').value || ''
+        this._rpc({
+            route: '/shop/cart/submit_customer_comment',
+            params: {
+                customer_comment
+            },
+        }).catch(e => {
+            alert(e.message?.data?.message || e.toString())
         });
     },
 });
