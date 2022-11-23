@@ -22,7 +22,7 @@
                                 </div>
                             </div>
                             <div style="font-weight: bolder; text-align: left;">
-                                <t t-set="customers" t-value="o._compute_customer_ids()"/>
+                                <t t-set="customers" t-value="o.get_customer_ids()"/>
                                 <div t-if="customers" t-out="customers.name" style="padding-top: 20px;"/>
                                 <div t-out="o.product_id.name" style="padding-top: 20px;"/>
                             </div>

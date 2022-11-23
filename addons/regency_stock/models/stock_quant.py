@@ -4,7 +4,7 @@ from odoo import models
 class StockQuant(models.Model):
     _inherit = 'stock.quant'
 
-    def _compute_customer_ids(self):
+    def get_customer_ids(self):
         customer_ids = False
         if self.package_id:
             domain = ['|', ('result_package_id', '=', self.package_id.id), ('package_id', '=', self.package_id.id)]
