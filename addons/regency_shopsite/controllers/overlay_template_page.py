@@ -7,7 +7,7 @@ from markupsafe import Markup
 from odoo import http, Command
 from odoo.exceptions import ValidationError
 from odoo.http import request
-from werkzeug.exceptions import NotFound
+from werkzeug.exceptions import Forbidden
 
 from odoo.addons.regency_shopsite.const import OVERLAY_PRODUCT_ID_URL_PARAMETER
 
@@ -353,14 +353,11 @@ class OverlayTemplatePage(http.Controller):
     @http.route(['/shop/area_image/<model("overlay.product.area.image"):overlay_product_area_image_id>'],
                 type='http', auth="user", website=True)
     def overlay_product_area_image(self, overlay_product_area_image_id):
-        if not overlay_product_area_image_id:
-            return NotFound()
-
         overlay_product_area_image_id = overlay_product_area_image_id.sudo()
 
         if not overlay_product_area_image_id.image_attachment_id or not self._overlay_template_is_available_for_user(
                 overlay_product_area_image_id.overlay_product_id.overlay_template_id):
-            return NotFound()
+            raise Forbidden()
 
         attachment_id = overlay_product_area_image_id.image_attachment_id.id
 
