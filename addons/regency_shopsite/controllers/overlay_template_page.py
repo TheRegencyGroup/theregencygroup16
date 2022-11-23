@@ -7,6 +7,7 @@ from markupsafe import Markup
 from odoo import http, Command
 from odoo.exceptions import ValidationError
 from odoo.http import request
+from werkzeug.exceptions import NotFound
 
 from odoo.addons.regency_shopsite.const import OVERLAY_PRODUCT_ID_URL_PARAMETER
 
@@ -172,15 +173,16 @@ class OverlayTemplatePage(http.Controller):
                             'type': 'binary',
                         }])
                         image_attachment_ids.append(attachment_id.id)
-                        request.env['overlay.product.area.image'].sudo().create({
+                        area_image_id = request.env['overlay.product.area.image'].sudo().create({
                             'image_attachment_id': attachment_id.id,
                             'overlay_position_id': overlay_position_id.id,
                             'area_index': area_index,
                             'area_object_index': area_object_index,
                             'overlay_product_id': overlay_product.id,
                         })
-                        obj['attachmentId'] = attachment_id.id
+                        obj['areaImageId'] = area_image_id.id
                         del obj['image']
+            overlay_product.overlay_product_area_image_attachment_ids.unlink()
             overlay_product.overlay_product_area_image_attachment_ids = [Command.set(image_attachment_ids)]
             overlay_product.area_list_data = overlay_area_list
 
@@ -347,3 +349,22 @@ class OverlayTemplatePage(http.Controller):
         return {
             'priceList': self._get_overlay_template_price_list(overlay_template_id),
         }
+
+    @http.route(['/shop/area_image/<model("overlay.product.area.image"):overlay_product_area_image_id>'],
+                type='http', auth="user", website=True)
+    def overlay_product_area_image(self, overlay_product_area_image_id):
+        if not overlay_product_area_image_id:
+            return NotFound()
+
+        overlay_product_area_image_id = overlay_product_area_image_id.sudo()
+
+        if not overlay_product_area_image_id.image_attachment_id or not self._overlay_template_is_available_for_user(
+                overlay_product_area_image_id.overlay_product_id.overlay_template_id):
+            return NotFound()
+
+        attachment_id = overlay_product_area_image_id.image_attachment_id.id
+
+        record = request.env['ir.binary'].sudo()._find_record(res_id=attachment_id)
+        stream = request.env['ir.binary']._get_stream_from(record)
+
+        return stream.get_response(max_age=None)

@@ -3,7 +3,7 @@
 import { registry } from "@web/core/registry";
 import { standardFieldProps } from "@web/views/fields/standard_field_props";
 import { OverlayAreasPositionComponent } from "./overlay_template_areas_position";
-import { useBus } from "@web/core/utils/hooks";
+import { useBus, useService } from "@web/core/utils/hooks";
 import legacyEnv from "web.env";
 import {
     PRODUCT_IMAGE_FIELD,
@@ -47,6 +47,7 @@ class OverlayAreasWidget extends Component {
         this.state.productTemplateImages = [];
         this.state.productTemplateImagesLoaded = false;
         this.state.imagesListModalData = false;
+        this.state.showBlockSpinner = false;
 
         this.lastRecordId = this.props.record.__bm_handle__;
         this.lastProductTemplateId = this.productTemplateId;
@@ -141,7 +142,9 @@ class OverlayAreasWidget extends Component {
     }
 
     onMounted() {
-
+        if (!this.state.productTemplateImagesLoaded) {
+            this.blockForm(true);
+        }
     }
 
     onPatched() {
@@ -233,6 +236,7 @@ class OverlayAreasWidget extends Component {
     }
 
     downloadProductTemplateImages() {
+        this.blockForm(true);
         let promises = [];
         for (let imageId of this.productTemplateImageIds) {
             promises.push(new Promise(async resolve => {
@@ -260,6 +264,7 @@ class OverlayAreasWidget extends Component {
         Promise.all(promises).then((data) => {
             this.state.productTemplateImages = data;
             this.state.productTemplateImagesLoaded = true;
+            this.blockForm(false);
         });
     }
 
@@ -371,6 +376,15 @@ class OverlayAreasWidget extends Component {
 
     getColorList() {
         return this.props.record.data.all_overlay_colors || [];
+    }
+
+    blockForm(state) {
+        const contentEl = document.querySelector('.o_content');
+        if (!contentEl) {
+            return;
+        }
+        contentEl.style.overflow = state ? 'unset' : 'auto';
+        this.state.showBlockSpinner = state;
     }
 }
 
