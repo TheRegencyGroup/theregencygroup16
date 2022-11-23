@@ -185,12 +185,13 @@ class OverlayAreasPositionComponent extends Component {
             data = {
                 width: newWidth,
                 height: newHeight,
-                src: computeImageSrc({
-                    id: newImageId,
-                    model: PRODUCT_IMAGE_MODEL,
-                    field: 'image_1920',
-                    timestamp: this.imageTimestamp,
-                })
+                // src: computeImageSrc({
+                //     id: newImageId,
+                //     model: PRODUCT_IMAGE_MODEL,
+                //     field: 'image_1920',
+                //     timestamp: this.imageTimestamp,
+                // })
+                src: newProductTemplateImage.image.src,
             };
         } else {
             this.state.editorImageLoaded = false;
