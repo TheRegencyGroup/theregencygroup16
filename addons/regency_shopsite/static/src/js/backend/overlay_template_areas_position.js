@@ -183,14 +183,9 @@ class OverlayAreasPositionComponent extends Component {
                 this.state.editorImageLoaded = false;
             }
             data = {
+                imageId: newImageId,
                 width: newWidth,
                 height: newHeight,
-                // src: computeImageSrc({
-                //     id: newImageId,
-                //     model: PRODUCT_IMAGE_MODEL,
-                //     field: 'image_1920',
-                //     timestamp: this.imageTimestamp,
-                // })
                 src: newProductTemplateImage.image.src,
             };
         } else {
@@ -199,7 +194,9 @@ class OverlayAreasPositionComponent extends Component {
                 this.destroyCanvas();
             }
         }
-        this.state.editorImage = data;
+        if (data.imageId !== this.state.editorImage.imageId) {
+            this.state.editorImage = data;
+        }
     }
 
     setImageOnloadCallback() {
@@ -287,8 +284,8 @@ class OverlayAreasPositionComponent extends Component {
 
     getEllipseObjData(object) {
         return {
-            rx: (!object.scaleX || object.scaleX === 1) ? object.width : Math.ceil(object.getRx()),
-            ry: (!object.scaleY || object.scaleY === 1) ? object.height : Math.ceil(object.getRy()),
+            rx: (!object.scaleX || object.scaleX === 1) ? object.rx : Math.ceil(object.getRx()),
+            ry: (!object.scaleY || object.scaleY === 1) ? object.ry : Math.ceil(object.getRy()),
             x: Math.ceil(object.left || 0),
             y: Math.ceil(object.top || 0),
             angle: Math.ceil(object.angle),
