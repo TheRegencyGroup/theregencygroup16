@@ -9,7 +9,11 @@
                 <button name="action_open_sale_order_line_form" type="object" icon="fa-external-link"/>
             </xpath>
             <xpath expr="//button[@name='action_quotation_send']" position="after">
-                <button name="submit_so_and_send_notify" string="Submit" type="object" states="draft" class="btn-primary"/>
+                <button name="submit_so_and_send_notify" string="Submit" type="object" states="draft"
+                        class="btn-primary"/>
+            </xpath>
+            <xpath expr="//group[@name='order_details']//field[@name='payment_term_id']" position="after">
+                <field name="customer_comment" readonly="1"/>
             </xpath>
         </field>
     </record>
