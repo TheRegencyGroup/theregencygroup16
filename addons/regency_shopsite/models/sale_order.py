@@ -55,12 +55,12 @@ class SaleOrderLine(models.Model):
         self.ensure_one()
         possible_addresses = [{'modelId': address.id,
                                'addressStr': address.name,
+                               'addressFullInfo': address._get_delivery_address_str()
                                } for address in self.possible_delivery_address_ids]
         return json.dumps({'solId': self.id,
                            'currentDeliveryAddress': self.delivery_address_id.id,
                            'possibleDeliveryAddresses': possible_addresses,
                            })
-
 
     @api.model_create_multi
     def create(self, vals):

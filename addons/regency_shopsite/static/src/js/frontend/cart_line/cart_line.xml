@@ -7,8 +7,10 @@
                 <option t-if="!currentDeliveryAddress" t-att-selected="!currentDeliveryAddress"/>
                 <option t-foreach="possibleDeliveryAddresses" t-as="address" t-key="address.modelId"
                         t-att-value="address.modelId"
-                        t-att-selected="address.modelId === currentDeliveryAddress"
-                        t-esc="address.addressStr"/>
+                        t-att-title="address.addressFullInfo"
+                        t-att-selected="address.modelId === currentDeliveryAddress">
+                    <t t-esc="address.addressStr"/>
+                </option>
                 <option value="add_new_address">&lt; Add New Address &gt;</option>
             </select>
             <t t-call="new_address_form_input"/>

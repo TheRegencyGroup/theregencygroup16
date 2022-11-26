@@ -9,6 +9,15 @@ class ResPartner(models.Model):
     logo_url = fields.Text(compute='_compute_logo_url')
     background_url = fields.Text(compute='_compute_background_url')
 
+    def _get_delivery_address_str(self):
+        self.ensure_one()
+        data = [f'{self.street}', f'{self.street2}', f'{self.city}', f'{self.state_id.name}', f'{self.zip}',
+                f'{self.country_id.name}']
+        address = ''
+        for el in data:
+            address += f', {el}' if el else ''
+        return address.lstrip(', ')
+
     def _compute_logo_url(self):
         for partner in self:
             image_field = 'image_256'
