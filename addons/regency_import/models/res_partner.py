@@ -25,6 +25,7 @@ class ResPartner(models.Model):
         recs = super().create(val_list)
         recs.update_country_and_state()
         recs.assign_sales_rep()
+        recs.write({'entity_type': 'contact'})
         return recs
 
     def write(self, vals):
