@@ -5,7 +5,7 @@ import rpc from 'web.rpc';
 import Concurrency from 'web.concurrency';
 import env from 'web.public_env';
 
-const { Component, useState, useRef} = owl;
+const { Component, useState, useRef } = owl;
 const dropPrevious = new Concurrency.MutexedDropPrevious();
 
 export class DeliveryAddressCartLine extends Component {
@@ -26,6 +26,7 @@ export class DeliveryAddressCartLine extends Component {
             showModal: false,
             currentCountryId: this.store.countriesWorldData.defaultCountryId,
             currentCountryHasProvinces: this.store.countriesWorldData.defaultCountryHasProvince,
+            selectionTagTittle: this.selectionTagTittle,
         });
         env.bus.on('delivery-addresses-data-changed', null, this.onChangedDeliveryAddressData.bind(this));
     }
@@ -38,6 +39,15 @@ export class DeliveryAddressCartLine extends Component {
         return this.props.solData.currentDeliveryAddress;
     }
 
+    set currentDeliveryAddress(id) {
+        this.props.solData.currentDeliveryAddress = id;
+    }
+
+    get selectionTagTittle() {
+        let addressData = this.props.solData.possibleDeliveryAddresses.find(addr => addr.modelId == this.currentDeliveryAddress);
+        return addressData?.addressFullInfo || '';
+    }
+
     get possibleDeliveryAddresses() {
         return this.props.solData.possibleDeliveryAddresses;
     }
@@ -45,6 +55,7 @@ export class DeliveryAddressCartLine extends Component {
     hideInputFormModal() {
         this.state.showModal = false;
     }
+
     displayInputFormModal() {
         this.state.showModal = true;
     }
@@ -66,14 +77,16 @@ export class DeliveryAddressCartLine extends Component {
                 params: {
                     ...addressParams
                 },
-            }).then(() => {env.bus.trigger('delivery-addresses-data-changed');}).catch((e) => {
+            }).then(() => {
+                env.bus.trigger('delivery-addresses-data-changed');
+            }).catch((e) => {
                 alert(e.message?.data?.message || e.toString());
             });
         });
 
     }
 
-    getParamsForAddressCreation(){
+    getParamsForAddressCreation() {
         return {
             sale_order_line_id: this.solId,
             address_name: this.newAddressInputEls.name.el.value,
@@ -87,6 +100,7 @@ export class DeliveryAddressCartLine extends Component {
     }
 
     async saveDeliveryAddress(selectionTag) {
+        let self = this;
         let prevAddressId = this.currentDeliveryAddress
         let newAddressId = selectionTag.value
         let sale_order_line_id = this.solId;
@@ -100,6 +114,9 @@ export class DeliveryAddressCartLine extends Component {
                     sale_order_line_id,
                     delivery_address_id,
                 },
+            }).then(() => {
+                self.currentDeliveryAddress = selectionTag.value;
+                this.state.selectionTagTittle = this.selectionTagTittle;
             }).catch((e) => {
                 selectionTag.value = prevAddressId
                 alert(e.message?.data?.message || e.toString());
@@ -109,16 +126,17 @@ export class DeliveryAddressCartLine extends Component {
 
     async onChangedDeliveryAddressData() {
         let sale_order_line_id = this.solId;
-        let deliveryAddressData  = await rpc.query({
-                route: '/shop/cart/get_delivery_addresses_data',
-                params: {
-                    sale_order_line_id,
-                },
-            }).catch((e) => {
-                alert(e.message?.data?.message || e.toString());
-            });
+        let deliveryAddressData = await rpc.query({
+            route: '/shop/cart/get_delivery_addresses_data',
+            params: {
+                sale_order_line_id,
+            },
+        }).catch((e) => {
+            alert(e.message?.data?.message || e.toString());
+        });
         // updates props
         this.props.solData = JSON.parse(deliveryAddressData);
+        this.state.selectionTagTittle = this.selectionTagTittle;
         this.render();
         this.hideInputFormModal();
     }
