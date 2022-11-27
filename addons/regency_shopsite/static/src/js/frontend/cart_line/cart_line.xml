@@ -4,8 +4,8 @@
     <t t-name="address_cart_line" owl="1">
         <div>
             <select class="form-select" t-on-change="processDeliveryAddressChanging"
-                    t-att-title="this.state.selectionTagTittle">
-                <option t-if="!currentDeliveryAddress" t-att-selected="!currentDeliveryAddress"/>
+                    t-att-title="selectionTagTittle">
+                <option t-if="!currentDeliveryAddress" t-att-selected="true"/>
                 <option t-foreach="possibleDeliveryAddresses" t-as="address" t-key="address.modelId"
                         t-att-value="address.modelId"
                         t-att-title="address.addressFullInfo"

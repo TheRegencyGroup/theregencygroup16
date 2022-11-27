@@ -23,33 +23,33 @@ export class DeliveryAddressCartLine extends Component {
         this.provinceList = this.store.countriesWorldData.provinceList;
         this.countryList = this.store.countriesWorldData.countryList;
         this.state = useState({
+            solData: this.props.solData,
             showModal: false,
             currentCountryId: this.store.countriesWorldData.defaultCountryId,
             currentCountryHasProvinces: this.store.countriesWorldData.defaultCountryHasProvince,
-            selectionTagTittle: this.selectionTagTittle,
-        });
+            });
         env.bus.on('delivery-addresses-data-changed', null, this.onChangedDeliveryAddressData.bind(this));
     }
 
     get solId() { // 'sol' means 'sale order line'
-        return this.props.solData.solId;
+        return this.state.solData.solId;
     }
 
     get currentDeliveryAddress() {
-        return this.props.solData.currentDeliveryAddress;
+        return this.state.solData.currentDeliveryAddress;
     }
 
     set currentDeliveryAddress(id) {
-        this.props.solData.currentDeliveryAddress = id;
+        this.state.solData.currentDeliveryAddress = id;
     }
 
     get selectionTagTittle() {
-        let addressData = this.props.solData.possibleDeliveryAddresses.find(addr => addr.modelId == this.currentDeliveryAddress);
+        let addressData = this.state.solData.possibleDeliveryAddresses.find(addr => addr.modelId == this.currentDeliveryAddress);
         return addressData?.addressFullInfo || '';
     }
 
     get possibleDeliveryAddresses() {
-        return this.props.solData.possibleDeliveryAddresses;
+        return this.state.solData.possibleDeliveryAddresses;
     }
 
     hideInputFormModal() {
@@ -83,7 +83,6 @@ export class DeliveryAddressCartLine extends Component {
                 alert(e.message?.data?.message || e.toString());
             });
         });
-
     }
 
     getParamsForAddressCreation() {
@@ -101,8 +100,8 @@ export class DeliveryAddressCartLine extends Component {
 
     async saveDeliveryAddress(selectionTag) {
         let self = this;
-        let prevAddressId = this.currentDeliveryAddress
-        let newAddressId = selectionTag.value
+        let prevAddressId = this.currentDeliveryAddress;
+        let newAddressId = selectionTag.value;
         let sale_order_line_id = this.solId;
         let delivery_address_id = (
             newAddressId && (typeof newAddressId === 'string' || typeof newAddressId === 'number')
@@ -116,7 +115,6 @@ export class DeliveryAddressCartLine extends Component {
                 },
             }).then(() => {
                 self.currentDeliveryAddress = selectionTag.value;
-                this.state.selectionTagTittle = this.selectionTagTittle;
             }).catch((e) => {
                 selectionTag.value = prevAddressId
                 alert(e.message?.data?.message || e.toString());
@@ -135,9 +133,7 @@ export class DeliveryAddressCartLine extends Component {
             alert(e.message?.data?.message || e.toString());
         });
         // updates props
-        this.props.solData = JSON.parse(deliveryAddressData);
-        this.state.selectionTagTittle = this.selectionTagTittle;
-        this.render();
+        this.state.solData = JSON.parse(deliveryAddressData);
         this.hideInputFormModal();
     }
 
