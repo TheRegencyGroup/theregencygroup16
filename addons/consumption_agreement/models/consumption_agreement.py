@@ -143,6 +143,7 @@ class ConsumptionAgreement(models.Model):
                     'product_id': line.product_id.id,
                     'product_qty': line.qty_allowed,
                     'price_unit': line.price_unit,
+                    'customer_id': line.agreement_id.partner_id
                 })]
             })
             new_purchase_orders += po
