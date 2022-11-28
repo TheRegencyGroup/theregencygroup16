@@ -7,7 +7,7 @@ class OverlayProductAreaImage(models.Model):
     _name = 'overlay.product.area.image'
     _description = 'Overlay product area image'
 
-    image = fields.Binary(required=True, ondelete='cascade')
+    image = fields.Binary(required=True)
     image_type = fields.Char()
     image_extension = fields.Char()
     image_filename = fields.Char(compute='_compute_image_filename')
