@@ -13,7 +13,7 @@
                         class="btn-primary"/>
             </xpath>
             <xpath expr="//group[@name='order_details']//field[@name='payment_term_id']" position="after">
-                <field name="customer_comment" readonly="1" attrs="{'invisible': [('customer_comment', '=', False)]}"/>
+                <field name="customer_comment" readonly="1"/>
             </xpath>
         </field>
     </record>
