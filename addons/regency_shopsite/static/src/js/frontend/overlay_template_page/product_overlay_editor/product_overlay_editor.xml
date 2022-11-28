@@ -84,8 +84,10 @@
             </div>
             <div class="product_overlay_position_container">
                 <div class="product_overlay_position">
-                    <img t-att-src="state.backgroundImage.src" t-ref="image_ref"/>
-                    <div class="product_overlay_position_areas_container" t-ref="canvas_container_ref"/>
+                    <img t-att-src="backgroundImageSrc" t-ref="image_ref"/>
+                    <div class="product_overlay_position_areas_container"
+                         t-att-class="{ 'hide': !showCanvasContainer }"
+                         t-ref="canvas_container_ref"/>
                 </div>
             </div>
         </div>

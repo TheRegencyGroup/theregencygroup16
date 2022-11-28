@@ -21,7 +21,7 @@ if (overlayTemplatePageData) {
         }
 
         get overlayPositions() {
-            return this.overlayPositionsData || {};
+            return this.overlayTemplate?.positionsData || {};
         }
 
         get selectedAreasImageAttributeValueId() {
@@ -32,7 +32,7 @@ if (overlayTemplatePageData) {
         }
 
         get hasOverlayProductId() {
-            return !!this.overlayProductId;
+            return !!this.overlayProduct?.id;
         }
 
         get hasPriceList() {
@@ -40,12 +40,12 @@ if (overlayTemplatePageData) {
         }
 
         get canAddedToCart() {
-            return this.overlayTemplateIsAvailableForActiveHotel &&
+            return this.overlayTemplate?.isAvailableForActiveHotel &&
                 this.hasPriceList && !this.overlayProductIsArchived;
         }
 
         get overlayProductIsArchived() {
-            return this.hasOverlayProductId && !this.overlayProductActive;
+            return this.hasOverlayProductId && !this.overlayProduct?.active;
         }
 
         get sortedPriceList() {
@@ -99,7 +99,7 @@ if (overlayTemplatePageData) {
             let url = new URL(window.location.href);
             let paramKey = this.options?.overlayProductIdUrlParameter;
             if (this.hasOverlayProductId) {
-                url.searchParams.set(paramKey, this.overlayProductId);
+                url.searchParams.set(paramKey, this.overlayProduct.id);
             } else {
                 url.searchParams.delete(paramKey);
             }
@@ -141,7 +141,7 @@ if (overlayTemplatePageData) {
 
         getCustomizedData() {
             return {
-                overlayTemplateId: this.overlayTemplateId,
+                overlayTemplateId: this.overlayTemplate?.id,
                 attributeList: Object.entries(this.selectedAttributeValues)
                     .map(e => ({ 'attribute_id': parseInt(e[0]), value_id: e[1].valueId })),
                 quantity: this.quantity,
@@ -175,7 +175,7 @@ if (overlayTemplatePageData) {
             if (this.hasOverlayProductId && this.editMode) {
                 params = {
                     ...params,
-                    overlay_product_id: this.overlayProductId,
+                    overlay_product_id: this.overlayProduct?.id,
                     overlay_product_was_changed: overlayProductWasChanged || false,
                 };
             }
@@ -200,7 +200,7 @@ if (overlayTemplatePageData) {
                 let res = await rpc.query({
                     route: '/shop/overlay_template/delete',
                     params: {
-                        overlay_product_id: this.overlayProductId,
+                        overlay_product_id: this.overlayProduct?.id,
                     },
                 });
                 if (res) {
@@ -212,21 +212,21 @@ if (overlayTemplatePageData) {
         }
 
         duplicateOverlayProduct() {
-            this.overlayProductId = null;
-            this.overlayProductName = this.overlayProductName + ' (Copy)';
-            this.overlayProductActive = null;
+            this.overlayProduct.id = null;
+            this.overlayProduct.name = this.overlayProduct.name + ' (Copy)';
+            this.overlayProduct.active = null;
             this._updateOverlayProductIdUrlParameter();
         }
 
         async updatePriceList(activeHotelId) {
             if (activeHotelId) {
-                this.overlayTemplateIsAvailableForActiveHotel = this.overlayTemplateHotelIds.includes(activeHotelId);
+                this.overlayTemplateIsAvailableForActiveHotel = this.overlayTemplate?.hotelIds.includes(activeHotelId);
             }
             try {
                 let res = await rpc.query({
                     route: '/shop/overlay_template/price_list',
                     params: {
-                        overlay_template_id: this.overlayTemplateId,
+                        overlay_template_id: this.overlayTemplate?.id,
                     },
                 });
                 if (res) {
@@ -239,7 +239,10 @@ if (overlayTemplatePageData) {
         }
 
         updateOverlayProductData(data) {
-            Object.assign(this, data);
+            if (!this.overlayProduct) {
+                this.overlayProduct = {};
+            }
+            Object.assign(this.overlayProduct, data);
             this._updateOverlayProductIdUrlParameter();
         }
     }

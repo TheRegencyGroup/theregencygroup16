@@ -9,7 +9,6 @@ import {
     PRODUCT_IMAGE_MODEL,
     OVERLAY_PRODUCT_AREA_IMAGE,
     computeImageSrc,
-    computeAreaImageLink,
     readImageDataFromFile,
 } from '../../../main';
 import { RectangleArea } from './rectangle_area';
@@ -57,7 +56,7 @@ export class ProductOverlayPositionComponent extends Component {
 
         this.loadImage = false;
         this.lastSelectedAreasImageAttributeValueId = this.store.otPage.selectedAreasImageAttributeValueId;
-        this.lastOverlayProductId = this.store.otPage.overlayProductId;
+        this.lastOverlayProductId = this.store.otPage.overlayProduct?.id;
         this.lastEditModeState = this.store.otPage.editMode;
         
         this.imageTimestamp = new Date().valueOf();
@@ -78,8 +77,8 @@ export class ProductOverlayPositionComponent extends Component {
             this.lastEditModeState = this.store.otPage.editMode;
             editModeWasChange = true;
         }
-        if (this.lastOverlayProductId !== this.store.otPage.overlayProductId || editModeWasChange) {
-            this.lastOverlayProductId = this.store.otPage.overlayProductId;
+        if (this.lastOverlayProductId !== this.store.otPage.overlayProduct?.id || editModeWasChange) {
+            this.lastOverlayProductId = this.store.otPage.overlayProduct?.id;
             for (let area of Object.values(this.areas)) {
                 area.showMaskBorders(!this.store.otPage.hasOverlayProductId || this.store.otPage.editMode);
                 area.enablePointerEvents(!this.store.otPage.hasOverlayProductId || this.store.otPage.editMode);
@@ -97,6 +96,17 @@ export class ProductOverlayPositionComponent extends Component {
             return this.areas[this.state.selectedAreaIndex].type === TEXT_AREA_TYPE;
         }
         return false;
+    }
+
+    get showCanvasContainer() {
+        return !this.store.otPage.hasOverlayProductId || this.store.otPage.editMode;
+    }
+
+    get backgroundImageSrc() {
+        if (this.store.otPage.hasOverlayProductId && !this.store.otPage.editMode) {
+            return this.store.otPage.overlayProduct?.positionImagesUrls[this.overlayPositionId];
+        }
+        return this.state.backgroundImage.src;
     }
 
     updateImageSrc() {
@@ -132,17 +142,14 @@ export class ProductOverlayPositionComponent extends Component {
     updateAreas() {
         if (this.canvasContainerRef.el) {
             let areaObjectData;
-            if (this.store.otPage.overlayProductAreaList) {
-                areaObjectData = this.store.otPage.overlayProductAreaList[this.overlayPositionId];
+            if (this.store.otPage.overlayProduct?.areaList) {
+                areaObjectData = this.store.otPage.overlayProduct?.areaList[this.overlayPositionId];
             }
             for (let areaData of Object.values(this.props.overlayPosition.areaList)) {
                 let area;
                 let areaObjList = [];
                 if (areaObjectData) {
                     areaObjList = areaObjectData.areaList[areaData.index].data;
-                    for (let obj of areaObjList) {
-                        obj.attachmentUrl = computeAreaImageLink(obj.areaImageId);
-                    }
                 }
                 if (areaData.areaType === RECTANGLE_AREA_TYPE) {
                     area = new RectangleArea(areaData, this.canvasContainerRef.el, areaObjList);
@@ -209,16 +216,28 @@ export class ProductOverlayPositionComponent extends Component {
             alert('FILE FORMAT NOT SUPPORTED!');
             return;
         }
+        const isVectorImage = VECTOR_FILE_FORMATS.includes(file.type);
+        const fileData = await readImageDataFromFile(file);
         const image = new Image();
         image.onload = () => {
-            this.areas[this.state.selectedAreaIndex].addObject({
-                image,
+            const fileNameSplit = file.name.split('.');
+            const imageExtension = fileNameSplit.length > 1 ? fileNameSplit[fileNameSplit.length - 1] : '';
+            let data = {
+                previewImage: image,
                 addByUser: true,
-            });
+                imageType: file.type,
+                imageExtension,
+            };
+            if (isVectorImage) {
+                data = {
+                    ...data,
+                    originalImageData: fileData,
+                }
+            }
+            this.areas[this.state.selectedAreaIndex].addObject(data);
         };
-        if (VECTOR_FILE_FORMATS.includes(file.type)) {
+        if (isVectorImage) {
             try {
-                const fileData = await readImageDataFromFile(file);
                 image.src = await env.services.rpc({
                     route: '/shop/convert_area_image',
                     params: {

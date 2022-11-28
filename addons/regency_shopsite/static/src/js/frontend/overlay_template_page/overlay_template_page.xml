@@ -23,7 +23,7 @@
                                 <input type="text" name="" class="form-control"
                                        t-ref="name_input"
                                        t-att-disabled="disabledEditName"
-                                       t-att-value="store.otPage.overlayProductName"
+                                       t-att-value="store.otPage.overlayProduct?.name"
                                        t-on-focusin="onInputNameFocusin"
                                        t-on-focusout="onInputNameFocusout"/>
                             </div>
@@ -138,7 +138,7 @@
                                 <span>Add to cart</span>
                                 <span class="icon-cart"></span>
                             </button>
-                            <span t-if="!store.otPage.overlayTemplateIsAvailableForActiveHotel and !store.otPage.overlayProductIsArchived"
+                            <span t-if="!store.otPage.overlayTemplate?.isAvailableForActiveHotel and !store.otPage.overlayProductIsArchived"
                                   class="product-unavailable-message">
                                 <sup>*</sup>This product is unavailable for selected hotel
                             </span>

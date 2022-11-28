@@ -15,7 +15,7 @@ export class OverlayTemplatePageComponent extends Component {
 
         this.store = useStore();
         this.state = useState({
-            nameInputIsFilled: !!this.store.otPage.overlayProductName,
+            nameInputIsFilled: !!this.store.otPage.overlayProduct?.name,
         });
 
         this.inputNameRef = useRef('name_input');
@@ -94,9 +94,9 @@ export class OverlayTemplatePageComponent extends Component {
     get showAddToCartBtn() {
         return !this.store.otPage.overlayProductIsArchived &&
             ((this.store.otPage.hasPriceList &&
-                    this.store.otPage.overlayTemplateIsAvailableForActiveHotel) ||
+                    this.store.otPage.overlayTemplate?.isAvailableForActiveHotel) ||
                 (!this.store.otPage.hasPriceList &&
-                    !this.store.otPage.overlayTemplateIsAvailableForActiveHotel));
+                    !this.store.otPage.overlayTemplate?.isAvailableForActiveHotel));
     }
 
     get showListingNameInfoPopover() {
@@ -188,7 +188,7 @@ export class OverlayTemplatePageComponent extends Component {
             return;
         }
         let data = this.store.otPage.getCustomizedData();
-        let overlayProductId = this.store.otPage.overlayProductId;
+        let overlayProductId = this.store.otPage.overlayProduct?.id;
         if (!!overlayProductId) {
             data = {
                 ...data,
