@@ -23,4 +23,6 @@ class StockQuant(models.Model):
                 allowed_customer_ids = picking.product_id.product_tmpl_id.allowed_partner_ids
                 if allowed_customer_ids:
                     customer_id = allowed_customer_ids[0]
+                    if customer_id:
+                        break
         return customer_id
