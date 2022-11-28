@@ -17,7 +17,11 @@ class StockQuant(models.Model):
                 lambda f: f.picking_type_id.code == 'incoming')
             for picking in incoming_picking_ids:
                 pol = picking.move_ids.purchase_line_id
-                customer_id = pol.customer_id or picking.product_id.product_tmpl_id.allowed_partner_ids or False
+                customer_id = pol.customer_id
                 if customer_id:
+                    break
+                allowed_customer_ids = picking.product_id.product_tmpl_id.allowed_partner_ids
+                if allowed_customer_ids:
+                    customer_id = allowed_customer_ids[0]
                     break
         return customer_id
