@@ -6,6 +6,7 @@ from odoo.addons.website_sale.controllers.main import WebsiteSale
 from odoo.addons.regency_shopsite.controllers.overlay_template_page import OverlayTemplatePage
 
 DEFAULT_PRODUCT_QTY_PEAR_PAGE = 6
+DELIVERY_ADDRESS_OPT_PARAMS = ('street', 'street2', 'city', 'zip', 'state_id', 'country_id', )
 
 
 class WebsiteSaleRegency(WebsiteSale):
@@ -85,8 +86,7 @@ class WebsiteSaleRegency(WebsiteSale):
     def create_and_link_delivery_address(self, sale_order_line_id, address_name: str, **kw):
         sol = self._get_sol_id_from_current_cart(sale_order_line_id)
         if sol:
-            possible_kw_keys = ['street', 'street2', 'city', 'zip', 'state_id', 'country_id', ]
-            optional_addr_vals = {key: kw.get(key) for key in kw.keys() if key in possible_kw_keys}
+            optional_addr_vals = {key: kw.get(key) for key in kw.keys() if key in DELIVERY_ADDRESS_OPT_PARAMS}
             new_address_vals = {'name': address_name,
                                 'type': 'delivery',
                                 'parent_id': sol.delivery_partner_id.id,

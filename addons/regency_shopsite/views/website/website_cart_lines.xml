@@ -70,7 +70,7 @@
                 </div>
             </td>
             <td align="center">
-                <div data-owl-widget="DeliveryAddressCartLine" t-att-data-sol-data-props="line._get_delivery_data()"></div>
+                <div data-owl-widget="DeliveryAddressCartLine" t-att-data-sol-data-props="line._get_delivery_data(return_json=True)"></div>
             </td>
         </xpath>
     </template>

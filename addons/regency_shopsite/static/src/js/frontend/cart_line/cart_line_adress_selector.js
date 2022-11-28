@@ -27,7 +27,8 @@ export class DeliveryAddressCartLine extends Component {
             showModal: false,
             currentCountryId: this.store.countriesWorldData.defaultCountryId,
             currentCountryHasProvinces: this.store.countriesWorldData.defaultCountryHasProvince,
-            });
+            newAddrCreationIsProcessing: false
+        });
         env.bus.on('delivery-addresses-data-changed', null, this.onChangedDeliveryAddressData.bind(this));
     }
 
@@ -60,16 +61,17 @@ export class DeliveryAddressCartLine extends Component {
         this.state.showModal = true;
     }
 
-    async processDeliveryAddressChanging(ev) {
+    processDeliveryAddressChanging(ev) {
         let selectionTag = ev.target;
         if (selectionTag.value === 'add_new_address') {
             this.displayInputFormModal();
         } else {
-            await this.saveDeliveryAddress(selectionTag);
+            dropPrevious.exec(() => this.saveDeliveryAddress(selectionTag));
         }
     }
 
     async createNewDeliveryAddress() {
+        this.state.newAddrCreationIsProcessing = true;
         let addressParams = this.getParamsForAddressCreation()
         await dropPrevious.exec(() => {
             return rpc.query({
@@ -98,7 +100,7 @@ export class DeliveryAddressCartLine extends Component {
         };
     }
 
-    async saveDeliveryAddress(selectionTag) {
+    saveDeliveryAddress(selectionTag) {
         let self = this;
         let prevAddressId = this.currentDeliveryAddress;
         let newAddressId = selectionTag.value;
@@ -106,35 +108,34 @@ export class DeliveryAddressCartLine extends Component {
         let delivery_address_id = (
             newAddressId && (typeof newAddressId === 'string' || typeof newAddressId === 'number')
         ) ? Number(newAddressId) : false;
-        dropPrevious.exec(() => {
-            return rpc.query({
-                route: '/shop/cart/save_delivery_address',
-                params: {
-                    sale_order_line_id,
-                    delivery_address_id,
-                },
-            }).then(() => {
-                self.currentDeliveryAddress = selectionTag.value;
-            }).catch((e) => {
-                selectionTag.value = prevAddressId
-                alert(e.message?.data?.message || e.toString());
-            });
+        rpc.query({
+            route: '/shop/cart/save_delivery_address',
+            params: {
+                sale_order_line_id,
+                delivery_address_id,
+            },
+        }).then(() => {
+            self.currentDeliveryAddress = selectionTag.value;
+        }).catch((e) => {
+            selectionTag.value = prevAddressId
+            alert(e.message?.data?.message || e.toString());
         });
     }
 
     async onChangedDeliveryAddressData() {
         let sale_order_line_id = this.solId;
-        let deliveryAddressData = await rpc.query({
-            route: '/shop/cart/get_delivery_addresses_data',
-            params: {
-                sale_order_line_id,
-            },
-        }).catch((e) => {
+        try {
+            this.state.solData = await rpc.query({
+                route: '/shop/cart/get_delivery_addresses_data',
+                params: {
+                    sale_order_line_id,
+                },
+            });
+            this.hideInputFormModal();
+            this.state.newAddrCreationIsProcessing = false;
+        } catch (e) {
             alert(e.message?.data?.message || e.toString());
-        });
-        // updates props
-        this.state.solData = JSON.parse(deliveryAddressData);
-        this.hideInputFormModal();
+        }
     }
 
     onChangedCountrySelection(ev) {

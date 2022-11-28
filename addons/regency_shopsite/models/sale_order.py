@@ -51,16 +51,17 @@ class SaleOrderLine(models.Model):
     image_snapshot = fields.Image('Product Image')
     image_snapshot_url = fields.Text(compute='_compute_image_snapshot_url')
 
-    def _get_delivery_data(self):
+    def _get_delivery_data(self, return_json: bool = False):
         self.ensure_one()
         possible_addresses = [{'modelId': address.id,
                                'addressStr': address.name,
                                'addressFullInfo': address._get_delivery_address_str()
                                } for address in self.possible_delivery_address_ids]
-        return json.dumps({'solId': self.id,
-                           'currentDeliveryAddress': self.delivery_address_id.id,
-                           'possibleDeliveryAddresses': possible_addresses,
-                           })
+        res_data = {'solId': self.id,
+                    'currentDeliveryAddress': self.delivery_address_id.id,
+                    'possibleDeliveryAddresses': possible_addresses,
+                    }
+        return json.dumps(res_data) if return_json else res_data
 
     @api.model_create_multi
     def create(self, vals):
@@ -85,8 +86,8 @@ class SaleOrderLine(models.Model):
     def _link_overlay_product_to_product_variant(self):
         customization_attribute_id = self.env.ref('regency_shopsite.customization_attribute')
         for line in self:
-            customization_value_id = line.product_id.product_template_attribute_value_ids\
-                .filtered(lambda x: x.attribute_id.id == customization_attribute_id.id)\
+            customization_value_id = line.product_id.product_template_attribute_value_ids \
+                .filtered(lambda x: x.attribute_id.id == customization_attribute_id.id) \
                 .product_attribute_value_id
             if not customization_value_id or not customization_value_id.overlay_product_id:
                 continue
