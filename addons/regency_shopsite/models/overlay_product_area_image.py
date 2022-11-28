@@ -27,4 +27,4 @@ class OverlayProductAreaImage(models.Model):
     @api.depends('image', 'image_type')
     def _compute_is_vector_image(self):
         for rec in self:
-            rec.is_vector_image = check_if_image_is_vector(rec.image.decode(), rec.image_type)
+            rec.is_vector_image = check_if_image_is_vector(rec.image.decode(), rec.image_type) if rec.image else False
