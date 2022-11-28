@@ -52,7 +52,7 @@ class WebsiteSaleRegency(WebsiteSale):
                               delivery_partner_id=hotel_id.id if hotel_id else False, price_list_id=price_list_id)
         return {
             'cartData': request.website._get_cart_data(),
-            'overlayProductData': OverlayTemplatePage.get_overlay_product_data(overlay_product),
+            'overlayProductData': OverlayTemplatePage.get_base_overlay_product_data(overlay_product),
         }
 
     @http.route([

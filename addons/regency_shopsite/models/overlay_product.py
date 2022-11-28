@@ -30,7 +30,7 @@ class OverlayProduct(models.Model):
                                                 copy=False)
     overlay_product_area_image_ids = fields.One2many('overlay.product.area.image', 'overlay_product_id', readonly=True,
                                                      copy=False)
-    overlay_product_area_image_attachment_ids = fields.Many2many('ir.attachment')
+    all_areas_images_are_vector = fields.Boolean(compute='_compute_all_areas_images_are_vector', store=True, copy=False)
     area_list_data = fields.Json()
     areas_text_table = fields.Html(compute='_compute_areas_text_table', store=True)
     last_updated_date = fields.Datetime(readonly=True, copy=False)
@@ -87,6 +87,11 @@ class OverlayProduct(models.Model):
                 </table>
             '''
             rec.areas_text_table = table
+
+    @api.depends('overlay_product_area_image_ids')
+    def _compute_all_areas_images_are_vector(self):
+        for rec in self:
+            rec.all_areas_images_are_vector = all(rec.overlay_product_area_image_ids.mapped('is_vector_image'))
 
     @api.model_create_multi
     def create(self, vals):

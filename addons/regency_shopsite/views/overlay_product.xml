@@ -12,6 +12,8 @@
                             <field name="name"/>
                             <field name="overlay_template_id" invisible="1"/>
                             <field name="customize_attribute_value_id" string="Attribute value"/>
+                            <field name="last_updated_date"/>
+                            <field name="updated_by_id"/>
                         </group>
                         <group>
                             <field name="product_tmpl_id"/>
@@ -40,8 +42,13 @@
                     <group>
                         <group>
                             <field name="areas_text_table" string="Areas text"/>
-                            <field name="overlay_product_area_image_attachment_ids" widget="many2many_binary"
-                                   string="Attachments" readonly="1"/>
+                            <field name="all_areas_images_are_vector" string="All images are vector"/>
+                            <field name="overlay_product_area_image_ids" string="Areas images" readonly="1">
+                                <tree no_open="1">
+                                    <field name="image_filename" invisible="1"/>
+                                    <field name="image" filename="image_filename" widget="binary"/>
+                                </tree>
+                            </field>
                         </group>
                     </group>
                 </sheet>

@@ -123,6 +123,10 @@
             top: 0;
             left: 0;
 
+            &.hide {
+              z-index: -1;
+            }
+
             .product_overlay_area {
               position: absolute;
             }

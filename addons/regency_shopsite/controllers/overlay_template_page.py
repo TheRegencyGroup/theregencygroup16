@@ -1,23 +1,17 @@
-import base64
 import io
 import json
-from tempfile import SpooledTemporaryFile, TemporaryFile
+from base64 import b64encode, b64decode
 
-from PIL import UnidentifiedImageError, Image, EpsImagePlugin #EpsImagePlugin needed for read eps files
-from pdf2image import convert_from_bytes
-from pdf2image.exceptions import PDFSyntaxError, PDFPageCountError
-from cairosvg import svg2png
-from xml.etree.ElementTree import ParseError
+from PIL import Image
 
 from markupsafe import Markup
 from odoo import http, Command
 from odoo.exceptions import ValidationError
 from odoo.http import request
-from werkzeug.datastructures import FileStorage
-from werkzeug.exceptions import Forbidden
+from werkzeug.exceptions import Forbidden, NotFound
 
-from odoo.addons.regency_shopsite.const import OVERLAY_PRODUCT_ID_URL_PARAMETER, PDF_FILE_FORMATS, EPS_FILE_FORMATS, \
-    POSTSCRIPT_FILE_FORMATS, SVG_FILE_FORMATS
+from odoo.addons.regency_shopsite.const import OVERLAY_PRODUCT_ID_URL_PARAMETER, VECTOR_FILE_FORMATS
+from odoo.addons.regency_shopsite.image_tools import convert_vector_to_png, compute_image_data
 
 
 class OverlayTemplatePage(http.Controller):
@@ -52,14 +46,6 @@ class OverlayTemplatePage(http.Controller):
         return price_list
 
     @classmethod
-    def get_overlay_product_data(cls, overlay_product_id):
-        return {
-            'overlayProductId': overlay_product_id.id if overlay_product_id else False,
-            'overlayProductActive': overlay_product_id.active if overlay_product_id else False,
-            'overlayProductName': overlay_product_id.name if overlay_product_id else False,
-        }
-
-    @classmethod
     def _create_overlay_product_preview_images(cls, overlay_product_id, preview_images_data):
         for image_with_overlay in preview_images_data:
             if not image_with_overlay.get('images', False):
@@ -69,12 +55,12 @@ class OverlayTemplatePage(http.Controller):
             if not overlay_position_id:
                 continue
             back_image_id = request.env['product.image'].browse(image_with_overlay['backgroundImageId'])
-            back_image = Image.open(io.BytesIO(base64.b64decode(back_image_id.image_1920)))
+            back_image = Image.open(io.BytesIO(b64decode(back_image_id.image_1920)))
             width = image_with_overlay['backgroundImageSize']['width']
             height = image_with_overlay['backgroundImageSize']['height']
             back_image = back_image.resize((width, height))
             for image_data in image_with_overlay['images']:
-                image = Image.open(io.BytesIO(base64.b64decode(image_data['data'].encode())))
+                image = Image.open(io.BytesIO(b64decode(image_data['data'].encode())))
                 scale = image_data['scale']
                 image = image.resize((int(image.width * scale), int(image.height * scale)))
                 x = image_data['size']['x']
@@ -85,7 +71,7 @@ class OverlayTemplatePage(http.Controller):
             back_image.save(result_image, format='PNG')
 
             request.env['overlay.product.image'].sudo().create({
-                'image': base64.b64encode(result_image.getvalue()),
+                'image': b64encode(result_image.getvalue()),
                 'overlay_position_id': overlay_position_id.id,
                 'overlay_product_id': overlay_product_id.id,
             })
@@ -154,7 +140,6 @@ class OverlayTemplatePage(http.Controller):
 
             cls._create_overlay_product_preview_images(overlay_product, preview_images_data)
 
-            image_attachment_ids = []
             for item in overlay_area_list.values():
                 overlay_position_id = item.get('overlayPositionId', False)
                 if overlay_position_id:
@@ -171,18 +156,17 @@ class OverlayTemplatePage(http.Controller):
                         continue
                     area_index = area.get('index')
                     for obj in data:
-                        image_bytes = obj.get('image', False)
-                        if not image_bytes:
+                        image_data = obj.get('image', False)
+                        if not image_data:
                             continue
+                        image_data_split = image_data.split(',')
+                        image_type = image_data_split[0].split(':')[1].split(';')[0]
+                        image_bytes = image_data_split[1]
                         area_object_index = obj.get('index')
-                        attachment_id = request.env['ir.attachment'].sudo().create([{
-                            'name': f'{overlay_product.name}__{overlay_position_id.name}_{area_index}_{area_object_index}',
-                            'datas': image_bytes.encode(),
-                            'type': 'binary',
-                        }])
-                        image_attachment_ids.append(attachment_id.id)
                         area_image_id = request.env['overlay.product.area.image'].sudo().create({
-                            'image_attachment_id': attachment_id.id,
+                            'image': image_bytes.encode(),
+                            'image_type': image_type,
+                            'image_extension': obj.get('imageExtension', ''),
                             'overlay_position_id': overlay_position_id.id,
                             'area_index': area_index,
                             'area_object_index': area_object_index,
@@ -190,13 +174,23 @@ class OverlayTemplatePage(http.Controller):
                         })
                         obj['areaImageId'] = area_image_id.id
                         del obj['image']
-            overlay_product.overlay_product_area_image_attachment_ids.unlink()
-            overlay_product.overlay_product_area_image_attachment_ids = [Command.set(image_attachment_ids)]
             overlay_product.area_list_data = overlay_area_list
 
         overlay_product._set_update_info()
 
         return overlay_product, product_template_attribute_value_ids
+
+    @classmethod
+    def get_base_overlay_product_data(cls, overlay_product_id):
+        return {
+            'id': overlay_product_id.id if overlay_product_id else False,
+            'active': overlay_product_id.active if overlay_product_id else False,
+            'name': overlay_product_id.name if overlay_product_id else False,
+            'positionImagesUrls': {
+                x.overlay_position_id.id: f'/web/image?model={x._name}&id={x.id}&field=image'
+                for x in overlay_product_id.overlay_product_image_ids
+            }
+        }
 
     @http.route(['/shop/<model("overlay.template"):overlay_template_id>'], type='http', auth='user', website=True)
     def overlay_template_page(self, overlay_template_id, **kwargs):
@@ -259,17 +253,19 @@ class OverlayTemplatePage(http.Controller):
         price_list = self._get_overlay_template_price_list(overlay_template_id)
 
         overlay_template_page_data = {
-            'overlayTemplateIsAvailableForActiveHotel': overlay_template_is_available_for_hotel,
-            'overlayTemplateId': overlay_template_id.id,
-            'overlayTemplateName': overlay_template_id.name,
-            'overlayTemplateHotelIds': overlay_template_id.hotel_ids.ids,
+            'overlayTemplate': {
+                'isAvailableForActiveHotel': overlay_template_is_available_for_hotel,
+                'id': overlay_template_id.id,
+                'name': overlay_template_id.name,
+                'hotelIds': overlay_template_id.hotel_ids.ids,
+                'positionsData': overlay_template_id.areas_data or {},
+            },
             'productTemplateId': product_template_id.id,
             'productName': product_template_id.name,
             'productDescription': product_template_id.description_sale,
             'attributeList': attribute_list,
             'areasImageAttributeId': overlay_template_id.areas_image_attribute_id.id,
             'colorAttributeId': color_attribute_id.id,
-            'overlayPositionsData': overlay_template_id.areas_data or {},
             'priceList': price_list,
             'options': {
                 'overlayProductIdUrlParameter': OVERLAY_PRODUCT_ID_URL_PARAMETER,
@@ -303,11 +299,11 @@ class OverlayTemplatePage(http.Controller):
                     if overlay_product_attribute_value_id:
                         attribute['selectedValueId'] = overlay_product_attribute_value_id.id
             overlay_template_page_data.update({
-                'overlayProductId': overlay_product_id.id,
-                'overlayProductActive': overlay_product_id.active,
-                'overlayProductName': overlay_product_id.name if overlay_product_id else False,
-                'overlayProductAreaList': overlay_product_id.area_list_data or {},
-                'overlayProductAreaImageList': overlay_product_area_image_list,
+                'overlayProduct': {
+                    **self.get_base_overlay_product_data(overlay_product_id),
+                    'areaList': overlay_product_id.area_list_data or {},
+                    'areaImageList': overlay_product_area_image_list,
+                },
                 'productId': product_id.id,
                 'attributeList': attribute_list,
             })
@@ -328,7 +324,7 @@ class OverlayTemplatePage(http.Controller):
             preview_images_data=preview_images_data,
             overlay_product_id=overlay_product_id,
             overlay_product_was_changed=overlay_product_was_changed)
-        return self.get_overlay_product_data(overlay_product)
+        return self.get_base_overlay_product_data(overlay_product)
 
     @http.route(['/shop/overlay_template/delete'], type='json', auth='user', methods=['POST'], website=True,
                 csrf=False)
@@ -358,64 +354,33 @@ class OverlayTemplatePage(http.Controller):
             'priceList': self._get_overlay_template_price_list(overlay_template_id),
         }
 
-    @http.route(['/shop/area_image/<model("overlay.product.area.image"):overlay_product_area_image_id>'],
-                type='http', auth="user", website=True)
+    @http.route(['/shop/area_image'], type='json', auth="user", website=True)
     def overlay_product_area_image(self, overlay_product_area_image_id):
-        overlay_product_area_image_id = overlay_product_area_image_id.sudo()
+        overlay_product_area_image = request.env['overlay.product.area.image'].sudo()\
+            .browse(overlay_product_area_image_id)
 
-        if not overlay_product_area_image_id.image_attachment_id or not self._overlay_template_is_available_for_user(
-                overlay_product_area_image_id.overlay_product_id.overlay_template_id):
+        if not overlay_product_area_image:
+            raise NotFound()
+
+        if not self._overlay_template_is_available_for_user(
+                overlay_product_area_image.overlay_product_id.overlay_template_id):
             raise Forbidden()
 
-        attachment_id = overlay_product_area_image_id.image_attachment_id.id
+        image = overlay_product_area_image.image
+        image_type = overlay_product_area_image.image_type
 
-        record = request.env['ir.binary'].sudo()._find_record(res_id=attachment_id)
-        stream = request.env['ir.binary']._get_stream_from(record)
+        if overlay_product_area_image.image_type in VECTOR_FILE_FORMATS:
+            data = {
+                'vector': compute_image_data(image.decode(), image_type),
+                'bitmap': convert_vector_to_png(image.decode(), image_type),
+            }
+        else:
+            data = {
+                'bitmap': compute_image_data(image.decode(), image_type),
+            }
 
-        return stream.get_response(max_age=None)
+        return data
 
     @http.route(['/shop/convert_area_image'], type='json', auth='user', methods=['POST'], website=True)
     def convert_area_image(self, file_data, file_type, **kwargs):
-        is_pdf = file_type in PDF_FILE_FORMATS
-        is_eps = file_type in EPS_FILE_FORMATS
-        is_postscript = file_type in POSTSCRIPT_FILE_FORMATS
-        is_svg = file_type in SVG_FILE_FORMATS
-
-        if not any([is_pdf, is_eps, is_postscript, is_svg]):
-            raise ValidationError('File format not supported!')
-
-        file_bytes = base64.b64decode(file_data.encode())
-        converted_image = io.BytesIO()
-
-        postscript_is_not_ai = False
-        invalid_file_format = False
-        if is_pdf or is_postscript:
-            try:
-                images = convert_from_bytes(file_bytes, transparent=True, fmt='png')
-                images[0].save(converted_image, 'PNG')
-            except (PDFSyntaxError, PDFPageCountError, IndexError):
-                if is_postscript:
-                    postscript_is_not_ai = True
-                else:
-                    invalid_file_format = True
-        if is_eps or postscript_is_not_ai:
-            temp_eps_file = TemporaryFile()
-            try:
-                temp_eps_file.write(file_bytes)
-                eps_file = FileStorage(temp_eps_file, 'temp_eps_file.eps', name='file', content_type=file_type)
-                image = Image.open(eps_file)
-                image.load(transparency=True)
-                image.save(converted_image, format='PNG')
-            except UnidentifiedImageError:
-                invalid_file_format = True
-            temp_eps_file.close()
-        if is_svg:
-            try:
-                svg2png(bytestring=file_bytes, write_to=converted_image)
-            except ParseError:
-                invalid_file_format = True
-
-        if invalid_file_format:
-            raise ValidationError('Invalid file format!')
-
-        return f'data:image/png;base64,{base64.b64encode(converted_image.getvalue()).decode()}'
+        return convert_vector_to_png(file_data, file_type)

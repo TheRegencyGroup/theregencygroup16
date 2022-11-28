@@ -1,5 +1,6 @@
 /** @odoo-module **/
 
+import env from 'web.public_env';
 import {
     enableCanvasPointerEvents,
     readImageDataFromFile,
@@ -35,22 +36,29 @@ export class Area {
             let promises = []
             for (let imageObj of this.areaObjectData) {
                 promises.push(new Promise(async (resolve, reject) => {
-                    const image = new Image();
                     try {
-                        let res = await fetch(imageObj.attachmentUrl);
-                        const blob = await res.blob();
-                        image.src = await readImageDataFromFile(blob);
+                        let res = await env.services.rpc({
+                            route: '/shop/area_image',
+                            params: {
+                               overlay_product_area_image_id: imageObj.areaImageId,
+                            },
+                        });
+                        const image = new Image();
+                        image.src = res.bitmap;
+                        image.onload = () => {
+                            resolve({
+                                previewImage: image,
+                                originalImageData: res.vector,
+                                imageType: imageObj.imageType,
+                                imageExtension: imageObj.imageExtension,
+                                objIndex: imageObj.index,
+                                data: imageObj.objectData,
+                            });
+                        };
                     } catch (e) {
                         alert(e.message?.data?.message || e.toString());
                         reject();
                     }
-                    image.onload = () => {
-                        resolve({
-                            image,
-                            objIndex: imageObj.index,
-                            data: imageObj.objectData,
-                        })
-                    };
                 }));
             }
             Promise.all(promises).then((res) => {
@@ -138,18 +146,26 @@ export class Area {
         this.canvas.renderAll();
     }
 
-    addObject({ image, objIndex, data, addByUser }) {
+    addObject({
+                  previewImage,
+                  originalImageData,
+                  imageType,
+                  imageExtension,
+                  objIndex,
+                  data,
+                  addByUser,
+              }) {
         if (addByUser) {
             this.wasChanged = true;
         }
-        const object = new fabric.Image(image, {});
+        const object = new fabric.Image(previewImage, {});
         if (!objIndex) {
             objIndex = this.objectIndex;
             this.objectIndex += 1;
         }
         object.objIndex = objIndex;
         if (!data) {
-            if (image.width >= image.height) {
+            if (previewImage.width >= previewImage.height) {
                 object.scaleToWidth(this.newImageObjectWidth);
             } else {
                 object.scaleToHeight(this.newImageObjectHeight);
@@ -163,11 +179,11 @@ export class Area {
             object.angle = data.angle;
         }
 
-        let imageSplit = image.src.split(',');
         this.objectList[objIndex] = {
             index: objIndex,
-            image: imageSplit[1],
-            imageFormat: imageSplit[0].split('/')[1].split(';')[0],
+            image: originalImageData || previewImage.src,
+            imageType,
+            imageExtension,
             object,
         };
         object.setControlsVisibility({
@@ -209,7 +225,8 @@ export class Area {
             res.push({
                 index: imageObj.index,
                 image: imageObj.image,
-                imageFormat: imageObj.imageFormat,
+                imageType: imageObj.imageType,
+                imageExtension: imageObj.imageExtension,
                 objectData: {
                     width: Math.ceil(imageObj.object.getScaledWidth()),
                     height: Math.ceil(imageObj.object.getScaledHeight()),
