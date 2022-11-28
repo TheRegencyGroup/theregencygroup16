@@ -1,8 +1,9 @@
 /** @odoo-module **/
 
-import { enableCanvasPointerEvents } from '../../../main'
-
-const SVG_IMAGE_EXTENSION = 'svg';
+import {
+    enableCanvasPointerEvents,
+    readImageDataFromFile,
+} from '../../../main';
 
 export class Area {
 
@@ -33,21 +34,16 @@ export class Area {
             this.objectIndex = Math.max(...this.areaObjectData.map(e => e.index)) + 1;
             let promises = []
             for (let imageObj of this.areaObjectData) {
-                promises.push(new Promise(async resolve => {
+                promises.push(new Promise(async (resolve, reject) => {
                     const image = new Image();
-                    let blob;
-                    let res = await fetch(imageObj.attachmentUrl);
-                    if (imageObj.imageFormat.includes(SVG_IMAGE_EXTENSION)) {
-                        const svg = await res.text();
-                        blob = new Blob([svg], { type: 'image/svg+xml' });
-                    } else {
-                        blob = await res.blob();
+                    try {
+                        let res = await fetch(imageObj.attachmentUrl);
+                        const blob = await res.blob();
+                        image.src = await readImageDataFromFile(blob);
+                    } catch (e) {
+                        alert(e.message?.data?.message || e.toString());
+                        reject();
                     }
-                    image.src = await new Promise(resolve => {
-                        const reader = new FileReader();
-                        reader.onloadend = () => resolve(reader.result);
-                        reader.readAsDataURL(blob);
-                    });
                     image.onload = () => {
                         resolve({
                             image,
