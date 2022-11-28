@@ -1,5 +1,6 @@
 /** @odoo-module **/
 
+import env from 'web.public_env';
 import { useStore } from "@fe_owl_base/js/main";
 import {
     ELLIPSE_AREA_TYPE,
@@ -9,6 +10,7 @@ import {
     OVERLAY_PRODUCT_AREA_IMAGE,
     computeImageSrc,
     computeAreaImageLink,
+    readImageDataFromFile,
 } from '../../../main';
 import { RectangleArea } from './rectangle_area';
 import { EllipseArea } from './ellipse_area';
@@ -16,11 +18,24 @@ import { TextArea } from './text_area';
 
 const { Component, onMounted, onPatched, useState, useRef } = owl;
 
-const ACCEPT_FILE_EXTENSIONS_FOR_AREAS = ['png', 'jpg', 'jpeg', 'svg'];
+const AVAILABLE_FILE_EXTENSIONS_FOR_AREAS = ['png', 'jpg', 'jpeg', 'svg', 'ai', 'eps', 'pdf'];
+const VECTOR_FILE_FORMATS = [
+    'image/x-eps',
+    'image/eps',
+    'application/illustrator',
+    'application/postscript',
+    'application/pdf',
+    'image/svg+xml',
+];
+const AVAILABLE_FILE_FORMAT_FOR_AREAS = [
+    'image/jpeg',
+    'image/png',
+    ...VECTOR_FILE_FORMATS,
+];
 
 export class ProductOverlayPositionComponent extends Component {
     setup() {
-        this.acceptFileExtensionsForAreas = ACCEPT_FILE_EXTENSIONS_FOR_AREAS
+        this.acceptFileExtensionsForAreas = AVAILABLE_FILE_EXTENSIONS_FOR_AREAS
             .map(e => `.${e}`).join(', ');
 
         onPatched(this.onPatched.bind(this));
@@ -181,24 +196,41 @@ export class ProductOverlayPositionComponent extends Component {
         });
     }
 
-    onChangeUploadImage(event) {
+    async onChangeUploadImage(event) {
         if (!this.state.selectedAreaIndex) {
             return;
         }
-        const reader = new FileReader();
-        reader.onloadend = () => {
-            const image = new Image();
-            image.src = reader.result;
-            image.onload = () => {
-                this.areas[this.state.selectedAreaIndex].addObject({
-                    image,
-                    addByUser: true,
-                });
-                event.target.value = '';
-            };
+        const file = event.target.files.length ? event.target.files[0] : null;
+        event.target.value = '';
+        if (!file) {
+            return;
+        }
+        if (!AVAILABLE_FILE_FORMAT_FOR_AREAS.includes(file.type)) {
+            alert('FILE FORMAT NOT SUPPORTED!');
+            return;
+        }
+        const image = new Image();
+        image.onload = () => {
+            this.areas[this.state.selectedAreaIndex].addObject({
+                image,
+                addByUser: true,
+            });
         };
-        if (event.target.files.length) {
-            reader.readAsDataURL(event.target.files[0]);
+        if (VECTOR_FILE_FORMATS.includes(file.type)) {
+            try {
+                const fileData = await readImageDataFromFile(file);
+                image.src = await env.services.rpc({
+                    route: '/shop/convert_area_image',
+                    params: {
+                        file_data: fileData.split(',')[1],
+                        file_type: file.type,
+                    }
+                });
+            } catch (e) {
+                alert(e.message?.data?.message || e.toString());
+            }
+        } else {
+            image.src = await readImageDataFromFile(file);
         }
     }
 

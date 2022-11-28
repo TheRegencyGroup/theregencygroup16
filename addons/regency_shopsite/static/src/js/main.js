@@ -28,3 +28,13 @@ export function computeAreaImageLink(attachmentId) {
 export function enableCanvasPointerEvents(canvas, state) {
     canvas.upperCanvasEl.style.pointerEvents = state ? 'all' : 'none';
 }
+
+export async function readImageDataFromFile(blob) {
+    return await new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+            resolve(reader.result);
+        };
+        reader.readAsDataURL(blob);
+    });
+}
