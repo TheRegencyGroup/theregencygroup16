@@ -279,7 +279,8 @@ class ProductPriceSheet(models.Model):
                                                                   'price_unit': p.price,
                                                                   'vendor_id': p.partner_id.id,
                                                                   'name': p.name
-                                                              }) for p in lines_to_order]})
+                                                              }) for p in lines_to_order],
+                                                          'currency_id': self.currency_id.id})
         lines_to_order.write({'product_uom_qty': 0})
         return order
 
