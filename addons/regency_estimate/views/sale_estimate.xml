@@ -204,6 +204,7 @@
                 <tree string="Estimates" sample="1" multi_edit="1">
                     <field name="create_date" optional="hide"/>
                     <field name="name" string="Lead" readonly="1"/>
+                    <field name="partner_id" string="Customer"/>
                     <field name="contact_name" optional="hide"/>
                     <field name="city" optional="show"/>
                     <field name="state_id" optional="hide"/>
