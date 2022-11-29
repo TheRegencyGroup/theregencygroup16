@@ -46,6 +46,7 @@ export class ProductOverlayPositionComponent extends Component {
             backgroundImage: {},
             selectedAreaIndex: null,
             showAddTextPopover: false,
+            showLoader: false,
         });
 
         this.areas = {};
@@ -216,6 +217,7 @@ export class ProductOverlayPositionComponent extends Component {
             alert('FILE FORMAT NOT SUPPORTED!');
             return;
         }
+        this.state.showLoader = true;
         const isVectorImage = VECTOR_FILE_FORMATS.includes(file.type);
         const fileData = await readImageDataFromFile(file);
         const image = new Image();
@@ -235,6 +237,10 @@ export class ProductOverlayPositionComponent extends Component {
                 }
             }
             this.areas[this.state.selectedAreaIndex].addObject(data);
+            this.state.showLoader = false;
+        };
+        image.onerror = () => {
+            this.state.showLoader = false;
         };
         if (isVectorImage) {
             try {
@@ -247,6 +253,7 @@ export class ProductOverlayPositionComponent extends Component {
                 });
             } catch (e) {
                 alert(e.message?.data?.message || e.toString());
+                this.state.showLoader = false;
             }
         } else {
             image.src = await readImageDataFromFile(file);
