@@ -57,6 +57,7 @@
             'regency_shopsite/static/src/js/frontend/shop_catalog/*.js',
             'regency_shopsite/static/src/js/frontend/list_pagination/*.js',
             'regency_shopsite/static/src/js/frontend/cart_page.js',
+            'regency_shopsite/static/src/js/frontend/website_sale.js',
 
             'regency_shopsite/static/src/js/frontend/**/**/*.xml',
 
