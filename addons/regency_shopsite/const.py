@@ -24,3 +24,21 @@ SHOP_CATALOG_TAB_MODELS = {
 }
 
 TEXT_AREA_TYPE = 'text'
+
+PDF_FILE_FORMATS = [
+    'application/illustrator',
+    'application/pdf',
+]
+
+EPS_FILE_FORMATS = [
+    'image/x-eps',
+    'image/eps',
+]
+
+POSTSCRIPT_FILE_FORMATS = [
+    'application/postscript',
+]
+
+SVG_FILE_FORMATS = [
+    'image/svg+xml',
+]

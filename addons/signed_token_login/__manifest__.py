@@ -1,7 +1,7 @@
 {
     'name': "Signed Token Login",
     'description': "Auto log-in users with query string signed token",
-    'version': "15.0.1.0",
+    'version': "16.0.1.0",
     'author': "OpsWay",
     'depends': ["base", "web"],
     'data': [

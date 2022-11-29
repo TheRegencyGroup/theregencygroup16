@@ -20,6 +20,11 @@
     </t>
 
     <t t-name="overlay_areas" owl="1">
+        <div t-if="state.showBlockSpinner" class="ot_widget_spinner" t-portal="'.o_content'">
+            <div class="o_spinner ">
+                <img src="/web/static/img/spin.svg" alt="Loading..."/>
+            </div>
+        </div>
         <div class="d-flex">
             <button t-if="!editMode and Object.keys(state.overlayPositions).length"
                     class="ot_edit_mode_btn btn btn-primary"

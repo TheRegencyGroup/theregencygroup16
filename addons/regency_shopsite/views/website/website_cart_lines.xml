@@ -1,12 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
-     <template id="cart" inherit_id="website_sale.cart">
-         <xpath expr="//t[@t-call='website_sale.wizard_checkout']/parent::div" position="replace">
-             <div class="mt-4"/>
-         </xpath>
-         <xpath expr="//a[contains(@href, '/shop/checkout')]/parent::div" position="replace"/>
-     </template>
+    <template id="cart" inherit_id="website_sale.cart">
+        <xpath expr="//t[@t-call='website_sale.wizard_checkout']/parent::div" position="replace">
+            <div class="mt-4"/>
+        </xpath>
+        <xpath expr="//a[contains(@href, '/shop/checkout')]/parent::div" position="replace">
+            <div t-if="website_sale_order" class="input-group customer_comment_input_group">
+                <input name="Customer Comment" class="form-control mb32 customer_comment_input" type="text"
+                       placeholder="leave your message here..."
+                       t-att-value="website_sale_order.customer_comment or None"/>
+                <a href="#" role="button" class="btn btn-secondary mb32 a-submit-customer-comment">Save</a>
+            </div>
+        </xpath>
+    </template>
 
     <template id="short_cart_summary" inherit_id="website_sale.short_cart_summary">
          <xpath expr="//a[contains(@href, '/shop/checkout')]" position="replace">
@@ -47,11 +54,11 @@
         <xpath expr="//span[@t-field='line.price_reduce_taxinc']" position="attributes">
             <attribute name="t-field">line.price_total</attribute>
         </xpath>
-        <xpath expr="//table[@id='cart_products']/thead//th[hasclass('td-img')]" position="after">
+        <xpath expr="//table[@id='cart_products']/thead//th[hasclass('td-qty')]" position="before">
             <th class="text-center">Hotel</th>
             <th class="text-center">Address</th>
         </xpath>
-        <xpath expr="//td[hasclass('td-product_name')]" position="before">
+        <xpath expr="//td[hasclass('td-product_name')]" position="after">
             <td align="center">
                 <div>
                     <t t-esc="line.delivery_partner_id.name"/>

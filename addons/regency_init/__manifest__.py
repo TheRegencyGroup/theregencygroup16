@@ -9,6 +9,7 @@
         'stock',
         'consumption_agreement',
         'regency_import',
+        'regency_portal',
         'regency_estimate',
         'regency_crm',
         'regency_shopsite'

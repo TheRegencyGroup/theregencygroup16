@@ -1,14 +1,23 @@
 import base64
 import io
 import json
+from tempfile import SpooledTemporaryFile, TemporaryFile
 
-import PIL.Image as Image
+from PIL import UnidentifiedImageError, Image, EpsImagePlugin #EpsImagePlugin needed for read eps files
+from pdf2image import convert_from_bytes
+from pdf2image.exceptions import PDFSyntaxError, PDFPageCountError
+from cairosvg import svg2png
+from xml.etree.ElementTree import ParseError
+
 from markupsafe import Markup
 from odoo import http, Command
 from odoo.exceptions import ValidationError
 from odoo.http import request
+from werkzeug.datastructures import FileStorage
+from werkzeug.exceptions import Forbidden
 
-from odoo.addons.regency_shopsite.const import OVERLAY_PRODUCT_ID_URL_PARAMETER
+from odoo.addons.regency_shopsite.const import OVERLAY_PRODUCT_ID_URL_PARAMETER, PDF_FILE_FORMATS, EPS_FILE_FORMATS, \
+    POSTSCRIPT_FILE_FORMATS, SVG_FILE_FORMATS
 
 
 class OverlayTemplatePage(http.Controller):
@@ -172,15 +181,16 @@ class OverlayTemplatePage(http.Controller):
                             'type': 'binary',
                         }])
                         image_attachment_ids.append(attachment_id.id)
-                        request.env['overlay.product.area.image'].sudo().create({
+                        area_image_id = request.env['overlay.product.area.image'].sudo().create({
                             'image_attachment_id': attachment_id.id,
                             'overlay_position_id': overlay_position_id.id,
                             'area_index': area_index,
                             'area_object_index': area_object_index,
                             'overlay_product_id': overlay_product.id,
                         })
-                        obj['attachmentId'] = attachment_id.id
+                        obj['areaImageId'] = area_image_id.id
                         del obj['image']
+            overlay_product.overlay_product_area_image_attachment_ids.unlink()
             overlay_product.overlay_product_area_image_attachment_ids = [Command.set(image_attachment_ids)]
             overlay_product.area_list_data = overlay_area_list
 
@@ -347,3 +357,65 @@ class OverlayTemplatePage(http.Controller):
         return {
             'priceList': self._get_overlay_template_price_list(overlay_template_id),
         }
+
+    @http.route(['/shop/area_image/<model("overlay.product.area.image"):overlay_product_area_image_id>'],
+                type='http', auth="user", website=True)
+    def overlay_product_area_image(self, overlay_product_area_image_id):
+        overlay_product_area_image_id = overlay_product_area_image_id.sudo()
+
+        if not overlay_product_area_image_id.image_attachment_id or not self._overlay_template_is_available_for_user(
+                overlay_product_area_image_id.overlay_product_id.overlay_template_id):
+            raise Forbidden()
+
+        attachment_id = overlay_product_area_image_id.image_attachment_id.id
+
+        record = request.env['ir.binary'].sudo()._find_record(res_id=attachment_id)
+        stream = request.env['ir.binary']._get_stream_from(record)
+
+        return stream.get_response(max_age=None)
+
+    @http.route(['/shop/convert_area_image'], type='json', auth='user', methods=['POST'], website=True)
+    def convert_area_image(self, file_data, file_type, **kwargs):
+        is_pdf = file_type in PDF_FILE_FORMATS
+        is_eps = file_type in EPS_FILE_FORMATS
+        is_postscript = file_type in POSTSCRIPT_FILE_FORMATS
+        is_svg = file_type in SVG_FILE_FORMATS
+
+        if not any([is_pdf, is_eps, is_postscript, is_svg]):
+            raise ValidationError('File format not supported!')
+
+        file_bytes = base64.b64decode(file_data.encode())
+        converted_image = io.BytesIO()
+
+        postscript_is_not_ai = False
+        invalid_file_format = False
+        if is_pdf or is_postscript:
+            try:
+                images = convert_from_bytes(file_bytes, transparent=True, fmt='png')
+                images[0].save(converted_image, 'PNG')
+            except (PDFSyntaxError, PDFPageCountError, IndexError):
+                if is_postscript:
+                    postscript_is_not_ai = True
+                else:
+                    invalid_file_format = True
+        if is_eps or postscript_is_not_ai:
+            temp_eps_file = TemporaryFile()
+            try:
+                temp_eps_file.write(file_bytes)
+                eps_file = FileStorage(temp_eps_file, 'temp_eps_file.eps', name='file', content_type=file_type)
+                image = Image.open(eps_file)
+                image.load(transparency=True)
+                image.save(converted_image, format='PNG')
+            except UnidentifiedImageError:
+                invalid_file_format = True
+            temp_eps_file.close()
+        if is_svg:
+            try:
+                svg2png(bytestring=file_bytes, write_to=converted_image)
+            except ParseError:
+                invalid_file_format = True
+
+        if invalid_file_format:
+            raise ValidationError('Invalid file format!')
+
+        return f'data:image/png;base64,{base64.b64encode(converted_image.getvalue()).decode()}'

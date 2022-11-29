@@ -57,12 +57,14 @@
                         </group>
                     </group>
                     <group>
-                          <field
+                        <field name="possible_partners" invisible="1"/>
+                        <field
                                 name="allowed_partner_ids"
                                 widget="many2many_tags"
                                 mode="tree"
+                                domain="[('id', 'in', possible_partners)]"
                                 attrs="{'readonly': [('state', 'not in', ['draft'])]}"
-                            />
+                        />
                     </group>
                     <notebook>
                         <page string="Products" name="agreement_lines">
@@ -74,8 +76,8 @@
                             >
                                 <tree editable="bottom" no_open="1">
                                     <field name="product_id"/>
+                                    <field name="allowed_partner_ids" widget="many2many_tags" domain="[('id', 'in', parent.allowed_partner_ids)]"/>
                                     <field name="name" string="Description"/>
-                                    <field name="allowed_partner_ids" widget="many2many_tags"/>
                                     <field name="vendor_id" optional="hide"/>
                                     <field name="qty_allowed"/>
                                     <field name="qty_available" string="Qty On Hand"/>

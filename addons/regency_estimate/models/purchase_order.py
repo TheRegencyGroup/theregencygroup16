@@ -64,6 +64,7 @@ class MyPurchaseOrderLine(models.Model):
     _inherit = 'purchase.order.line'
 
     produced_overseas = fields.Boolean(string='Produced overseas')
+    customer_id = fields.Many2one('res.partner')
 
     @api.onchange('product_id')
     def onchange_product_id(self):
@@ -98,6 +99,8 @@ class MyPurchaseOrderLine(models.Model):
                                                                     values, po)
         if values['pricesheet_vendor_id']:
             res.update({'price_unit': values['pricesheet_vendor_price']})
+        if values['customer_id']:
+            res.update({'customer_id': values['customer_id']})
         return res
 
 

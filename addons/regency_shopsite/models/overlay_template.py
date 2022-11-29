@@ -31,6 +31,8 @@ class OverlayTemplate(models.Model):
     display_name = fields.Char(compute='_compute_display_name')
     hotel_ids = fields.Many2many('res.partner', 'hotel_template_rel', 'template_id', 'hotel_id', string='Hotels',
                                  domain=[('entity_type', "=", HOTEL)])
+    hotels_without_prices = fields.One2many('res.partner', compute='_compute_hotels_without_prices')
+    show_hotels_without_prices = fields.Boolean(compute='_compute_hotels_without_prices')
 
     areas_data = fields.Json()
     overlay_position_ids = fields.Many2many('overlay.position', required=True, string='Positions', ondelete='restrict')
@@ -45,8 +47,6 @@ class OverlayTemplate(models.Model):
     areas_image_attribute_selected_value_ids = fields.Many2many('product.attribute.value',
                                                                 compute='_compute_areas_data_values',
                                                                 store=True, ondelete='restrict')
-    hotels_without_prices = fields.One2many('res.partner', compute='_compute_hotels_without_prices')
-    show_hotels_without_prices = fields.Boolean(compute='_compute_hotels_without_prices')
     allow_edit = fields.Boolean(compute='_compute_allow_edit')
     all_overlay_fonts = fields.Json(compute='_compute_all_overlay_fonts')
     areas_overlay_font_ids = fields.Many2many('overlay.font', compute='_compute_areas_data_values', store=True,
