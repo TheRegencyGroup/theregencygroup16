@@ -4,7 +4,7 @@ import { mountComponentAsWidget } from '@fe_owl_base/js/main';
 import rpc from 'web.rpc';
 import Concurrency from 'web.concurrency';
 
-const { Component, useState, onMounted, useRef } = owl;
+const { Component, useState, onMounted } = owl;
 const dropPrevious = new Concurrency.MutexedDropPrevious();
 
 export class CustomerCommentInCart extends Component {
