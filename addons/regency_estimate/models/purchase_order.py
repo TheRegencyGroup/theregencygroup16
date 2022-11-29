@@ -97,7 +97,7 @@ class MyPurchaseOrderLine(models.Model):
                                                       po):
         res = super()._prepare_purchase_order_line_from_procurement(product_id, product_qty, product_uom, company_id,
                                                                     values, po)
-        if values['pricesheet_vendor_id']:
+        if values.get('pricesheet_vendor_id'):
             res.update({'price_unit': values['pricesheet_vendor_price']})
         if values['customer_id']:
             res.update({'customer_id': values['customer_id']})
