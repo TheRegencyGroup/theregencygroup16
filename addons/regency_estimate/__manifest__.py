@@ -24,6 +24,7 @@
         'data/product_price_sheet.xml',
         'data/sale_estimate_stages.xml',
         'data/purchase_requisition_data.xml',
+        'data/sale_estimate_sequence.xml',
         'security/ir.model.access.csv',
         'security/groups.xml',
         'views/sale_estimate.xml',
@@ -48,6 +49,7 @@
         'data/fee_type.xml',
         'views/stock_picking.xml',
         'views/account_move.xml',
+        'views/sale_order.xml'
     ],
     'demo': [
     ],
