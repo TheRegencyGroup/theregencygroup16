@@ -15,7 +15,7 @@
         'web_one2many_duplicate_cr',
         'delivery',
         'stock_mts_mto_rule',
-        'custom_list_view',
+        'regency_backend_interface',
         'mail_chatter_customization',
     ],
     'category': 'Regency/Sales',

@@ -297,7 +297,7 @@ class ProductPriceSheetLine(models.Model):
     _order = 'product_id ASC, min_quantity ASC'
 
     price_sheet_id = fields.Many2one('product.price.sheet')
-    name = fields.Char('Description')
+    name = fields.Text('Description')
     sequence = fields.Integer("Sequence", default=10)
     product_id = fields.Many2one(
         'product.product', string='Product',
