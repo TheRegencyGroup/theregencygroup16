@@ -7,7 +7,6 @@ publicWidget.registry.SubmitCart = publicWidget.Widget.extend({
     selector: '.oe_website_sale',
     events: {
         'click button.submit_cart': '_onClickSubmitOrder',
-        'click a.a-submit-customer-comment': '_onClickSubmitComment',
     },
 
     async _onClickSubmitOrder(event) {
@@ -33,18 +32,6 @@ publicWidget.registry.SubmitCart = publicWidget.Widget.extend({
             }).catch(e => {
                 alert(e.message?.data?.message || e.toString())
             });
-        });
-    },
-
-    async _onClickSubmitComment(event) {
-        let customer_comment = document.querySelector('.customer_comment_input').value || ''
-        this._rpc({
-            route: '/shop/cart/submit_customer_comment',
-            params: {
-                customer_comment
-            },
-        }).catch(e => {
-            alert(e.message?.data?.message || e.toString())
         });
     },
 });

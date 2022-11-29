@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates>
+
+    <t t-name="customer_comment_in_cart" owl="1">
+        <div t-if="state.hasActiveOrder" class="input-group customer_comment_input_group">
+            <input name="Customer Comment" class="form-control mb32 customer_comment_input" type="text"
+                   placeholder="leave your message here..."
+                   t-on-input="onCommentInput"
+                   t-ref="customer_comment_input_tag_ref"/>
+            <a href="#" t-on-click="onClickSave" role="button"
+               t-att-hidden="!state.hasUnsavedChanges or state.processSaving"
+               class="btn btn-secondary mb32 a-submit-customer-comment">
+                Save
+            </a>
+            <t t-if="state.processSaving">
+                <div class="btn btn-secondary mb32 processing-customer-comment">
+                    Processing...
+                </div>
+            </t>
+            <t t-elif="state.hasSavedComment">
+                <a href="#" t-on-click="onClickDelete" role="button"
+                   class="btn btn-secondary mb32 a-delete-customer-comment">
+                    Delete
+                </a>
+            </t>
+
+        </div>
+    </t>
+</templates>
