@@ -11,9 +11,8 @@
             <div class="mt-4"/>
         </xpath>
         <xpath expr="//a[contains(@href, '/shop/checkout')]/parent::div" position="replace">
-            <div data-owl-widget="CustomerCommentInCart"
-                 t-att-data-comment-props="website_sale_order.customer_comment or None"
-                 t-att-data-has-sale-order-props="bool(website_sale_order)"></div>
+            <div t-if="website_sale_order" data-owl-widget="CustomerCommentInCart"
+                 t-att-data-comment-props="website_sale_order.customer_comment or None"/>
         </xpath>
     </template>
 
@@ -68,7 +67,7 @@
             </td>
             <td align="center">
                 <div data-owl-widget="DeliveryAddressCartLine"
-                     t-att-data-sol-data-props="line._get_delivery_data()"></div>
+                     t-att-data-sol-data-props="line._get_delivery_data(return_json=True)"></div>
             </td>
         </xpath>
     </template>
