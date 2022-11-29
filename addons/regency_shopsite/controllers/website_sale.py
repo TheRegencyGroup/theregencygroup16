@@ -112,7 +112,7 @@ class WebsiteSaleRegency(WebsiteSale):
     def submit_cart_customer_comment(self, customer_comment):
         order = request.website.sale_get_order()
         if not order or order.state != 'draft':
-            return False
+            raise ValidationError('There is no active sale order in the cart')
         return order.write({'customer_comment': customer_comment or ''})
 
     @staticmethod
