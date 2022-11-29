@@ -12,7 +12,6 @@ export class CustomerCommentInCart extends Component {
         onMounted(this.setSavedCommentAsInputValue.bind(this))
         this.actualSavedComment = this.props.comment;
         this.state = useState({
-            hasActiveOrder: this.props.hasSaleOrder,
             processSaving: false,
             hasSavedComment: Boolean(this.props.comment),
             hasUnsavedChanges: false,
@@ -72,9 +71,6 @@ export class CustomerCommentInCart extends Component {
 CustomerCommentInCart.props = {
     comment: {
         type: String,
-    },
-    hasSaleOrder: {
-        type: Boolean,
     },
 }
 
