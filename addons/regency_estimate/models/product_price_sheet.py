@@ -347,7 +347,10 @@ class ProductPriceSheetLine(models.Model):
     @api.depends('fee_value_ids', 'fee_value_ids.value', 'fee_value_ids.portal_value')
     def _compute_fee(self):
         for rec in self:
-            rec.fee = sum(rec.fee_value_ids.mapped('value'))
+            fee_sum = 0
+            for fee in rec.fee_value_ids:
+                fee_sum += rec.min_quantity * fee.value
+            rec.fee = fee_sum
             rec.portal_fee = sum(rec.fee_value_ids.mapped('portal_value'))
             rec.onchange_price()
 
