@@ -110,6 +110,10 @@ export class ProductOverlayPositionComponent extends Component {
         return this.state.backgroundImage.src;
     }
 
+    get disableToolsButton() {
+        return !this.state.selectedAreaIndex || this.state.showLoader;
+    }
+
     updateImageSrc() {
         const position = this.props.overlayPosition;
         const valueId = this.store.otPage.selectedAreasImageAttributeValueId;

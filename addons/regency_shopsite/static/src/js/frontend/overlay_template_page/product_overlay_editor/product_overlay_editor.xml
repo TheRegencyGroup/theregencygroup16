@@ -43,7 +43,7 @@
                 <t t-if="selectedAreaIsText">
                     <div class="ot_add_text_block">
                         <button class="ot_tools_btn"
-                                t-att-class="{ 'product_overlay_disabled': !state.selectedAreaIndex }"
+                                t-att-class="{ 'product_overlay_disabled': disableToolsButton }"
                                 t-on-click="onClickOpenAddTextPopover"
                                 title="Add text">
                             <i class="fa fa-font"/>
@@ -61,7 +61,7 @@
                 </t>
                 <t t-else="">
                     <label class="ot_tools_btn"
-                           t-att-class="{ 'product_overlay_disabled': !state.selectedAreaIndex }"
+                           t-att-class="{ 'product_overlay_disabled': disableToolsButton }"
                            t-attf-for="upload_area_image_{{props.overlayPosition.id}}"
                            title="Upload image">
                         <i class="fa fa-upload"/>
@@ -72,11 +72,11 @@
                            t-ref="image_upload_ref"/>
                 </t>
                 <button class="ot_tools_btn product_overlay_position_remove_active_obj"
-                        t-att-class="{ 'product_overlay_disabled': !state.selectedAreaIndex }"
+                        t-att-class="{ 'product_overlay_disabled': disableToolsButton  }"
                         t-on-click="onClickRemoveActiveObject"
                         title="Remove active object"/>
                 <button class="ot_tools_btn"
-                        t-att-class="{ 'product_overlay_disabled': !state.selectedAreaIndex }"
+                        t-att-class="{ 'product_overlay_disabled': disableToolsButton }"
                         t-on-click="onClickRemoveAllObjects"
                         title="Remove all objects">
                     <i class="fa fa-close"/>
