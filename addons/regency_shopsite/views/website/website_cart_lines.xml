@@ -2,6 +2,11 @@
 <odoo>
 
     <template id="cart" inherit_id="website_sale.cart">
+        <xpath expr="//t[@t-call='website.layout']" position="after">
+            <script type="text/javascript">
+                PRELOADED_DATA.COUNTRIES_DATA=<t t-out="request.env['website']._get_country_state_full_list_data()"/>;
+            </script>
+        </xpath>
         <xpath expr="//t[@t-call='website_sale.wizard_checkout']/parent::div" position="replace">
             <div class="mt-4"/>
         </xpath>

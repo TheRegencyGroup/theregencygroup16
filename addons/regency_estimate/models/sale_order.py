@@ -9,6 +9,9 @@ class SaleOrder(models.Model):
     estimate_id = fields.Many2one('sale.estimate')
     legal_accepted = fields.Boolean(default=False)
 
+    def _has_to_be_signed(self, include_draft=False):
+        return super(SaleOrder, self)._has_to_be_signed(include_draft=True)
+
     def toggle_legal_accepted(self, checked):
         self.ensure_one()
         if self.state == 'draft':

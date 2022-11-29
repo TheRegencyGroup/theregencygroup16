@@ -3,12 +3,15 @@
 
     <t t-name="address_cart_line" owl="1">
         <div>
-            <select class="form-select" t-on-change="processDeliveryAddressChanging">
-                <option t-if="!currentDeliveryAddress" t-att-selected="!currentDeliveryAddress"/>
+            <select class="form-select" t-on-change="processDeliveryAddressChanging"
+                    t-att-title="selectionTagTittle">
+                <option t-if="!currentDeliveryAddress" t-att-selected="true"/>
                 <option t-foreach="possibleDeliveryAddresses" t-as="address" t-key="address.modelId"
                         t-att-value="address.modelId"
-                        t-att-selected="address.modelId === currentDeliveryAddress"
-                        t-esc="address.addressStr"/>
+                        t-att-title="address.addressFullInfo"
+                        t-att-selected="address.modelId == currentDeliveryAddress">
+                    <t t-esc="address.addressStr"/>
+                </option>
                 <option value="add_new_address">&lt; Add New Address &gt;</option>
             </select>
             <t t-call="new_address_form_input"/>
@@ -31,25 +34,34 @@
                     <input type="text" name="ZIP" placeholder="ZIP" class="form-control" t-ref="new_address_zip_input"
                            style="width: 50%; margin: 10px 0px;"/>
                     <span t-if="this.state.currentCountryHasProvinces">State</span>
-                    <select t-if="this.state.currentCountryHasProvinces" class="form-select" t-ref="new_address_province_input">
+                    <select t-if="this.state.currentCountryHasProvinces" class="form-select"
+                            t-ref="new_address_province_input">
                         <option t-foreach="provinceList" t-as="province" t-key="province.id" t-att-value="province.id"
                                 t-if="province.countryId == this.state.currentCountryId" t-esc="province.name"/>
                     </select>
                     <span>Country</span>
-                    <select t-on-change="onChangedCountrySelection" class="form-select" t-ref="new_address_country_input">
+                    <select t-on-change="onChangedCountrySelection" class="form-select"
+                            t-ref="new_address_country_input">
                         <option t-foreach="countryList" t-as="country" t-key="country.id" t-att-value="country.id"
                                 t-att-data-has-province="country.hasProvince" t-esc="country.name"
                                 t-att-selected="this.state.currentCountryId == country.id"/>
                     </select>
                 </div>
                 <div class="d-flex justify-content-between" style="padding: 10px">
-                    <button t-on-click="createNewDeliveryAddress" class='btn btn-primary mb32'
-                            style="margin:20px 60px;">
-                        Submit
-                    </button>
-                    <button t-on-click="hideInputFormModal" class='btn btn-secondary mb32' style="margin:20px 60px;">
-                        Cancel
-                    </button>
+                    <t t-if="state.newAddrCreationIsProcessing">
+                        <button t-on-click="createNewDeliveryAddress" class='btn btn-primary mb32 standard_btn_size'>
+                            Processing...
+                        </button>
+                        <div class="mb32 standard_btn_size"/>
+                    </t>
+                    <t t-else="">
+                        <button t-on-click="createNewDeliveryAddress" class='btn btn-primary mb32 standard_btn_size'>
+                            Submit
+                        </button>
+                        <button t-on-click="hideInputFormModal" class='btn btn-secondary mb32 standard_btn_size'>
+                            Cancel
+                        </button>
+                    </t>
                 </div>
             </div>
         </t>

@@ -20,11 +20,16 @@ export function computeImageSrc({ id, model, field, timestamp }) {
     return `${baseUrl}/web/image?model=${model}&id=${id}&field=${field}&unique=${timestamp}`;
 }
 
-export function computeAttachmentLink(attachmentId) {
-    let baseUrl = window.location.origin;
-    return `${baseUrl}/web/content/${attachmentId}`;
-}
-
 export function enableCanvasPointerEvents(canvas, state) {
     canvas.upperCanvasEl.style.pointerEvents = state ? 'all' : 'none';
+}
+
+export async function readImageDataFromFile(blob) {
+    return await new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+            resolve(reader.result);
+        };
+        reader.readAsDataURL(blob);
+    });
 }

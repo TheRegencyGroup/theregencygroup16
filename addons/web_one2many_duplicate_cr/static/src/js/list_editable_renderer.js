@@ -7,29 +7,24 @@ import {
     serializeDateTime,
 } from "@web/core/l10n/dates";
 
-const { onMounted, onPatched, useRef } = owl;
+const { onMounted } = owl;
 
 
 patch(ListRenderer.prototype, 'web_one2many_duplicate_cr/static/src/js/list_editable_renderer.js', {
     setup() {
         this._super();
-        onMounted(this.addThTag.bind(this));
+        onMounted(this.onMountedCopyRecord.bind(this));
     },
 
-    addThTag() {
-        const buttonTag = document.querySelector('td.o_list_record_copy');
-        if (!buttonTag) {
-            return;
+    onMountedCopyRecord() {
+        if (this.isX2Many && this.activeActions.create) {
+            const theadRow = document.querySelector(`div[name="${this.props.list.__fieldName__}"] table thead tr`);
+            if (theadRow) {
+                const thCopyRecord = document.createElement('th');
+                thCopyRecord.classList.add('o_list_record_copy_th');
+                theadRow.appendChild(thCopyRecord);
+            }
         }
-        const indexButtonTag = [...buttonTag.parentElement.children].indexOf(buttonTag);
-
-        const newThTag = document.createElement("th");
-        newThTag.classList.add('o_list_button');
-        newThTag.style.width = '30px';
-
-        const tableEl = buttonTag.parentElement.parentElement.parentElement;
-        const allCells = tableEl.tHead.firstElementChild.children;
-        (allCells[indexButtonTag - 1] || allCells[indexButtonTag]).after(newThTag);
     },
 
     async onCopyRecord(record) {

@@ -2,3 +2,5 @@ PyJWT==2.5.0
 xlrd
 pyotp
 fonttools==4.38.0
+pdf2image==1.16.0
+cairosvg==2.5.2
