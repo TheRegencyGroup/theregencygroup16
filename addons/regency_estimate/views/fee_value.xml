@@ -6,10 +6,10 @@
         <field name="model">fee.value</field>
         <field name="arch" type="xml">
             <tree string="Fee Types" editable="bottom">
-                <field name="name" string="Description"/>
                 <field name="fee_type_id"/>
+                <field name="per_item"/>
                 <field name="value" required="1"/>
-                <field name="percent_value"/>
+                <field name="percent_value" attrs="{'readonly': [('per_item', '=', True)]}"/>
             </tree>
         </field>
     </record>
