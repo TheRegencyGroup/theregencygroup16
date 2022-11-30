@@ -130,16 +130,16 @@ class ConsumptionAgreement(models.Model):
         return order, order_count
 
     def check_is_vendor_set(self):
-        for rec in self:
-            products_without_vendor = []
-            for line in rec.line_ids:
-                if line.product_id:
-                    seller = line.product_id._select_seller(quantity=line.qty_allowed)
-                    if not line.vendor_id and not seller:
-                        products_without_vendor += line.product_id
-            if products_without_vendor:
-                raise UserError(_('Please set a vendor on product %s.') % ', '.join(
-                    [p.display_name for p in products_without_vendor]))
+        self.ensure_one()
+        products_without_vendor = []
+        for line in self.line_ids:
+            if line.product_id:
+                seller = line.product_id._select_seller(quantity=line.qty_allowed)
+                if not line.vendor_id and not seller:
+                    products_without_vendor += line.product_id
+        if products_without_vendor:
+            raise UserError(_('Please set a vendor on product %s.') % ', '.join(
+                [p.display_name for p in products_without_vendor]))
 
     def generate_purchase_order(self):
         self.ensure_one()
@@ -185,7 +185,8 @@ class ConsumptionAgreement(models.Model):
         if vals.get('name', _('New')) == _('New'):
             vals['name'] = self.env['ir.sequence'].next_by_code('consumption.agreement') or _('New')
         result = super(ConsumptionAgreement, self).create(vals)
-        result.check_is_vendor_set()
+        for rec in result:
+            rec.check_is_vendor_set()
         return result
 
     def write(self, values):
