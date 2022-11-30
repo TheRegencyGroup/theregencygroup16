@@ -349,7 +349,10 @@ class ProductPriceSheetLine(models.Model):
         for rec in self:
             fee_sum = 0
             for fee in rec.fee_value_ids:
-                fee_sum += rec.min_quantity * fee.value
+                if fee.per_item:
+                    fee_sum += rec.min_quantity * fee.value
+                else:
+                    fee_sum += fee.value
             rec.fee = fee_sum
             rec.portal_fee = sum(rec.fee_value_ids.mapped('portal_value'))
             rec.onchange_price()
