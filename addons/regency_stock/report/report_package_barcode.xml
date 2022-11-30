@@ -57,4 +57,37 @@
         </t>
     </template>
 
+        <template id="report_purchase_order_barcode">
+        <t t-call="web.basic_layout">
+           <page>
+                <t t-call="web.html_container">
+                    <t t-foreach="docs" t-as="o">
+                        <div style="width: 102mm; height: 51mm; padding: 10px; display: flex; flex-direction: column;">
+                            <div class="d-flex">
+                                <div class="text-center">
+                                    <div t-out="o.name"
+                                         t-options="{'widget': 'barcode', 'img_style': 'width:182px;height:70px;'}"/>
+                                    <div t-out="o.name"
+                                         style="font-size:12px;"/>
+                                </div>
+                                <div style="width: 182px; text-align: right; position: relative;">
+                                    <img t-if="o.company_id.logo"
+                                         t-att-src="image_data_uri(o.company_id.logo)"
+                                         style="height: 45px; margin-right: 20px;"/>
+<!--                                    <div t-out="round(o.quantity)"-->
+<!--                                         style="position: absolute; top: 65px; left: 20px; font-weight: bolder;"/>-->
+                                </div>
+                            </div>
+<!--                            <div style="font-weight: bolder; text-align: left;">-->
+<!--                                <t t-set="customer" t-value="o._picking_customer_id()"/>-->
+<!--                                <div t-if="customer" t-out="customer.name" style="padding-top: 20px;"/>-->
+<!--                                <div t-out="o.product_id.name" style="padding-top: 20px;"/>-->
+<!--                            </div>-->
+                        </div>
+                    </t>
+                </t>
+            </page>
+        </t>
+    </template>
+
 </odoo>
