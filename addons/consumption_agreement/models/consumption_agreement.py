@@ -178,7 +178,7 @@ class ConsumptionAgreement(models.Model):
             }
         }
 
-    @api.model
+    @api.model_create_multi
     def create(self, vals):
         if 'company_id' in vals:
             self = self.with_company(vals['company_id'])
