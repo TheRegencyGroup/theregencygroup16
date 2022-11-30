@@ -344,7 +344,7 @@ class ProductPriceSheetLine(models.Model):
     fee_value_ids = fields.One2many('fee.value', 'price_sheet_line_id')
     portal_fee = fields.Float(compute='_compute_fee', store=True)
 
-    @api.depends('fee_value_ids', 'fee_value_ids.value', 'fee_value_ids.portal_value')
+    @api.depends('fee_value_ids', 'fee_value_ids.value', 'fee_value_ids.portal_value', 'fee_value_ids.per_item')
     def _compute_fee(self):
         for rec in self:
             fee_sum = 0
