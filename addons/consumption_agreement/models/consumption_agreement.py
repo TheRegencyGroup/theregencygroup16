@@ -79,6 +79,7 @@ class ConsumptionAgreement(models.Model):
 
     def action_confirm(self):
         for rec in self:
+            rec.check_is_vendor_set()
             rec.state = 'confirmed'
             if not rec.signed_date:
                 rec.signed_date = fields.Date.today()
@@ -128,14 +129,25 @@ class ConsumptionAgreement(models.Model):
                                             }) for p in self.line_ids.filtered(lambda l: l.id in selected_line_ids)]})
         return order, order_count
 
+    def check_is_vendor_set(self):
+        for rec in self:
+            products_without_vendor = []
+            for line in rec.line_ids:
+                if line.product_id:
+                    seller = line.product_id._select_seller(quantity=line.qty_allowed)
+                    if not line.vendor_id and not seller:
+                        products_without_vendor += line.product_id
+            if products_without_vendor:
+                raise UserError(_('Please set a vendor on product %s.') % ', '.join(
+                    [p.display_name for p in products_without_vendor]))
+
     def generate_purchase_order(self):
         self.ensure_one()
+        self.check_is_vendor_set()
         order_count = self.purchase_order_count
         new_purchase_orders = self.env['purchase.order']
         for line in self.line_ids:
             seller = line.product_id._select_seller(quantity=line.qty_allowed)
-            if not line.vendor_id and not seller:
-                raise UserError(_('Please set a vendor on product %s.') % line.product_id.display_name)
             po = self.env['purchase.order'].create({
                 'partner_id': line.vendor_id.id if line.vendor_id else seller.partner_id.id,
                 'consumption_agreement_id': self.id,
@@ -173,7 +185,13 @@ class ConsumptionAgreement(models.Model):
         if vals.get('name', _('New')) == _('New'):
             vals['name'] = self.env['ir.sequence'].next_by_code('consumption.agreement') or _('New')
         result = super(ConsumptionAgreement, self).create(vals)
+        result.check_is_vendor_set()
         return result
+
+    def write(self, values):
+        for rec in self:
+            rec.check_is_vendor_set()
+        return super().write(values)
 
     def has_to_be_signed(self):
         return not self.signature
