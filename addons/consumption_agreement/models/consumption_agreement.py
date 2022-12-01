@@ -155,7 +155,7 @@ class ConsumptionAgreement(models.Model):
                     'product_id': line.product_id.id,
                     'product_qty': line.qty_allowed,
                     'price_unit': line.price_unit,
-                    'customer_id': line.agreement_id.partner_id
+                    'customer_id': line.agreement_id.partner_id.id
                 })]
             })
             new_purchase_orders += po
@@ -164,7 +164,7 @@ class ConsumptionAgreement(models.Model):
             action['domain'] = [('id', 'in', [x.id for x in new_purchase_orders])]
             if len(new_purchase_orders) == 1:
                 action['views'] = [(self.env.ref('purchase.purchase_order_form').id, 'form')]
-                action['res_id'] = new_purchase_orders
+                action['res_id'] = new_purchase_orders.id
             return action
         return {
             'type': 'ir.actions.client',

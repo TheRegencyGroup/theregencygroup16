@@ -5,7 +5,8 @@
     'author': 'OpsWay',
     'description': "",
     'depends': [
-        'delivery'
+        'delivery',
+        'purchase',
     ],
     'category': 'Regency/Stock',
     'sequence': 10,

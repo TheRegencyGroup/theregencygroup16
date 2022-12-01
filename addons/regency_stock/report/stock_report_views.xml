@@ -49,5 +49,17 @@
             <field name="binding_model_id" eval="False"/>
             <field name="binding_type">report</field>
         </record>
+
+        <record id="action_report_purchase_order_barcode" model="ir.actions.report">
+            <field name="name">Purchase Order Barcode (PDF)</field>
+            <field name="model">purchase.order.line</field>
+            <field name="report_type">qweb-pdf</field>
+            <field name="report_name">regency_stock.report_purchase_order_barcode</field>
+            <field name="report_file">regency_stock.report_purchase_order_barcode</field>
+            <field name="print_report_name">'Barcode - %s' % (object.name)</field>
+            <field name="binding_model_id" eval="False"/>
+            <field name="binding_type">report</field>
+            <field name="paperformat_id" ref="paperformat_barcode_regency"/>
+        </record>
     </data>
 </odoo>
