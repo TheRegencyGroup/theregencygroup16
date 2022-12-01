@@ -11,7 +11,8 @@
             <div class="mt-4"/>
         </xpath>
         <xpath expr="//a[contains(@href, '/shop/checkout')]/parent::div" position="replace">
-            <div t-if="website_sale_order" data-owl-widget="CustomerCommentInCart"
+            <div t-if="website_sale_order" class="r_order_customer_comment_container"
+                 data-owl-widget="CustomerCommentInCart"
                  t-att-data-comment-props="website_sale_order.customer_comment or None"/>
         </xpath>
     </template>

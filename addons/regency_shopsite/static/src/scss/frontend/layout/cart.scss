@@ -18,19 +18,28 @@
   }
 }
 
-.customer_comment_input_group {
-  padding-left: 40px;
-}
+.r_order_customer_comment_container {
+  flex-grow: 1;
+  margin-left: 20px;
 
-.customer_comment_input{
-  border: 1px solid #DBE0E3;
-  min-width: 40%;
-  max-width: 50%;
-  min-height: 50px;
-  padding: 5px;
-}
+  .r_order_customer_comment {
+    display: flex;
+    align-items: stretch;
 
-.standard_btn_size {
-  width: 150px;
-  margin:20px 60px;
+    input {
+      width: 100%;
+      min-height: 50px;
+      padding: 5px;
+      border: 1px solid $border-color;
+      outline: none;
+
+      & + button, & + div {
+        border-left: none;
+      }
+    }
+
+    button + button, div + button {
+      border-left: none;
+    }
+  }
 }

@@ -2,10 +2,8 @@
 
 import { mountComponentAsWidget } from '@fe_owl_base/js/main';
 import rpc from 'web.rpc';
-import Concurrency from 'web.concurrency';
 
-const { Component, useState, onMounted } = owl;
-const dropPrevious = new Concurrency.MutexedDropPrevious();
+const { Component, useState, onMounted, useRef } = owl;
 
 export class CustomerCommentInCart extends Component {
     setup() {
@@ -16,21 +14,19 @@ export class CustomerCommentInCart extends Component {
             hasSavedComment: Boolean(this.props.comment),
             hasUnsavedChanges: false,
         });
+
+        this.commentInput = useRef('comment_input');
     }
 
     setSavedCommentAsInputValue() {
-        this.inputCommentTagRef.value = this.actualSavedComment || '';
-    }
-
-    get inputCommentTagRef() {
-        return document.querySelector('.customer_comment_input')
+        this.commentInput.el.value = this.actualSavedComment || '';
     }
 
     async onClickSave() {
-        let prevReadOnlyState = this.inputCommentTagRef.readOnly;
-        this.inputCommentTagRef.readOnly = true;
+        let prevReadOnlyState = this.commentInput.el.readOnly;
+        this.commentInput.el.readOnly = true;
         let prevComment = this.actualSavedComment;
-        let customer_comment = this.inputCommentTagRef.value || '';
+        let customer_comment = this.commentInput.el.value || '';
         this.actualSavedComment = customer_comment;
         this.state.processSaving = true;
         let isSuccessfullySaved = false;
@@ -50,16 +46,16 @@ export class CustomerCommentInCart extends Component {
             alert(e.message?.data?.message || e.toString());
         }
         this.state.processSaving = false;
-        this.inputCommentTagRef.readOnly = prevReadOnlyState;
-        return isSuccessfullySaved
+        this.commentInput.el.readOnly = prevReadOnlyState;
+        return isSuccessfullySaved;
     }
 
     async onClickDelete() {
-        let prevInputVal = this.inputCommentTagRef.value
-        this.inputCommentTagRef.value = '';
+        let prevInputVal = this.commentInput.el.value
+        this.commentInput.el.value = '';
         let isSuccessfullySaved = await this.onClickSave();
         if (!isSuccessfullySaved) {
-            this.inputCommentTagRef.value = prevInputVal;
+            this.commentInput.el.value = prevInputVal;
         }
     }
 
