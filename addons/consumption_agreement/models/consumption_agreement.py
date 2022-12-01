@@ -178,15 +178,14 @@ class ConsumptionAgreement(models.Model):
             }
         }
 
-    @api.model_create_multi
+    @api.model
     def create(self, vals):
         if 'company_id' in vals:
             self = self.with_company(vals['company_id'])
         if vals.get('name', _('New')) == _('New'):
             vals['name'] = self.env['ir.sequence'].next_by_code('consumption.agreement') or _('New')
         result = super(ConsumptionAgreement, self).create(vals)
-        for rec in result:
-            rec.check_is_vendor_set()
+        result.check_is_vendor_set()
         return result
 
     def write(self, values):
