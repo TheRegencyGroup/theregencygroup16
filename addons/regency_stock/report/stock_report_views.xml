@@ -52,7 +52,7 @@
 
         <record id="action_report_purchase_order_barcode" model="ir.actions.report">
             <field name="name">Purchase Order Barcode (PDF)</field>
-            <field name="model">purchase.order</field>
+            <field name="model">purchase.order.line</field>
             <field name="report_type">qweb-pdf</field>
             <field name="report_name">regency_stock.report_purchase_order_barcode</field>
             <field name="report_file">regency_stock.report_purchase_order_barcode</field>
