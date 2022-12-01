@@ -79,7 +79,7 @@ class ConsumptionAgreement(models.Model):
 
     def action_confirm(self):
         for rec in self:
-            rec.check_is_vendor_set()
+            rec._check_is_vendor_set()
             rec.state = 'confirmed'
             if not rec.signed_date:
                 rec.signed_date = fields.Date.today()
@@ -129,7 +129,7 @@ class ConsumptionAgreement(models.Model):
                                             }) for p in self.line_ids.filtered(lambda l: l.id in selected_line_ids)]})
         return order, order_count
 
-    def check_is_vendor_set(self):
+    def _check_is_vendor_set(self):
         self.ensure_one()
         products_without_vendor = []
         for line in self.line_ids:
@@ -143,7 +143,7 @@ class ConsumptionAgreement(models.Model):
 
     def generate_purchase_order(self):
         self.ensure_one()
-        self.check_is_vendor_set()
+        self._check_is_vendor_set()
         order_count = self.purchase_order_count
         new_purchase_orders = self.env['purchase.order']
         for line in self.line_ids:
@@ -185,12 +185,12 @@ class ConsumptionAgreement(models.Model):
         if vals.get('name', _('New')) == _('New'):
             vals['name'] = self.env['ir.sequence'].next_by_code('consumption.agreement') or _('New')
         result = super(ConsumptionAgreement, self).create(vals)
-        result.check_is_vendor_set()
+        result._check_is_vendor_set()
         return result
 
     def write(self, values):
         for rec in self:
-            rec.check_is_vendor_set()
+            rec._check_is_vendor_set()
         return super().write(values)
 
     def has_to_be_signed(self):
