@@ -50,7 +50,7 @@ class SaleEstimate(models.Model):
     # Customer / contact
     partner_id = fields.Many2one(
         'res.partner', string='Customer', check_company=True, index=True, tracking=10,
-        domain="[('contact_type', '=', 'customer'),'|', ('company_id', '=', False), ('company_id', '=', company_id)]",
+        domain="[('contact_type', '!=', 'customer'),'|', ('company_id', '=', False), ('company_id', '=', company_id)]",
         help="Linked partner (optional). Usually created when converting the lead. You can find a partner by its Name, TIN, Email or Internal Reference.")
     contact_name = fields.Char(
         'Contact Name', tracking=30,
