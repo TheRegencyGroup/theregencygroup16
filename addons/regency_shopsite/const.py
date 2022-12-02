@@ -23,6 +23,8 @@ SHOP_CATALOG_TAB_MODELS = {
     OVERLAY_PRODUCT_CATALOG_TAB_KEY: 'overlay.product',
 }
 
+RECTANGLE_AREA_TYPE = 'rectangle'
+ELLIPSE_AREA_TYPE = 'ellipse'
 TEXT_AREA_TYPE = 'text'
 
 PDF_FILE_FORMATS = [
