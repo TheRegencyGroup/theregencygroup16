@@ -7,6 +7,7 @@
             <form>
                 <field name="image_filename" invisible="1"/>
                 <field name="image_type" invisible="1"/>
+                <field name="overlay_position_ids" invisible="1"/>
                 <sheet>
                     <group>
                         <group>
