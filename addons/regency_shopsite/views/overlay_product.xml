@@ -31,8 +31,11 @@
                                             <img class="card-img-top"
                                               t-att-src="kanban_image('overlay.product.image', 'image', record.id.raw_value)"/>
                                         </div>
-                                        <h4 class="w-100 text-center text-light bg-primary m-0 p-2">
+                                        <h4 class="w-100 text-center text-light bg-primary m-0 p-3 position-relative">
                                             <field name="overlay_position_id"/>
+                                            <button name="action_download_image" type="object"
+                                                    icon="fa-download" help="Download image"
+                                                    class="btn btn-secondary btn-overlay-product-download-position-image"/>
                                         </h4>
                                     </div>
                                 </t>
