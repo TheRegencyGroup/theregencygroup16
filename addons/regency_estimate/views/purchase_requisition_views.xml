@@ -25,6 +25,11 @@
                     <field name="partner_id"/>
                     <field name="state" invisible="1"/>
                 </xpath>
+                <xpath expr="//field[@name='line_ids']/tree/field[@name='price_unit']" position="after">
+                    <field name="fee"/>
+                    <button class="float-end" name="action_edit_fee_value" type="object"
+                            icon="fa-pencil"/>
+                </xpath>
                 <xpath expr="//field[@name='line_ids']/tree/field[@name='product_qty']" position="before">
                     <field name="produced_overseas"/>
                 </xpath>

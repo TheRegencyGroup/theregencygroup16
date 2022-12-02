@@ -1,4 +1,4 @@
-from odoo import fields, models, api
+from odoo import fields, models, api, Command
 from odoo.tools import get_lang
 from odoo.addons.purchase_requisition.models.purchase import PurchaseOrderLine
 
@@ -43,6 +43,11 @@ class PurchaseOrder(models.Model):
         for rec in self.filtered(lambda f: f.requisition_id):
             for line in rec.order_line:
                 req_line = rec.requisition_id.line_ids.filtered(lambda f: f.product_id == line.product_id
+                                                                      and (f.partner_id == rec.partner_id or not f.partner_id)
+                                                                      and f.product_qty == line.product_qty)
+
+                new_fees = [f.copy() for f in line.fee_value_ids]
+
                                                                           and (
                                                                                   f.partner_id == rec.partner_id or not f.partner_id)
                                                                           and f.product_qty == line.product_qty)
@@ -50,8 +55,10 @@ class PurchaseOrder(models.Model):
                     req_line.write({'partner_id': rec.partner_id.id,
                                     'price_unit': line.price_unit,
                                     'product_qty': line.product_qty,
-                                    'produced_overseas': line.produced_overseas})
+                                    'produced_overseas': line.produced_overseas,
+                                    'fee_value_ids': [f.id for f in new_fees]})
                 else:
+                    req_line.fee_value_ids = []
                     self.env['purchase.requisition.line'].create({
                         'requisition_id': rec.requisition_id.id,
                         'product_description_variants': line.name,
@@ -61,6 +68,7 @@ class PurchaseOrder(models.Model):
                         'partner_id': rec.partner_id.id,
                         'product_uom_id': line.product_uom.id,
                         'produced_overseas': line.produced_overseas,
+                        'fee_value_ids': [f.id for f in new_fees],
                     })
 
     def _prepare_invoice(self):
@@ -74,6 +82,19 @@ class MyPurchaseOrderLine(models.Model):
 
     produced_overseas = fields.Boolean(string='Produced overseas')
     customer_id = fields.Many2one('res.partner')
+    fee = fields.Float(readonly=True, compute='_compute_fee', store=True)
+    fee_value_ids = fields.One2many('fee.value', 'po_line_id', store=True, required=True)
+
+    @api.depends('fee_value_ids', 'fee_value_ids.value', 'fee_value_ids.per_item')
+    def _compute_fee(self):
+        for rec in self:
+            fee_sum = 0
+            for fee in rec.fee_value_ids:
+                if fee.per_item:
+                    fee_sum += rec.product_qty * fee.value
+                else:
+                    fee_sum += fee.value
+            rec.fee = fee_sum
 
     @api.onchange('product_id')
     def onchange_product_id(self):
@@ -111,6 +132,13 @@ class MyPurchaseOrderLine(models.Model):
         if values['customer_id']:
             res.update({'customer_id': values['customer_id']})
         return res
+
+    def action_edit_fee_value(self):
+        self.ensure_one()
+        action = self.env["ir.actions.actions"]._for_xml_id("regency_estimate.action_fee_value")
+        action['domain'] = [('po_line_id', '=', self.id)]
+        action['context'] = {'default_po_line_id': self.id}
+        return action
 
 
 PurchaseOrderLine._compute_price_unit_and_date_planned_and_name = MyPurchaseOrderLine._new_compute_price_unit_and_date_planned_and_name

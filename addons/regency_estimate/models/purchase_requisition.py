@@ -107,6 +107,19 @@ class PurchaseRequisitionLine(models.Model):
         ('done', 'Done')
     ], compute='_compute_state', store=True)
     color = fields.Integer('Color Index', compute='_compute_color')
+    fee = fields.Float(readonly=True, compute='_compute_fee')
+    fee_value_ids = fields.One2many('fee.value', 'purchase_requisition_line_id')
+
+    @api.depends('fee_value_ids', 'fee_value_ids.value', 'fee_value_ids.per_item')
+    def _compute_fee(self):
+        for rec in self:
+            fee_sum = 0
+            for fee in rec.fee_value_ids:
+                if fee.per_item:
+                    fee_sum += rec.product_qty * fee.value
+                else:
+                    fee_sum += fee.value
+            rec.fee = fee_sum
 
     @api.onchange('partner_id')
     def _onchange_partner(self):
@@ -138,3 +151,10 @@ class PurchaseRequisitionLine(models.Model):
                 rec.color = 10  # Green
             else:
                 rec.color = 0  # White
+
+    def action_edit_fee_value(self):
+        self.ensure_one()
+        action = self.env["ir.actions.actions"]._for_xml_id("regency_estimate.action_fee_value")
+        action['domain'] = [('purchase_requisition_line_id', '=', self.id)]
+        action['context'] = {'default_purchase_requisition_line_id': self.id}
+        return action
