@@ -12,6 +12,11 @@ class PurchaseOrder(models.Model):
         'confirmed_prices': lambda recs: recs.write({'state': 'draft'}),
     })
     show_column_produced_overseas = fields.Boolean(compute='_compute_show_column_produced_overseas')
+    tracking_ref = fields.Char(compute='_compute_tracking_references')
+
+    def _compute_tracking_references(self):
+        if self.picking_ids:
+            self.tracking_ref = ' ,'.join(ref for ref in self.picking_ids.mapped('carrier_tracking_ref') if type(ref) == str)
 
     @api.depends('partner_id', 'partner_id.is_company', 'partner_id.contact_type', 'partner_id.vendor_type')
     def _compute_show_column_produced_overseas(self):
