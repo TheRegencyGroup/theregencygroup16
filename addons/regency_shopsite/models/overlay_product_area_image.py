@@ -10,19 +10,24 @@ class OverlayProductAreaImage(models.Model):
     image = fields.Binary(required=True)
     image_type = fields.Char()
     image_extension = fields.Char()
-    image_filename = fields.Char(compute='_compute_image_filename')
+    image_name = fields.Char(compute='_compute_image_name')
+    image_filename = fields.Char()
     is_vector_image = fields.Boolean(compute='_compute_is_vector_image', store=True)
     overlay_position_id = fields.Many2one('overlay.position', required=True)
-    area_index = fields.Integer(required=True)
-    area_object_index = fields.Integer(required=True)
+    area_index = fields.Integer()
+    area_object_index = fields.Integer()
     overlay_product_id = fields.Many2one('overlay.product', ondelete='cascade', copy=False)
     hotel_ids = fields.Many2many(related='overlay_product_id.hotel_ids')
+    added_on_website = fields.Boolean(readonly=True)
 
     @api.depends('overlay_product_id', 'overlay_position_id', 'area_index', 'area_object_index')
-    def _compute_image_filename(self):
+    def _compute_image_name(self):
         for rec in self:
-            rec.image_filename = f'{rec.overlay_product_id.name}__{rec.overlay_position_id.name}_{rec.area_index}_' \
-                                 f'{rec.area_object_index}.{rec.image_extension}'
+            if rec.added_on_website:
+                rec.image_filename_temp = f'{rec.overlay_product_id.name}__{rec.overlay_position_id.name}_' \
+                                          f'{rec.area_index}_{rec.area_object_index}.{rec.image_extension}'
+            else:
+                rec.image_name = rec.image_filename
 
     @api.depends('image', 'image_type')
     def _compute_is_vector_image(self):

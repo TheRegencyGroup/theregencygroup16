@@ -171,6 +171,7 @@ class OverlayTemplatePage(http.Controller):
                             'area_index': area_index,
                             'area_object_index': area_object_index,
                             'overlay_product_id': overlay_product.id,
+                            'added_on_website': True,
                         })
                         obj['areaImageId'] = area_image_id.id
                         del obj['image']
