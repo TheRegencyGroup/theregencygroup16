@@ -508,6 +508,7 @@ class OverlayAreasPositionComponent extends Component {
         if (this.state.selectedAreaIndex === areaIndex) {
             this.state.selectedAreaIndex = null;
         }
+        this.canvas.discardActiveObject().renderAll();
         this.canvas.remove(this.getAreaObjectByIndex(areaIndex));
         delete this.state.areaList[areaIndex];
     }

@@ -1,11 +1,14 @@
-import json
+import io
+from base64 import b64decode, b64encode
 
+from PIL import Image, ImageFont, ImageDraw
 from odoo.addons.http_routing.models.ir_http import slug
 from odoo.exceptions import ValidationError, UserError
 from odoo import fields, models, api, Command, _
+from odoo.modules import get_module_resource
 
 from odoo.addons.regency_contacts.models.const import HOTEL
-from odoo.addons.regency_shopsite.const import TEXT_AREA_TYPE
+from odoo.addons.regency_shopsite.const import TEXT_AREA_TYPE, ELLIPSE_AREA_TYPE, RECTANGLE_AREA_TYPE
 
 
 class OverlayTemplate(models.Model):
@@ -54,6 +57,7 @@ class OverlayTemplate(models.Model):
     all_overlay_colors = fields.Json(compute='_compute_all_overlay_colors')
     areas_overlay_color_ids = fields.Many2many('overlay.color', compute='_compute_areas_data_values', store=True,
                                                ondelete='restrict')
+    preview_image = fields.Image(compute='_compute_preview_image', store=True)
 
     @api.constrains('areas_data')
     def _check_areas_data(self):
@@ -175,6 +179,101 @@ class OverlayTemplate(models.Model):
         for rec in self:
             rec.all_overlay_colors = all_overlay_colors
 
+    @api.depends('areas_data')
+    def _compute_preview_image(self):
+        for rec in self:
+            if not rec.areas_data or not isinstance(rec.areas_data, dict):
+                rec.preview_image = False
+            else:
+                position = list(rec.areas_data.values())[0]
+                if not position.get('selectedImages'):
+                    rec.preview_image = False
+                    continue
+                product_image_id = list(position['selectedImages'].values())[0]['imageId']
+                product_image = self.env['product.image'].browse(product_image_id).exists()
+                if not product_image:
+                    rec.preview_image = False
+                    continue
+                background_image = Image.open(io.BytesIO(b64decode(product_image.image_1920)))
+                width = position['canvasSize']['width']
+                height = position['canvasSize']['height']
+                background_image = background_image.resize((width, height))
+
+                for area in position.get('areaList', {}).values():
+                    area_type = area['areaType']
+                    area_x = area['data']['x']
+                    area_y = area['data']['y']
+                    area_angle = area['data']['angle']
+
+                    if area_type == ELLIPSE_AREA_TYPE:
+                        area_width = area['data']['rx'] * 2
+                        area_height = area['data']['ry'] * 2
+                    else:
+                        area_width = area['data']['width']
+                        area_height = area['data']['height']
+
+                    scale = 1
+                    if area_type == RECTANGLE_AREA_TYPE:
+                        scale = 0.8
+                    elif area_type == ELLIPSE_AREA_TYPE:
+                        if area_width > area_height:
+                            scale = area_height / area_width * 1.2
+                        elif area_width > area_height:
+                            scale = area_width / area_height * 1.2
+                        else:
+                            scale = 0.7
+
+                    if area_type == TEXT_AREA_TYPE:
+                        font_size = area['data'].get('fontSize', 14)
+                        image_color = '#000000'
+                        image_font = ImageFont.truetype(
+                            font=get_module_resource('regency_shopsite', 'static/src/fonts', 'Arial.ttf'), size=font_size)
+                        area_font = area['data'].get('font', False)
+                        if area_font and isinstance(area_font, dict) and isinstance(area_font['id'], int):
+                            font_id = area_font['id']
+                            font = self.env['overlay.font'].browse(font_id).exists()
+                            if font:
+                                font_file = io.BytesIO(b64decode(font.font))
+                                image_font = ImageFont.truetype(font=font_file, size=font_size)
+                        area_color = area['data'].get('color', False)
+                        if area_color and isinstance(area_color, dict) and isinstance(area_color['id'], int):
+                            color_id = area_color['id']
+                            color = self.env['overlay.color'].browse(color_id)
+                            if color:
+                                image_color = color.color
+                        logo_image = Image.new('RGBA', (area_width, area_height), '#FFFFFF00')
+                        d = ImageDraw.Draw(logo_image)
+                        d.text((int(area_width / 2), int(area_height / 2)), 'Text', fill=image_color, anchor='mm',
+                               font=image_font)
+                    else:
+                        logo_image = Image.open(get_module_resource('regency_shopsite', 'static/src/img', 'logo.png'))
+
+                    if area_type != TEXT_AREA_TYPE:
+                        if area_width >= area_height and logo_image.width < logo_image.height:
+                            scale_logo_height = int(area_height * scale)
+                            scale_logo_width = int((logo_image.width * scale_logo_height) / logo_image.height)
+                        else:
+                            scale_logo_width = int(area_width * scale)
+                            scale_logo_height = int((logo_image.height * scale_logo_width) / logo_image.width)
+                        logo_image = logo_image.resize((scale_logo_width, scale_logo_height))
+
+                    if area_angle != 0:
+                        logo_image = logo_image.rotate((360 - area_angle), resample=Image.BICUBIC, expand=True)
+                        area_bound_rect_width = area['data']['boundRect']['width']
+                        area_bound_rect_height = area['data']['boundRect']['height']
+                        area_bound_rect_x = area['data']['boundRect']['x']
+                        area_bound_rect_y = area['data']['boundRect']['y']
+                        x = area_bound_rect_x + int((area_bound_rect_width - logo_image.width) / 2)
+                        y = area_bound_rect_y + int((area_bound_rect_height - logo_image.height) / 2)
+                    else:
+                        x = area_x + int((area_width - logo_image.width) / 2)
+                        y = area_y + int((area_height - logo_image.height) / 2)
+                    background_image.paste(logo_image, (x, y), logo_image)
+
+                result_image = io.BytesIO()
+                background_image.save(result_image, format='PNG')
+                rec.preview_image = b64encode(result_image.getvalue())
+
     @api.onchange('product_template_id')
     @api.constrains('product_template_id')
     def _constrains_changes_if_has_overlay_product(self):
@@ -280,7 +379,7 @@ class OverlayTemplate(models.Model):
 
     def _preview_image_url(self):
         self.ensure_one()
-        return f'/web/image?model={self.product_template_id._name}&id={self.product_template_id.id}&field=image_512'
+        return f'/web/image?model={self._name}&id={self.id}&field=preview_image'
 
     def show_on_website(self):
         self.ensure_one()
