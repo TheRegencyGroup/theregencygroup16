@@ -38,7 +38,7 @@
         'views/website/sale_portal_templates.xml',
         'views/res_partner.xml',
         'views/res_config_settings.xml',
-        'views/product_image_views.xml',
+        'views/overlay_product_area_image_views.xml',
         'views/email_templates.xml'
     ],
     'demo': [
@@ -74,11 +74,11 @@
         'web.assets_backend': [
             'regency_shopsite/static/lib/fabric_js/fabric.min.js',
             'regency_shopsite/static/src/js/main.js',
-            'regency_shopsite/static/src/js/backend/*.js',
+            'regency_shopsite/static/src/js/backend/**/*.js',
 
-            'regency_shopsite/static/src/js/backend/*.xml',
+            'regency_shopsite/static/src/js/backend/**/*.xml',
 
-            'regency_shopsite/static/src/scss/backend/*.scss',
+            'regency_shopsite/static/src/scss/backend/**/*.scss',
         ],
     },
     'category': 'Regency',

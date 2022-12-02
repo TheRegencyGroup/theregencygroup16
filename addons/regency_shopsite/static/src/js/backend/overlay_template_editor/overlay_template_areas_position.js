@@ -6,7 +6,7 @@ import {
     AREAS_IMAGE_NON_ATTRIBUTE_VALUE_ID,
     computeImageSrc, RECTANGLE_AREA_TYPE, ELLIPSE_AREA_TYPE, TEXT_AREA_TYPE,
     enableCanvasPointerEvents,
-} from '../main';
+} from '../../main';
 import { AreaParameters } from './area_parameters';
 
 const { Component, onMounted, onPatched, useState, useRef, reactive, useBus } = owl;

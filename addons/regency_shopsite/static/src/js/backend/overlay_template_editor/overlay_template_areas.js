@@ -10,7 +10,7 @@ import {
     PRODUCT_IMAGE_MODEL,
     AREAS_IMAGE_NON_ATTRIBUTE_VALUE_ID,
     computeImageSrc,
-} from "../main";
+} from "../../main";
 
 const { Component, onMounted, onPatched, useRef, useState, useEnv } = owl;
 
