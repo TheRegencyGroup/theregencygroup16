@@ -12,7 +12,9 @@
     'data': [
         'report/stock_report_views.xml',
         'report/report_package_barcode.xml',
+        'wizard/choose_receipt_package_views.xml',
         'views/stock_quant_package.xml',
+        'security/ir.model.access.csv'
     ],
     'installable': True,
     'application': True,
