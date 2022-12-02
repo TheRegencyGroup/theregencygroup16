@@ -25,7 +25,7 @@ class OverlayProductAreaImage(models.Model):
     def _compute_image_name(self):
         for rec in self:
             if rec.added_on_website:
-                rec.image_filename_temp = f'{rec.overlay_product_id.name}__{rec.overlay_position_id.name}_' \
+                rec.image_name = f'{rec.overlay_product_id.name}__{rec.overlay_position_id.name}_' \
                                           f'{rec.area_index}_{rec.area_object_index}.{rec.image_extension}'
             else:
                 rec.image_name = rec.image_filename
