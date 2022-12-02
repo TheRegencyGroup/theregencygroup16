@@ -13,11 +13,12 @@ class OverlayProductAreaImage(models.Model):
     image_name = fields.Char(compute='_compute_image_name')
     image_filename = fields.Char()
     is_vector_image = fields.Boolean(compute='_compute_is_vector_image', store=True)
-    overlay_position_id = fields.Many2one('overlay.position', required=True)
     area_index = fields.Integer()
     area_object_index = fields.Integer()
     overlay_product_id = fields.Many2one('overlay.product', ondelete='cascade', copy=False)
+    overlay_position_ids = fields.Many2many(related='overlay_product_id.overlay_template_id.overlay_position_ids')
     hotel_ids = fields.Many2many(related='overlay_product_id.hotel_ids')
+    overlay_position_id = fields.Many2one('overlay.position', domain="[('id', 'in', overlay_position_ids)]", required=True)
     added_on_website = fields.Boolean(readonly=True)
 
     @api.depends('overlay_product_id', 'overlay_position_id', 'area_index', 'area_object_index')
