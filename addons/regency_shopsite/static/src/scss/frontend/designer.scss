@@ -10,6 +10,8 @@
 
   .product_overlay_editor_positions {
     .product_overlay_editor_position_hide {
+      position: absolute;
+      top: 0;
       visibility: hidden;
       height: 0;
     }
