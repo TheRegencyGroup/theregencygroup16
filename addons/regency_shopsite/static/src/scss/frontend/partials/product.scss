@@ -110,6 +110,18 @@
   }
 }
 
+.post-product-add-to-cart-buttons {
+  position: relative;
+  display: flex;
+  button, a {
+    z-index: 999;
+
+    &:first-child {
+      margin-right: 10px;
+    }
+  }
+}
+
 .product-unavailable-message {
   display: block;
   margin-top: 10px;
