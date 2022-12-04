@@ -22,7 +22,8 @@ if (cartData) {
                                    overlayAreaList,
                                    previewImagesData,
                                    overlayProductWasChanged,
-        }) {
+                                   duplicateOverlayProductId,
+                               }) {
             this.addingToCart = true;
             let data = false;
             try {
@@ -45,6 +46,9 @@ if (cartData) {
                         preview_images_data: previewImagesData,
                         overlay_product_was_changed: overlayProductWasChanged,
                     };
+                }
+                if (duplicateOverlayProductId) {
+                    params.duplicate_overlay_product_id = duplicateOverlayProductId;
                 }
                 let res = await rpc.query({
                     route: '/shop/cart/update_json/overlay',

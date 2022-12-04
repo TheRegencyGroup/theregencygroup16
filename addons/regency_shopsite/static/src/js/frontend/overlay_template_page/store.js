@@ -179,6 +179,9 @@ if (overlayTemplatePageData) {
                     overlay_product_was_changed: overlayProductWasChanged || false,
                 };
             }
+            if (this.duplicateOverlayProductId) {
+                params.duplicate_overlay_product_id = this.duplicateOverlayProductId;
+            }
             try {
                 let res = await rpc.query({
                     route: '/shop/overlay_template/save',
@@ -212,6 +215,7 @@ if (overlayTemplatePageData) {
         }
 
         duplicateOverlayProduct() {
+            this.duplicateOverlayProductId = this.overlayProduct.id;
             this.overlayProduct.id = null;
             this.overlayProduct.name = this.overlayProduct.name + ' (Copy)';
             this.overlayProduct.active = null;
@@ -239,6 +243,7 @@ if (overlayTemplatePageData) {
         }
 
         updateOverlayProductData(data) {
+            this.duplicateOverlayProductId = null;
             if (!this.overlayProduct) {
                 this.overlayProduct = {};
             }

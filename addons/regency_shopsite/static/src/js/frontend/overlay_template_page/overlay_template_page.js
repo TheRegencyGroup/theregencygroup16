@@ -204,7 +204,10 @@ export class OverlayTemplatePageComponent extends Component {
             data = {
                 ...data,
                 ...customData,
-            }
+            };
+        }
+        if (this.store.otPage.duplicateOverlayProductId) {
+            data.duplicateOverlayProductId = this.store.otPage.duplicateOverlayProductId;
         }
         let res = await this.store.cart.addOverlayToCart(data);
         if (res) {
