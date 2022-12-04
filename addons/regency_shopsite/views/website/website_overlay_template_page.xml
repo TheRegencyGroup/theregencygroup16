@@ -2,7 +2,7 @@
 <odoo>
     <template id="overlay_template_page">
         <t t-call="website.layout">
-            <div data-owl-widget="OverlayTemplatePageComponent"></div>
+            <div class="content" data-owl-widget="OverlayTemplatePageComponent"></div>
         </t>
     </template>
 </odoo>
