@@ -86,6 +86,11 @@ class SaleEstimate(models.Model):
     purchase_order_ids = fields.One2many('purchase.order', compute='_compute_purchase_orders')
     purchase_order_count = fields.Integer(compute='_compute_purchase_orders')
 
+    shipping_contact_id = fields.Many2one('res.partner',
+                                          domain="[('parent_id', '=', partner_id),('is_company', '=', False)]")
+    billing_contact_id = fields.Many2one('res.partner',
+                                         domain="[('parent_id', '=', partner_id), ('is_company', '=', False)]")
+
     def _compute_purchase_orders(self):
         for rec in self:
             rec.purchase_order_ids = False

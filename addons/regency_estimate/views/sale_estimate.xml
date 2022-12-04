@@ -71,6 +71,8 @@
                                 <div class="o_row">
                                     <field name="contact_name"/>
                                 </div>
+                                 <field name="shipping_contact_id" string="Shipping Contact"/>
+                                 <field name="billing_contact_id" string="Billing Contact"/>
                              </group>
                             <group>
                                 <field name="user_id" widget="many2one_avatar_user"/>
