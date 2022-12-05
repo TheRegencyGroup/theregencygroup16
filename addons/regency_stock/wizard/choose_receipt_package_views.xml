@@ -11,7 +11,6 @@
                     <field name="receipt_package_type_id"
                            domain="[('package_carrier_type', '=', context.get('current_package_carrier_type', 'none'))]"/>
                     <field name="weight" attrs="{'invisible': [('receipt_package_type_id', '=', False)]}"></field>
-                    <field name="qty" attrs="{'invisible': [('receipt_package_type_id', '=', False)]}"></field>
                 </group>
                 <footer>
                     <button name="action_put_in_pack" type="object" string="Save" class="btn-primary" data-hotkey="q"/>
