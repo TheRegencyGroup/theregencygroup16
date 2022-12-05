@@ -29,3 +29,5 @@ class ChooseReceiptPackage(models.TransientModel):
         delivery_package = self.picking_id._put_in_pack(move_line_ids)
         if self.weight:
             delivery_package.shipping_weight = self.weight
+
+        return self.picking_id.action_print_barcode_pdf()
