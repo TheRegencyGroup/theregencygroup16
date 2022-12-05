@@ -9,7 +9,6 @@ class ChooseReceiptPackage(models.TransientModel):
     picking_id = fields.Many2one('stock.picking', 'Picking')
     receipt_package_type_id = fields.Many2one('stock.package.type', 'Receipt Package Type', check_company=True)
     weight = fields.Float('Shipping Weight')
-    qty = fields.Float('Quantity')  # TODO: where need to save in delivery package?
 
     def action_put_in_pack(self):
         picking_move_lines = self.picking_id.move_line_ids
