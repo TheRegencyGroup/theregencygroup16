@@ -18,6 +18,8 @@ AVAILABLE_PRIORITIES = [
     ('3', 'Very High'),
 ]
 
+DOMAIN = "[('parent_id', '=', partner_id),('is_company', '=', False)]"
+
 
 class SaleEstimate(models.Model):
     _name = 'sale.estimate'
@@ -87,9 +89,21 @@ class SaleEstimate(models.Model):
     purchase_order_count = fields.Integer(compute='_compute_purchase_orders')
 
     shipping_contact_id = fields.Many2one('res.partner',
-                                          domain="[('parent_id', '=', partner_id),('is_company', '=', False)]")
+                                          compute='_compute_shipping_billing_contact_id',
+                                          store=True, readonly=False, required=True, precompute=True,
+                                          domain=DOMAIN)
     billing_contact_id = fields.Many2one('res.partner',
-                                         domain="[('parent_id', '=', partner_id), ('is_company', '=', False)]")
+                                         compute='_compute_shipping_billing_contact_id',
+                                         store=True, readonly=False, required=True, precompute=True,
+                                         domain=DOMAIN)
+
+    @api.depends('partner_id')
+    def _compute_shipping_billing_contact_id(self):
+        for estimate in self:
+            estimate.shipping_contact_id = estimate.partner_id.address_get(['delivery'])[
+                'delivery'] if estimate.partner_id else False
+            estimate.billing_contact_id = estimate.partner_id.address_get(['invoice'])[
+                'invoice'] if estimate.partner_id else False
 
     def _compute_purchase_orders(self):
         for rec in self:
@@ -139,6 +153,7 @@ class SaleEstimate(models.Model):
         """ compute the new values when partner_id has changed """
         for rec in self:
             rec.update(rec._prepare_contact_name_from_partner(rec.partner_id))
+
 
     def _prepare_contact_name_from_partner(self, partner):
         contact_name = False if partner.is_company else partner.name
