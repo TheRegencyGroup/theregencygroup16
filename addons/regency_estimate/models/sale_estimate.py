@@ -18,8 +18,6 @@ AVAILABLE_PRIORITIES = [
     ('3', 'Very High'),
 ]
 
-DOMAIN = "[('parent_id', '=', partner_id),('is_company', '=', False)]"
-
 
 class SaleEstimate(models.Model):
     _name = 'sale.estimate'
@@ -91,11 +89,11 @@ class SaleEstimate(models.Model):
     shipping_contact_id = fields.Many2one('res.partner',
                                           compute='_compute_shipping_billing_contact_id',
                                           store=True, readonly=False, required=True, precompute=True,
-                                          domain=DOMAIN)
+                                          domain="[('parent_id', '=', partner_id),('is_company', '=', False)]")
     billing_contact_id = fields.Many2one('res.partner',
                                          compute='_compute_shipping_billing_contact_id',
                                          store=True, readonly=False, required=True, precompute=True,
-                                         domain=DOMAIN)
+                                         domain="[('parent_id', '=', partner_id),('is_company', '=', False)]")
 
     @api.depends('partner_id')
     def _compute_shipping_billing_contact_id(self):
