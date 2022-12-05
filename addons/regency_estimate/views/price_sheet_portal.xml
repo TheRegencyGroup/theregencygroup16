@@ -364,9 +364,7 @@
                                     <td id="selection">
                                         <input t-att-select-id="line.id" type="checkbox"/>
                                     </td>
-                                    <t t-if="line.insection_rownumber == 1">
-                                       <td  t-att-rowspan="line.insection_total_rows" id="product_name"><span t-field="line.name"/></td>
-                                    </t>
+                                    <td id="product_name"><span t-field="line.name"/></td>
                                     <td class="text-center" id="qty_range">
                                         <span t-field="line.qty_range_str"/>
                                     </td>
@@ -395,20 +393,13 @@
                                             class="text-right"
                                         />
                                     </td>
-<!--                                    <td t-if="display_discount" t-attf-class="text-right {{ 'd-none d-sm-table-cell' if report_type == 'html' else '' }}">-->
-<!--                                        <strong t-if="line.discount &gt; 0" class="text-info">-->
-<!--                                            <t t-esc="((line.discount % 1) and '%s' or '%d') % line.discount"/>%-->
-<!--                                        </strong>-->
-<!--                                    </td>-->
                                     <td class="text-right">
                                         <span class="oe_order_line_portal_fee" t-field="line.portal_fee"/>
                                     </td>
                                     <td class="text-right">
                                         <span class="oe_order_line_price_subtotal" t-field="line.price_subtotal"/>
                                     </td>
-                                    <t t-if="line.insection_rownumber == 1">
-                                           <td t-att-rowspan="line.insection_total_rows" class="text-center" id="shipping_options"><span t-field="line.shipping_options"/></td>
-                                    </t>
+                                    <td t-att-rowspan="line.insection_total_rows" class="text-center" id="shipping_options"><span t-field="line.shipping_options"/></td>
                                     <td>
                                       <span t-field="line.production_lead_time"/>
                                      </td>
