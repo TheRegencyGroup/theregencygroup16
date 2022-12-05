@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="choose_receipt_package_view_form" model="ir.ui.view">
+        <field name="name">choose.receipt.package.form</field>
+        <field name="model">choose.receipt.package</field>
+        <field name="arch" type="xml">
+            <form string="Package">
+                <field name="picking_id" invisible="1"/>
+                <group>
+
+                    <field name="receipt_package_type_id"
+                           domain="[('package_carrier_type', '=', context.get('current_package_carrier_type', 'none'))]"/>
+                    <field name="weight" attrs="{'invisible': [('receipt_package_type_id', '=', False)]}"></field>
+                    <field name="qty" attrs="{'invisible': [('receipt_package_type_id', '=', False)]}"></field>
+                </group>
+                <footer>
+                    <button name="action_put_in_pack" type="object" string="Save" class="btn-primary" data-hotkey="q"/>
+                    <button string="Discard" special="cancel" data-hotkey="z" class="btn-secondary"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+</odoo>
