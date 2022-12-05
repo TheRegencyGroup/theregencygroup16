@@ -1,5 +1,4 @@
-from odoo import fields, models, api, _
-from odoo.exceptions import UserError
+from odoo import fields, models, api
 
 
 class FeeValue(models.Model):
@@ -16,9 +15,9 @@ class FeeValue(models.Model):
     fee_type_id = fields.Many2one('fee.type', required=True)
     value = fields.Float(required=True)
     percent_value = fields.Float()
-    price_sheet_line_id = fields.Many2one('product.price.sheet.line', copy=False)
-    purchase_requisition_line_id = fields.Many2one('purchase.requisition.line', copy=False)
-    po_line_id = fields.Many2one('purchase.order.line', copy=False)
+    price_sheet_line_id = fields.Many2one('product.price.sheet.line')
+    purchase_requisition_line_id = fields.Many2one('purchase.requisition.line')
+    po_line_id = fields.Many2one('purchase.order.line')
     portal_value = fields.Float(compute='_compute_portal_value', store=True)
     per_item = fields.Boolean()
 

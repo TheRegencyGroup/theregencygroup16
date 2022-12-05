@@ -47,6 +47,8 @@ class PurchaseOrder(models.Model):
                                                                       and f.product_qty == line.product_qty)
 
                 new_fees = [f.copy() for f in line.fee_value_ids]
+                for fee in new_fees:
+                    fee.write({'purchase_requisition_line_id': req_line, 'po_line_id': False})
 
                                                                           and (
                                                                                   f.partner_id == rec.partner_id or not f.partner_id)
