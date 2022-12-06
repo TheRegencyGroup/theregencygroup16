@@ -44,4 +44,21 @@ class ProductProduct(models.Model):
 
     purchase_order_ids = fields.One2many('purchase.order', 'product_id')
     purchase_order_line_ids = fields.One2many('purchase.order.line', 'product_id')
+    last_purchase_order_date = fields.Date(compute='_compute_last_order_values')
+    last_purchase_order_qty = fields.Float(compute='_compute_last_order_values')
+    last_purchase_unit_price = fields.Float(compute='_compute_last_order_values')
 
+    @api.depends('purchase_order_ids', 'purchase_order_line_ids')
+    @api.depends_context('partner_id')
+    def _compute_last_order_values(self):
+        for rec in self:
+            purchase_orders = rec.purchase_order_ids.filtered(lambda order: order.state in ['purchase', 'done']
+                                and order.partner_id.id == self.env.context.get('active_id'))
+            last_purchase_order = purchase_orders.sorted('date_order', reverse=True)[0]
+            if last_purchase_order:
+                rec.last_purchase_order_date = last_purchase_order.date_order
+                last_purchase_line = last_purchase_order.order_line.filtered(lambda f: f.product_id == rec)
+                rec.last_purchase_order_qty = sum(last_purchase_line.mapped('product_uom_qty'))
+                rec.last_purchase_unit_price = sum(last_purchase_line.mapped('price_unit'))
+            else:
+                rec.last_purchase_unit_price, rec.last_purchase_order_date, rec.last_purchase_order_qty = False, False, False

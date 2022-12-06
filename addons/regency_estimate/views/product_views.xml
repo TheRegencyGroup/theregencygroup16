@@ -87,21 +87,13 @@
         <field name="arch" type="xml">
             <tree string="Product" multi_edit="1" class="custom_list_header" sample="1">
                 <field name="name"/>
+                <field name="last_purchase_order_date"/>
+                <field name="last_purchase_order_qty"/>
+                <field name="last_purchase_unit_price"/>
+                <field name="uom_id"/>
             </tree>
         </field>
     </record>
-
-<!--    <record id="product_product_form_view_from_partner" model="ir.ui.view">-->
-<!--        <field name="name">product.product.view.form.from.partner</field>-->
-<!--        <field name="inherit_id" ref="product.product_normal_form_view"/>-->
-<!--        <field name="model">product.product</field>-->
-<!--        <field name="mode">primary</field>-->
-<!--        <field name="arch" type="xml">-->
-<!--            <xpath expr="//field[@name='uom_po_id']" position="after">-->
-<!--                <field name="purchase_order_ids" invisible="1"/>-->
-<!--            </xpath>-->
-<!--        </field>-->
-<!--    </record>-->
 
     <record id="product_action_partner" model="ir.actions.act_window">
         <field name="name">Product From Partner</field>

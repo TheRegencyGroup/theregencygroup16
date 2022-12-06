@@ -17,6 +17,7 @@
         'stock_mts_mto_rule',
         'regency_backend_interface',
         'mail_chatter_customization',
+        'product'
     ],
     'category': 'Regency/Sales',
     'sequence': 10,
