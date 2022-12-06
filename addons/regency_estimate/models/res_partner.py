@@ -16,8 +16,9 @@ class ResPartner(models.Model):
     consumption_agreement_ids = fields.One2many('consumption.agreement', 'partner_id')
     consumption_agreement_count = fields.Integer(compute='_compute_consumption_agreement_count')
 
-    product_ids = fields.One2many('purchase.order', 'partner_id')
-    product_count = fields.Integer(compute='_compute_product_count')
+    purchase_order_ids = fields.One2many('purchase.order', 'partner_id')
+    purchase_order_line_ids = fields.One2many('purchase.order.line', 'partner_id')
+    product_count = fields.Integer(compute='_compute_product_product_count')
 
     def _compute_estimate_count(self):
         for rec in self:
@@ -55,10 +56,19 @@ class ResPartner(models.Model):
         action['domain'] = [('id', 'in', self.consumption_agreement_ids.ids)]
         return action
 
-    def _compute_product_count(self):
+    def _compute_product_product_count(self):
         for rec in self:
-            product_ids = rec.product_ids.filtered(lambda product: product.invoice_status == 'invoiced' and product.receipt_status == 'full')
+            product_ids = rec.purchase_order_ids.filtered(
+                lambda product: product.invoice_status == 'invoiced' and product.receipt_status == 'full').mapped('product_id')
             rec.product_count = len(product_ids)
 
     def action_show_products(self):
-        pass
+        product_ids = self.purchase_order_ids.filtered(
+            lambda product: product.invoice_status == 'invoiced' and product.receipt_status == 'full').mapped(
+            'product_id')
+        action = self.env["ir.actions.actions"]._for_xml_id('regency_estimate.product_action_partner')
+        action['domain'] = [('id', 'in', product_ids.ids)]
+        action['views'] = action['views'][:-1]
+        # a = 3
+        return action
+

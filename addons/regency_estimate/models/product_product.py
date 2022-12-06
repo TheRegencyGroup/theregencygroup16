@@ -38,3 +38,10 @@ class ProductProduct(models.Model):
             rec.last_order_uom_id = last_order.order_line.filtered(lambda f: f.product_template_id == rec).mapped(
                 'product_uom')
 
+
+class ProductProduct(models.Model):
+    _inherit = 'product.product'
+
+    purchase_order_ids = fields.One2many('purchase.order', 'product_id')
+    purchase_order_line_ids = fields.One2many('purchase.order.line', 'product_id')
+
