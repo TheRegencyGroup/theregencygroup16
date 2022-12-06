@@ -7,6 +7,7 @@ class SaleOrder(models.Model):
     _inherit = 'sale.order'
 
     customer_comment = fields.Char()
+    has_overlay_product = fields.Boolean(compute='_compute_has_overlay_product')
 
     def action_confirm(self):
         res = super(SaleOrder, self).action_confirm()
@@ -42,13 +43,19 @@ class SaleOrder(models.Model):
             }
             email_template.with_context(data).send_mail(self.id, email_values=email_values)
 
+    @api.depends('order_line.overlay_product_id')
+    def _compute_has_overlay_product(self):
+        for so in self:
+            so.has_overlay_product = bool(so.order_line.overlay_product_id)
+
 
 class SaleOrderLine(models.Model):
     _inherit = 'sale.order.line'
 
     overlay_template_id = fields.Many2one('overlay.template', compute='_compute_overlay_template_id')
     price_list_id = fields.Many2one('product.pricelist', string='Pricelist')
-    overlay_product_id = fields.Many2one('overlay.product', related='product_id.overlay_product_id')
+    overlay_product_id = fields.Many2one('overlay.product', 'Customized Product',
+                                         related='product_id.overlay_product_id')
     image_snapshot = fields.Image('Product Image')
     image_snapshot_url = fields.Text(compute='_compute_image_snapshot_url')
 

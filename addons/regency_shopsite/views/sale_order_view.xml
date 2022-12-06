@@ -23,13 +23,17 @@
         <field name="model">sale.order</field>
         <field name="inherit_id" ref="sale.view_order_form"/>
         <field name="arch" type="xml">
+            <xpath expr="//form//header" position="inside">
+                <field name="has_overlay_product" invisible="1"/>
+            </xpath>
             <xpath expr="//field[@name='order_line']/tree//field[@name='delivery_partner_id']" position="after">
                 <field name="price_list_id" optional="hide" attrs="{'readonly': [('product_updatable', '=', False)]}"/>
             </xpath>
             <xpath expr="//field[@name='order_line']/tree//field[@name='name']" position="after">
-                <field name="overlay_product_id" invisible="1"/>
-                <button type="object" name="action_open_overlay_product_form" string="Customize Item"
+                <button type="object" name="action_open_overlay_product_form"
+                        class="fa fa-fw o_button_icon fa-external-link"
                         attrs="{'invisible': [('overlay_product_id', '=', False)]}">
+                    <field name="overlay_product_id" attrs="{'column_invisible': [('parent.has_overlay_product', '=', False)]}"/>
                 </button>
             </xpath>
         </field>
