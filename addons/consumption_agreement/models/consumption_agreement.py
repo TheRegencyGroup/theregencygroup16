@@ -1,6 +1,6 @@
 from odoo import api, fields, models, _, Command
 from odoo.exceptions import UserError
-from odoo.tools import html_keep_url, is_html_empty
+from odoo.tools import html_keep_url, is_html_empty, get_lang
 from odoo.addons.regency_tools import SystemMessages
 
 
@@ -264,6 +264,14 @@ class ConsumptionAggreementLine(models.Model):
     vendor_id = fields.Many2one('res.partner')
     untaxed_amount = fields.Monetary(compute='_compute_untaxed_amount', store=True)
     name = fields.Text(string='Description')
+    product_custom_attribute_value_ids = fields.One2many('product.attribute.custom.value', 'ca_product_line_id',
+                                                         string="Custom Values", copy=True)
+    # M2M holding the values of product.attribute with create_variant field set to 'no_variant'
+    # It allows keeping track of the extra_price associated to those attribute values and add them to the SO line description
+    product_no_variant_attribute_value_ids = fields.Many2many('product.template.attribute.value', string="Extra Values",
+                                                              ondelete='restrict')
+    product_template_attribute_value_ids = fields.Many2many(related='product_id.product_template_attribute_value_ids',
+                                                            readonly=True)
 
     @api.depends('qty_allowed', 'state', 'sale_order_line_ids', 'sale_order_line_ids.product_uom_qty')
     def _compute_qty_consumed(self):
@@ -290,3 +298,73 @@ class ConsumptionAggreementLine(models.Model):
     def _compute_untaxed_amount(self):
         for line in self:
             line.untaxed_amount = line.price_unit * line.qty_allowed
+
+    @api.onchange('product_id')
+    def product_id_change(self):
+        self._update_description()
+
+    def _update_description(self):
+        if not self.product_id:
+            return
+        valid_values = self.product_id.product_tmpl_id.valid_product_template_attribute_line_ids.product_template_value_ids
+        # remove the is_custom values that don't belong to this template
+        for pacv in self.product_custom_attribute_value_ids:
+            if pacv.custom_product_template_attribute_value_id not in valid_values:
+                self.product_custom_attribute_value_ids -= pacv
+
+        # remove the no_variant attributes that don't belong to this template
+        for ptav in self.product_no_variant_attribute_value_ids:
+            if ptav._origin not in valid_values:
+                self.product_no_variant_attribute_value_ids -= ptav
+
+        product = self.product_id.with_context(
+            lang=get_lang(self.env, self.agreement_id.partner_id.lang).code,
+        )
+
+        self.update({'name': self.get_multiline_description_sale(product, self.product_template_attribute_value_ids)})
+
+    def get_multiline_description_sale(self, product, picked_attrs):
+        """ Compute a default multiline description for this product line.
+
+        In most cases the product description is enough but sometimes we need to append information that only
+        exists on the sale order line itself.
+        e.g:
+        - custom attributes and attributes that don't create variants, both introduced by the "product configurator"
+        - in event_sale we need to know specifically the sales order line as well as the product to generate the name:
+          the product is not sufficient because we also need to know the event_id and the event_ticket_id (both which belong to the sale order line).
+        """
+        # display the is_custom values
+        attrs_name = ''
+        for pacv in picked_attrs:
+            attrs_name += "\n" + pacv.with_context(lang=self.agreement_id.partner_id.lang).display_name
+        return product.get_product_multiline_description_sale() + attrs_name + self._get_multiline_description_variants()
+
+    def _get_multiline_description_variants(self):
+        """When using no_variant attributes or is_custom values, the product
+        itself is not sufficient to create the description: we need to add
+        information about those special attributes and values.
+
+        :return: the description related to special variant attributes/values
+        :rtype: string
+        """
+        if not self.product_custom_attribute_value_ids and not self.product_no_variant_attribute_value_ids:
+            return ""
+
+        name = "\n"
+
+        custom_ptavs = self.product_custom_attribute_value_ids.custom_product_template_attribute_value_id
+        no_variant_ptavs = self.product_no_variant_attribute_value_ids._origin
+
+        # display the no_variant attributes, except those that are also
+        # displayed by a custom (avoid duplicate description)
+        for ptav in (no_variant_ptavs - custom_ptavs):
+            name += "\n" + ptav.with_context(lang=self.agreement_id.partner_id.lang).display_name
+
+        # Sort the values according to _order settings, because it doesn't work for virtual records in onchange
+        custom_values = sorted(self.product_custom_attribute_value_ids,
+                               key=lambda r: (r.custom_product_template_attribute_value_id.id, r.id))
+        # display the is_custom values
+        for pacv in custom_values:
+            name += "\n" + pacv.with_context(lang=self.agreement_id.partner_id.lang).display_name
+
+        return name
