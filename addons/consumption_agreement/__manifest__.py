@@ -1,6 +1,6 @@
 {
     'name': 'Regency Consumption Agreement',
-    'version': '16.0.0.2',
+    'version': '16.0.0.3',
     'summary': '',
     'author': 'OpsWay',
     'description': "",
