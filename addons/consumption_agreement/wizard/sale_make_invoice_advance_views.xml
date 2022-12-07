@@ -5,6 +5,8 @@
         <field name="name">Invoice Consumption Agreements</field>
         <field name="model">sale.advance.payment.inv</field>
         <field name="inherit_id" ref="sale.view_sale_advance_payment_inv"/>
+        <field name="priority">999</field>
+        <field name="mode">primary</field>
         <field name="arch" type="xml">
             <field name="advance_payment_method" position="replace">
                 <field name="advance_payment_method" invisible="1"/>

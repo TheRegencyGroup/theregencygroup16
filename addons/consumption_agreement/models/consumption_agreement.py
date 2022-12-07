@@ -34,9 +34,9 @@ class ConsumptionAgreement(models.Model):
     company_id = fields.Many2one('res.company', required=True, index=True, default=lambda self: self.env.company)
     terms_type = fields.Selection(related='company_id.terms_type')
     legal_accepted = fields.Boolean(default=False)
-    invoice_count = fields.Integer(string="Invoice Count", compute='_compute_invoice_stat')
-    deposit_percent = fields.Float(string='Deposit %', compute='_compute_invoice_stat')
-    deposit_percent_str = fields.Char(compute='_compute_invoice_stat')
+    invoice_count = fields.Integer(string="Invoice Count", compute='_compute_invoice_stat', store=True)
+    deposit_percent = fields.Float(string='Deposit %', compute='_compute_invoice_stat', store=True)
+    deposit_percent_str = fields.Char(compute='_compute_invoice_stat', store=True)
     invoice_ids = fields.One2many('account.move', 'consumption_agreement_id', string="Invoices")
     tax_totals = fields.Binary(compute='_compute_tax_totals')
 
@@ -135,7 +135,9 @@ class ConsumptionAgreement(models.Model):
             action['res_id'] = self.purchase_order_ids.id
         return action
 
-    def create_sale_order(self, selected_line_ids):
+    def create_sale_order(self, selected_line_ids, qtys=False):
+        if not qtys:
+            qtys = {}
         self.ensure_one()
         order_count = self.sale_order_count
         order = self.env['sale.order'].create({'access_token': self.access_token,
@@ -144,7 +146,7 @@ class ConsumptionAgreement(models.Model):
                                        'order_line': [
                                             Command.create({
                                                 'product_id': p.product_id.id,
-                                                'product_uom_qty': 0,
+                                                'product_uom_qty': qtys.get(p.id, 0),
                                                 'price_unit': p.price_unit,
                                                 'product_uom': p.product_id.uom_id.id,
                                                 'consumption_agreement_line_id': p.id
@@ -299,7 +301,7 @@ class ConsumptionAgreement(models.Model):
         so_wizard = self.env['sale.order.ca.wizard'].create(
             {
                 'consumption_agreement_id': self.id,
-                'ca_line_ids': [(0, 0, {'consumption_agreement_line_id': ca_line.id}) for ca_line in self.line_ids]
+                'ca_line_ids': [(0, 0, {'consumption_agreement_line_id': ca_line.id, 'selected_qty': ca_line.qty_remaining}) for ca_line in self.line_ids]
             })
         return {
             'name': _('Create SO'),
