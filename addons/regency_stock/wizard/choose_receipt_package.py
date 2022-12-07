@@ -29,6 +29,6 @@ class ChooseReceiptPackage(models.TransientModel):
         delivery_package = self.picking_id._put_in_pack(move_line_ids)
         if self.weight:
             delivery_package.shipping_weight = self.weight
-        report_action = self.picking_id.action_print_barcode_pdf()
+        report_action = self.env.ref('stock.report_package_barcode_small').report_action(self.picking_id.package_ids)
         report_action.update({'close_on_report_download': True})
         return report_action
