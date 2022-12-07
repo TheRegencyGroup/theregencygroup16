@@ -34,6 +34,28 @@ class ConsumptionAgreement(models.Model):
     company_id = fields.Many2one('res.company', required=True, index=True, default=lambda self: self.env.company)
     terms_type = fields.Selection(related='company_id.terms_type')
     legal_accepted = fields.Boolean(default=False)
+    invoice_count = fields.Integer(string="Invoice Count", compute='_compute_invoice_stat', store=True)
+    deposit_percent = fields.Float(string='Deposit %', compute='_compute_invoice_stat', store=True)
+    deposit_percent_str = fields.Char(compute='_compute_invoice_stat', store=True)
+    invoice_ids = fields.One2many('account.move', 'consumption_agreement_id', string="Invoices")
+    tax_totals = fields.Binary(compute='_compute_tax_totals')
+
+    @api.depends('line_ids.price_unit', 'line_ids.qty_allowed')
+    def _compute_tax_totals(self):
+        for order in self:
+            order_lines = order.line_ids #.filtered(lambda x: not x.display_type)
+            order.tax_totals = self.env['account.tax']._prepare_tax_totals(
+                [x._convert_to_tax_base_line_dict() for x in order_lines],
+                order.currency_id,
+            )
+
+    def _compute_invoice_stat(self):
+        for rec in self:
+            rec.invoice_count = len(rec.invoice_ids)
+            ca_amount = sum(rec.line_ids.mapped("untaxed_amount"))
+            downpayment_amount = sum(rec.invoice_ids.mapped('amount_untaxed'))
+            rec.deposit_percent = downpayment_amount / ca_amount * 100 if ca_amount > 0 else 0
+            rec.deposit_percent_str = str(rec.deposit_percent) + '%'
 
     @api.model
     def _get_note_url(self):
@@ -113,7 +135,9 @@ class ConsumptionAgreement(models.Model):
             action['res_id'] = self.purchase_order_ids.id
         return action
 
-    def create_sale_order(self, selected_line_ids):
+    def create_sale_order(self, selected_line_ids, qtys=False):
+        if not qtys:
+            qtys = {}
         self.ensure_one()
         order_count = self.sale_order_count
         order = self.env['sale.order'].create({'access_token': self.access_token,
@@ -122,7 +146,7 @@ class ConsumptionAgreement(models.Model):
                                        'order_line': [
                                             Command.create({
                                                 'product_id': p.product_id.id,
-                                                'product_uom_qty': 0,
+                                                'product_uom_qty': qtys.get(p.id, 0),
                                                 'price_unit': p.price_unit,
                                                 'product_uom': p.product_id.uom_id.id,
                                                 'consumption_agreement_line_id': p.id
@@ -178,6 +202,64 @@ class ConsumptionAgreement(models.Model):
             }
         }
 
+    def generate_downpayment_invoice(self):
+        action = self.env["ir.actions.act_window"]._for_xml_id("sale.action_view_sale_advance_payment_inv")
+        action['views'] = [(self.env.ref('consumption_agreement.view_consumption_advance_payment_inv').id, 'form')]
+        action['context'] = {'is_ca': True, 'default_advance_payment_method': 'percentage'}
+        return action
+
+    def action_view_invoice(self):
+        invoices = self.mapped('invoice_ids')
+        action = self.env['ir.actions.actions']._for_xml_id('account.action_move_out_invoice_type')
+        if len(invoices) > 1:
+            action['domain'] = [('id', 'in', invoices.ids)]
+        elif len(invoices) == 1:
+            form_view = [(self.env.ref('account.view_move_form').id, 'form')]
+            if 'views' in action:
+                action['views'] = form_view + [(state,view) for state,view in action['views'] if view != 'form']
+            else:
+                action['views'] = form_view
+            action['res_id'] = invoices.id
+        else:
+            action = {'type': 'ir.actions.act_window_close'}
+
+        context = {
+            'default_move_type': 'out_invoice',
+        }
+        if len(self) == 1:
+            context.update({
+                'default_partner_id': self.partner_id.id,
+                'default_partner_shipping_id': self.partner_id.id,
+                'default_invoice_payment_term_id': self.partner_id.property_payment_term_id.id or self.env['account.move'].default_get(['invoice_payment_term_id']).get('invoice_payment_term_id'),
+                'default_invoice_origin': self.name,
+            })
+        action['context'] = context
+        return action
+
+    def _prepare_invoice(self):
+        """
+        Prepare the dict of values to create the new invoice for a sales order. This method may be
+        overridden to implement custom invoice generation (making sure to call super() to establish
+        a clean extension chain).
+        """
+        self.ensure_one()
+
+        return {
+            'ref': '',
+            'move_type': 'out_invoice',
+            'narration': self.note,
+            'currency_id': self.currency_id and self.currency_id.id or self.env.company.currency_id.id,
+            'partner_id': self.partner_id.id,
+            'partner_shipping_id': self.partner_id.id,
+            'fiscal_position_id': (self.env['account.fiscal.position']._get_fiscal_position(
+                self.partner_id)).id,
+            'invoice_payment_term_id': self.partner_id.property_payment_term_id.id or self.env['account.move'].default_get(['invoice_payment_term_id']).get('invoice_payment_term_id'),
+            'invoice_origin': self.name,
+            'company_id': self.company_id.id,
+            'invoice_line_ids': [],
+            'consumption_agreement_id': self.id
+        }
+
     @api.model
     def create(self, vals):
         if 'company_id' in vals:
@@ -219,7 +301,7 @@ class ConsumptionAgreement(models.Model):
         so_wizard = self.env['sale.order.ca.wizard'].create(
             {
                 'consumption_agreement_id': self.id,
-                'ca_line_ids': [(0, 0, {'consumption_agreement_line_id': ca_line.id}) for ca_line in self.line_ids]
+                'ca_line_ids': [(0, 0, {'consumption_agreement_line_id': ca_line.id, 'selected_qty': ca_line.qty_remaining}) for ca_line in self.line_ids]
             })
         return {
             'name': _('Create SO'),
@@ -368,3 +450,22 @@ class ConsumptionAggreementLine(models.Model):
             name += "\n" + pacv.with_context(lang=self.agreement_id.partner_id.lang).display_name
 
         return name
+
+    def _convert_to_tax_base_line_dict(self):
+        """ Convert the current record to a dictionary in order to use the generic taxes computation method
+        defined on account.tax.
+
+        :return: A python dictionary.
+        """
+        self.ensure_one()
+        return self.env['account.tax']._convert_to_tax_base_line_dict(
+            self,
+            partner=self.agreement_id.partner_id,
+            currency=self.currency_id,
+            product=self.product_id,
+            #taxes=self.tax_id,
+            price_unit=self.price_unit,
+            quantity=self.qty_allowed,
+           # discount=self.discount,
+            price_subtotal=self.untaxed_amount,
+        )

@@ -11,7 +11,8 @@ class SaleOrderCAWizard(models.TransientModel):
 
     def create_so_from_ca(self):
         order, order_count = self.consumption_agreement_id.create_sale_order(
-            selected_line_ids=self.ca_line_ids.filtered(lambda f: f.selected).mapped('consumption_agreement_line_id').ids)
+            selected_line_ids=self.ca_line_ids.filtered(lambda f: f.selected).mapped('consumption_agreement_line_id').ids,
+            qtys={x.consumption_agreement_line_id.id: x.selected_qty for x in self.ca_line_ids})
         if not order_count:
             action = self.env["ir.actions.act_window"]._for_xml_id("sale.action_orders")
             action['views'] = [(self.env.ref('sale.view_order_form').id, 'form')]
@@ -35,6 +36,6 @@ class SaleOrderCALineWizard(models.TransientModel):
 
     sale_order_ca_id = fields.Many2one('sale.order.ca.wizard')
     consumption_agreement_line_id = fields.Many2one('consumption.agreement.line')
-    selected_qty = fields.Integer(related='consumption_agreement_line_id.qty_allowed')
+    selected_qty = fields.Integer()
     product_id = fields.Many2one('product.product', related='consumption_agreement_line_id.product_id')
     selected = fields.Boolean(default=True)

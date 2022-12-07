@@ -14,6 +14,8 @@
                     <field name="state" widget="statusbar" statusbar_visible="draft,confirmed"/>
                     <button name="generate_purchase_order" data-hotkey="g" type="object"
                             string="Generate Purchase Order"/>
+                    <button name="generate_downpayment_invoice" string="Create Downpayment Invoice"
+                            type="object"  attrs="{'invisible': [('state', '!=', 'confirmed')]}"/>
                 </header>
                 <sheet>
                      <div class="oe_button_box" name="button_box">
@@ -37,6 +39,14 @@
                                 type="object"
                                 icon="fa-bars">
                             <field string="Purchase Orders" name="purchase_order_count" widget="statinfo" />
+                        </button>
+                        <field name="invoice_count" invisible="1"/>
+                         <button class="oe_stat_button"
+                                name="action_view_invoice"
+                                type="object"
+                                attrs="{'invisible': [('invoice_count', '=', 0)]}"
+                                icon="fa-bars">
+                            <field string="Deposit" name="deposit_percent_str" widget="statinfo" />
                         </button>
                     </div>
                     <div class="oe_title">
@@ -86,6 +96,15 @@
                                     <field name="price_unit"/>
                                 </tree>
                             </field>
+                             <group name="note_group" col="6" class="mt-2 mt-md-0">
+                                <group colspan="4">
+                                    <field  colspan="2" name="note" nolabel="1" placeholder="Terms and conditions..."/>
+                                </group>
+                                <group class="oe_subtotal_footer oe_right" colspan="2" name="sale_total">
+                                    <field name="tax_totals" widget="account-tax-totals-field" nolabel="1" colspan="2" readonly="1"/>
+                                </group>
+                                <div class="clearfix"/>
+                            </group>
                         </page>
                         <page string="Customer Signature" name="customer_signature" attrs="{'invisible': [('signed_by', '=', False), ('signature', '=', False), ('signed_on', '=', False)]}">
                         <group>

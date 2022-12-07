@@ -12,7 +12,7 @@
                             <tree delete="0" create="0" editable="top">
                                 <field name="selected"/>
                                 <field name="product_id" readonly="1"/>
-                                <field name="selected_qty" readonly="1"/>
+                                <field name="selected_qty"/>
                             </tree>
                         </field>
                     </group>

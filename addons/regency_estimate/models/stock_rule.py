@@ -48,7 +48,7 @@ class StockRule(models.Model):
             ####################
             # start custom logic
             partner = self.env['res.partner']
-            if procurement.values['pricesheet_vendor_id']:
+            if procurement.values.get('pricesheet_vendor_id'):
                 partner = procurement.values['pricesheet_vendor_id']
 
             if not supplier and not partner:  # added condition 'and not partner'
@@ -92,7 +92,7 @@ class StockRule(models.Model):
 
                     ####################
                     # start custom logic
-                    if positive_values[0]['pricesheet_vendor_id']:
+                    if positive_values[0].get('pricesheet_vendor_id'):
                         vals['partner_id'] = positive_values[0]['pricesheet_vendor_id'].id
                     # end custom logic
                     ##################
