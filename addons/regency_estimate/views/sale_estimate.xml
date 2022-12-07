@@ -33,28 +33,29 @@
                                     <field name="purchase_order_count" widget="statinfo" string="Purchase Orders"/>
                            </button>
                         </div>
+                        <group>
+                            <field name="partner_id" required="1"
+                                widget="res_partner_many2one"
+                                string="Customer"
+                                context="{'res_partner_search_mode': 'customer',
+                                    'default_name': contact_name,
+                                    'default_street': street,
+                                    'default_is_company': contact_name == False,
+                                    'default_street2': street2,
+                                    'default_city': city,
+                                    'default_state_id': state_id,
+                                    'default_zip': zip,
+                                    'default_country_id': country_id,
+                                    'show_vat': True,
+                                }"
+                            />
+                        </group>
                         <div class="oe_title">
                             <label for="name" string="Estimate"/>>
                             <h1><field class="o_text_overflow" name="name" placeholder="e.g. Product Pricing"/></h1>
                         </div>
                         <group>
                             <group name="opportunity_partner">
-                                <field name="partner_id" required="1"
-                                    widget="res_partner_many2one"
-                                    string="Customer"
-                                    context="{'res_partner_search_mode': 'customer',
-                                        'default_name': contact_name,
-                                        'default_street': street,
-                                        'default_is_company': contact_name == False,
-                                        'default_street2': street2,
-                                        'default_city': city,
-                                        'default_state_id': state_id,
-                                        'default_zip': zip,
-                                        'default_country_id': country_id,
-                                        'show_vat': True,
-                                    }"
-                                />
-
                                 <label for="street" string="Address"/>
                                 <div class="o_address_format">
                                     <field name="street" placeholder="Street..." class="o_address_street"/>
@@ -70,6 +71,8 @@
                                 <div class="o_row">
                                     <field name="contact_name"/>
                                 </div>
+                                 <field name="shipping_contact_id" string="Shipping Contact"/>
+                                 <field name="billing_contact_id" string="Billing Contact"/>
                              </group>
                             <group>
                                 <field name="user_id" widget="many2one_avatar_user"/>
@@ -203,6 +206,7 @@
                 <tree string="Estimates" sample="1" multi_edit="1">
                     <field name="create_date" optional="hide"/>
                     <field name="name" string="Lead" readonly="1"/>
+                    <field name="partner_id" string="Customer"/>
                     <field name="contact_name" optional="hide"/>
                     <field name="city" optional="show"/>
                     <field name="state_id" optional="hide"/>
@@ -352,7 +356,7 @@
                 <p class="o_view_nocontent_smiling_face">
                     Create an Estimate
                 </p><p>
-                    Estimates are the qualification step before the creation of an .
+                    Estimates are the qualification step before the creation of sales order
                 </p>
             </field>
         </record>

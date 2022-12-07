@@ -24,5 +24,15 @@
                 </xpath>
             </field>
          </record>
+        <record id="purchase_order_view_inherit" model="ir.ui.view">
+            <field name="name">purchase.order.regency</field>
+            <field name="model">purchase.order</field>
+            <field name="inherit_id" ref="purchase_stock.purchase_order_view_form_inherit"/>
+            <field name="arch" type="xml">
+                 <xpath expr="//field[@name='incoterm_location']" position="after">
+                    <field name="tracking_ref"/>
+                </xpath>
+            </field>
+         </record>
     </data>
 </odoo>

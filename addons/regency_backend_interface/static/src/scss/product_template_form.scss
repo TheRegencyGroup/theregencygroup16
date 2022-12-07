@@ -1,0 +1,9 @@
+.o_form_view_container[data-model-name='product.template'] {
+  div[name='attribute_line_ids'] {
+    .badge {
+      .o_tag_badge_text {
+        max-width: unset !important;
+      }
+    }
+  }
+}

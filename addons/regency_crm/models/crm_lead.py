@@ -134,3 +134,10 @@ class CRMLead(models.Model):
         for rec in res:
             rec.representative_name.parent_id = rec.partner_id
         return res
+
+    def action_show_customer(self):
+        self.ensure_one()
+        action = self.env["ir.actions.actions"]._for_xml_id("base.action_partner_customer_form")
+        action['views'] = [(self.env.ref('base.view_partner_form').id, 'form')]
+        action['res_id'] = self.partner_id.id
+        return action

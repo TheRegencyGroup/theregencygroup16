@@ -1,6 +1,6 @@
 from odoo import api, fields, models, _, Command
 from odoo.exceptions import UserError
-from odoo.tools import html_keep_url, is_html_empty
+from odoo.tools import html_keep_url, is_html_empty, get_lang
 from odoo.addons.regency_tools import SystemMessages
 
 
@@ -101,6 +101,7 @@ class ConsumptionAgreement(models.Model):
 
     def action_confirm(self):
         for rec in self:
+            rec._check_is_vendor_set()
             rec.state = 'confirmed'
             if not rec.signed_date:
                 rec.signed_date = fields.Date.today()
@@ -150,14 +151,25 @@ class ConsumptionAgreement(models.Model):
                                             }) for p in self.line_ids.filtered(lambda l: l.id in selected_line_ids)]})
         return order, order_count
 
+    def _check_is_vendor_set(self):
+        self.ensure_one()
+        products_without_vendor = []
+        for line in self.line_ids:
+            if line.product_id:
+                seller = line.product_id._select_seller(quantity=line.qty_allowed)
+                if not line.vendor_id and not seller:
+                    products_without_vendor += line.product_id
+        if products_without_vendor:
+            raise UserError(_('Please set a vendor on product %s.') % ', '.join(
+                [p.display_name for p in products_without_vendor]))
+
     def generate_purchase_order(self):
         self.ensure_one()
+        self._check_is_vendor_set()
         order_count = self.purchase_order_count
         new_purchase_orders = self.env['purchase.order']
         for line in self.line_ids:
             seller = line.product_id._select_seller(quantity=line.qty_allowed)
-            if not line.vendor_id and not seller:
-                raise UserError(_('Please set a vendor on product %s.') % line.product_id.display_name)
             po = self.env['purchase.order'].create({
                 'partner_id': line.vendor_id.id if line.vendor_id else seller.partner_id.id,
                 'consumption_agreement_id': self.id,
@@ -165,7 +177,7 @@ class ConsumptionAgreement(models.Model):
                     'product_id': line.product_id.id,
                     'product_qty': line.qty_allowed,
                     'price_unit': line.price_unit,
-                    'customer_id': line.agreement_id.partner_id
+                    'customer_id': line.agreement_id.partner_id.id
                 })]
             })
             new_purchase_orders += po
@@ -174,7 +186,7 @@ class ConsumptionAgreement(models.Model):
             action['domain'] = [('id', 'in', [x.id for x in new_purchase_orders])]
             if len(new_purchase_orders) == 1:
                 action['views'] = [(self.env.ref('purchase.purchase_order_form').id, 'form')]
-                action['res_id'] = new_purchase_orders
+                action['res_id'] = new_purchase_orders.id
             return action
         return {
             'type': 'ir.actions.client',
@@ -253,7 +265,13 @@ class ConsumptionAgreement(models.Model):
         if vals.get('name', _('New')) == _('New'):
             vals['name'] = self.env['ir.sequence'].next_by_code('consumption.agreement') or _('New')
         result = super(ConsumptionAgreement, self).create(vals)
+        result._check_is_vendor_set()
         return result
+
+    def write(self, values):
+        for rec in self:
+            rec._check_is_vendor_set()
+        return super().write(values)
 
     def has_to_be_signed(self):
         return not self.signature
@@ -326,6 +344,14 @@ class ConsumptionAggreementLine(models.Model):
     vendor_id = fields.Many2one('res.partner')
     untaxed_amount = fields.Monetary(compute='_compute_untaxed_amount', store=True)
     name = fields.Text(string='Description')
+    product_custom_attribute_value_ids = fields.One2many('product.attribute.custom.value', 'ca_product_line_id',
+                                                         string="Custom Values", copy=True)
+    # M2M holding the values of product.attribute with create_variant field set to 'no_variant'
+    # It allows keeping track of the extra_price associated to those attribute values and add them to the SO line description
+    product_no_variant_attribute_value_ids = fields.Many2many('product.template.attribute.value', string="Extra Values",
+                                                              ondelete='restrict')
+    product_template_attribute_value_ids = fields.Many2many(related='product_id.product_template_attribute_value_ids',
+                                                            readonly=True)
 
     @api.depends('qty_allowed', 'state', 'sale_order_line_ids', 'sale_order_line_ids.product_uom_qty')
     def _compute_qty_consumed(self):
@@ -352,6 +378,76 @@ class ConsumptionAggreementLine(models.Model):
     def _compute_untaxed_amount(self):
         for line in self:
             line.untaxed_amount = line.price_unit * line.qty_allowed
+
+    @api.onchange('product_id')
+    def product_id_change(self):
+        self._update_description()
+
+    def _update_description(self):
+        if not self.product_id:
+            return
+        valid_values = self.product_id.product_tmpl_id.valid_product_template_attribute_line_ids.product_template_value_ids
+        # remove the is_custom values that don't belong to this template
+        for pacv in self.product_custom_attribute_value_ids:
+            if pacv.custom_product_template_attribute_value_id not in valid_values:
+                self.product_custom_attribute_value_ids -= pacv
+
+        # remove the no_variant attributes that don't belong to this template
+        for ptav in self.product_no_variant_attribute_value_ids:
+            if ptav._origin not in valid_values:
+                self.product_no_variant_attribute_value_ids -= ptav
+
+        product = self.product_id.with_context(
+            lang=get_lang(self.env, self.agreement_id.partner_id.lang).code,
+        )
+
+        self.update({'name': self.get_multiline_description_sale(product, self.product_template_attribute_value_ids)})
+
+    def get_multiline_description_sale(self, product, picked_attrs):
+        """ Compute a default multiline description for this product line.
+
+        In most cases the product description is enough but sometimes we need to append information that only
+        exists on the sale order line itself.
+        e.g:
+        - custom attributes and attributes that don't create variants, both introduced by the "product configurator"
+        - in event_sale we need to know specifically the sales order line as well as the product to generate the name:
+          the product is not sufficient because we also need to know the event_id and the event_ticket_id (both which belong to the sale order line).
+        """
+        # display the is_custom values
+        attrs_name = ''
+        for pacv in picked_attrs:
+            attrs_name += "\n" + pacv.with_context(lang=self.agreement_id.partner_id.lang).display_name
+        return product.get_product_multiline_description_sale() + attrs_name + self._get_multiline_description_variants()
+
+    def _get_multiline_description_variants(self):
+        """When using no_variant attributes or is_custom values, the product
+        itself is not sufficient to create the description: we need to add
+        information about those special attributes and values.
+
+        :return: the description related to special variant attributes/values
+        :rtype: string
+        """
+        if not self.product_custom_attribute_value_ids and not self.product_no_variant_attribute_value_ids:
+            return ""
+
+        name = "\n"
+
+        custom_ptavs = self.product_custom_attribute_value_ids.custom_product_template_attribute_value_id
+        no_variant_ptavs = self.product_no_variant_attribute_value_ids._origin
+
+        # display the no_variant attributes, except those that are also
+        # displayed by a custom (avoid duplicate description)
+        for ptav in (no_variant_ptavs - custom_ptavs):
+            name += "\n" + ptav.with_context(lang=self.agreement_id.partner_id.lang).display_name
+
+        # Sort the values according to _order settings, because it doesn't work for virtual records in onchange
+        custom_values = sorted(self.product_custom_attribute_value_ids,
+                               key=lambda r: (r.custom_product_template_attribute_value_id.id, r.id))
+        # display the is_custom values
+        for pacv in custom_values:
+            name += "\n" + pacv.with_context(lang=self.agreement_id.partner_id.lang).display_name
+
+        return name
 
     def _convert_to_tax_base_line_dict(self):
         """ Convert the current record to a dictionary in order to use the generic taxes computation method

@@ -15,7 +15,7 @@ class WebsiteSaleRegency(WebsiteSale):
                 csrf=False)
     def shopsite_cart_update_json(self, qty, overlay_template_id=None, attribute_list=None, overlay_product_id=None,
                                   overlay_product_name=None, overlay_area_list=None, preview_images_data=None,
-                                  overlay_product_was_changed=None, **kwargs):
+                                  overlay_product_was_changed=None, duplicate_overlay_product_id=None, **kwargs):
         if not overlay_product_id or overlay_product_was_changed:
             overlay_product, product_template_attribute_value_ids = OverlayTemplatePage.save_overlay_product(
                 overlay_template_id, overlay_product_name,
@@ -23,7 +23,8 @@ class WebsiteSaleRegency(WebsiteSale):
                 overlay_area_list=overlay_area_list,
                 preview_images_data=preview_images_data,
                 overlay_product_id=overlay_product_id,
-                overlay_product_was_changed=overlay_product_was_changed)
+                overlay_product_was_changed=overlay_product_was_changed,
+                duplicate_overlay_product_id=duplicate_overlay_product_id)
         else:
             overlay_product = request.env['overlay.product'].sudo().browse(overlay_product_id).exists()
             if not overlay_product:
@@ -112,7 +113,7 @@ class WebsiteSaleRegency(WebsiteSale):
     def submit_cart_customer_comment(self, customer_comment):
         order = request.website.sale_get_order()
         if not order or order.state != 'draft':
-            return False
+            raise ValidationError('There is no active sale order in the cart')
         return order.write({'customer_comment': customer_comment or ''})
 
     @staticmethod

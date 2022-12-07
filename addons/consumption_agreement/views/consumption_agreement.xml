@@ -84,7 +84,7 @@
                                 mode="tree"
                                 attrs="{'readonly': [('state', 'not in', ['draft'])]}"
                             >
-                                <tree editable="bottom" no_open="1">
+                                <tree editable="bottom">
                                     <field name="product_id"/>
                                     <field name="allowed_partner_ids" widget="many2many_tags" domain="[('id', 'in', parent.allowed_partner_ids)]"/>
                                     <field name="name" string="Description"/>

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-inherit="web.X2ManyField" t-inherit-mode="extension" owl="1">
+         <xpath expr="//button[hasclass('o-kanban-button-new')]/parent::div" position="attributes">
+             <attribute name="t-att-class" add="(isProductMultipleImagesUpload ? ' text-nowrap' : '')" separator=" "/>
+         </xpath>
+        <xpath expr="//button[hasclass('o-kanban-button-new')]/parent::div" position="after">
+            <div t-if="isProductMultipleImagesUpload">
+                <input type="file" id="product_multiple_images_upload" class="d-none"
+                       accept="image/*" multiple="multiple"
+                       t-on-change="onAddMultipleImages"/>
+                <label for="product_multiple_images_upload"
+                       class="btn btn-secondary text-nowrap"
+                       title="Add multiple images">
+                    Add multiple images
+                </label>
+            </div>
+        </xpath>
+    </t>
+</templates>

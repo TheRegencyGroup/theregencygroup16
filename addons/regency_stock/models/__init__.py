@@ -1,1 +1,1 @@
-from . import stock_picking, stock_quant, stock_quant_package
+from . import stock_picking, stock_quant, stock_quant_package, mail_template

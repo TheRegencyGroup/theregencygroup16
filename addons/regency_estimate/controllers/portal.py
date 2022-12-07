@@ -178,16 +178,12 @@ class CustomerPortal(portal.CustomerPortal):
     @http.route(['/my/price_sheets/<int:order_id>'], type='http', auth="public", website=True)
     def portal_price_sheet_page(self, order_id, report_type=None, access_token=None, message=False, download=False,
                                 **kw):
+        if not request.session.uid:
+            return request.redirect('/web/login', 303)
         try:
             order_sudo = self._document_check_access('product.price.sheet', order_id, access_token=access_token)
         except (AccessError, MissingError):
             return request.redirect('/my')
-
-        # TODO: add report later
-
-        # if report_type in ('html', 'pdf', 'text'):
-        #     return self._show_report(model=order_sudo, report_type=report_type,
-        #                              report_ref='sale.action_report_saleorder', download=download)
 
         # use sudo to allow accessing/viewing orders for public user
         # only if he knows the private token

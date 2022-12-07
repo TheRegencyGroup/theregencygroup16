@@ -77,9 +77,18 @@ class OverlayTemplatePage(http.Controller):
             })
 
     @classmethod
+    def copy_overlay_product_area_images(cls, area_images):
+        new_area_images = request.env['overlay.product.area.image'].sudo()
+        for area_image in area_images:
+            new_area_image = area_image.copy()
+            new_area_image.overlay_product_id = False
+            new_area_images += new_area_image
+        return new_area_images
+
+    @classmethod
     def save_overlay_product(cls, overlay_template_id, overlay_product_name, attribute_list=None,
                              overlay_area_list=None, preview_images_data=None, overlay_product_id=None,
-                             overlay_product_was_changed=None):
+                             overlay_product_was_changed=None, duplicate_overlay_product_id=None):
         overlay_template_id = request.env['overlay.template'].browse(overlay_template_id).exists()
         if not overlay_template_id:
             raise ValidationError('Overlay template does not exists!')
@@ -87,6 +96,7 @@ class OverlayTemplatePage(http.Controller):
 
         sol_with_overlay_product = False
         old_overlay_product = False
+        old_overlay_product_area_image_by_backend = False
         overlay_product = False
         if overlay_product_id:
             old_overlay_product = request.env['overlay.product'].sudo().browse(overlay_product_id).exists()
@@ -97,12 +107,16 @@ class OverlayTemplatePage(http.Controller):
                     [('product_id', '=', old_overlay_product.product_id.id)])
             if sol_with_overlay_product and overlay_product_was_changed:
                 old_overlay_product.active = False
+                backend_area_images = old_overlay_product.overlay_product_area_image_ids. \
+                    filtered(lambda x: not x.added_on_website)
+                old_overlay_product_area_image_by_backend = cls.copy_overlay_product_area_images(
+                    backend_area_images)
             else:
                 overlay_product = old_overlay_product
                 overlay_product.name = overlay_product_name
                 if overlay_product_was_changed:
                     overlay_product.overlay_product_image_ids.unlink()
-                    overlay_product.overlay_product_area_image_ids.unlink()
+                    overlay_product.overlay_product_area_image_ids.filtered(lambda x: x.added_on_website).unlink()
                     overlay_product.product_id = False
 
         if not overlay_product:
@@ -110,6 +124,14 @@ class OverlayTemplatePage(http.Controller):
                 'name': overlay_product_name,
                 'overlay_template_id': overlay_template_id.id,
             })
+
+        if not old_overlay_product_area_image_by_backend and duplicate_overlay_product_id:
+            backend_area_images = request.env['overlay.product.area.image'].sudo().search(
+                [('overlay_product_id', '=', duplicate_overlay_product_id), ('added_on_website', '=', False)])
+            old_overlay_product_area_image_by_backend = cls.copy_overlay_product_area_images(backend_area_images)
+
+        if overlay_product and old_overlay_product_area_image_by_backend:
+            old_overlay_product_area_image_by_backend.overlay_product_id = overlay_product.id
 
         product_template_attribute_value_ids = []
         if not old_overlay_product or overlay_product_was_changed:
@@ -171,6 +193,7 @@ class OverlayTemplatePage(http.Controller):
                             'area_index': area_index,
                             'area_object_index': area_object_index,
                             'overlay_product_id': overlay_product.id,
+                            'added_on_website': True,
                         })
                         obj['areaImageId'] = area_image_id.id
                         del obj['image']
@@ -316,14 +339,16 @@ class OverlayTemplatePage(http.Controller):
                 csrf=False)
     def overlay_product_save(self, overlay_template_id, overlay_product_name, attribute_list=None,
                              overlay_area_list=None, preview_images_data=None, overlay_product_id=None,
-                             overlay_product_was_changed=None, **kwargs):
+                             overlay_product_was_changed=None, duplicate_overlay_product_id=None, **kwargs):
         overlay_product, product_template_attribute_value_ids = self.save_overlay_product(
             overlay_template_id, overlay_product_name,
             attribute_list=attribute_list,
             overlay_area_list=overlay_area_list,
             preview_images_data=preview_images_data,
             overlay_product_id=overlay_product_id,
-            overlay_product_was_changed=overlay_product_was_changed)
+            overlay_product_was_changed=overlay_product_was_changed,
+            duplicate_overlay_product_id=duplicate_overlay_product_id,
+        )
         return self.get_base_overlay_product_data(overlay_product)
 
     @http.route(['/shop/overlay_template/delete'], type='json', auth='user', methods=['POST'], website=True,

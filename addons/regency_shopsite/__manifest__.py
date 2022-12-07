@@ -38,8 +38,7 @@
         'views/website/sale_portal_templates.xml',
         'views/res_partner.xml',
         'views/res_config_settings.xml',
-        'views/sale_portal_templates.xml',
-        'views/product_image_views.xml',
+        'views/overlay_product_area_image_views.xml',
         'views/email_templates.xml'
     ],
     'demo': [
@@ -53,9 +52,11 @@
             'regency_shopsite/static/src/js/frontend/overlay_template_page/**/*.js',
             'regency_shopsite/static/src/js/frontend/cart/**/*.js',
             'regency_shopsite/static/src/js/frontend/cart_line/**/*.js',
+            'regency_shopsite/static/src/js/frontend/cart_comment/**/*.js',
             'regency_shopsite/static/src/js/frontend/shop_catalog/*.js',
             'regency_shopsite/static/src/js/frontend/list_pagination/*.js',
             'regency_shopsite/static/src/js/frontend/cart_page.js',
+            'regency_shopsite/static/src/js/frontend/website_sale.js',
 
             'regency_shopsite/static/src/js/frontend/**/**/*.xml',
 
@@ -73,11 +74,11 @@
         'web.assets_backend': [
             'regency_shopsite/static/lib/fabric_js/fabric.min.js',
             'regency_shopsite/static/src/js/main.js',
-            'regency_shopsite/static/src/js/backend/*.js',
+            'regency_shopsite/static/src/js/backend/**/*.js',
 
-            'regency_shopsite/static/src/js/backend/*.xml',
+            'regency_shopsite/static/src/js/backend/**/*.xml',
 
-            'regency_shopsite/static/src/scss/backend/*.scss',
+            'regency_shopsite/static/src/scss/backend/**/*.scss',
         ],
     },
     'category': 'Regency',
