@@ -34,9 +34,9 @@ class ConsumptionAgreement(models.Model):
     company_id = fields.Many2one('res.company', required=True, index=True, default=lambda self: self.env.company)
     terms_type = fields.Selection(related='company_id.terms_type')
     legal_accepted = fields.Boolean(default=False)
-    invoice_count = fields.Integer(string="Invoice Count", compute='_compute_invoice_stat', store=True)
-    deposit_percent = fields.Float(string='Deposit %', compute='_compute_invoice_stat', store=True)
-    deposit_percent_str = fields.Char(compute='_compute_invoice_stat', store=True)
+    invoice_count = fields.Integer(string="Invoice Count", compute='_compute_invoice_stat')
+    deposit_percent = fields.Float(string='Deposit %', compute='_compute_invoice_stat')
+    deposit_percent_str = fields.Char(compute='_compute_invoice_stat')
     invoice_ids = fields.One2many('account.move', 'consumption_agreement_id', string="Invoices")
     tax_totals = fields.Binary(compute='_compute_tax_totals')
 
