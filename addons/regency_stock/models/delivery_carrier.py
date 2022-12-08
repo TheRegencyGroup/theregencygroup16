@@ -1,18 +1,14 @@
-import psycopg2
-
-from odoo import api, fields, models, registry, SUPERUSER_ID, _
-from odoo.tools.float_utils import float_round
-
-from odoo.addons.delivery.models.delivery_request_objects import DeliveryCommodity, DeliveryPackage
-
-
-# from .delivery_request_objects import DeliveryCommodity, DeliveryPackage
+from odoo import models
+from odoo.addons.delivery.models.delivery_request_objects import DeliveryPackage
 
 
 class DeliveryCarrier(models.Model):
     _inherit = 'delivery.carrier'
 
     def _get_packages_from_order(self, order, default_package_type):
+        """
+        Overriden.
+        """
         packages = []
 
         total_cost = 0
