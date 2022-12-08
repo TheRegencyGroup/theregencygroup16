@@ -1,5 +1,4 @@
 from odoo.addons.purchase_requisition.tests.common import TestPurchaseRequisitionCommon
-from odoo.tests import TransactionCase
 
 
 class TestFee(TestPurchaseRequisitionCommon):
@@ -38,47 +37,51 @@ class TestFee(TestPurchaseRequisitionCommon):
         })
 
     def test_compute_fee(self):
-        self.assertEqual(self.fee_value_per_item.value, 1.5)  # 1.5
-        self.assertEqual(self.fee_value_percent.value, 10 * 75 * 5 / 100)  # 37.5
-        self.assertEqual(self.fee_value_abs.value, 7)  # 7
-        self.assertEqual(self.psl.fee, (1.5 * 10) + (75 * 10 * 5 / 100) + 7)  # 59.5
-        self.assertEqual(self.psl.total, 59.5 + 10 * 75)  # 809.5
-        self.assertEqual(self.psl.price, 75)
+        self.assertEqual(1.5, self.fee_value_per_item.value)  # 1.5
+        self.assertEqual(10 * 75 * 5 / 100, self.fee_value_percent.value)  # 37.5
+        self.assertEqual(7, self.fee_value_abs.value)  # 7
+        self.assertEqual(1.5 * 10 + 75 * 10 * 5 / 100 + 7, self.psl.fee)  # 59.5
+        self.assertEqual(59.5 + 10 * 75, self.psl.total)  # 809.5
+        self.assertEqual(75, self.psl.price)
+
+    def test_change_fee(self):
+        self.fee_value_percent.write({'percent_value': 6})
+        self.fee_value_abs.write({'value': 8})
+        self.fee_value_per_item.write({'value': 2})
+
+        self.assertEqual(2 * 10 + 75 * 10 * 6 / 100 + 8, self.psl.fee)  # 73
+        self.assertEqual(73 + 10 * 75, self.psl.total)  # 823
 
     def test_change_price(self):
-        self.assertEqual(self.fee_value_per_item.value, 1.5)  # 1.5
-        self.assertEqual(self.fee_value_percent.value, 10 * 75 * 5 / 100)  # 37.5
-        self.assertEqual(self.fee_value_abs.value, 7)  # 7
+        self.assertEqual(1.5, self.fee_value_per_item.value)  # 1.5
+        self.assertEqual(10 * 75 * 5 / 100, self.fee_value_percent.value)  # 37.5
+        self.assertEqual(7, self.fee_value_abs.value)  # 7
 
         self.psl.write({'price': 72})
 
-        self.assertEqual(self.psl.fee, (1.5 * 10) + (72 * 10 * 5 / 100) + 7)  # 58
-        self.assertEqual(self.psl.total, 58 + 10 * 72)
+        self.assertEqual(1.5 * 10 + 72 * 10 * 5 / 100 + 7, self.psl.fee)  # 58
+        self.assertEqual(58 + 10 * 72, self.psl.total)
 
         self.psl.onchange_total()
 
-        self.assertEqual(self.psl.price, 72)
-        self.assertEqual(self.fee_value_per_item.value, 1.5)  # 1.5
-        self.assertEqual(self.fee_value_percent.value, 10 * 72 * 5 / 100)  # 36
-        self.assertEqual(self.fee_value_abs.value, 7)  # 7
+        self.assertEqual(72, self.psl.price)
+        self.assertEqual(1.5, self.fee_value_per_item.value)  # 1.5
+        self.assertEqual(10 * 72 * 5 / 100, self.fee_value_percent.value)  # 36
+        self.assertEqual(7, self.fee_value_abs.value)  # 7
 
     def test_change_qty(self):
-        self.assertEqual(self.fee_value_per_item.value, 1.5)  # 1.5
-        self.assertEqual(self.fee_value_percent.value, 10 * 75 * 5 / 100)  # 37.5
-        self.assertEqual(self.fee_value_abs.value, 7)  # 7
+        self.assertEqual(1.5, self.fee_value_per_item.value)  # 1.5
+        self.assertEqual(10 * 75 * 5 / 100, self.fee_value_percent.value)  # 37.5
+        self.assertEqual(7, self.fee_value_abs.value)  # 7
 
         self.psl.write({'min_quantity': 20})
 
-        self.assertEqual(self.psl.fee, (1.5 * 20) + (75 * 20 * 5 / 100) + 7)  # 112
-        self.assertEqual(self.psl.total, 112 + 20 * 75)
+        self.assertEqual(1.5 * 20 + 75 * 20 * 5 / 100 + 7, self.psl.fee)  # 112
+        self.assertEqual(112 + 20 * 75, self.psl.total)
 
         self.psl.onchange_total()
 
-        self.assertEqual(self.psl.price, 75)
-        self.assertEqual(self.fee_value_per_item.value, 1.5)  # 1.5
-        self.assertEqual(self.fee_value_percent.value, 20 * 75 * 5 / 100)  # 75
-        self.assertEqual(self.fee_value_abs.value, 7)  # 7
-
-
-
-
+        self.assertEqual(75, self.psl.price)
+        self.assertEqual(1.5, self.fee_value_per_item.value)  # 1.5
+        self.assertEqual(20 * 75 * 5 / 100, self.fee_value_percent.value)  # 75
+        self.assertEqual(7, self.fee_value_abs.value)  # 7
