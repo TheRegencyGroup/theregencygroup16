@@ -343,7 +343,7 @@ class ConsumptionAggreementLine(models.Model):
     partner_id = fields.Many2one(related='agreement_id.partner_id', domain=[('contact_type', '=', 'customer')],
                                  store=True)
     allowed_partner_ids = fields.Many2many('res.partner', string="Allowed Customers")
-    vendor_id = fields.Many2one('res.partner')
+    vendor_id = fields.Many2one('res.partner', required=True)
     untaxed_amount = fields.Monetary(compute='_compute_untaxed_amount', store=True)
     name = fields.Text(string='Description')
     product_custom_attribute_value_ids = fields.One2many('product.attribute.custom.value', 'ca_product_line_id',
