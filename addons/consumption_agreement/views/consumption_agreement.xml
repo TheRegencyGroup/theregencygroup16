@@ -88,7 +88,7 @@
                                     <field name="product_id"/>
                                     <field name="allowed_partner_ids" widget="many2many_tags" domain="[('id', 'in', parent.allowed_partner_ids)]"/>
                                     <field name="name" string="Description"/>
-                                    <field name="vendor_id" optional="hide"/>
+                                    <field name="vendor_id"/>
                                     <field name="qty_allowed"/>
                                     <field name="qty_available" string="Qty On Hand"/>
                                     <field name="qty_consumed"/>
