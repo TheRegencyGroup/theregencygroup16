@@ -32,7 +32,8 @@ class TestDownpayment(TestSaleCommon):
                 Command.create({
                     'product_id': product.id,
                     'qty_allowed': 1000,
-                    'price_unit': 0.1
+                    'price_unit': 0.1,
+                    'vendor_id': vendor.id
                 })
             ]
         })
