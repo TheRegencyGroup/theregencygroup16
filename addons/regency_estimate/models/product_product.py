@@ -52,7 +52,7 @@ class ProductProduct(models.Model):
     @api.depends_context('customer_or_vendor_id')
     def _compute_last_order_values(self):
         for rec in self:
-            purchase_orders = rec.purchase_order_ids.filtered(lambda order: order.state in ['purchase']
+            purchase_orders = rec.purchase_order_ids.filtered(lambda order: order.state == 'purchase'
                                 and order.partner_id.id == self.env.context.get('customer_or_vendor_id'))
             last_purchase_order = purchase_orders.sorted('date_order', reverse=True)[0]
             if last_purchase_order:
