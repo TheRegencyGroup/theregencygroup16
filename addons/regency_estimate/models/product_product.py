@@ -49,10 +49,11 @@ class ProductProduct(models.Model):
     last_purchase_unit_price = fields.Float(compute='_compute_last_order_values')
 
     @api.depends('purchase_order_ids', 'purchase_order_line_ids')
+    @api.depends_context('customer_or_vendor_id')
     def _compute_last_order_values(self):
         for rec in self:
             purchase_orders = rec.purchase_order_ids.filtered(lambda order: order.state in ['purchase', 'done']
-                                and order.partner_id.id == self.env.context.get('active_id'))
+                                and order.partner_id.id == self.env.context.get('customer_or_vendor_id'))
             last_purchase_order = purchase_orders.sorted('date_order', reverse=True)[0]
             if last_purchase_order:
                 rec.last_purchase_order_date = last_purchase_order.date_order

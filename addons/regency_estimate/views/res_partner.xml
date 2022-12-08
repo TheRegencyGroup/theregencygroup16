@@ -46,7 +46,7 @@
                     </div>
                 </button>
                 <button name="action_show_products" type="object"
-                        class="oe_stat_button" icon="fa-calendar">
+                        class="oe_stat_button" icon="fa-calendar" context="{'customer_or_vendor_id': id}">
                     <div class="o_stat_info">
                         <field name="product_count" class="o_stat_value"/>
                         <span class="o_stat_text" attrs="{'invisible': [('product_count', '=', 1)]}">
