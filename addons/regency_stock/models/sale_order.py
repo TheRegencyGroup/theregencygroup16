@@ -12,5 +12,6 @@ class SaleOrder(models.Model):
         for order in self:
             out_stock_picking = order.mapped('order_line.move_ids.picking_id').filtered(
                 lambda f: f.picking_type_code == 'outgoing')
-            out_stock_picking.write({'carrier_id': carrier.id})
+            if out_stock_picking:
+                out_stock_picking.write({'carrier_id': carrier.id})
         return res
