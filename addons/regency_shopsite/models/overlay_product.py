@@ -28,9 +28,7 @@ class OverlayProduct(models.Model):
     product_template_attribute_value_ids = fields.Many2many('product.template.attribute.value')
     overlay_product_image_ids = fields.One2many('overlay.product.image', 'overlay_product_id', readonly=True,
                                                 copy=False)
-    overlay_product_area_image_ids = fields.One2many('overlay.product.area.image', 'overlay_product_id', readonly=True,
-                                                     copy=False)
-    overlay_product_area_image_attachment_ids = fields.Many2many('ir.attachment')
+    overlay_product_area_image_ids = fields.One2many('overlay.product.area.image', 'overlay_product_id', copy=False)
     area_list_data = fields.Json()
     areas_text_table = fields.Html(compute='_compute_areas_text_table', store=True)
     last_updated_date = fields.Datetime(readonly=True, copy=False)

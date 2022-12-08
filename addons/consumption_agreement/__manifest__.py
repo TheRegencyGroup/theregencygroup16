@@ -1,6 +1,6 @@
 {
     'name': 'Regency Consumption Agreement',
-    'version': '16.0.0.2',
+    'version': '16.0.0.3',
     'summary': '',
     'author': 'OpsWay',
     'description': "",
@@ -8,7 +8,10 @@
     'depends': [
         'sale_management',
         'sale',
-        'regency_contacts'
+        'regency_contacts',
+        'purchase_stock',
+        'stock_mts_mto_rule',
+        'stock_dropshipping'
     ],
     'category': 'Regency',
     'sequence': 3,
@@ -20,6 +23,7 @@
         'views/sale_order_portal.xml',
         'security/ir.model.access.csv',
         'wizard/create_so_wizard.xml',
+        'wizard/sale_make_invoice_advance_views.xml',
         'report/consumption_agreement.xml'
     ],
     'assets': {

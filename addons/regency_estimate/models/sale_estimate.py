@@ -27,8 +27,7 @@ class SaleEstimate(models.Model):
 
     # Description
     name = fields.Char(
-        'Estimate', index=True, required=True,
-        compute='_compute_name', readonly=False, store=True)
+        'Estimate', index=True, required=True, readonly=True, default=lambda self: _('New'))
     description = fields.Html('Notes')
     company_id = fields.Many2one(
         'res.company', string='Company', index=True,
@@ -51,7 +50,7 @@ class SaleEstimate(models.Model):
     # Customer / contact
     partner_id = fields.Many2one(
         'res.partner', string='Customer', check_company=True, index=True, tracking=10,
-        domain="['|', ('company_id', '=', False), ('company_id', '=', company_id)]",
+        domain="[('is_company', '=', True),('contact_type', '=', 'customer'),'|', ('company_id', '=', False), ('company_id', '=', company_id)]",
         help="Linked partner (optional). Usually created when converting the lead. You can find a partner by its Name, TIN, Email or Internal Reference.")
     contact_name = fields.Char(
         'Contact Name', tracking=30,
@@ -86,6 +85,23 @@ class SaleEstimate(models.Model):
                                         store=True, index=True)
     purchase_order_ids = fields.One2many('purchase.order', compute='_compute_purchase_orders')
     purchase_order_count = fields.Integer(compute='_compute_purchase_orders')
+
+    shipping_contact_id = fields.Many2one('res.partner',
+                                          compute='_compute_shipping_billing_contact_id',
+                                          store=True, readonly=False, required=True, precompute=True,
+                                          domain="[('parent_id', '=', partner_id),('is_company', '=', False)]")
+    billing_contact_id = fields.Many2one('res.partner',
+                                         compute='_compute_shipping_billing_contact_id',
+                                         store=True, readonly=False, required=True, precompute=True,
+                                         domain="[('parent_id', '=', partner_id),('is_company', '=', False)]")
+
+    @api.depends('partner_id')
+    def _compute_shipping_billing_contact_id(self):
+        for estimate in self:
+            estimate.shipping_contact_id = estimate.partner_id.address_get(['delivery'])[
+                'delivery'] if estimate.partner_id else False
+            estimate.billing_contact_id = estimate.partner_id.address_get(['invoice'])[
+                'invoice'] if estimate.partner_id else False
 
     def _compute_purchase_orders(self):
         for rec in self:
@@ -131,16 +147,11 @@ class SaleEstimate(models.Model):
                 rec.company_id = proposal
 
     @api.depends('partner_id')
-    def _compute_name(self):
-        for rec in self:
-            if not rec.name and rec.partner_id and rec.partner_id.name:
-                rec.name = _("%s's estimate") % rec.partner_id.name
-
-    @api.depends('partner_id')
     def _compute_contact_name(self):
         """ compute the new values when partner_id has changed """
         for rec in self:
             rec.update(rec._prepare_contact_name_from_partner(rec.partner_id))
+
 
     def _prepare_contact_name_from_partner(self, partner):
         contact_name = False if partner.is_company else partner.name
@@ -174,6 +185,13 @@ class SaleEstimate(models.Model):
     def _compute_price_sheet_data(self):
         for rec in self:
             rec.price_sheet_count = len(rec.price_sheet_ids)
+
+    @api.model
+    def create(self, vals):
+        if vals.get('name', _('New')) == _('New'):
+            vals['name'] = self.env['ir.sequence'].next_by_code('sale.estimate') or _('New')
+        result = super(SaleEstimate, self).create(vals)
+        return result
 
     def acton_select_all(self):
         for rec in self:

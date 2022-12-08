@@ -12,19 +12,27 @@ class PurchaseOrder(models.Model):
         'confirmed_prices': lambda recs: recs.write({'state': 'draft'}),
     })
     show_column_produced_overseas = fields.Boolean(compute='_compute_show_column_produced_overseas')
+    tracking_ref = fields.Char(compute='_compute_tracking_references')
+
+    def _compute_tracking_references(self):
+        for entry in self:
+            if entry.picking_ids:
+                entry.tracking_ref = " ,".join(ref for ref in entry.picking_ids.mapped('carrier_tracking_ref') if ref)
+            else:
+                entry.tracking_ref = False
 
     @api.depends('partner_id', 'partner_id.is_company', 'partner_id.contact_type', 'partner_id.vendor_type')
     def _compute_show_column_produced_overseas(self):
         for rec in self:
-            rec.show_column_produced_overseas = rec.partner_id.is_company\
-                                                and rec.partner_id.contact_type == 'vendor'\
+            rec.show_column_produced_overseas = rec.partner_id.is_company \
+                                                and rec.partner_id.contact_type == 'vendor' \
                                                 and rec.partner_id.vendor_type == 'overseas'
 
     @api.onchange('partner_id')
     @api.depends('partner_id', 'partner_id.is_company', 'partner_id.contact_type', 'partner_id.vendor_type')
     def _onchange_partner_id(self):
-        if self.partner_id.is_company\
-                and self.partner_id.contact_type == 'vendor'\
+        if self.partner_id.is_company \
+                and self.partner_id.contact_type == 'vendor' \
                 and self.partner_id.vendor_type == 'overseas':
             self.order_line.write({'produced_overseas': True})
         else:
@@ -35,8 +43,9 @@ class PurchaseOrder(models.Model):
         for rec in self.filtered(lambda f: f.requisition_id):
             for line in rec.order_line:
                 req_line = rec.requisition_id.line_ids.filtered(lambda f: f.product_id == line.product_id
-                                                                      and (f.partner_id == rec.partner_id or not f.partner_id)
-                                                                      and f.product_qty == line.product_qty)
+                                                                          and (
+                                                                                  f.partner_id == rec.partner_id or not f.partner_id)
+                                                                          and f.product_qty == line.product_qty)
                 if req_line:
                     req_line.write({'partner_id': rec.partner_id.id,
                                     'price_unit': line.price_unit,
@@ -97,7 +106,7 @@ class MyPurchaseOrderLine(models.Model):
                                                       po):
         res = super()._prepare_purchase_order_line_from_procurement(product_id, product_qty, product_uom, company_id,
                                                                     values, po)
-        if values['pricesheet_vendor_id']:
+        if values.get('pricesheet_vendor_id'):
             res.update({'price_unit': values['pricesheet_vendor_price']})
         if values['customer_id']:
             res.update({'customer_id': values['customer_id']})

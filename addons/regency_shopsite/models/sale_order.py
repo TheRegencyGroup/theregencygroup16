@@ -7,6 +7,7 @@ class SaleOrder(models.Model):
     _inherit = 'sale.order'
 
     customer_comment = fields.Char()
+    has_overlay_product = fields.Boolean(compute='_compute_has_overlay_product')
 
     def action_confirm(self):
         res = super(SaleOrder, self).action_confirm()
@@ -42,25 +43,33 @@ class SaleOrder(models.Model):
             }
             email_template.with_context(data).send_mail(self.id, email_values=email_values)
 
+    @api.depends('order_line.overlay_product_id')
+    def _compute_has_overlay_product(self):
+        for so in self:
+            so.has_overlay_product = bool(so.order_line.overlay_product_id)
+
 
 class SaleOrderLine(models.Model):
     _inherit = 'sale.order.line'
 
     overlay_template_id = fields.Many2one('overlay.template', compute='_compute_overlay_template_id')
     price_list_id = fields.Many2one('product.pricelist', string='Pricelist')
+    overlay_product_id = fields.Many2one('overlay.product', 'Customized Product',
+                                         related='product_id.overlay_product_id')
     image_snapshot = fields.Image('Product Image')
     image_snapshot_url = fields.Text(compute='_compute_image_snapshot_url')
 
-    def _get_delivery_data(self):
+    def _get_delivery_data(self, return_json: bool = False):
         self.ensure_one()
         possible_addresses = [{'modelId': address.id,
                                'addressStr': address.name,
+                               'addressFullInfo': address._get_delivery_address_str()
                                } for address in self.possible_delivery_address_ids]
-        return json.dumps({'solId': self.id,
-                           'currentDeliveryAddress': self.delivery_address_id.id,
-                           'possibleDeliveryAddresses': possible_addresses,
-                           })
-
+        res_data = {'solId': self.id,
+                    'currentDeliveryAddress': self.delivery_address_id.id,
+                    'possibleDeliveryAddresses': possible_addresses,
+                    }
+        return json.dumps(res_data) if return_json else res_data
 
     @api.model_create_multi
     def create(self, vals):
@@ -85,8 +94,8 @@ class SaleOrderLine(models.Model):
     def _link_overlay_product_to_product_variant(self):
         customization_attribute_id = self.env.ref('regency_shopsite.customization_attribute')
         for line in self:
-            customization_value_id = line.product_id.product_template_attribute_value_ids\
-                .filtered(lambda x: x.attribute_id.id == customization_attribute_id.id)\
+            customization_value_id = line.product_id.product_template_attribute_value_ids \
+                .filtered(lambda x: x.attribute_id.id == customization_attribute_id.id) \
                 .product_attribute_value_id
             if not customization_value_id or not customization_value_id.overlay_product_id:
                 continue
@@ -162,6 +171,16 @@ class SaleOrderLine(models.Model):
             'type': 'ir.actions.act_window',
             'res_model': 'sale.order.line',
             'res_id': self.id,
+            'view_mode': 'form',
+            'views': [(False, "form")],
+        }
+
+    def action_open_overlay_product_form(self):
+        self.ensure_one()
+        return {
+            'type': 'ir.actions.act_window',
+            'res_model': 'overlay.product',
+            'res_id': self.overlay_product_id.id,
             'view_mode': 'form',
             'views': [(False, "form")],
         }

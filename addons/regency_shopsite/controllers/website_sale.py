@@ -6,6 +6,7 @@ from odoo.addons.website_sale.controllers.main import WebsiteSale
 from odoo.addons.regency_shopsite.controllers.overlay_template_page import OverlayTemplatePage
 
 DEFAULT_PRODUCT_QTY_PEAR_PAGE = 6
+DELIVERY_ADDRESS_OPT_PARAMS = ('street', 'street2', 'city', 'zip', 'state_id', 'country_id', )
 
 
 class WebsiteSaleRegency(WebsiteSale):
@@ -14,7 +15,7 @@ class WebsiteSaleRegency(WebsiteSale):
                 csrf=False)
     def shopsite_cart_update_json(self, qty, overlay_template_id=None, attribute_list=None, overlay_product_id=None,
                                   overlay_product_name=None, overlay_area_list=None, preview_images_data=None,
-                                  overlay_product_was_changed=None, **kwargs):
+                                  overlay_product_was_changed=None, duplicate_overlay_product_id=None, **kwargs):
         if not overlay_product_id or overlay_product_was_changed:
             overlay_product, product_template_attribute_value_ids = OverlayTemplatePage.save_overlay_product(
                 overlay_template_id, overlay_product_name,
@@ -22,7 +23,8 @@ class WebsiteSaleRegency(WebsiteSale):
                 overlay_area_list=overlay_area_list,
                 preview_images_data=preview_images_data,
                 overlay_product_id=overlay_product_id,
-                overlay_product_was_changed=overlay_product_was_changed)
+                overlay_product_was_changed=overlay_product_was_changed,
+                duplicate_overlay_product_id=duplicate_overlay_product_id)
         else:
             overlay_product = request.env['overlay.product'].sudo().browse(overlay_product_id).exists()
             if not overlay_product:
@@ -52,7 +54,7 @@ class WebsiteSaleRegency(WebsiteSale):
                               delivery_partner_id=hotel_id.id if hotel_id else False, price_list_id=price_list_id)
         return {
             'cartData': request.website._get_cart_data(),
-            'overlayProductData': OverlayTemplatePage.get_overlay_product_data(overlay_product),
+            'overlayProductData': OverlayTemplatePage.get_base_overlay_product_data(overlay_product),
         }
 
     @http.route([
@@ -85,10 +87,11 @@ class WebsiteSaleRegency(WebsiteSale):
     def create_and_link_delivery_address(self, sale_order_line_id, address_name: str, **kw):
         sol = self._get_sol_id_from_current_cart(sale_order_line_id)
         if sol:
+            optional_addr_vals = {key: kw.get(key) for key in kw.keys() if key in DELIVERY_ADDRESS_OPT_PARAMS}
             new_address_vals = {'name': address_name,
                                 'type': 'delivery',
                                 'parent_id': sol.delivery_partner_id.id,
-                                **kw
+                                **optional_addr_vals
                                 }
             new_address = sol.env['res.partner'].create(new_address_vals)
             sol.write({'delivery_address_id': new_address.id})
@@ -110,7 +113,7 @@ class WebsiteSaleRegency(WebsiteSale):
     def submit_cart_customer_comment(self, customer_comment):
         order = request.website.sale_get_order()
         if not order or order.state != 'draft':
-            return False
+            raise ValidationError('There is no active sale order in the cart')
         return order.write({'customer_comment': customer_comment or ''})
 
     @staticmethod

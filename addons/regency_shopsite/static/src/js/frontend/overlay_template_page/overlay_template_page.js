@@ -15,7 +15,8 @@ export class OverlayTemplatePageComponent extends Component {
 
         this.store = useStore();
         this.state = useState({
-            nameInputIsFilled: !!this.store.otPage.overlayProductName,
+            nameInputIsFilled: !!this.store.otPage.overlayProduct?.name,
+            showPostAddToCart: false,
         });
 
         this.inputNameRef = useRef('name_input');
@@ -94,9 +95,9 @@ export class OverlayTemplatePageComponent extends Component {
     get showAddToCartBtn() {
         return !this.store.otPage.overlayProductIsArchived &&
             ((this.store.otPage.hasPriceList &&
-                    this.store.otPage.overlayTemplateIsAvailableForActiveHotel) ||
+                    this.store.otPage.overlayTemplate?.isAvailableForActiveHotel) ||
                 (!this.store.otPage.hasPriceList &&
-                    !this.store.otPage.overlayTemplateIsAvailableForActiveHotel));
+                    !this.store.otPage.overlayTemplate?.isAvailableForActiveHotel));
     }
 
     get showListingNameInfoPopover() {
@@ -188,7 +189,7 @@ export class OverlayTemplatePageComponent extends Component {
             return;
         }
         let data = this.store.otPage.getCustomizedData();
-        let overlayProductId = this.store.otPage.overlayProductId;
+        let overlayProductId = this.store.otPage.overlayProduct?.id;
         if (!!overlayProductId) {
             data = {
                 ...data,
@@ -204,11 +205,15 @@ export class OverlayTemplatePageComponent extends Component {
             data = {
                 ...data,
                 ...customData,
-            }
+            };
+        }
+        if (this.store.otPage.duplicateOverlayProductId) {
+            data.duplicateOverlayProductId = this.store.otPage.duplicateOverlayProductId;
         }
         let res = await this.store.cart.addOverlayToCart(data);
         if (res) {
             this.store.otPage.updateOverlayProductData(res);
+            this.state.showPostAddToCart = true;
         }
         if (this.store.otPage.editMode) {
             this.store.otPage.disableEditMode();
@@ -218,6 +223,10 @@ export class OverlayTemplatePageComponent extends Component {
     onChangedActiveHotel() {
         let activeHotelId = this.store.hotelSelector?.activeHotel;
         this.store.otPage.updatePriceList(activeHotelId).catch();
+    }
+
+    onClickContinueShoppingBtn() {
+        this.state.showPostAddToCart = false;
     }
 }
 

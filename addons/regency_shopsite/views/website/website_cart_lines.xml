@@ -2,16 +2,18 @@
 <odoo>
 
     <template id="cart" inherit_id="website_sale.cart">
+        <xpath expr="//t[@t-call='website.layout']" position="after">
+            <script type="text/javascript">
+                PRELOADED_DATA.COUNTRIES_DATA=<t t-out="request.env['website']._get_country_state_full_list_data()"/>;
+            </script>
+        </xpath>
         <xpath expr="//t[@t-call='website_sale.wizard_checkout']/parent::div" position="replace">
             <div class="mt-4"/>
         </xpath>
         <xpath expr="//a[contains(@href, '/shop/checkout')]/parent::div" position="replace">
-            <div t-if="website_sale_order" class="input-group customer_comment_input_group">
-                <input name="Customer Comment" class="form-control mb32 customer_comment_input" type="text"
-                       placeholder="leave your message here..."
-                       t-att-value="website_sale_order.customer_comment or None"/>
-                <a href="#" role="button" class="btn btn-secondary mb32 a-submit-customer-comment">Save</a>
-            </div>
+            <div t-if="website_sale_order" class="r_order_customer_comment_container"
+                 data-owl-widget="CustomerCommentInCart"
+                 t-att-data-comment-props="website_sale_order.customer_comment or None"/>
         </xpath>
     </template>
 
@@ -65,7 +67,8 @@
                 </div>
             </td>
             <td align="center">
-                <div data-owl-widget="DeliveryAddressCartLine" t-att-data-sol-data-props="line._get_delivery_data()"></div>
+                <div data-owl-widget="DeliveryAddressCartLine"
+                     t-att-data-sol-data-props="line._get_delivery_data(return_json=True)"></div>
             </td>
         </xpath>
     </template>

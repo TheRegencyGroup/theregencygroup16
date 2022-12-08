@@ -297,7 +297,7 @@ class ProductPriceSheetLine(models.Model):
     _order = 'product_id ASC, min_quantity ASC'
 
     price_sheet_id = fields.Many2one('product.price.sheet')
-    name = fields.Char('Description')
+    name = fields.Text('Description')
     sequence = fields.Integer("Sequence", default=10)
     product_id = fields.Many2one(
         'product.product', string='Product',
@@ -344,10 +344,16 @@ class ProductPriceSheetLine(models.Model):
     fee_value_ids = fields.One2many('fee.value', 'price_sheet_line_id')
     portal_fee = fields.Float(compute='_compute_fee', store=True)
 
-    @api.depends('fee_value_ids', 'fee_value_ids.value', 'fee_value_ids.portal_value')
+    @api.depends('fee_value_ids', 'fee_value_ids.value', 'fee_value_ids.portal_value', 'fee_value_ids.per_item')
     def _compute_fee(self):
         for rec in self:
-            rec.fee = sum(rec.fee_value_ids.mapped('value'))
+            fee_sum = 0
+            for fee in rec.fee_value_ids:
+                if fee.per_item:
+                    fee_sum += rec.min_quantity * fee.value
+                else:
+                    fee_sum += fee.value
+            rec.fee = fee_sum
             rec.portal_fee = sum(rec.fee_value_ids.mapped('portal_value'))
             rec.onchange_price()
 

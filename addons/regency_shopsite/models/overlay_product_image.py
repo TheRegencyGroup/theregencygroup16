@@ -8,3 +8,10 @@ class OverlayProductImage(models.Model):
     image = fields.Image(required=True)
     overlay_position_id = fields.Many2one('overlay.position', required=True)
     overlay_product_id = fields.Many2one('overlay.product', ondelete='cascade', copy=False)
+
+    def action_download_image(self):
+        return {
+            'type': 'ir.actions.act_url',
+            'target': 'new',
+            'url': f'/web/image?model={self._name}&id={self.id}&field=image&download=True',
+        }

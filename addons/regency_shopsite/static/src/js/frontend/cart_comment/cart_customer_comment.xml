@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates>
+
+    <t t-name="customer_comment_in_cart" owl="1">
+        <div class="r_order_customer_comment">
+            <input name="Customer Comment" type="text"
+                   placeholder="Leave your message here..."
+                   t-on-input="onCommentInput"
+                   t-ref="comment_input"/>
+            <button t-if="state.hasUnsavedChanges and !state.processSaving"
+                    t-on-click="onClickSave"
+                    class="btn btn-secondary">
+                Save
+            </button>
+            <t t-if="state.processSaving">
+                <div class="btn btn-secondary">
+                    Processing...
+                </div>
+            </t>
+            <t t-elif="state.hasSavedComment">
+                <button t-on-click="onClickDelete"
+                        class="btn btn-secondary">
+                    Delete
+                </button>
+            </t>
+
+        </div>
+    </t>
+</templates>

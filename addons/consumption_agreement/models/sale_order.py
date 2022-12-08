@@ -1,5 +1,6 @@
-from odoo import api, fields, models
+from odoo import api, fields, models, Command
 from odoo.exceptions import UserError
+import time
 
 
 class SaleOrder(models.Model):
@@ -17,8 +18,35 @@ class SaleOrder(models.Model):
         res = super(SaleOrder, self).action_confirm()
         self.mapped('order_line').check_overconsumption()
         self.mapped('order_line').check_fifo_consumption()
+        self.add_downpayments_from_ca()
         return res
 
+    def add_downpayments_from_ca(self):
+        for rec in self:
+            consumptions = rec.order_line.mapped('consumption_agreement_line_id.agreement_id')
+            for con in consumptions.filtered(lambda x: x.deposit_percent > 0):
+                lines = rec.order_line.filtered(lambda x: x.consumption_agreement_line_id.agreement_id.id == con.id)
+                lines_subtotal = sum(lines.mapped('price_subtotal'))
+                so_context = {
+                    'active_model': 'sale.order',
+                    'active_ids': [rec.id],
+                    'active_id': rec.id
+                }
+                downpayment = self.env['sale.advance.payment.inv'].with_context(so_context).create({
+                    'advance_payment_method': 'percentage',
+                    'amount': con.deposit_percent
+                })
+                # Create down payment section if necessary
+                if not any(line.display_type and line.is_downpayment for line in rec.order_line):
+                    self.env['sale.order.line'].create(
+                        downpayment._prepare_down_payment_section_values(rec)
+                    )
+                line_values = downpayment._prepare_so_line_values(rec)
+                line_values['price_unit'] = downpayment._get_down_payment_amount_from_total(lines_subtotal) / len(con.invoice_ids)
+                line_values['name'] = f"Down Payment: { con.name } Deposist { con.deposit_percent_str }"
+                line_values['invoice_lines'] = [Command.link(invl.id) for invl in con.invoice_ids.mapped('line_ids').
+                                                        filtered(lambda x: x.display_type == 'product')]
+                self.env['sale.order.line'].create(line_values)
 
 class SaleOrderLine(models.Model):
     _inherit = 'sale.order.line'
