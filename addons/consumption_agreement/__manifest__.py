@@ -10,7 +10,8 @@
         'sale',
         'regency_contacts',
         'purchase_stock',
-        'stock_mts_mto_rule'
+        'stock_mts_mto_rule',
+        'stock_dropshipping'
     ],
     'category': 'Regency',
     'sequence': 3,
