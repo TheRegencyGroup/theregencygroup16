@@ -81,4 +81,27 @@
         </field>
     </record>
 
+    <record id="product_product_tree_view_from_partner" model="ir.ui.view">
+        <field name="name">product.product.tree.from.partner</field>
+        <field name="model">product.product</field>
+        <field name="arch" type="xml">
+            <tree string="Product" multi_edit="1" class="custom_list_header" sample="1">
+                <field name="name"/>
+                <field name="last_purchase_order_date"/>
+                <field name="last_purchase_order_qty"/>
+                <field name="last_purchase_unit_price"/>
+                <field name="uom_id"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="product_action_partner" model="ir.actions.act_window">
+        <field name="name">Product From Partner</field>
+        <field name="res_model">product.product</field>
+        <field name="view_mode">tree, form</field>
+        <field name="view_ids" eval="[(5, 0, 0),
+            (0, 0, {'view_mode': 'tree', 'view_id': ref('regency_estimate.product_product_tree_view_from_partner')}),
+            (0, 0, {'view_mode': 'form', 'view_id': ref('product.product_normal_form_view')})]"/>
+    </record>
+
 </odoo>
