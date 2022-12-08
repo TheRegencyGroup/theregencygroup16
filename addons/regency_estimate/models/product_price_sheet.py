@@ -344,13 +344,17 @@ class ProductPriceSheetLine(models.Model):
     fee_value_ids = fields.One2many('fee.value', 'price_sheet_line_id')
     portal_fee = fields.Float(compute='_compute_fee', store=True)
 
-    @api.depends('fee_value_ids', 'fee_value_ids.value', 'fee_value_ids.portal_value', 'fee_value_ids.per_item')
+    @api.depends('fee_value_ids', 'fee_value_ids.value', 'fee_value_ids.portal_value', 'fee_value_ids.per_item',
+                 'min_quantity', 'price')
     def _compute_fee(self):
         for rec in self:
             fee_sum = 0
             for fee in rec.fee_value_ids:
                 if fee.per_item:
                     fee_sum += rec.min_quantity * fee.value
+                elif fee.percent_value:
+                    fee.value = rec.min_quantity * rec.price * fee.percent_value / 100
+                    fee_sum += fee.value
                 else:
                     fee_sum += fee.value
             rec.fee = fee_sum
@@ -411,7 +415,7 @@ class ProductPriceSheetLine(models.Model):
     @api.onchange('total')
     def onchange_total(self):
         for rec in self:
-            rec.price = rec.total / rec.min_quantity if rec.min_quantity else 0
+            rec.price = (rec.total - rec.fee) / rec.min_quantity if rec.min_quantity else 0
 
     @api.onchange('price')
     def onchange_price(self):
