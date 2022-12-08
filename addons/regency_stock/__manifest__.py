@@ -15,7 +15,8 @@
         'report/report_package_barcode.xml',
         'wizard/choose_receipt_package_views.xml',
         'views/stock_quant_package.xml',
-        'security/ir.model.access.csv'
+        'security/ir.model.access.csv',
+        'views/stock_quant.xml'
     ],
     'installable': True,
     'application': True,

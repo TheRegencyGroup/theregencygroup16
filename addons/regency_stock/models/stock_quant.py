@@ -1,8 +1,10 @@
-from odoo import models
+from odoo import models, fields
 
 
 class StockQuant(models.Model):
     _inherit = 'stock.quant'
+
+    package_weight = fields.Float(related='package_id.shipping_weight')
 
     def _picking_customer_id(self):
         """ Compute customer for picking. Called by report_package_barcode_small_regency_quants.
