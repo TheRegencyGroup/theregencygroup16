@@ -55,7 +55,7 @@ class ConsumptionAgreement(models.Model):
             rec.invoice_count = len(rec.invoice_ids)
             ca_amount = sum(rec.line_ids.mapped("untaxed_amount"))
             downpayment_amount = sum(rec.invoice_ids.mapped('amount_untaxed'))
-            rec.deposit_percent = round(downpayment_amount / ca_amount, 2) * 100 if ca_amount > 0 else 0
+            rec.deposit_percent = round(downpayment_amount / ca_amount * 100, 2) if ca_amount > 0 else 0
             rec.deposit_percent_str = str(rec.deposit_percent) + '%'
 
     @api.model
