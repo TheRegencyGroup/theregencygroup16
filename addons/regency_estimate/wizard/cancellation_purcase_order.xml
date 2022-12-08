@@ -8,9 +8,9 @@
                 <header>
                 </header>
                 <field name="text"/>
-                <field name="cancellation_reason"/>
+                <group><field name="cancellation_reason"/></group>
                 <footer>
-                    <button name="cancel" string="Cancel" type="object"/>
+                    <button name="cancel" string="Cancel" class="oe_highlight" type="object"/>
                     <button string="Discard" special="cancel"/>
                 </footer>
             </form>
