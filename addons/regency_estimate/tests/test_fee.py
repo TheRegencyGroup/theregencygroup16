@@ -37,13 +37,13 @@ class TestFee(TestPurchaseRequisitionCommon):
             'price_sheet_line_id': self.psl.id
         })
 
-    # def test_compute_fee(self):
-    #     self.assertEqual(self.fee_value_per_item.value, 1.5)  # 1.5
-    #     self.assertEqual(self.fee_value_percent.value, 10 * 75 * 5 / 100)  # 37.5
-    #     self.assertEqual(self.fee_value_abs.value, 7)  # 7
-    #     self.assertEqual(self.psl.fee, (1.5 * 10) + (75 * 10 * 5 / 100) + 7)  # 59.5
-    #     self.assertEqual(self.psl.total, 59.5 + 10 * 75)  # 809.5
-    #     self.assertEqual(self.psl.price, 75)
+    def test_compute_fee(self):
+        self.assertEqual(self.fee_value_per_item.value, 1.5)  # 1.5
+        self.assertEqual(self.fee_value_percent.value, 10 * 75 * 5 / 100)  # 37.5
+        self.assertEqual(self.fee_value_abs.value, 7)  # 7
+        self.assertEqual(self.psl.fee, (1.5 * 10) + (75 * 10 * 5 / 100) + 7)  # 59.5
+        self.assertEqual(self.psl.total, 59.5 + 10 * 75)  # 809.5
+        self.assertEqual(self.psl.price, 75)
 
     def test_change_price(self):
         self.assertEqual(self.fee_value_per_item.value, 1.5)  # 1.5
