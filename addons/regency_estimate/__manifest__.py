@@ -41,6 +41,7 @@
         'views/crm_stage.xml',
         'wizard/choose_delivery_carrier_view.xml',
         'wizard/portal_link.xml',
+        'wizard/cancellation_purcase_order.xml',
         'views/product_views.xml',
         'views/delivery_carrier.xml',
         'views/portal_templates.xml',

@@ -13,6 +13,7 @@ class PurchaseOrder(models.Model):
     })
     show_column_produced_overseas = fields.Boolean(compute='_compute_show_column_produced_overseas')
     tracking_ref = fields.Char(compute='_compute_tracking_references')
+    cancellation_reason = fields.Char()
 
     def _compute_tracking_references(self):
         for entry in self:
@@ -67,6 +68,21 @@ class PurchaseOrder(models.Model):
         invoice_vals = super()._prepare_invoice()
         invoice_vals['invoice_date'] = fields.Datetime.now()
         return invoice_vals
+
+    def button_cancel(self):
+        res = super(PurchaseOrder, self).button_cancel()
+        self.ensure_one()
+        value = self.env['purchase.order.cancel.wizard'].sudo().create({'cancellation_reason': ''})
+        if self.state == 'purchase':
+            return {
+                'name': 'Cancel',
+                'view_mode': 'form',
+                'res_model': 'purchase.order.cancel.wizard',
+                'type': 'ir.actions.act_window',
+                'target': 'new',
+                'res_id': value.id
+            }
+        return res
 
 
 class MyPurchaseOrderLine(models.Model):
