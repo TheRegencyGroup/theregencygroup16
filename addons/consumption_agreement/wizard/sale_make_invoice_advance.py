@@ -21,11 +21,11 @@ class SaleAdvancePaymentInv(models.TransientModel):
             "according to their invoicing policy (based on ordered or delivered quantity).")
 
     sale_order_ids = fields.Many2many(
-        'sale.order', default=lambda self: not self.env.context.get('is_ca') and
+        'sale.order', default=lambda self: not self.env.context.get('active_model') == 'consumption.agreement' and
                                            self.env.context.get('active_ids'))
 
     consumption_agreement_ids = fields.Many2many('consumption.agreement',
-                                                 default=lambda self: self.env.context.get('is_ca') and
+                                                 default=lambda self: self.env.context.get('active_model') == 'consumption.agreement' and
                                                                       self.env.context.get('active_ids'))
 
     #=== COMPUTE METHODS ===#
@@ -115,14 +115,6 @@ class SaleAdvancePaymentInv(models.TransientModel):
         order = self.consumption_agreement_ids
         # analytic_distribution = {}
         amount_total = sum(order.line_ids.mapped("untaxed_amount"))
-        # if not float_is_zero(amount_total, precision_rounding=self.currency_id.rounding or 0.01):
-        #     for line in order.line_ids:
-        #         distrib_dict = line.analytic_distribution or {}
-        #         for account, distribution in distrib_dict.items():
-        #             analytic_distribution[account] = distribution * line.untaxed_amount + analytic_distribution.get(
-        #                 account, 0)
-        #     for account, distribution_amount in analytic_distribution.items():
-        #         analytic_distribution[account] = distribution_amount / amount_total
         res = {
             'display_type': 'product',
             'name': _('Down Payment: %s (Draft)', time.strftime('%m %Y')),
@@ -133,14 +125,6 @@ class SaleAdvancePaymentInv(models.TransientModel):
             #'analytic_distribution': analytic_distribution,
             'is_downpayment': True,
         }
-        # analytic_account_id = self.order_id.analytic_account_id.id
-        # if analytic_account_id and not self.display_type:
-        #     res['analytic_distribution'] = res['analytic_distribution'] or {}
-        #     if self.analytic_distribution:
-        #         res['analytic_distribution'][analytic_account_id] = self.analytic_distribution.get(analytic_account_id,
-        #                                                                                            0) + 100
-        #     else:
-        #         res['analytic_distribution'][analytic_account_id] = 100
         if optional_values:
             res.update(optional_values)
         return res

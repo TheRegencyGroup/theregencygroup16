@@ -8,7 +8,9 @@
     'depends': [
         'sale_management',
         'sale',
-        'regency_contacts'
+        'regency_contacts',
+        'purchase_stock',
+        'stock_mts_mto_rule'
     ],
     'category': 'Regency',
     'sequence': 3,

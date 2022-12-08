@@ -1,4 +1,4 @@
-from odoo import api, fields, models
+from odoo import api, fields, models, Command
 from odoo.exceptions import UserError
 import time
 
@@ -36,9 +36,16 @@ class SaleOrder(models.Model):
                     'advance_payment_method': 'percentage',
                     'amount': con.deposit_percent
                 })
+                # Create down payment section if necessary
+                if not any(line.display_type and line.is_downpayment for line in rec.order_line):
+                    self.env['sale.order.line'].create(
+                        downpayment._prepare_down_payment_section_values(rec)
+                    )
                 line_values = downpayment._prepare_so_line_values(rec)
-                line_values['price_unit'] = downpayment._get_down_payment_amount_from_total(lines_subtotal)
+                line_values['price_unit'] = downpayment._get_down_payment_amount_from_total(lines_subtotal) / len(con.invoice_ids)
                 line_values['name'] = f"Down Payment: { con.name } Deposist { con.deposit_percent_str }"
+                line_values['invoice_lines'] = [Command.link(invl.id) for invl in con.invoice_ids.mapped('line_ids').
+                                                        filtered(lambda x: x.display_type == 'product')]
                 self.env['sale.order.line'].create(line_values)
 
 class SaleOrderLine(models.Model):

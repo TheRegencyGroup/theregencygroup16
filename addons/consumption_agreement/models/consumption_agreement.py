@@ -49,6 +49,7 @@ class ConsumptionAgreement(models.Model):
                 order.currency_id,
             )
 
+    @api.depends('invoice_ids', 'invoice_ids.amount_untaxed', 'line_ids.untaxed_amount')
     def _compute_invoice_stat(self):
         for rec in self:
             rec.invoice_count = len(rec.invoice_ids)
@@ -80,6 +81,7 @@ class ConsumptionAgreement(models.Model):
             elif not is_html_empty(self.env.company.invoice_terms):
                 order.note = order.with_context(lang=order.partner_id.lang).env.company.invoice_terms
 
+    @api.depends('sale_order_ids', 'purchase_order_ids')
     def _compute_order_count(self):
         for rec in self:
             rec.sale_order_count = len(rec.sale_order_ids)
@@ -205,7 +207,7 @@ class ConsumptionAgreement(models.Model):
     def generate_downpayment_invoice(self):
         action = self.env["ir.actions.act_window"]._for_xml_id("sale.action_view_sale_advance_payment_inv")
         action['views'] = [(self.env.ref('consumption_agreement.view_consumption_advance_payment_inv').id, 'form')]
-        action['context'] = {'is_ca': True, 'default_advance_payment_method': 'percentage'}
+        action['context'] = {'default_advance_payment_method': 'percentage'}
         return action
 
     def action_view_invoice(self):
