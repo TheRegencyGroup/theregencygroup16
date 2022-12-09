@@ -343,6 +343,13 @@ class CustomerPortal(portal.CustomerPortal):
 
         query_string = f'&comeback_url_caption={order_sudo.name}&comeback_url={order_sudo.get_portal_url()}'
 
+        # Notify
+        # TODO: problem with internal notification, if user notify subscribed by email
+        from odoo.addons.regency_tools.system_messages import accept_format_string, SystemMessages
+        if selected_price_sheet_line_ids.price_sheet_id.estimate_id:
+            msg = accept_format_string(SystemMessages.get('M-011'), selected_price_sheet_line_ids.price_sheet_id.estimate_id.estimate_manager_id.partner_id.name, sale_order.name)
+            selected_price_sheet_line_ids.price_sheet_id.estimate_id.estimate_manager_id.partner_id.with_context(internal_notify=True).message_post(body=msg)
+
         return {
             'force_refresh': True,
             'redirect_url': sale_order.get_portal_url(query_string=query_string)
