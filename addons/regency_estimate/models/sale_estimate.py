@@ -351,6 +351,7 @@ class SaleEstimate(models.Model):
                 'partner_id': self.partner_id,
                 'item_ids': sheet_lines,
             })
+            new_pricesheet.message_subscribe(partner_ids=(self.estimate_manager_id.partner_id + self.purchase_agreement_ids.mapped('user_id.partner_id')).ids)
             action = self.env["ir.actions.actions"]._for_xml_id("regency_estimate.action_product_price_sheet_new")
             action['res_id'] = new_pricesheet.id
         self.product_lines.filtered('selected').write({'selected': False})
