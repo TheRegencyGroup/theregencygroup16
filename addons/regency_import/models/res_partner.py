@@ -21,11 +21,10 @@ class ResPartner(models.Model):
     ext_is_regency_contact = fields.Char()
 
     @api.model_create_multi
-    def create(self, val_list):
-        recs = super().create(val_list)
+    def create(self, values):
+        recs = super().create(values)
         recs.update_country_and_state()
         recs.assign_sales_rep()
-        recs.filtered(lambda f: f.type == 'contact' and not f.is_company).write({'entity_type': 'contact'})
         return recs
 
     def write(self, vals):

@@ -43,3 +43,11 @@ class ResPartner(models.Model):
         res = super().write(vals)
         prev_association_ids._delete_incomplete()
         return res
+
+    @api.model_create_multi
+    def create(self, values):
+        result = super().create(values)
+        result.filtered(lambda f: f.type == 'contact' and not f.is_company and not f.entity_type).write({
+            'entity_type': 'contact',
+        })
+        return result
