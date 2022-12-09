@@ -52,11 +52,11 @@ class ProductProduct(models.Model):
     @api.depends_context('customer_or_vendor_id')
     def _compute_last_order_values(self):
         for rec in self:
-            purchase_orders = rec.purchase_order_ids.filtered(lambda order: order.state in ['purchase', 'done']
+            purchase_orders = rec.purchase_order_ids.filtered(lambda order: order.state == 'purchase'
                                 and order.partner_id.id == self.env.context.get('customer_or_vendor_id'))
             last_purchase_order = purchase_orders.sorted('date_order', reverse=True)[0]
             if last_purchase_order:
-                rec.last_purchase_order_date = last_purchase_order.date_order
+                rec.last_purchase_order_date = last_purchase_order.date_approve
                 last_purchase_line = last_purchase_order.order_line.filtered(lambda f: f.product_id == rec)
                 rec.last_purchase_order_qty = sum(last_purchase_line.mapped('product_uom_qty'))
                 rec.last_purchase_unit_price = sum(last_purchase_line.mapped('price_unit'))
