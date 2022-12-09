@@ -347,6 +347,7 @@ class CustomerPortal(portal.CustomerPortal):
         # TODO: problem with internal notification, if user notify subscribed by email
         from odoo.addons.regency_tools.system_messages import accept_format_string, SystemMessages
         if selected_price_sheet_line_ids.price_sheet_id.estimate_id:
+            sale_order.message_subscribe(partner_ids=selected_price_sheet_line_ids.price_sheet_id.estimate_id.estimate_manager_id.partner_id.ids)
             msg = accept_format_string(SystemMessages.get('M-011'), selected_price_sheet_line_ids.price_sheet_id.estimate_id.estimate_manager_id.partner_id.name, sale_order.name)
             selected_price_sheet_line_ids.price_sheet_id.estimate_id.estimate_manager_id.partner_id.with_context(internal_notify=True).message_post(body=msg)
 
