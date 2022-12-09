@@ -23,7 +23,7 @@ class SaleEstimate(models.Model):
     _name = 'sale.estimate'
     _description = "Estimate"
     _order = "id desc"
-    _inherit = ['mail.thread']
+    _inherit = ['mail.thread', 'mail.activity.mixin']
 
     # Description
     name = fields.Char(
