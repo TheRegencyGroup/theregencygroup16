@@ -25,7 +25,7 @@
         'data/sale_estimate_stages.xml',
         'data/purchase_requisition_data.xml',
         'data/sale_estimate_sequence.xml',
-        'wizard/cancellation_purcase_order.xml',
+        'wizard/cancellation_purchase_order.xml',
         'security/ir.model.access.csv',
         'security/groups.xml',
         'views/sale_estimate.xml',
