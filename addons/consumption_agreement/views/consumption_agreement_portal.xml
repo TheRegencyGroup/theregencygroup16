@@ -369,7 +369,19 @@
                         Terms &amp; Conditions</label>
                 </div>
             </section>
+
+<!--            <section class="mt-5" t-if="sale_order.payment_term_id">-->
+<!--                <h3 class="">Payment terms</h3>-->
+<!--                <hr class="mt-0 mb-1"/>-->
+<!--                <span t-field="sale_order.payment_term_id"/>-->
+<!--            </section>-->
         </div>
     </template>
 
+<!--    <template id="sale_order_portal_content_totals_table">-->
+<!--        <table class="table table-sm">-->
+<!--            <t t-set="tax_totals" t-value="json.loads(sale_order.tax_totals_json)"/>-->
+<!--            <t t-call="account.document_tax_totals"/>-->
+<!--        </table>-->
+<!--    </template>-->
 </odoo>
