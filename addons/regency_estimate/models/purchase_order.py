@@ -43,8 +43,8 @@ class PurchaseOrder(models.Model):
         for rec in self.filtered(lambda f: f.requisition_id):
             for line in rec.order_line:
                 req_line = rec.requisition_id.line_ids.filtered(lambda f: f.product_id == line.product_id
-                                                                      and (f.partner_id == rec.partner_id or not f.partner_id)
-                                                                      and f.product_qty == line.product_qty)
+                                                                and (f.partner_id == rec.partner_id or not f.partner_id)
+                                                                and f.product_qty == line.product_qty)
 
                 new_fees = [f.copy() for f in line.fee_value_ids]
                 for fee in new_fees:
@@ -87,13 +87,16 @@ class MyPurchaseOrderLine(models.Model):
     fee = fields.Float(readonly=True, compute='_compute_fee', store=True)
     fee_value_ids = fields.One2many('fee.value', 'po_line_id', store=True, required=True)
 
-    @api.depends('fee_value_ids', 'fee_value_ids.value', 'fee_value_ids.per_item')
+    @api.depends('fee_value_ids', 'fee_value_ids.value', 'fee_value_ids.per_item', 'product_qty', 'price_unit')
     def _compute_fee(self):
         for rec in self:
             fee_sum = 0
             for fee in rec.fee_value_ids:
                 if fee.per_item:
                     fee_sum += rec.product_qty * fee.value
+                elif fee.percent_value:
+                    fee.value = rec.product_qty * rec.price_unit * fee.percent_value / 100
+                    fee_sum += fee.value
                 else:
                     fee_sum += fee.value
             rec.fee = fee_sum

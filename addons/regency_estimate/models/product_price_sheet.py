@@ -288,8 +288,8 @@ class ProductPriceSheet(models.Model):
         for rec in self:
             existing_product_lines = self.item_ids.mapped(lambda x: (x.product_id.id, x.partner_id.id, x.product_uom_qty))
             for line in sheet_lines:
-                if (line[2].get('product_id'), line[2].get('partner_id'), line[2].get('product_uom_qty')) not in existing_product_lines:
-                    rec.write({'item_ids': [line]})
+                if (line.product_id, line.partner_id, line.product_uom_qty) not in existing_product_lines:
+                    rec.write({'item_ids': [line.id]})
 
 
 class ProductPriceSheetLine(models.Model):

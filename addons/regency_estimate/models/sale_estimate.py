@@ -314,7 +314,7 @@ class SaleEstimate(models.Model):
                         seq += 1
                 else:
                     # create new line for the product that is in estimate, but not in purchase requisition
-                    sheet_lines.append(Command.create({
+                    sheet_line = self.env['product.price.sheet.line'].create({
                         'name': p.name,
                         'sequence': seq,
                         'product_id': p.product_id.id,
@@ -325,7 +325,8 @@ class SaleEstimate(models.Model):
                         'total': p.product_id.list_price * p.product_uom_qty,
                         'display_type': p.display_type,
                         'sale_estimate_line_ids': [(6, 0, [p.id])]
-                    }))
+                    })
+                    sheet_lines.append(sheet_line)
                     seq += 1
 
         # add new lines(not in estimate) from confirmed purchase requisitions
