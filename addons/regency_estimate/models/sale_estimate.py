@@ -94,8 +94,6 @@ class SaleEstimate(models.Model):
                                          compute='_compute_shipping_billing_contact_id',
                                          store=True, readonly=False, required=True, precompute=True,
                                          domain="[('parent_id', '=', partner_id),('is_company', '=', False)]")
-    estimate_manager_id = fields.Many2one('res.users', string='Estimate Manager',
-                                          default=lambda self: self.env.company.estimate_manager_id)
 
     @api.depends('partner_id')
     def _compute_shipping_billing_contact_id(self):
@@ -351,7 +349,6 @@ class SaleEstimate(models.Model):
                 'partner_id': self.partner_id,
                 'item_ids': sheet_lines,
             })
-            new_pricesheet.message_subscribe(partner_ids=(self.estimate_manager_id.partner_id + self.purchase_agreement_ids.mapped('user_id.partner_id')).ids)
             action = self.env["ir.actions.actions"]._for_xml_id("regency_estimate.action_product_price_sheet_new")
             action['res_id'] = new_pricesheet.id
         self.product_lines.filtered('selected').write({'selected': False})
