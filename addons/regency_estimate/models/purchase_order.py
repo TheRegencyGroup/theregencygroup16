@@ -1,4 +1,4 @@
-from odoo import fields, models, api, Command
+from odoo import fields, models, api
 from odoo.tools import get_lang
 from odoo.addons.purchase_requisition.models.purchase import PurchaseOrderLine
 
