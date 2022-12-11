@@ -10,7 +10,7 @@ from odoo.addons.portal.controllers.portal import pager as portal_pager, get_rec
 from odoo.addons.portal.controllers.mail import _message_post_helper
 
 from odoo import fields, http, SUPERUSER_ID, _, Command
-from odoo.addons.regency_tools import SystemMessages
+from odoo.addons.regency_tools.system_messages import accept_format_string, SystemMessages
 
 
 class CustomerPortal(portal.CustomerPortal):
@@ -343,6 +343,16 @@ class CustomerPortal(portal.CustomerPortal):
 
         query_string = f'&comeback_url_caption={order_sudo.name}&comeback_url={order_sudo.get_portal_url()}'
 
+        # Notify
+        estimate_id = selected_price_sheet_line_ids.price_sheet_id.estimate_id
+        if estimate_id and estimate_id.estimate_manager_id:
+            sale_order.message_subscribe(partner_ids=estimate_id.estimate_manager_id.partner_id.ids,
+                                         subtype_ids=[request.env.ref('mail.mt_activities').id,
+                                                      request.env.ref('mail.mt_comment').id])
+            msg = accept_format_string(SystemMessages.get('M-011'), estimate_id.estimate_manager_id.partner_id.name,
+                                       sale_order.name)
+            sale_order.message_post(body=msg, partner_ids=estimate_id.estimate_manager_id.partner_id.ids)
+
         return {
             'force_refresh': True,
             'redirect_url': sale_order.get_portal_url(query_string=query_string)
@@ -374,6 +384,15 @@ class CustomerPortal(portal.CustomerPortal):
             raise UserError('Orders not found.')
 
         consumption = order_sudo.create_consumption_agreement(selected_price_sheet_line_ids, order_sudo)
+        # Notify
+        estimate_id = selected_price_sheet_line_ids.price_sheet_id.estimate_id
+        if estimate_id and estimate_id.estimate_manager_id:
+            consumption.message_subscribe(partner_ids=estimate_id.estimate_manager_id.partner_id.ids,
+                                         subtype_ids=[request.env.ref('mail.mt_activities').id,
+                                                      request.env.ref('mail.mt_comment').id])
+            msg = accept_format_string(SystemMessages.get('M-011'), estimate_id.estimate_manager_id.partner_id.name,
+                                       consumption.name)
+            consumption.message_post(body=msg, partner_ids=estimate_id.estimate_manager_id.partner_id.ids)
 
         query_string = f'&comeback_url_caption={order_sudo.name}&comeback_url={order_sudo.get_portal_url()}'
 
