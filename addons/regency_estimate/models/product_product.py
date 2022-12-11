@@ -24,7 +24,7 @@ class ProductProduct(models.Model):
     @api.depends_context('partner_id')
     def _compute_sale_order_ids(self):
         for rec in self:
-            rec.sale_order_ids = self.env['sale.order.line'].\
+            rec.sale_order_ids = self.env['sale.order.line']. \
                 search([('product_template_id', '=', rec.id), ('order_id.state', 'in', ['sale', 'done']),
                         ('order_id.partner_id', '=', self.env.context.get('partner_id'))]).mapped('order_id')
             last_order = rec.sale_order_ids.sorted('date_order', reverse=True)
@@ -53,6 +53,7 @@ class ProductProduct(models.Model):
     def _compute_last_order_values(self):
         for rec in self:
             purchase_orders = rec.purchase_order_ids.filtered(lambda order: order.state == 'purchase'
+                                and order.invoice_status == 'invoiced' and order.receipt_status == 'full'
                                 and order.partner_id.id == self.env.context.get('customer_or_vendor_id'))
             last_purchase_order = purchase_orders.sorted('date_order', reverse=True)[0]
             if last_purchase_order:

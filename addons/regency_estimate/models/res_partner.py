@@ -64,7 +64,7 @@ class ResPartner(models.Model):
 
     def action_show_products(self):
         product_ids = self.purchase_order_ids.filtered(
-            lambda product: product.invoice_status == 'invoiced' and product.receipt_status == 'full').mapped(
+            lambda order: order.invoice_status == 'invoiced' and order.receipt_status == 'full').mapped(
             'product_id')
         action = self.env["ir.actions.actions"]._for_xml_id('regency_estimate.product_action_partner')
         action['domain'] = [('id', 'in', product_ids.ids)]
