@@ -94,6 +94,14 @@ class SaleEstimate(models.Model):
                                          compute='_compute_shipping_billing_contact_id',
                                          store=True, readonly=False, required=True, precompute=True,
                                          domain="[('parent_id', '=', partner_id),('is_company', '=', False)]")
+    consumption_agreements_count = fields.Integer(compute='_compute_consumption_agreements')
+
+    # @api.depends('price_sheet_ids')
+    def _compute_consumption_agreements(self):
+        for estimate in self:
+            consumption_agreements = self.env['consumption.agreement'].search([('price_sheet_id', 'in',
+                                                                                estimate.price_sheet_ids.ids)])
+            estimate.consumption_agreements_count = len(consumption_agreements)
 
     @api.depends('partner_id')
     def _compute_shipping_billing_contact_id(self):
@@ -252,6 +260,11 @@ class SaleEstimate(models.Model):
         if len(self.purchase_agreement_ids) == 1:
             action['views'] = [(self.env.ref('purchase_requisition.view_purchase_requisition_form').id, 'form')]
             action['res_id'] = self.purchase_agreement_ids.id
+        return action
+
+    def action_view_consumption_agreements(self):
+        action = self.env["ir.actions.actions"]._for_xml_id("consumption_agreement.consumption_agreement_action")
+        action['domain'] = [('price_sheet_id', 'in', self.price_sheet_ids.ids)]
         return action
 
     def action_view_sale_order(self):

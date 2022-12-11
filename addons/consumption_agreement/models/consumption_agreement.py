@@ -177,6 +177,7 @@ class ConsumptionAgreement(models.Model):
             po = self.env['purchase.order'].create({
                 'partner_id': line.vendor_id.id if line.vendor_id else seller.partner_id.id,
                 'consumption_agreement_id': self.id,
+                'origin': self.name,
                 'order_line': [Command.create({
                     'product_id': line.product_id.id,
                     'product_qty': line.qty_allowed,

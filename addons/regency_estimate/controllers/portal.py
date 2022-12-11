@@ -373,7 +373,7 @@ class CustomerPortal(portal.CustomerPortal):
         if not selected_price_sheet_line_ids:
             raise UserError('Orders not found.')
 
-        consumption = order_sudo.create_consumption_agreement(selected_price_sheet_line_ids)
+        consumption = order_sudo.create_consumption_agreement(selected_price_sheet_line_ids, order_sudo)
 
         query_string = f'&comeback_url_caption={order_sudo.name}&comeback_url={order_sudo.get_portal_url()}'
 
