@@ -94,9 +94,8 @@ class SaleEstimate(models.Model):
                                          compute='_compute_shipping_billing_contact_id',
                                          store=True, readonly=False, required=True, precompute=True,
                                          domain="[('parent_id', '=', partner_id),('is_company', '=', False)]")
-    # estimate_manager_id = fields.Many2one('res.users', string='Estimate Manager',
-    #                                       default=lambda self: self.env.company.estimate_manager_id)
-    estimate_manager_id = fields.Many2one('res.users', string='Estimate Manager')
+    estimate_manager_id = fields.Many2one('res.users', string='Estimate Manager',
+                                          default=lambda self: self.env.company.estimate_manager_id)
 
     @api.depends('partner_id')
     def _compute_shipping_billing_contact_id(self):
