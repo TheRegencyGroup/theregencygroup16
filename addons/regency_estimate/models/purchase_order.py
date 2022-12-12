@@ -103,11 +103,6 @@ class MyPurchaseOrderLine(models.Model):
                                  and self.partner_id.contact_type == 'vendor' \
                                  and self.partner_id.vendor_type == 'overseas'
 
-    # @api.onchange('fee')
-    # def onchange_fee(self):
-    #     self.price_subtotal =
-
-
     def _new_compute_price_unit_and_date_planned_and_name(self):
         """Override for fixing bugs"""
         po_lines_without_requisition = self.env['purchase.order.line']
