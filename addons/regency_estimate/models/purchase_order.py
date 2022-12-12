@@ -1,4 +1,4 @@
-from odoo import fields, models, api, _
+from odoo import fields, models, api
 from odoo.tools import get_lang
 from odoo.addons.purchase_requisition.models.purchase import PurchaseOrderLine
 
@@ -77,7 +77,7 @@ class PurchaseOrder(models.Model):
             if self.state == 'purchase':
                 value = self.env['purchase.order.cancel.wizard'].sudo().create({'cancellation_reason': ''})
                 return {
-                    'name': _('Cancel'),
+                    'name': 'Cancel',
                     'view_mode': 'form',
                     'res_model': 'purchase.order.cancel.wizard',
                     'type': 'ir.actions.act_window',
