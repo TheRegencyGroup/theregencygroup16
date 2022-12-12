@@ -113,16 +113,7 @@ class PurchaseRequisitionLine(models.Model):
     @api.depends('fee_value_ids', 'fee_value_ids.value', 'fee_value_ids.per_item', 'product_qty', 'price_unit')
     def _compute_fee(self):
         for rec in self:
-            fee_sum = 0
-            for fee in rec.fee_value_ids:
-                if fee.per_item:
-                    fee_sum += rec.product_qty * fee.value
-                elif fee.percent_value:
-                    fee.value = rec.product_qty * rec.price_unit * fee.percent_value / 100
-                    fee_sum += fee.value
-                else:
-                    fee_sum += fee.value
-            rec.fee = fee_sum
+            rec.fee = rec.fee_value_ids.get_fee_sum(rec.product_qty, rec.price_unit)
 
     @api.onchange('partner_id')
     def _onchange_partner(self):

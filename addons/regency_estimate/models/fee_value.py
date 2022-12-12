@@ -32,6 +32,18 @@ class FeeValue(models.Model):
             else:
                 rec.portal_value = 0
 
+    def get_fee_sum(self, qty, price):
+        fee_sum = 0
+        for fee in self:
+            if fee.per_item:
+                fee_sum += qty * fee.value
+            elif fee.percent_value:
+                fee.value = qty * price * fee.percent_value / 100
+                fee_sum += fee.value
+            else:
+                fee_sum += fee.value
+        return fee_sum
+
     @api.onchange('percent_value')
     def _onchange_percent_value(self):
         self.value = self.price_sheet_line_id.price * self.price_sheet_line_id.min_quantity * self.percent_value / 100 \

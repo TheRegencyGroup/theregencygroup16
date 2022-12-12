@@ -87,16 +87,14 @@ class MyPurchaseOrderLine(models.Model):
     @api.depends('fee_value_ids', 'fee_value_ids.value', 'fee_value_ids.per_item', 'product_qty', 'price_unit')
     def _compute_fee(self):
         for rec in self:
-            fee_sum = 0
-            for fee in rec.fee_value_ids:
-                if fee.per_item:
-                    fee_sum += rec.product_qty * fee.value
-                elif fee.percent_value:
-                    fee.value = rec.product_qty * rec.price_unit * fee.percent_value / 100
-                    fee_sum += fee.value
-                else:
-                    fee_sum += fee.value
-            rec.fee = fee_sum
+            rec.fee = rec.fee_value_ids.get_fee_sum(rec.product_qty, rec.price_unit)
+
+    @api.depends('product_qty', 'price_unit', 'taxes_id', 'fee')
+    def _compute_amount(self):
+        super()._compute_amount()
+        for line in self:
+            line_subtotal = line.price_subtotal + line.fee
+            line.update({'price_subtotal': line_subtotal})
 
     @api.onchange('product_id')
     def onchange_product_id(self):
@@ -104,6 +102,11 @@ class MyPurchaseOrderLine(models.Model):
         self.produced_overseas = self.partner_id.is_company \
                                  and self.partner_id.contact_type == 'vendor' \
                                  and self.partner_id.vendor_type == 'overseas'
+
+    # @api.onchange('fee')
+    # def onchange_fee(self):
+    #     self.price_subtotal =
+
 
     def _new_compute_price_unit_and_date_planned_and_name(self):
         """Override for fixing bugs"""
