@@ -55,7 +55,7 @@ class ProductProduct(models.Model):
             purchase_orders = rec.purchase_order_ids.filtered(lambda order: order.state == 'purchase'
                                 and order.invoice_status == 'invoiced' and order.receipt_status == 'full'
                                 and order.partner_id.id == self.env.context.get('customer_or_vendor_id'))
-            last_purchase_order = purchase_orders.sorted('date_order', reverse=True)[0]
+            last_purchase_order = purchase_orders.sorted('date_approve', reverse=True)[0]
             if last_purchase_order:
                 rec.last_purchase_order_date = last_purchase_order.date_approve
                 last_purchase_line = last_purchase_order.order_line.filtered(lambda f: f.product_id == rec)
