@@ -345,7 +345,7 @@ class ConsumptionAggreementLine(models.Model):
     partner_id = fields.Many2one(related='agreement_id.partner_id', domain=[('contact_type', '=', 'customer')],
                                  store=True)
     allowed_partner_ids = fields.Many2many('res.partner', string="Allowed Customers")
-    vendor_id = fields.Many2one('res.partner', required=True)
+    vendor_id = fields.Many2one('res.partner', domain=[('contact_type', '=', 'vendor')], required=True)
     untaxed_amount = fields.Monetary(compute='_compute_untaxed_amount', store=True)
     name = fields.Text(string='Description')
     product_custom_attribute_value_ids = fields.One2many('product.attribute.custom.value', 'ca_product_line_id',
@@ -356,6 +356,19 @@ class ConsumptionAggreementLine(models.Model):
                                                               ondelete='restrict')
     product_template_attribute_value_ids = fields.Many2many(related='product_id.product_template_attribute_value_ids',
                                                             readonly=True)
+
+    @api.model
+    def create(self, vals_list):
+        res = super().create(vals_list)
+        if res.vendor_id not in res.product_id.seller_ids.mapped('partner_id'):
+            self.env['product.supplierinfo'].create([
+                {
+                    'partner_id': res.vendor_id.id,
+                    'product_tmpl_id': res.product_id.product_tmpl_id.id,
+                    'price': 0,
+                }
+            ])
+        return res
 
     @api.depends('qty_allowed', 'state', 'sale_order_line_ids', 'sale_order_line_ids.product_uom_qty')
     def _compute_qty_consumed(self):
@@ -465,9 +478,12 @@ class ConsumptionAggreementLine(models.Model):
             partner=self.agreement_id.partner_id,
             currency=self.currency_id,
             product=self.product_id,
-            #taxes=self.tax_id,
             price_unit=self.price_unit,
             quantity=self.qty_allowed,
-           # discount=self.discount,
             price_subtotal=self.untaxed_amount,
         )
+
+    @api.onchange('product_id')
+    def _onchange_product(self):
+        if self.product_id.seller_ids:
+            self.vendor_id = self.product_id.seller_ids[0].partner_id  # Always get first
