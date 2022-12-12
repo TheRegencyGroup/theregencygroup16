@@ -289,8 +289,8 @@ class ProductPriceSheet(models.Model):
         for rec in self:
             existing_product_lines = self.item_ids.mapped(lambda x: (x.product_id.id, x.partner_id.id, x.product_uom_qty))
             for line in sheet_lines:
-                if (line[2].get('product_id'), line[2].get('partner_id'), line[2].get('product_uom_qty')) not in existing_product_lines:
-                    rec.write({'item_ids': [line]})
+                if (line.product_id, line.partner_id, line.product_uom_qty) not in existing_product_lines:
+                    rec.write({'item_ids': [line.id]})
 
 
 class ProductPriceSheetLine(models.Model):
@@ -349,16 +349,7 @@ class ProductPriceSheetLine(models.Model):
                  'min_quantity', 'price')
     def _compute_fee(self):
         for rec in self:
-            fee_sum = 0
-            for fee in rec.fee_value_ids:
-                if fee.per_item:
-                    fee_sum += rec.min_quantity * fee.value
-                elif fee.percent_value:
-                    fee.value = rec.min_quantity * rec.price * fee.percent_value / 100
-                    fee_sum += fee.value
-                else:
-                    fee_sum += fee.value
-            rec.fee = fee_sum
+            rec.fee = rec.fee_value_ids.get_fee_sum(rec.min_quantity, rec.price)
             rec.portal_fee = sum(rec.fee_value_ids.mapped('portal_value'))
             rec.onchange_price()
 

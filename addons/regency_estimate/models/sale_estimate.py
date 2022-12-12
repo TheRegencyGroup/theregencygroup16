@@ -293,7 +293,7 @@ class SaleEstimate(models.Model):
                                                            and x.product_qty == p.product_uom_qty).sorted('product_qty')
                 if matched_lines:
                     for line in matched_lines:
-                        sheet_lines.append(Command.create({
+                        sheet_line = self.env['product.price.sheet.line'].create({
                                 'name': p.name,
                                 'sequence': seq,
                                 'product_id': p.product_id.id,
@@ -304,12 +304,17 @@ class SaleEstimate(models.Model):
                                 'total': line.price_unit * 1.6 * line.product_qty,
                                 'display_type': p.display_type,
                                 'produced_overseas': line.produced_overseas,
-                                'sale_estimate_line_ids': [(6, 0, [p.id])]
-                            }))
+                                'sale_estimate_line_ids': [(6, 0, [p.id])],
+                            })
+                        new_fees = [f.copy() for f in line.fee_value_ids]
+                        for fee in new_fees:
+                            fee.write({'purchase_requisition_line_id': False, 'price_sheet_line_id': sheet_line.id})
+                        sheet_line.write({'fee_value_ids': [f.id for f in new_fees]})
+                        sheet_lines.append(sheet_line)
                         seq += 1
                 else:
                     # create new line for the product that is in estimate, but not in purchase requisition
-                    sheet_lines.append(Command.create({
+                    sheet_line = self.env['product.price.sheet.line'].create({
                         'name': p.name,
                         'sequence': seq,
                         'product_id': p.product_id.id,
@@ -320,13 +325,14 @@ class SaleEstimate(models.Model):
                         'total': p.product_id.list_price * p.product_uom_qty,
                         'display_type': p.display_type,
                         'sale_estimate_line_ids': [(6, 0, [p.id])]
-                    }))
+                    })
+                    sheet_lines.append(sheet_line)
                     seq += 1
 
         # add new lines(not in estimate) from confirmed purchase requisitions
         seq = self.product_lines.sorted('sequence')[-1].sequence
         for x in new_requisition_lines:
-            sheet_lines.append(Command.create({
+            sheet_line = self.env['product.price.sheet.line'].create({
                 'name': x.product_description_variants,
                 'sequence': seq,
                 'product_id': x.product_id.id,
@@ -336,7 +342,12 @@ class SaleEstimate(models.Model):
                 'price': x.price_unit * 1.6,
                 'total': x.price_unit * 1.6 * x.product_qty,
                 'produced_overseas': x.produced_overseas
-            }))
+            })
+            new_fees = [f.copy() for f in x.fee_value_ids]
+            for fee in new_fees:
+                fee.write({'purchase_requisition_line_id': False, 'price_sheet_line_id': sheet_line.id})
+            sheet_line.write({'fee_value_ids': [f.id for f in new_fees]})
+            sheet_lines.append(sheet_line)
             seq += 1
         existing_draft_pricesheets = self.price_sheet_ids.filtered(lambda x: x.state == 'draft')
         if existing_draft_pricesheets:
@@ -349,7 +360,7 @@ class SaleEstimate(models.Model):
             new_pricesheet = existing_draft_pricesheets.create({
                 'estimate_id': self.id,
                 'partner_id': self.partner_id,
-                'item_ids': sheet_lines,
+                'item_ids': [s.id for s in sheet_lines],
             })
             new_pricesheet.message_subscribe(partner_ids=(self.estimate_manager_id.partner_id + self.purchase_agreement_ids.mapped('user_id.partner_id')).ids)
             action = self.env["ir.actions.actions"]._for_xml_id("regency_estimate.action_product_price_sheet_new")
