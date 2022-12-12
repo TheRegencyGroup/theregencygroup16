@@ -29,6 +29,7 @@ class CustomerPortal(portal.CustomerPortal):
     def _prepare_price_sheets_domain(self, partner):
         return [
             ('state', 'in', ['confirmed', 'done']),
+            '|', ('partner_id', 'child_of', [partner.commercial_partner_id.id]),
             ('message_partner_ids', 'child_of', [partner.commercial_partner_id.id]),
         ]
 
@@ -340,6 +341,8 @@ class CustomerPortal(portal.CustomerPortal):
             raise UserError('Orders not found.')
 
         sale_order = order_sudo.create_sale_order(selected_price_sheet_line_ids)
+        # to make quotation visible on Portal set it Sent
+        sale_order.state = 'sent'
 
         query_string = f'&comeback_url_caption={order_sudo.name}&comeback_url={order_sudo.get_portal_url()}'
 

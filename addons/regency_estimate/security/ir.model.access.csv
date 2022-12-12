@@ -9,3 +9,8 @@ access_previous_price_line_wizard,previous.price.line.wizard,model_previous_pric
 access_portal_link_wizard,portal.link.wizard,model_portal_link_wizard,base.group_user,1,1,1,1
 access_fee_type,fee_type,model_fee_type,base.group_user,1,1,1,1
 access_fee_value,fee_value,model_fee_value,base.group_user,1,1,1,1
+access_product_price_sheet_portal,product_price_sheet_portal,model_product_price_sheet,base.group_portal,1,0,0,0
+access_sale_estimate_portal,sale_estimate_portal,model_sale_estimate,base.group_portal,1,0,0,0
+access_product_price_sheet_line_portal,product_price_sheet_line_portal,model_product_price_sheet_line,base.group_portal,1,0,0,0
+access_fee_value_portal,fee_value_portal,model_fee_value,base.group_portal,1,0,0,0
+access_fee_type_portal,fee_type_portal,model_fee_type,base.group_portal,1,0,0,0

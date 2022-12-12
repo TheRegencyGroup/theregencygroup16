@@ -65,7 +65,7 @@ class ConsumptionAgreement(models.Model):
     def toggle_legal_accepted(self, checked):
         self.ensure_one()
         if self.state == 'draft':
-            self.legal_accepted = checked
+            self.sudo().write({'legal_accepted': checked})
         return self.legal_accepted
 
     @api.depends('partner_id')
@@ -148,11 +148,12 @@ class ConsumptionAgreement(models.Model):
                                        'order_line': [
                                             Command.create({
                                                 'product_id': p.product_id.id,
-                                                'product_uom_qty': qtys.get(p.id, 0),
+                                                'product_uom_qty': qtys.get(p.id, p.qty_remaining),
                                                 'price_unit': p.price_unit,
                                                 'product_uom': p.product_id.uom_id.id,
                                                 'consumption_agreement_line_id': p.id
                                             }) for p in self.line_ids.filtered(lambda l: l.id in selected_line_ids)]})
+        order.message_subscribe([order.partner_id.id])
         return order, order_count
 
     def _check_is_vendor_set(self):

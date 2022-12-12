@@ -3,6 +3,14 @@ odoo.define('regency_estimate.price_sheet_portal', function (require) {
 
 var publicWidget = require('web.public.widget');
 
+publicWidget.registry.PortalHomeCounters.include({
+        /**
+         * @override
+         */
+        _getCountersAlwaysDisplayed() {
+            return this._super(...arguments).concat(['price_sheets_count']);
+        },
+    });
 
 publicWidget.registry.PriceSheetPortal = publicWidget.Widget.extend({
     selector: '.o_portal_sale_sidebar',
