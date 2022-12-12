@@ -1,5 +1,5 @@
-from odoo import fields, models, api, Command
-from odoo.addons.regency_estimate.models.product_price_sheet import MAX_QUANTITY
+from odoo import fields, models
+from odoo.addons.regency_tools.system_messages import accept_format_string, SystemMessages
 
 
 class SaleOrder(models.Model):
@@ -18,6 +18,19 @@ class SaleOrder(models.Model):
             self.legal_accepted = checked
         return self.legal_accepted
 
+    def action_confirm(self):
+        res = super().action_confirm()
+        if self.estimate_id:
+            partners_to_inform = self.env['res.partner']
+            if self.estimate_id.estimate_manager_id:
+                partners_to_inform += self.estimate_id.estimate_manager_id.partner_id
+            if self.estimate_id.purchase_agreement_ids:
+                for partner in self.estimate_id.purchase_agreement_ids.mapped('user_id.partner_id'):
+                    partners_to_inform += partner
+            for partner in partners_to_inform:
+                msg = accept_format_string(SystemMessages.get('M-011'), partner.name, self.name)
+                self.message_post(body=msg, partner_ids=partner.ids)
+        return res
 
 class SaleOrderLine(models.Model):
     _inherit = 'sale.order.line'
