@@ -5,6 +5,7 @@ access_sale_estimate_line,sale_estimate_line,model_sale_estimate_line,base.group
 access_product_price_sheet,product_price_sheet,model_product_price_sheet,base.group_user,1,1,1,1
 access_product_price_sheet_line,product_price_sheet_line,model_product_price_sheet_line,base.group_user,1,1,1,1
 access_previous_prices_wizard,previous.prices.wizard,model_previous_prices_wizard,base.group_user,1,1,1,1
+access_po_cancel_wizard,purchase.order.cancel.wizard,model_purchase_order_cancel_wizard,base.group_user,1,1,1,1
 access_previous_price_line_wizard,previous.price.line.wizard,model_previous_price_line_wizard,base.group_user,1,1,1,1
 access_portal_link_wizard,portal.link.wizard,model_portal_link_wizard,base.group_user,1,1,1,1
 access_fee_type,fee_type,model_fee_type,base.group_user,1,1,1,1
