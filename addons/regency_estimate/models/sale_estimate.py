@@ -98,7 +98,7 @@ class SaleEstimate(models.Model):
                                           default=lambda self: self.env.company.estimate_manager_id)
     consumption_agreements_count = fields.Integer(compute='_compute_consumption_agreements')
 
-    # @api.depends('price_sheet_ids')
+    @api.depends('price_sheet_ids')
     def _compute_consumption_agreements(self):
         for estimate in self:
             consumption_agreements = self.env['consumption.agreement'].search([('price_sheet_id', 'in',
