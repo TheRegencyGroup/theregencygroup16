@@ -1,7 +1,7 @@
 from odoo import api, fields, models, _, Command
 from odoo.exceptions import UserError
 from odoo.tools import html_keep_url, is_html_empty, get_lang
-from odoo.addons.regency_tools import SystemMessages
+from odoo.addons.regency_tools.system_messages import accept_format_string, SystemMessages
 
 
 class ConsumptionAgreement(models.Model):
@@ -39,6 +39,7 @@ class ConsumptionAgreement(models.Model):
     deposit_percent_str = fields.Char(compute='_compute_invoice_stat')
     invoice_ids = fields.One2many('account.move', 'consumption_agreement_id', string="Invoices")
     tax_totals = fields.Binary(compute='_compute_tax_totals')
+    from_pricesheet_id = fields.Many2one('product.price.sheet', help='From what Pricesheet created')
 
     @api.depends('line_ids.price_unit', 'line_ids.qty_allowed')
     def _compute_tax_totals(self):
@@ -108,6 +109,16 @@ class ConsumptionAgreement(models.Model):
             if not rec.signed_date:
                 rec.signed_date = fields.Date.today()
             rec.update_product_route_ids()
+            if rec.from_pricesheet_id and rec.from_pricesheet_id.estimate_id:
+                partners_to_inform = self.env['res.partner']
+                if rec.from_pricesheet_id.estimate_id.estimate_manager_id:
+                    partners_to_inform += rec.from_pricesheet_id.estimate_id.estimate_manager_id.partner_id
+                if rec.from_pricesheet_id.estimate_id.purchase_agreement_ids:
+                    for partner in rec.from_pricesheet_id.estimate_id.purchase_agreement_ids.mapped('user_id.partner_id'):
+                        partners_to_inform += partner
+                for partner in partners_to_inform:
+                    msg = accept_format_string(SystemMessages.get('M-011'), partner.name, rec.name)
+                    rec.message_post(body=msg, partner_ids=partner.ids)
 
     def update_product_route_ids(self):
         products = self.line_ids.mapped('product_id')

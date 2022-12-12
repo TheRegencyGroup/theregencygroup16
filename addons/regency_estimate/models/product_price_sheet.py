@@ -272,6 +272,7 @@ class ProductPriceSheet(models.Model):
         self.ensure_one()
         order = self.env['consumption.agreement'].create({'access_token': self.access_token,
                                                           'partner_id': self.partner_id.id,
+                                                          'from_pricesheet_id': self.id,
                                                           'line_ids': [
                                                               Command.create({
                                                                   'product_id': p.product_id.id,
