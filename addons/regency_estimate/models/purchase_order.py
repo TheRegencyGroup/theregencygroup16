@@ -108,7 +108,7 @@ class MyPurchaseOrderLine(models.Model):
                                                                     values, po)
         if values.get('pricesheet_vendor_id'):
             res.update({'price_unit': values['pricesheet_vendor_price']})
-        if values['customer_id']:
+        if values.get('customer_id'):
             res.update({'customer_id': values['customer_id']})
         return res
 
