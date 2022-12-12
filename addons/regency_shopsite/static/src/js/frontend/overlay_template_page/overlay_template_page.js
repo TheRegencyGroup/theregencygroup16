@@ -32,7 +32,7 @@ export class OverlayTemplatePageComponent extends Component {
             maxWidth: 215,
             placement: 'top-start',
             theme: 'listing-name-info',
-            appendTo: () => document.getElementById('wrap'),
+            appendTo: () => document.body,
             content: 'This is where you supply the name of your customized item',
             trigger: 'mouseenter focus',
             offset: [-10, 10],
