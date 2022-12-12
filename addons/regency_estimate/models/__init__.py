@@ -16,3 +16,4 @@ from . import fee_value
 from . import stock_move, res_config_settings, res_company
 from . import consumption_agreement
 
+from . import account_move

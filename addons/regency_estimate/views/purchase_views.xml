@@ -19,6 +19,11 @@
                 <xpath expr="//field[@name='order_line']/tree/field[@name='name']" position="after">
                     <field name="produced_overseas" attrs="{'column_invisible': [('parent.show_column_produced_overseas', '=', False)]}"/>
                 </xpath>
+                <xpath expr="//field[@name='order_line']/tree/field[@name='taxes_id']" position="before">
+                    <field name="fee"/>
+                    <button class="float-end" name="action_edit_fee_value" type="object"
+                            icon="fa-pencil"/>
+                </xpath>
                 <xpath expr="//field[@name='requisition_id']" position="attributes">
                     <attribute name="string">Purchase Requisition</attribute>
                 </xpath>

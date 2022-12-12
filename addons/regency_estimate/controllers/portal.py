@@ -29,6 +29,7 @@ class CustomerPortal(portal.CustomerPortal):
     def _prepare_price_sheets_domain(self, partner):
         return [
             ('state', 'in', ['confirmed', 'done']),
+            '|', ('partner_id', 'child_of', [partner.commercial_partner_id.id]),
             ('message_partner_ids', 'child_of', [partner.commercial_partner_id.id]),
         ]
 
@@ -340,18 +341,25 @@ class CustomerPortal(portal.CustomerPortal):
             raise UserError('Orders not found.')
 
         sale_order = order_sudo.create_sale_order(selected_price_sheet_line_ids)
+        # to make quotation visible on Portal set it Sent
+        sale_order.state = 'sent'
 
         query_string = f'&comeback_url_caption={order_sudo.name}&comeback_url={order_sudo.get_portal_url()}'
 
         # Notify
         estimate_id = selected_price_sheet_line_ids.price_sheet_id.estimate_id
-        if estimate_id and estimate_id.estimate_manager_id:
-            sale_order.message_subscribe(partner_ids=estimate_id.estimate_manager_id.partner_id.ids,
-                                         subtype_ids=[request.env.ref('mail.mt_activities').id,
-                                                      request.env.ref('mail.mt_comment').id])
-            msg = accept_format_string(SystemMessages.get('M-011'), estimate_id.estimate_manager_id.partner_id.name,
-                                       sale_order.name)
-            sale_order.message_post(body=msg, partner_ids=estimate_id.estimate_manager_id.partner_id.ids)
+        if estimate_id:
+            partners_to_subscribe = selected_price_sheet_line_ids.price_sheet_id.message_follower_ids.mapped('partner_id')
+            if estimate_id.estimate_manager_id:
+                partners_to_subscribe += estimate_id.estimate_manager_id.partner_id
+            if estimate_id.purchase_agreement_ids:
+                for partner in estimate_id.purchase_agreement_ids.mapped('user_id.partner_id'):
+                    partners_to_subscribe += partner
+
+            if partners_to_subscribe:
+                sale_order.message_subscribe(partner_ids=partners_to_subscribe.ids,
+                                              subtype_ids=[request.env.ref('mail.mt_activities').id,
+                                                           request.env.ref('mail.mt_comment').id])
 
         return {
             'force_refresh': True,
@@ -386,13 +394,18 @@ class CustomerPortal(portal.CustomerPortal):
         consumption = order_sudo.create_consumption_agreement(selected_price_sheet_line_ids, order_sudo)
         # Notify
         estimate_id = selected_price_sheet_line_ids.price_sheet_id.estimate_id
-        if estimate_id and estimate_id.estimate_manager_id:
-            consumption.message_subscribe(partner_ids=estimate_id.estimate_manager_id.partner_id.ids,
-                                         subtype_ids=[request.env.ref('mail.mt_activities').id,
-                                                      request.env.ref('mail.mt_comment').id])
-            msg = accept_format_string(SystemMessages.get('M-011'), estimate_id.estimate_manager_id.partner_id.name,
-                                       consumption.name)
-            consumption.message_post(body=msg, partner_ids=estimate_id.estimate_manager_id.partner_id.ids)
+        if estimate_id:
+            partners_to_subscribe = selected_price_sheet_line_ids.price_sheet_id.message_follower_ids.mapped('partner_id')
+            if estimate_id.estimate_manager_id:
+                partners_to_subscribe += estimate_id.estimate_manager_id.partner_id
+            if estimate_id.purchase_agreement_ids:
+                for partner in estimate_id.purchase_agreement_ids.mapped('user_id.partner_id'):
+                    partners_to_subscribe += partner
+
+            if partners_to_subscribe:
+                consumption.message_subscribe(partner_ids=partners_to_subscribe.ids,
+                                              subtype_ids=[request.env.ref('mail.mt_activities').id,
+                                                           request.env.ref('mail.mt_comment').id])
 
         query_string = f'&comeback_url_caption={order_sudo.name}&comeback_url={order_sudo.get_portal_url()}'
 
