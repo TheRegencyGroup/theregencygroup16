@@ -41,13 +41,6 @@ class TestDownpayment(TestConsumptionCommon, HttpCase):
                                 content_type='application/json',
                                 headers=headers, method=method)
 
-
-    # def test(self):
-    #     self.assertTrue(self.consumption)
-    #     response = self.url_open(url=f"/my/consumptions/{self.consumption.id}/create_sale_order/{self.consumption.access_token}",
-    #                              data={'selected_line_ids': self.consumption.line_ids.ids})
-    #     self.assertEqual(response.status_code, 200, 'The request should be successful.')
-
     def test_portal_consumption_create_sale_order(self):
         self.assertTrue(self.consumption)
         order_id = self.consumption.id
