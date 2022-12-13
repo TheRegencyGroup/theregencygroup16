@@ -96,7 +96,8 @@ class SaleEstimate(models.Model):
     estimate_manager_id = fields.Many2one('res.users', string='Estimate Manager',
                                           default=lambda self: self.env.company.estimate_manager_id)
 
-    @api.depends('product_lines', 'product_lines.purchase_requisition_line_ids.state')
+    @api.depends('product_lines', 'product_lines.purchase_requisition_line_ids.state',
+                 'product_lines.purchase_requisition_line_ids.product_id', 'product_lines.product_id')
     def _compute_state(self):
         for rec in self:
             done_products_count = len(rec.product_lines.purchase_requisition_line_ids.filtered(lambda f: f.state == 'done').mapped('product_id'))
