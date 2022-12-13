@@ -39,10 +39,9 @@ class SaleEstimate(models.Model):
     priority = fields.Selection(
         AVAILABLE_PRIORITIES, string='Priority', index=True,
         default=AVAILABLE_PRIORITIES[0][0])
-    stage_id = fields.Many2one(
-        'sale.estimate.stage', string='Stage', index=True, tracking=True,
-        group_expand='_read_group_stage_ids',
-        readonly=False, copy=False, ondelete='restrict')
+    state = fields.Selection([('draft', 'New'), ('in_progress', 'In Progress'), ('done', 'Prices Confirmed')], 'Status',
+                             compute='_compute_state', store=True)
+    state_with_qty = fields.Char(compute='_compute_state')
     tag_ids = fields.Many2many(
         'crm.tag', 'estimate_tag_rel', 'estimate_id', 'tag_id', string='Tags',
         help="Classify and analyze your estimates categories like: Training, Service")
@@ -104,6 +103,22 @@ class SaleEstimate(models.Model):
             consumption_agreements = self.env['consumption.agreement'].search([('from_pricesheet_id', 'in',
                                                                                 estimate.price_sheet_ids.ids)])
             estimate.consumption_agreements_count = len(consumption_agreements)
+
+    @api.depends('product_lines', 'product_lines.purchase_requisition_line_ids.state',
+                 'product_lines.purchase_requisition_line_ids.product_id', 'product_lines.product_id')
+    def _compute_state(self):
+        for rec in self:
+            done_products_count = len(rec.product_lines.purchase_requisition_line_ids.filtered(lambda f: f.state == 'done').mapped('product_id'))
+            if done_products_count:
+                rec.state = 'done'
+                all_products_count = len(rec.product_lines.mapped('product_id'))
+                rec.state_with_qty = f'Prices confirmed {done_products_count}/{all_products_count}'
+            elif rec.product_lines.product_id:
+                rec.state = 'in_progress'
+                rec.state_with_qty = 'In progress'
+            else:
+                rec.state = 'draft'
+                rec.state_with_qty = 'New'
 
     @api.depends('partner_id')
     def _compute_shipping_billing_contact_id(self):
