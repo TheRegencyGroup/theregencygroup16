@@ -96,6 +96,14 @@ class SaleEstimate(models.Model):
                                          domain="[('parent_id', '=', partner_id),('is_company', '=', False)]")
     estimate_manager_id = fields.Many2one('res.users', string='Estimate Manager',
                                           default=lambda self: self.env.company.estimate_manager_id)
+    consumption_agreements_count = fields.Integer(compute='_compute_consumption_agreements')
+
+    @api.depends('price_sheet_ids')
+    def _compute_consumption_agreements(self):
+        for estimate in self:
+            consumption_agreements = self.env['consumption.agreement'].search([('from_pricesheet_id', 'in',
+                                                                                estimate.price_sheet_ids.ids)])
+            estimate.consumption_agreements_count = len(consumption_agreements)
 
     @api.depends('partner_id')
     def _compute_shipping_billing_contact_id(self):
@@ -254,6 +262,11 @@ class SaleEstimate(models.Model):
         if len(self.purchase_agreement_ids) == 1:
             action['views'] = [(self.env.ref('purchase_requisition.view_purchase_requisition_form').id, 'form')]
             action['res_id'] = self.purchase_agreement_ids.id
+        return action
+
+    def action_view_consumption_agreements(self):
+        action = self.env["ir.actions.actions"]._for_xml_id("consumption_agreement.consumption_agreement_action")
+        action['domain'] = [('from_pricesheet_id', 'in', self.price_sheet_ids.ids)]
         return action
 
     def action_view_sale_order(self):

@@ -17,6 +17,10 @@
                     <sheet>
                         <div class="oe_button_box" name="button_box">
                             <button class="oe_stat_button" type="object"
+                                    name="action_view_consumption_agreements" icon="fa-pencil-square-o">
+                                    <field name="consumption_agreements_count" widget="statinfo" string="Consumption Agreements"/>
+                           </button>
+                            <button class="oe_stat_button" type="object"
                                     name="action_view_purchase_agreement" icon="fa-pencil-square-o">
                                     <field name="purchase_agreement_count" widget="statinfo" string="Purchase Requisitions"/>
                            </button>
