@@ -101,7 +101,7 @@ class SaleEstimate(models.Model):
     @api.depends('price_sheet_ids')
     def _compute_consumption_agreements(self):
         for estimate in self:
-            consumption_agreements = self.env['consumption.agreement'].search([('price_sheet_id', 'in',
+            consumption_agreements = self.env['consumption.agreement'].search([('from_pricesheet_id', 'in',
                                                                                 estimate.price_sheet_ids.ids)])
             estimate.consumption_agreements_count = len(consumption_agreements)
 
@@ -266,7 +266,7 @@ class SaleEstimate(models.Model):
 
     def action_view_consumption_agreements(self):
         action = self.env["ir.actions.actions"]._for_xml_id("consumption_agreement.consumption_agreement_action")
-        action['domain'] = [('price_sheet_id', 'in', self.price_sheet_ids.ids)]
+        action['domain'] = [('from_pricesheet_id', 'in', self.price_sheet_ids.ids)]
         return action
 
     def action_view_sale_order(self):

@@ -269,12 +269,11 @@ class ProductPriceSheet(models.Model):
         lines_to_order.write({'product_uom_qty': 0})
         return order
 
-    def create_consumption_agreement(self, lines_to_order, price_sheet):
+    def create_consumption_agreement(self, lines_to_order):
         self.ensure_one()
         order = self.env['consumption.agreement'].create({'access_token': self.access_token,
                                                           'partner_id': self.partner_id.id,
                                                           'from_pricesheet_id': self.id,
-                                                          'price_sheet_id': price_sheet.id,
                                                           'line_ids': [
                                                               Command.create({
                                                                   'product_id': p.product_id.id,

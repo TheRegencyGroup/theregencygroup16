@@ -391,7 +391,7 @@ class CustomerPortal(portal.CustomerPortal):
         if not selected_price_sheet_line_ids:
             raise UserError('Orders not found.')
 
-        consumption = order_sudo.create_consumption_agreement(selected_price_sheet_line_ids, order_sudo)
+        consumption = order_sudo.create_consumption_agreement(selected_price_sheet_line_ids)
         # Notify
         estimate_id = selected_price_sheet_line_ids.price_sheet_id.estimate_id
         if estimate_id:
