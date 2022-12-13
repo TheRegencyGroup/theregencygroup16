@@ -1,3 +1,4 @@
+from . import res_company
 from . import sale_estimate
 from . import sale_estimate_stage
 from . import product_attribute
@@ -13,5 +14,5 @@ from . import stock_rule
 from . import product_product
 from . import fee_type
 from . import fee_value
-from . import stock_move, res_config_settings, res_company
+from . import stock_move, res_config_settings
 from . import account_move
