@@ -38,11 +38,11 @@
                                 data-hotkey="r" groups="regency_estimate.group_estimate_administrator"/>
                         <button string="Generate Portal Link" name="action_get_portal_link" type="object" class="oe_highlight"
                                 data-hotkey="q"
-                                attrs="{'invisible':[('state', '=', 'confirmed')]}"
+                                attrs="{'invisible':[('state', 'in', ['draft', 'request_approval', 'approved', 'closed'])]}"
                                 title="Generate Portal Link"/>
                         <button string="Get Portal Link" name="action_get_portal_link" type="object" class="oe_highlight"
                                 data-hotkey="q"
-                                attrs="{'invisible':[('state', '=', 'draft')]}"
+                                attrs="{'invisible':[('state', 'in', ['draft', 'request_approval', 'confirmed', 'closed'])]}"
                                 title="Get Portal Link"/>
                         <field name="state" widget="statusbar" statusbar_visible="draft,confirmed"/>
                         <field name="has_produced_overseas_items" invisible="1"/>
