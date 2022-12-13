@@ -391,11 +391,11 @@ class ProductPriceSheetLine(models.Model):
     def _compute_color(self):
         for rec in self:
             if rec.price_sheet_id.state == 'draft':
-                rec.color = 3  # Yellow
-            elif rec.price_sheet_id.state == 'confirmed':
+                rec.color = 0  # White
+            elif rec.price_sheet_id.state in ['approved', 'closed']:
                 rec.color = 10  # Green
             else:
-                rec.color = 0  # White
+                rec.color = 3  # Yellow
 
     @api.depends('vendor_price', 'duty', 'freight')
     def _compute_unit_price(self):

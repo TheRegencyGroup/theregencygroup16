@@ -78,10 +78,10 @@
 <!--                                <a t-if="price_sheet.has_to_be_signed()" role="button" class="btn btn-primary btn-block mb8" data-toggle="modal" data-target="#modalaccept" href="#">-->
 <!--                                    <i class="fa fa-check"/> Accept &amp; Sign-->
 <!--                                </a>-->
-                                <a t-if="price_sheet.state == 'confirmed'" id="create_sale_order_from_price_sheet_button" role="button" class="btn btn-primary btn-block mb8" href="#">
+                                <a t-if="price_sheet.state == 'approved'" id="create_sale_order_from_price_sheet_button" role="button" class="btn btn-primary btn-block mb8" href="#">
                                     <i class="fa fa-check"/> Create Sale Order
                                 </a>
-                                <a t-if="price_sheet.state == 'confirmed'" id="create_consumption_from_price_sheet_button" role="button" class="btn btn-primary btn-block mb8" href="#">
+                                <a t-if="price_sheet.state == 'approved'" id="create_consumption_from_price_sheet_button" role="button" class="btn btn-primary btn-block mb8" href="#">
                                     <i class="fa fa-check"/> Create Consumption Agreement
                                 </a>
                                 <div class="o_download_pdf btn-toolbar flex-sm-nowrap">
@@ -196,7 +196,7 @@
                     <div t-if="message == 'sign_ok'" class="alert alert-success alert-dismissable d-print-none" role="status">
                         <button type="button" class="close" data-dismiss="alert" aria-label="Close">×</button>
                         <strong>Thank You!</strong><br/>
-                        <t t-if="message == 'sign_ok' and price_sheet.state in ['confirmed']">Your order has been confirmed.</t>
+                        <t t-if="message == 'sign_ok' and price_sheet.state in ['approved']">Your order has been confirmed.</t>
                         <t t-else="">Your order has been signed.</t>
                     </div>
 
@@ -240,7 +240,7 @@
                                 <a role="button" class="btn btn-danger" data-toggle="modal" data-target="#modaldecline" href="#"> <i class="fa fa-times"/> Reject</a>
                             </div>
                         </t>
-                        <t t-if="price_sheet.state == 'confirmed'">
+                        <t t-if="price_sheet.state == 'approved'">
                             <div class="col-sm-auto mt8">
                                 <a role="button" class="btn btn-primary" id="create_sale_order_from_price_sheet_button" href="#"><i class="fa fa-check"/> Create Sale Order</a>
                             </div>
