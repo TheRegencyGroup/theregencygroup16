@@ -25,6 +25,27 @@ class CRMLead(models.Model):
     avendra_account_punchout_user_name = fields.Char(string="Account Punchout User Name")
     number_of_keys = fields.Integer()
     is_existing_customer = fields.Boolean(compute='_compute_is_existing_customer', store=True)
+    partner_id = fields.Many2one(
+        domain="[('is_company', '=', True), ('contact_type', '=', 'customer')]")
+    partner_contact_ids = fields.One2many(related='partner_id.child_ids')
+    partner_contact_id = fields.Many2one('res.partner', domain="[('id', 'in', partner_contact_ids)]")
+
+    @api.onchange('partner_contact_id')
+    def _onchange_partner_contact_id(self):
+        if self.partner_contact_id:
+            self.email_from = self.partner_contact_id.email
+            self.function = self.partner_contact_id.function
+            self.phone = self.partner_contact_id.phone
+            self.mobile = self.partner_contact_id.mobile
+
+    @api.onchange('partner_id')
+    def _onchange_partner_id(self):
+        if self.partner_id != self.partner_contact_id.parent_id:
+            self.partner_contact_id = False
+            self.email_from = False
+            self.function = False
+            self.phone = False
+            self.mobile = False
 
     @api.depends('account_number', 'avendra_account_address1', 'avendra_account_address2', 'street', 'street2')
     def _compute_is_existing_customer(self):
@@ -97,6 +118,14 @@ class CRMLead(models.Model):
         for lead in self:
             if lead.representative_name.phone and lead._get_partner_phone_update():
                 lead.phone = lead.representative_name.phone
+
+    @api.depends_context('uid')
+    @api.depends('partner_id', 'type')
+    def _compute_is_partner_visible(self):
+        """Overridden to ALWAYS show field customer_id"""
+        is_debug_mode = True
+        for lead in self:
+            lead.is_partner_visible = bool(lead.type == 'opportunity' or lead.partner_id or is_debug_mode)
 
     def _inverse_phone(self):
         """
