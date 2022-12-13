@@ -43,15 +43,21 @@ class PurchaseOrder(models.Model):
         for rec in self.filtered(lambda f: f.requisition_id):
             for line in rec.order_line:
                 req_line = rec.requisition_id.line_ids.filtered(lambda f: f.product_id == line.product_id
-                                                                          and (
-                                                                                  f.partner_id == rec.partner_id or not f.partner_id)
-                                                                          and f.product_qty == line.product_qty)
+                                                                and (f.partner_id == rec.partner_id or not f.partner_id)
+                                                                and f.product_qty == line.product_qty)
+
+                new_fees = [f.copy() for f in line.fee_value_ids]
+                for fee in new_fees:
+                    fee.write({'purchase_requisition_line_id': req_line, 'po_line_id': False})
+
                 if req_line:
                     req_line.write({'partner_id': rec.partner_id.id,
                                     'price_unit': line.price_unit,
                                     'product_qty': line.product_qty,
-                                    'produced_overseas': line.produced_overseas})
+                                    'produced_overseas': line.produced_overseas,
+                                    'fee_value_ids': [f.id for f in new_fees]})
                 else:
+                    req_line.fee_value_ids = []
                     self.env['purchase.requisition.line'].create({
                         'requisition_id': rec.requisition_id.id,
                         'product_description_variants': line.name,
@@ -61,6 +67,7 @@ class PurchaseOrder(models.Model):
                         'partner_id': rec.partner_id.id,
                         'product_uom_id': line.product_uom.id,
                         'produced_overseas': line.produced_overseas,
+                        'fee_value_ids': [f.id for f in new_fees],
                     })
 
     def _prepare_invoice(self):
@@ -74,6 +81,20 @@ class MyPurchaseOrderLine(models.Model):
 
     produced_overseas = fields.Boolean(string='Produced overseas')
     customer_id = fields.Many2one('res.partner')
+    fee = fields.Float(readonly=True, compute='_compute_fee', store=True)
+    fee_value_ids = fields.One2many('fee.value', 'po_line_id', store=True, required=True)
+
+    @api.depends('fee_value_ids', 'fee_value_ids.value', 'fee_value_ids.per_item', 'product_qty', 'price_unit')
+    def _compute_fee(self):
+        for rec in self:
+            rec.fee = rec.fee_value_ids.get_fee_sum(rec.product_qty, rec.price_unit)
+
+    @api.depends('product_qty', 'price_unit', 'taxes_id', 'fee')
+    def _compute_amount(self):
+        super()._compute_amount()
+        for line in self:
+            line_subtotal = line.price_subtotal + line.fee
+            line.update({'price_subtotal': line_subtotal})
 
     @api.onchange('product_id')
     def onchange_product_id(self):
@@ -106,11 +127,18 @@ class MyPurchaseOrderLine(models.Model):
                                                       po):
         res = super()._prepare_purchase_order_line_from_procurement(product_id, product_qty, product_uom, company_id,
                                                                     values, po)
-        if values['pricesheet_vendor_id']:
+        if values.get('pricesheet_vendor_id'):
             res.update({'price_unit': values['pricesheet_vendor_price']})
-        if values['customer_id']:
+        if values.get('customer_id'):
             res.update({'customer_id': values['customer_id']})
         return res
+
+    def action_edit_fee_value(self):
+        self.ensure_one()
+        action = self.env["ir.actions.actions"]._for_xml_id("regency_estimate.action_fee_value")
+        action['domain'] = [('po_line_id', '=', self.id)]
+        action['context'] = {'default_po_line_id': self.id}
+        return action
 
 
 PurchaseOrderLine._compute_price_unit_and_date_planned_and_name = MyPurchaseOrderLine._new_compute_price_unit_and_date_planned_and_name

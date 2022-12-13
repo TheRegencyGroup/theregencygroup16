@@ -1,6 +1,6 @@
 {
     'name': 'Regency Sales Estimates',
-    'version': '16.0.0.5',
+    'version': '16.0.0.6',
     'summary': '',
     'author': 'OpsWay',
     'description': "",
@@ -50,7 +50,8 @@
         'data/fee_type.xml',
         'views/stock_picking.xml',
         'views/account_move.xml',
-        'views/sale_order.xml'
+        'views/sale_order.xml',
+        'views/res_config_settings.xml'
     ],
     'demo': [
     ],

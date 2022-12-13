@@ -71,10 +71,13 @@
                                 <div class="o_row">
                                     <field name="contact_name"/>
                                 </div>
+                                 <field name="shipping_contact_id" string="Shipping Contact"/>
+                                 <field name="billing_contact_id" string="Billing Contact"/>
                              </group>
                             <group>
                                 <field name="user_id" widget="many2one_avatar_user"/>
-                                 <field name="company_id" invisible="1"/>
+                                <field name="estimate_manager_id"/>
+                                <field name="company_id" invisible="1"/>
                             </group>
                             <group name="lead_priority" >
                                 <field name="priority" widget="priority"/>
@@ -191,6 +194,7 @@
                     <div class="oe_chatter">
                         <field name="message_follower_ids"/>
                         <field name="message_ids" options="{'post_refresh': 'recipients'}"/>
+                        <field name="activity_ids"/>
                     </div>
                 </form>
              </field>

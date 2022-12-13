@@ -27,4 +27,5 @@ SystemMessages = {
     "M-005": "%s is confirmed. Please, send it the customer!<br/>The link to portal: %s",
     "M-009": "%s %s created!",
     "M-010": "%s is created!",
+    "M-011": "%s has signed the %s"
 }

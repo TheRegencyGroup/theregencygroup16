@@ -1,3 +1,5 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
-access_customer_association,customer.association,model_customer_association,base.group_erp_manager,1,1,1,1
-access_association_type,association.type,model_association_type,base.group_erp_manager,1,1,1,1
+access_customer_association,customer.association,model_customer_association,base.group_system,1,1,1,1
+access_association_type,association.type,model_association_type,base.group_system,1,1,1,1
+access_customer_association_user,customer.association user,model_customer_association,base.group_user,1,0,0,0
+access_association_type_user,association.type user,model_association_type,base.group_user,1,0,0,0

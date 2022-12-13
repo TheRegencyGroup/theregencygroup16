@@ -23,7 +23,7 @@ class SaleEstimate(models.Model):
     _name = 'sale.estimate'
     _description = "Estimate"
     _order = "id desc"
-    _inherit = ['mail.thread']
+    _inherit = ['mail.thread', 'mail.activity.mixin']
 
     # Description
     name = fields.Char(
@@ -50,7 +50,7 @@ class SaleEstimate(models.Model):
     # Customer / contact
     partner_id = fields.Many2one(
         'res.partner', string='Customer', check_company=True, index=True, tracking=10,
-        domain="[('contact_type', '!=', 'customer'),'|', ('company_id', '=', False), ('company_id', '=', company_id)]",
+        domain="[('is_company', '=', True),('contact_type', '=', 'customer'),'|', ('company_id', '=', False), ('company_id', '=', company_id)]",
         help="Linked partner (optional). Usually created when converting the lead. You can find a partner by its Name, TIN, Email or Internal Reference.")
     contact_name = fields.Char(
         'Contact Name', tracking=30,
@@ -85,6 +85,25 @@ class SaleEstimate(models.Model):
                                         store=True, index=True)
     purchase_order_ids = fields.One2many('purchase.order', compute='_compute_purchase_orders')
     purchase_order_count = fields.Integer(compute='_compute_purchase_orders')
+
+    shipping_contact_id = fields.Many2one('res.partner',
+                                          compute='_compute_shipping_billing_contact_id',
+                                          store=True, readonly=False, required=True, precompute=True,
+                                          domain="[('parent_id', '=', partner_id),('is_company', '=', False)]")
+    billing_contact_id = fields.Many2one('res.partner',
+                                         compute='_compute_shipping_billing_contact_id',
+                                         store=True, readonly=False, required=True, precompute=True,
+                                         domain="[('parent_id', '=', partner_id),('is_company', '=', False)]")
+    estimate_manager_id = fields.Many2one('res.users', string='Estimate Manager',
+                                          default=lambda self: self.env.company.estimate_manager_id)
+
+    @api.depends('partner_id')
+    def _compute_shipping_billing_contact_id(self):
+        for estimate in self:
+            estimate.shipping_contact_id = estimate.partner_id.address_get(['delivery'])[
+                'delivery'] if estimate.partner_id else False
+            estimate.billing_contact_id = estimate.partner_id.address_get(['invoice'])[
+                'invoice'] if estimate.partner_id else False
 
     def _compute_purchase_orders(self):
         for rec in self:
@@ -134,6 +153,7 @@ class SaleEstimate(models.Model):
         """ compute the new values when partner_id has changed """
         for rec in self:
             rec.update(rec._prepare_contact_name_from_partner(rec.partner_id))
+
 
     def _prepare_contact_name_from_partner(self, partner):
         contact_name = False if partner.is_company else partner.name
@@ -273,7 +293,7 @@ class SaleEstimate(models.Model):
                                                            and x.product_qty == p.product_uom_qty).sorted('product_qty')
                 if matched_lines:
                     for line in matched_lines:
-                        sheet_lines.append(Command.create({
+                        sheet_line = self.env['product.price.sheet.line'].create({
                                 'name': p.name,
                                 'sequence': seq,
                                 'product_id': p.product_id.id,
@@ -284,12 +304,17 @@ class SaleEstimate(models.Model):
                                 'total': line.price_unit * 1.6 * line.product_qty,
                                 'display_type': p.display_type,
                                 'produced_overseas': line.produced_overseas,
-                                'sale_estimate_line_ids': [(6, 0, [p.id])]
-                            }))
+                                'sale_estimate_line_ids': [(6, 0, [p.id])],
+                            })
+                        new_fees = [f.copy() for f in line.fee_value_ids]
+                        for fee in new_fees:
+                            fee.write({'purchase_requisition_line_id': False, 'price_sheet_line_id': sheet_line.id})
+                        sheet_line.write({'fee_value_ids': [f.id for f in new_fees]})
+                        sheet_lines.append(sheet_line)
                         seq += 1
                 else:
                     # create new line for the product that is in estimate, but not in purchase requisition
-                    sheet_lines.append(Command.create({
+                    sheet_line = self.env['product.price.sheet.line'].create({
                         'name': p.name,
                         'sequence': seq,
                         'product_id': p.product_id.id,
@@ -300,13 +325,14 @@ class SaleEstimate(models.Model):
                         'total': p.product_id.list_price * p.product_uom_qty,
                         'display_type': p.display_type,
                         'sale_estimate_line_ids': [(6, 0, [p.id])]
-                    }))
+                    })
+                    sheet_lines.append(sheet_line)
                     seq += 1
 
         # add new lines(not in estimate) from confirmed purchase requisitions
         seq = self.product_lines.sorted('sequence')[-1].sequence
         for x in new_requisition_lines:
-            sheet_lines.append(Command.create({
+            sheet_line = self.env['product.price.sheet.line'].create({
                 'name': x.product_description_variants,
                 'sequence': seq,
                 'product_id': x.product_id.id,
@@ -316,7 +342,12 @@ class SaleEstimate(models.Model):
                 'price': x.price_unit * 1.6,
                 'total': x.price_unit * 1.6 * x.product_qty,
                 'produced_overseas': x.produced_overseas
-            }))
+            })
+            new_fees = [f.copy() for f in x.fee_value_ids]
+            for fee in new_fees:
+                fee.write({'purchase_requisition_line_id': False, 'price_sheet_line_id': sheet_line.id})
+            sheet_line.write({'fee_value_ids': [f.id for f in new_fees]})
+            sheet_lines.append(sheet_line)
             seq += 1
         existing_draft_pricesheets = self.price_sheet_ids.filtered(lambda x: x.state == 'draft')
         if existing_draft_pricesheets:
@@ -329,8 +360,9 @@ class SaleEstimate(models.Model):
             new_pricesheet = existing_draft_pricesheets.create({
                 'estimate_id': self.id,
                 'partner_id': self.partner_id,
-                'item_ids': sheet_lines,
+                'item_ids': [s.id for s in sheet_lines],
             })
+            new_pricesheet.message_subscribe(partner_ids=(self.estimate_manager_id.partner_id + self.purchase_agreement_ids.mapped('user_id.partner_id')).ids)
             action = self.env["ir.actions.actions"]._for_xml_id("regency_estimate.action_product_price_sheet_new")
             action['res_id'] = new_pricesheet.id
         self.product_lines.filtered('selected').write({'selected': False})
