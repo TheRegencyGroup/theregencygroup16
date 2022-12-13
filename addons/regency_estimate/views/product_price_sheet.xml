@@ -24,10 +24,18 @@
 <!--                        <button string="New Quotation" name="action_new_quotation" type="object" class="oe_highlight"-->
 <!--                                data-hotkey="q"-->
 <!--                                title="Create new quotation"/>-->
-                        <button string="Confirm" name="action_confirm" type="object" class="oe_highlight"
+                        <button string="Request Approval" name="action_request_approval" type="object" class="oe_highlight"
                                 data-hotkey="c" states="draft"/>
-                        <button string="Reset to Draft" name="action_draft" states="confirmed,closed" type="object"
+                        <button string="Confirm" name="action_confirm" type="object" class="oe_highlight"
+                                data-hotkey="c" states="request_approval" groups="regency_estimate.group_estimate_manager"/>
+                        <button string="Approve" name="action_approve" type="object" class="oe_highlight"
+                                data-hotkey="c" states="confirmed" groups="regency_estimate.group_estimate_administrator"/>
+                        <button string="Reset to Draft" name="action_draft" states="request_approval,confirmed" type="object"
                                 data-hotkey="r" groups="regency_estimate.group_estimate_manager"/>
+                        <button string="Reset to Draft" name="action_draft" states="approved,closed" type="object"
+                                data-hotkey="r" groups="regency_estimate.group_estimate_administrator"/>
+                        <button string="Close" name="action_close" states="approved" type="object"
+                                data-hotkey="r" groups="regency_estimate.group_estimate_administrator"/>
                         <button string="Generate Portal Link" name="action_get_portal_link" type="object" class="oe_highlight"
                                 data-hotkey="q"
                                 attrs="{'invisible':[('state', '=', 'confirmed')]}"
@@ -40,6 +48,7 @@
                         <field name="has_produced_overseas_items" invisible="1"/>
                     </header>
                      <sheet>
+                        <field name="can_edit" invisible="1"/>
                         <div class="oe_button_box" name="button_box">
                                 <button class="oe_stat_button" type="object"
                                     name="action_view_sale_quotation" icon="fa-pencil-square-o" >
@@ -67,7 +76,7 @@
                         </group>
                         <notebook>
                             <page name="pricelist" string="Price Sheet Items">
-                              <field name="item_ids"  widget="section_and_note_one2many" mode="tree">
+                              <field name="item_ids" attrs="{'readonly': [('can_edit', '==', False)]}" widget="section_and_note_one2many" mode="tree">
                                   <tree string="Price Sheet Items" class="custom_list_header" editable="bottom" options="{'no_open': True}">
                                       <control>
                                         <create name="add_product_control" string="Add a product"/>

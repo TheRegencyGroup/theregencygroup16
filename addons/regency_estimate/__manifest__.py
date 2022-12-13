@@ -1,6 +1,6 @@
 {
     'name': 'Regency Sales Estimates',
-    'version': '16.0.0.6',
+    'version': '16.0.0.7',
     'summary': '',
     'author': 'OpsWay',
     'description': "",
@@ -17,7 +17,8 @@
         'stock_mts_mto_rule',
         'regency_backend_interface',
         'mail_chatter_customization',
-        'product'
+        'product',
+        'regency_tools'
     ],
     'category': 'Regency/Sales',
     'sequence': 10,

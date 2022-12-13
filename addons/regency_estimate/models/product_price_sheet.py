@@ -33,7 +33,7 @@ class ProductPriceSheet(models.Model):
                        states={'draft': [('readonly', False)]})
     item_ids = fields.One2many(
         'product.price.sheet.line', 'price_sheet_id', 'Price sheet lines',
-        copy=True, readonly=True, states={'draft': [('readonly', False)]})
+        copy=True)
     has_produced_overseas_items = fields.Boolean(compute='_compute_has_produced_overseas_items')
     currency_id = fields.Many2one('res.currency', 'Currency', default=_get_default_currency_id, required=True,
                                   readonly=True, states={'draft': [('readonly', False)]})
@@ -44,8 +44,10 @@ class ProductPriceSheet(models.Model):
                                      string="Number of Quotations")
     sale_order_ids = fields.One2many('sale.order', 'price_sheet_id', string='Quotations')
     state = fields.Selection([('draft', 'Draft'),
+                              ('request_approval', 'Request Approval'),
                               ('confirmed', 'Confirmed'),
-                              ('closed', 'Done')], default='draft')
+                              ('approved', 'Approved'),
+                              ('closed', 'Close')], default='draft')
     amount_untaxed = fields.Monetary(string='Untaxed Amount', store=True, compute='_amount_all', tracking=5)
     tax_totals_json = fields.Char(compute='_compute_tax_totals_json')
     amount_tax = fields.Monetary(string='Taxes', store=True, compute='_amount_all')
@@ -57,6 +59,13 @@ class ProductPriceSheet(models.Model):
     payment_term_id = fields.Many2one(
         'account.payment.term', string='Payment Terms', check_company=True,  # Unrequired company
         domain="['|', ('company_id', '=', False), ('company_id', '=', company_id)]",)
+    can_edit = fields.Boolean(compute="_compute_can_edit")
+
+    def _compute_can_edit(self):
+        for rec in self:
+            rec.can_edit = rec.state == 'draft' or \
+                           rec.state in ['request_approval', 'confirmed'] and self.env.user.has_group('regency_estimate.group_estimate_manager') or \
+                           rec.state in ['approved'] and self.env.user.has_group('regency_estimate.group_estimate_administrator')
 
     @api.depends('sale_order_ids')
     def _compute_sale_order_data(self):
@@ -83,7 +92,6 @@ class ProductPriceSheet(models.Model):
     def _compute_has_produced_overseas_items(self):
         for ps in self:
             ps.has_produced_overseas_items = any(ps.mapped('item_ids.produced_overseas'))
-
 
     def _compute_access_url(self):
         # super(ProductPriceSheet, self)._compute_access_url()
@@ -155,6 +163,13 @@ class ProductPriceSheet(models.Model):
            # 'delay': line.ETA,
         }
 
+    def action_request_approval(self):
+        for rec in self:
+            rec.write({'state': 'request_approval'})
+            if rec.estimate_id.estimate_manager_id:
+                message = SystemMessages['M-013'] % rec.name
+                self.env['mail.channel'].send_notification(message=message, user_id=rec.estimate_id.estimate_manager_id)
+
     def action_confirm(self):
         for line in self.mapped('item_ids'):
             # Do not add a contact as a supplier
@@ -175,15 +190,27 @@ class ProductPriceSheet(models.Model):
                 except AccessError:  # no write access rights -> just ignore
                     break
         self.write({'state': 'confirmed'})
+        est_admin = self._get_estimate_administrator()
+        if est_admin:
+            for rec in self:
+                message = SystemMessages['M-013'] % rec.name
+                self.env['mail.channel'].send_notification(message=message, user_id=est_admin)
+
+    def action_approve(self):
+        self.ensure_one()
+        self.write({'state': 'approved'})
         if self.estimate_id.user_id:
             url = f'{self.get_base_url()}{self.get_portal_url()}'
             message = SystemMessages['M-005'] % (
                 f'<a href="/web#id={self.id}&amp;model={self._name}&amp;view_type=form">{self.name}</a>',
                 f'<a href={url}>{url}</a>')
-            self.env['purchase.requisition'].send_notification(message=message, user_id=self.estimate_id.user_id)
+            self.env['mail.channel'].send_notification(message=message, user_id=self.estimate_id.user_id)
 
     def action_draft(self):
         self.write({'state': 'draft'})
+
+    def action_close(self):
+        self.write({'state': 'closed'})
 
     def action_get_portal_link(self):
         base_url = self.get_base_url()
@@ -196,6 +223,9 @@ class ProductPriceSheet(models.Model):
             'type': 'ir.actions.act_window',
             'target': 'new'
         }
+
+    def _get_estimate_administrator(self):
+        return self.env['res.users'].search([('groups_id', 'in', self.env.ref('regency_estimate.group_estimate_administrator').ids)])
 
     def has_to_be_signed(self):
         return False
