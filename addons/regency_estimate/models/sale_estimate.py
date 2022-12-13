@@ -99,7 +99,6 @@ class SaleEstimate(models.Model):
     @api.depends('product_lines', 'product_lines.purchase_requisition_line_ids.state')
     def _compute_state(self):
         for rec in self:
-            rec.state_with_qty = False
             done_products_count = len(rec.product_lines.purchase_requisition_line_ids.filtered(lambda f: f.state == 'done').mapped('product_id'))
             if done_products_count:
                 rec.state = 'done'
