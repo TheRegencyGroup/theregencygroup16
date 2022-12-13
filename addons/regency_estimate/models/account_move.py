@@ -1,11 +1,18 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo import models, api
+from odoo import models, api, fields
 
 
 class AccountMove(models.Model):
     _inherit = 'account.move'
+
+    @api.model
+    def default_get(self, fields_list):
+        defaults = super().default_get(fields_list)
+        if defaults.get('move_type') == 'in_invoice':
+            defaults.update(invoice_date=fields.Datetime.now())
+        return defaults
 
     @api.model_create_multi
     def create(self, vals_list):
