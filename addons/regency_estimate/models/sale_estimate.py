@@ -41,7 +41,7 @@ class SaleEstimate(models.Model):
         default=AVAILABLE_PRIORITIES[0][0])
     state = fields.Selection([('draft', 'New'), ('in_progress', 'In Progress'), ('done', 'Prices Confirmed')], 'Status',
                              compute='_compute_state', store=True)
-    confirmed_qty = fields.Char(compute='_compute_state')
+    state_with_qty = fields.Char(compute='_compute_state')
     tag_ids = fields.Many2many(
         'crm.tag', 'estimate_tag_rel', 'estimate_id', 'tag_id', string='Tags',
         help="Classify and analyze your estimates categories like: Training, Service")
@@ -99,18 +99,18 @@ class SaleEstimate(models.Model):
     @api.depends('product_lines', 'product_lines.purchase_requisition_line_ids.state')
     def _compute_state(self):
         for rec in self:
-            rec.confirmed_qty = False
+            rec.state_with_qty = False
             done_products_count = len(rec.product_lines.purchase_requisition_line_ids.filtered(lambda f: f.state == 'done').mapped('product_id'))
             if done_products_count:
                 rec.state = 'done'
                 all_products_count = len(rec.product_lines.mapped('product_id'))
-                rec.confirmed_qty = f'Prices confirmed {done_products_count}/{all_products_count}'
+                rec.state_with_qty = f'Prices confirmed {done_products_count}/{all_products_count}'
             elif rec.product_lines.product_id:
                 rec.state = 'in_progress'
-                rec.confirmed_qty = 'In progress'
+                rec.state_with_qty = 'In progress'
             else:
                 rec.state = 'draft'
-                rec.confirmed_qty = 'New'
+                rec.state_with_qty = 'New'
 
     @api.depends('partner_id')
     def _compute_shipping_billing_contact_id(self):

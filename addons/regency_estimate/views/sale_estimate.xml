@@ -212,7 +212,7 @@
                     <field name="city" optional="show"/>
                     <field name="state_id" optional="hide"/>
                     <field name="state" invisible="1"/>
-                    <field name="confirmed_qty" widget="badge" decoration-success="state == 'done'"
+                    <field name="state_with_qty" widget="badge" decoration-success="state == 'done'"
                            decoration-warning="state == 'in_progress'" decoration-info="state == 'draft'"/>
                     <field name="country_id" optional="show" options="{'no_open': True, 'no_create': True}"/>
                     <field name="partner_id" invisible="1"/>
