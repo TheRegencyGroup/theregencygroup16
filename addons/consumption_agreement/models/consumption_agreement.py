@@ -197,6 +197,13 @@ class ConsumptionAgreement(models.Model):
                     'customer_id': line.agreement_id.partner_id.id
                 })]
             })
+            if po.partner_id.country_id:
+                po.currency_id = po.partner_id.country_id.currency_id
+                for po_line in po.order_line:
+                    if po.currency_id != self.currency_id:
+                        po_line.price_unit = self.currency_id._convert(po_line.price_unit, po_line.currency_id,
+                                                                          self.company_id, fields.Date.today())
+
             new_purchase_orders += po
         if not order_count:
             action = self.env["ir.actions.act_window"]._for_xml_id("purchase.purchase_rfq")
