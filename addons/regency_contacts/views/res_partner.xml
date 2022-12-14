@@ -8,16 +8,28 @@
 
             <xpath expr="//span[@name='address_name']" position="before">
                 <field name="entity_type"
-                       attrs="{'invisible':[('is_company', '=', True),('contact_type','!=','customer')]}"/>
+                       attrs="{'invisible':[('is_company', '=', True),('is_customer','!=', True)]}"/>
                 <field name="dba_name"/>
             </xpath>
 
             <xpath expr="//field[@name='company_type']" position="after">
                 <group>
-                    <field name="contact_type" widget="radio" options="{'horizontal': true}"
-                           attrs="{'invisible': [('company_type', '!=', 'company')]}"/>
-                    <field name="vendor_type" widget="radio" options="{'horizontal': true}"
-                           attrs="{'invisible': ['|', ('contact_type', '!=', 'vendor'), ('is_company', '=', False)]}"/>
+                    <div class="o_row">
+                        <label for="is_customer" attrs="{'invisible': [('company_type', '!=', 'company')]}"/>
+                        <div class="o_row">
+                            <field name="is_customer" attrs="{'invisible': [('company_type', '!=', 'company')]}"/>
+                        </div>
+                        <label for="is_vendor" attrs="{'invisible': [('company_type', '!=', 'company')]}"/>
+                        <div class="o_row">
+                            <field name="is_vendor" attrs="{'invisible': [('company_type', '!=', 'company')]}"/>
+                        </div>
+                    </div>
+                    <div class="o_row">
+                        <label class="oe_inline" for="vendor_type"
+                               attrs="{'invisible': ['|', ('is_vendor', '=', False), ('is_company', '=', False)]}"/>
+                        <field name="vendor_type" widget="radio" options="{'horizontal': true}"
+                               attrs="{'invisible': ['|', ('is_vendor', '=', False), ('is_company', '=', False)]}"/>
+                    </div>
                 </group>
             </xpath>
 
@@ -76,8 +88,8 @@
         <field name="res_model">res.partner</field>
         <field name="view_mode">kanban,tree,form,activity</field>
         <field name="search_view_id" ref="base.view_res_partner_filter"/>
-        <field name="context">{'default_company_type': 'company', 'default_contact_type': 'customer'}</field>
-        <field name="domain">[('contact_type', '=', 'customer'), ('is_company', '=', True)]</field>
+        <field name="context">{'default_company_type': 'company', 'default_is_customer': True}</field>
+        <field name="domain">[('is_customer', '=', True), ('is_company', '=', True)]</field>
     </record>
 
     <record id="action_vendors" model="ir.actions.act_window">
@@ -86,8 +98,8 @@
         <field name="res_model">res.partner</field>
         <field name="view_mode">kanban,tree,form,activity</field>
         <field name="search_view_id" ref="base.view_res_partner_filter"/>
-        <field name="domain">[('contact_type', '=', 'vendor'), ('is_company', '=', True)]</field>
-        <field name="context">{'default_company_type': 'company', 'default_contact_type': 'vendor'}</field>
+        <field name="domain">[('is_vendor', '=', True), ('is_company', '=', True)]</field>
+        <field name="context">{'default_company_type': 'company', 'default_is_vendor': True}</field>
     </record>
 
     <menuitem id="res_partner_menu_customers"

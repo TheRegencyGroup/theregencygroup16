@@ -10,7 +10,7 @@ class ConsumptionAgreement(models.Model):
 
     name = fields.Char(required=True, copy=False, index=True, default=lambda self: _('New'))
     signed_date = fields.Date()
-    partner_id = fields.Many2one('res.partner', domain=[('contact_type', '=', 'customer')], string='Primary Customer')
+    partner_id = fields.Many2one('res.partner', domain=[('is_customer', '=', True)], string='Primary Customer')
     possible_partners = fields.One2many('res.partner', compute='_compute_possible_partners')
     allowed_partner_ids = fields.Many2many('res.partner', string="Allowed Customers")
     line_ids = fields.One2many('consumption.agreement.line', 'agreement_id')
@@ -355,10 +355,9 @@ class ConsumptionAggreementLine(models.Model):
     currency_id = fields.Many2one(related='agreement_id.currency_id', store=True)
     state = fields.Selection(related='agreement_id.state', store=True)
     sale_order_line_ids = fields.One2many('sale.order.line', 'consumption_agreement_line_id')
-    partner_id = fields.Many2one(related='agreement_id.partner_id', domain=[('contact_type', '=', 'customer')],
-                                 store=True)
+    partner_id = fields.Many2one(related='agreement_id.partner_id', domain=[('is_customer', '=', True)], store=True)
     allowed_partner_ids = fields.Many2many('res.partner', string="Allowed Customers")
-    vendor_id = fields.Many2one('res.partner', domain=[('contact_type', '=', 'vendor')], required=True)
+    vendor_id = fields.Many2one('res.partner', domain=[('is_vendor', '=', True)], required=True)
     untaxed_amount = fields.Monetary(compute='_compute_untaxed_amount', store=True)
     name = fields.Text(string='Description')
     product_custom_attribute_value_ids = fields.One2many('product.attribute.custom.value', 'ca_product_line_id',

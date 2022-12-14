@@ -25,8 +25,7 @@ class CRMLead(models.Model):
     avendra_account_punchout_user_name = fields.Char(string="Account Punchout User Name")
     number_of_keys = fields.Integer()
     is_existing_customer = fields.Boolean(compute='_compute_is_existing_customer', store=True)
-    partner_id = fields.Many2one(
-        domain="[('is_company', '=', True), ('contact_type', '=', 'customer')]")
+    partner_id = fields.Many2one(domain="[('is_company', '=', True), ('is_customer', '=', True)]")
     partner_contact_ids = fields.One2many(related='partner_id.child_ids')
     partner_contact_id = fields.Many2one('res.partner', domain="[('id', 'in', partner_contact_ids)]")
 
