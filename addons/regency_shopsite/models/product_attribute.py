@@ -16,7 +16,7 @@ class ProductAttribute(models.Model):
         )
 
     def unlink(self):
-        if self.env['ir.config_parameter'].sudo()\
+        if self.env['ir.config_parameter'].sudo() \
                 .get_param('regency_shopsite.restricted_delete_default_attributes', '1') == '1':
             if any(x in self._get_restricted_for_unlink() for x in self.ids):
                 raise UserError('Attribute is default!')
@@ -83,7 +83,7 @@ class ProductTemplateAttributeValue(models.Model):
         for rec in self:
             if not rec.product_tmpl_id.overlay_template_ids or rec.attribute_id.id == overlay_attribute_id.id:
                 continue
-            overlay_attribute_line_value_ids = rec.product_tmpl_id.overlay_template_ids\
+            overlay_attribute_line_value_ids = rec.product_tmpl_id.overlay_template_ids \
                 .mapped('overlay_attribute_line_ids').mapped('value_ids')
             if rec.product_attribute_value_id.id in overlay_attribute_line_value_ids.ids:
                 raise UserError(f'The attribute value "{rec.product_attribute_value_id.name}" is used in one of the '
@@ -136,9 +136,12 @@ class ProductTemplateAttributeValue(models.Model):
                 overlay_attribute_id = self.env.ref('regency_shopsite.overlay_attribute')
                 none_overlay_value_id = self.env.ref('regency_shopsite.none_overlay_attribute_value')
                 customization_attr_id = self.env.ref('regency_shopsite.customization_attribute')
-                if overlay_attribute_id == ptav.attribute_id and ptav.product_attribute_value_id != none_overlay_value_id:
-                    raise UserError('Overlay attribute line values possible to change only from overlay template.')
+                if not self._context.get('is_overlay_template_initiator'):
+                    if overlay_attribute_id == ptav.attribute_id \
+                            and ptav.product_attribute_value_id != none_overlay_value_id:
+                        raise UserError('Overlay attribute line values possible to change only from overlay template.')
 
-                if customization_attr_id == ptav.attribute_id and self.env.ref(
-                        'regency_shopsite.no_customization_value') != ptav.product_attribute_value_id:
-                    raise UserError('Customization attribute line values possible to change only from overlay template.')
+                    if customization_attr_id == ptav.attribute_id and self.env.ref(
+                            'regency_shopsite.no_customization_value') != ptav.product_attribute_value_id:
+                        raise UserError(
+                            'Customization attribute line values possible to change only from overlay template.')
