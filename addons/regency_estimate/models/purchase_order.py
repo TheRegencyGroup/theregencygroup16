@@ -39,6 +39,13 @@ class PurchaseOrder(models.Model):
         else:
             self.order_line.write({'produced_overseas': False})
 
+    @api.onchange('partner_id', 'company_id')
+    def onchange_partner_id(self):
+        """Overridden"""
+        super().onchange_partner_id()
+        if self.partner_id.country_id:
+            self.currency_id = self.partner_id.country_id.currency_id.id
+
     def action_confirm_prices(self):
         self.write({'state': 'confirmed_prices'})
         for rec in self.filtered(lambda f: f.requisition_id):
