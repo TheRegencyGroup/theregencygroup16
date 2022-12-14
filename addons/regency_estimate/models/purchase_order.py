@@ -63,7 +63,8 @@ class PurchaseOrder(models.Model):
                                     'price_unit': line.price_unit,
                                     'product_qty': line.product_qty,
                                     'produced_overseas': line.produced_overseas,
-                                    'fee_value_ids': [f.id for f in new_fees]})
+                                    'fee_value_ids': [f.id for f in new_fees],
+                                    'currency_id': rec.currency_id.id})
                 else:
                     req_line.fee_value_ids = []
                     self.env['purchase.requisition.line'].create({
@@ -76,6 +77,7 @@ class PurchaseOrder(models.Model):
                         'product_uom_id': line.product_uom.id,
                         'produced_overseas': line.produced_overseas,
                         'fee_value_ids': [f.id for f in new_fees],
+                        'currency_id': rec.currency_id.id
                     })
 
     def _prepare_invoice(self):
