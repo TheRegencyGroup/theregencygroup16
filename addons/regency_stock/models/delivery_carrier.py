@@ -1,5 +1,6 @@
-from odoo import models
+from odoo import models, _
 from odoo.addons.delivery.models.delivery_request_objects import DeliveryPackage
+from odoo.exceptions import UserError
 
 
 class DeliveryCarrier(models.Model):
@@ -16,6 +17,11 @@ class DeliveryCarrier(models.Model):
             total_cost += self._product_price_to_company_currency(line.product_qty, line.product_id, order.company_id)
 
         total_weight = self._get_estimated_weight(order) + default_package_type.base_weight  # Overridden
+        if total_weight == 0.0:
+            weight_uom_name = self.env['product.template']._get_weight_uom_name_from_ir_config_parameter()
+            raise UserError(
+                _("The package cannot be created because the total weight of the products in the picking is 0.0 %s") % (
+                    weight_uom_name))
         # If max weight == 0 => division by 0. If this happens, we want to have
         # more in the max weight than in the total weight, so that it only
         # creates ONE package with everything.

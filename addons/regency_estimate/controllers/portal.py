@@ -28,7 +28,7 @@ class CustomerPortal(portal.CustomerPortal):
 
     def _prepare_price_sheets_domain(self, partner):
         return [
-            ('state', 'in', ['confirmed', 'done']),
+            ('state', 'in', ['approved', 'closed']),
             '|', ('partner_id', 'child_of', [partner.commercial_partner_id.id]),
             ('message_partner_ids', 'child_of', [partner.commercial_partner_id.id]),
         ]
@@ -74,7 +74,7 @@ class CustomerPortal(portal.CustomerPortal):
         except (AccessError, MissingError):
             return request.redirect('/my')
 
-        if order_sudo.state not in ('draft', 'confirmed'):
+        if order_sudo.state == 'closed':
             return False
         order_line = request.env['product.price.sheet.line'].sudo().browse(int(line_id))
         if order_line.price_sheet_id != order_sudo:
@@ -120,7 +120,7 @@ class CustomerPortal(portal.CustomerPortal):
         except (AccessError, MissingError):
             return request.redirect('/my')
 
-        if order_sudo.state not in ('draft', 'confirmed'):
+        if order_sudo.state ==  'closed':
             return False
         order_line = request.env['product.price.sheet.line'].sudo().browse(int(line_id))
         if order_line.price_sheet_id != order_sudo:
@@ -392,7 +392,6 @@ class CustomerPortal(portal.CustomerPortal):
             raise UserError('Orders not found.')
 
         consumption = order_sudo.create_consumption_agreement(selected_price_sheet_line_ids)
-
         # Notify
         estimate_id = selected_price_sheet_line_ids.price_sheet_id.estimate_id
         if estimate_id:

@@ -39,10 +39,9 @@ class SaleEstimate(models.Model):
     priority = fields.Selection(
         AVAILABLE_PRIORITIES, string='Priority', index=True,
         default=AVAILABLE_PRIORITIES[0][0])
-    stage_id = fields.Many2one(
-        'sale.estimate.stage', string='Stage', index=True, tracking=True,
-        group_expand='_read_group_stage_ids',
-        readonly=False, copy=False, ondelete='restrict')
+    state = fields.Selection([('draft', 'New'), ('in_progress', 'In Progress'), ('done', 'Prices Confirmed')], 'Status',
+                             compute='_compute_state', store=True)
+    state_with_qty = fields.Char(compute='_compute_state')
     tag_ids = fields.Many2many(
         'crm.tag', 'estimate_tag_rel', 'estimate_id', 'tag_id', string='Tags',
         help="Classify and analyze your estimates categories like: Training, Service")
@@ -96,6 +95,30 @@ class SaleEstimate(models.Model):
                                          domain="[('parent_id', '=', partner_id),('is_company', '=', False)]")
     estimate_manager_id = fields.Many2one('res.users', string='Estimate Manager',
                                           default=lambda self: self.env.company.estimate_manager_id)
+    consumption_agreements_count = fields.Integer(compute='_compute_consumption_agreements')
+
+    @api.depends('price_sheet_ids')
+    def _compute_consumption_agreements(self):
+        for estimate in self:
+            consumption_agreements = self.env['consumption.agreement'].search([('from_pricesheet_id', 'in',
+                                                                                estimate.price_sheet_ids.ids)])
+            estimate.consumption_agreements_count = len(consumption_agreements)
+
+    @api.depends('product_lines', 'product_lines.purchase_requisition_line_ids.state',
+                 'product_lines.purchase_requisition_line_ids.product_id', 'product_lines.product_id')
+    def _compute_state(self):
+        for rec in self:
+            done_products_count = len(rec.product_lines.purchase_requisition_line_ids.filtered(lambda f: f.state == 'done').mapped('product_id'))
+            if done_products_count:
+                rec.state = 'done'
+                all_products_count = len(rec.product_lines.mapped('product_id'))
+                rec.state_with_qty = f'Prices confirmed {done_products_count}/{all_products_count}'
+            elif rec.product_lines.product_id:
+                rec.state = 'in_progress'
+                rec.state_with_qty = 'In progress'
+            else:
+                rec.state = 'draft'
+                rec.state_with_qty = 'New'
 
     @api.depends('partner_id')
     def _compute_shipping_billing_contact_id(self):
@@ -254,6 +277,11 @@ class SaleEstimate(models.Model):
         if len(self.purchase_agreement_ids) == 1:
             action['views'] = [(self.env.ref('purchase_requisition.view_purchase_requisition_form').id, 'form')]
             action['res_id'] = self.purchase_agreement_ids.id
+        return action
+
+    def action_view_consumption_agreements(self):
+        action = self.env["ir.actions.actions"]._for_xml_id("consumption_agreement.consumption_agreement_action")
+        action['domain'] = [('from_pricesheet_id', 'in', self.price_sheet_ids.ids)]
         return action
 
     def action_view_sale_order(self):
