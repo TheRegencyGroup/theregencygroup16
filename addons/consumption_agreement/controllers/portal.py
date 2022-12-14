@@ -25,9 +25,9 @@ class CustomerPortal(portal.CustomerPortal):
 
     def _prepare_consumptions_domain(self, partner):
         return [
+            '|', ('partner_id', 'child_of', [partner.commercial_partner_id.id]),
             ('message_partner_ids', 'child_of', [partner.commercial_partner_id.id]),
         ]
-
 
     def _get_consumption_searchbar_sortings(self):
         return {
@@ -109,7 +109,7 @@ class CustomerPortal(portal.CustomerPortal):
                     token=order_sudo.access_token,
                     message_type="notification",
                     subtype_xmlid="mail.mt_note",
-                    partner_ids=order_sudo.user_id.sudo().partner_id.ids,
+                    partner_ids=order_sudo.sudo().partner_id.ids,
                 )
 
         values = {
@@ -201,7 +201,9 @@ class CustomerPortal(portal.CustomerPortal):
         if not selected_line_ids:
             return {'error': _('Select at least one line.')}
 
-        sale_order = order_sudo.create_sale_order([int(str_id) for str_id in selected_line_ids])
+        sale_order, count = order_sudo.create_sale_order([int(str_id) for str_id in selected_line_ids])
+        # to make quotation visible on Portal set it Sent
+        sale_order.state = 'sent'
 
         query_string = f'&comeback_url_caption={order_sudo.name}&comeback_url={order_sudo.get_portal_url()}'
 

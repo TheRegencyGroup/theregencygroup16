@@ -12,7 +12,8 @@
         'regency_portal',
         'regency_estimate',
         'regency_crm',
-        'regency_shopsite'
+        'regency_shopsite',
+        'regency_contacts',
     ],
     'category': 'Regency',
     'sequence': 5,

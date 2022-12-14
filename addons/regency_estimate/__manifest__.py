@@ -1,6 +1,6 @@
 {
     'name': 'Regency Sales Estimates',
-    'version': '16.0.0.5',
+    'version': '16.0.0.8',
     'summary': '',
     'author': 'OpsWay',
     'description': "",
@@ -17,19 +17,19 @@
         'stock_mts_mto_rule',
         'regency_backend_interface',
         'mail_chatter_customization',
-        'product'
+        'product',
+        'regency_tools'
     ],
     'category': 'Regency/Sales',
     'sequence': 10,
     'data': [
         'data/product_price_sheet.xml',
-        'data/sale_estimate_stages.xml',
         'data/purchase_requisition_data.xml',
         'data/sale_estimate_sequence.xml',
+        'wizard/cancellation_purchase_order.xml',
         'security/ir.model.access.csv',
         'security/groups.xml',
         'views/sale_estimate.xml',
-        'views/sale_estimate_stage_views.xml',
         'views/purchase_requisition_views.xml',
         'views/product_price_sheet.xml',
         'views/purchase_views.xml',
@@ -50,7 +50,8 @@
         'data/fee_type.xml',
         'views/stock_picking.xml',
         'views/account_move.xml',
-        'views/sale_order.xml'
+        'views/sale_order.xml',
+        'views/res_config_settings.xml'
     ],
     'demo': [
     ],

@@ -93,6 +93,11 @@
              <xpath expr="//group[@name='opportunity_partner']/field[@name='partner_id']" position="after">
                  <field name="representative_name" string="Representative"/>
              </xpath>
+             <xpath expr="//label[@for='contact_name']" position="replace"/>
+             <xpath expr="//field[@name='contact_name']/parent::div" position="replace">
+                 <field name="partner_contact_ids" invisible="1"/>
+                 <field name="partner_contact_id" string="Contact Name"/>
+             </xpath>
              <xpath expr="//div[@name='button_box']" position="inside">
                  <button name="action_show_customer" class="oe_stat_button" icon="fa-user"
                          attrs="{'invisible': [('partner_id', '=', False)]}" string="Customer" type="object"/>

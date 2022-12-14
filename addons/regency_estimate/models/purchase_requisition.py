@@ -75,18 +75,7 @@ class PurchaseRequisition(models.Model):
                       f'<a href="/web#id={self.id}&amp;model={self._name}&amp;view_type=form">{self.name}</a>' \
                       f' is assigned to you'
         ch_obj = self.env['mail.channel']
-        ch_name = user_id.name + ', ' + self.env.user.name
-        ch = ch_obj.sudo().search([('name', 'ilike', str(ch_name))]) or ch_obj.sudo().search(
-            [('name', 'ilike', str(self.env.user.name + ', ' + user_id.name))])
-        if not ch and user_id != self.env.user:
-            ch = self.env['mail.channel'].create({
-                'name': user_id.name + ', ' + self.env.user.name,
-                'channel_partner_ids': [(4, user_id.partner_id.id)],
-                # 'public': 'private',
-                'channel_type': 'chat',
-            })
-        if ch:
-            ch.message_post(body=message, author_id=self.env.user.partner_id.id, message_type='comment')
+        ch_obj.send_notification(user_id, message=message)
 
     def action_in_progress(self):
         super(PurchaseRequisition, self).action_in_progress()
@@ -107,6 +96,13 @@ class PurchaseRequisitionLine(models.Model):
         ('done', 'Done')
     ], compute='_compute_state', store=True)
     color = fields.Integer('Color Index', compute='_compute_color')
+    fee = fields.Float(readonly=True, compute='_compute_fee')
+    fee_value_ids = fields.One2many('fee.value', 'purchase_requisition_line_id')
+
+    @api.depends('fee_value_ids', 'fee_value_ids.value', 'fee_value_ids.per_item', 'product_qty', 'price_unit')
+    def _compute_fee(self):
+        for rec in self:
+            rec.fee = rec.fee_value_ids.get_fee_sum(rec.product_qty, rec.price_unit)
 
     @api.onchange('partner_id')
     def _onchange_partner(self):
@@ -138,3 +134,10 @@ class PurchaseRequisitionLine(models.Model):
                 rec.color = 10  # Green
             else:
                 rec.color = 0  # White
+
+    def action_edit_fee_value(self):
+        self.ensure_one()
+        action = self.env["ir.actions.actions"]._for_xml_id("regency_estimate.action_fee_value")
+        action['domain'] = [('purchase_requisition_line_id', '=', self.id)]
+        action['context'] = {'default_purchase_requisition_line_id': self.id}
+        return action

@@ -1,7 +1,7 @@
 from odoo import api, fields, models, _, Command
 from odoo.exceptions import UserError
 from odoo.tools import html_keep_url, is_html_empty, get_lang
-from odoo.addons.regency_tools import SystemMessages
+from odoo.addons.regency_tools.system_messages import accept_format_string, SystemMessages
 
 
 class ConsumptionAgreement(models.Model):
@@ -39,6 +39,7 @@ class ConsumptionAgreement(models.Model):
     deposit_percent_str = fields.Char(compute='_compute_invoice_stat')
     invoice_ids = fields.One2many('account.move', 'consumption_agreement_id', string="Invoices")
     tax_totals = fields.Binary(compute='_compute_tax_totals')
+    from_pricesheet_id = fields.Many2one('product.price.sheet', help='From what Pricesheet created')
 
     @api.depends('line_ids.price_unit', 'line_ids.qty_allowed')
     def _compute_tax_totals(self):
@@ -65,7 +66,7 @@ class ConsumptionAgreement(models.Model):
     def toggle_legal_accepted(self, checked):
         self.ensure_one()
         if self.state == 'draft':
-            self.legal_accepted = checked
+            self.sudo().write({'legal_accepted': checked})
         return self.legal_accepted
 
     @api.depends('partner_id')
@@ -108,6 +109,16 @@ class ConsumptionAgreement(models.Model):
             if not rec.signed_date:
                 rec.signed_date = fields.Date.today()
             rec.update_product_route_ids()
+            if rec.from_pricesheet_id and rec.from_pricesheet_id.estimate_id:
+                partners_to_inform = self.env['res.partner']
+                if rec.from_pricesheet_id.estimate_id.estimate_manager_id:
+                    partners_to_inform += rec.from_pricesheet_id.estimate_id.estimate_manager_id.partner_id
+                if rec.from_pricesheet_id.estimate_id.purchase_agreement_ids:
+                    for partner in rec.from_pricesheet_id.estimate_id.purchase_agreement_ids.mapped('user_id.partner_id'):
+                        partners_to_inform += partner
+                for partner in partners_to_inform:
+                    msg = accept_format_string(SystemMessages.get('M-011'), partner.name, rec.name)
+                    rec.message_post(body=msg, partner_ids=partner.ids)
 
     def update_product_route_ids(self):
         products = self.line_ids.mapped('product_id')
@@ -148,11 +159,12 @@ class ConsumptionAgreement(models.Model):
                                        'order_line': [
                                             Command.create({
                                                 'product_id': p.product_id.id,
-                                                'product_uom_qty': qtys.get(p.id, 0),
+                                                'product_uom_qty': qtys.get(p.id, p.qty_remaining),
                                                 'price_unit': p.price_unit,
                                                 'product_uom': p.product_id.uom_id.id,
                                                 'consumption_agreement_line_id': p.id
                                             }) for p in self.line_ids.filtered(lambda l: l.id in selected_line_ids)]})
+        order.message_subscribe([order.partner_id.id])
         return order, order_count
 
     def _check_is_vendor_set(self):
@@ -177,6 +189,7 @@ class ConsumptionAgreement(models.Model):
             po = self.env['purchase.order'].create({
                 'partner_id': line.vendor_id.id if line.vendor_id else seller.partner_id.id,
                 'consumption_agreement_id': self.id,
+                'origin': self.name,
                 'order_line': [Command.create({
                     'product_id': line.product_id.id,
                     'product_qty': line.qty_allowed,
@@ -345,7 +358,7 @@ class ConsumptionAggreementLine(models.Model):
     partner_id = fields.Many2one(related='agreement_id.partner_id', domain=[('contact_type', '=', 'customer')],
                                  store=True)
     allowed_partner_ids = fields.Many2many('res.partner', string="Allowed Customers")
-    vendor_id = fields.Many2one('res.partner', required=True)
+    vendor_id = fields.Many2one('res.partner', domain=[('contact_type', '=', 'vendor')], required=True)
     untaxed_amount = fields.Monetary(compute='_compute_untaxed_amount', store=True)
     name = fields.Text(string='Description')
     product_custom_attribute_value_ids = fields.One2many('product.attribute.custom.value', 'ca_product_line_id',
@@ -356,6 +369,19 @@ class ConsumptionAggreementLine(models.Model):
                                                               ondelete='restrict')
     product_template_attribute_value_ids = fields.Many2many(related='product_id.product_template_attribute_value_ids',
                                                             readonly=True)
+
+    @api.model
+    def create(self, vals_list):
+        res = super().create(vals_list)
+        if res.vendor_id not in res.product_id.seller_ids.mapped('partner_id'):
+            self.env['product.supplierinfo'].create([
+                {
+                    'partner_id': res.vendor_id.id,
+                    'product_tmpl_id': res.product_id.product_tmpl_id.id,
+                    'price': 0,
+                }
+            ])
+        return res
 
     @api.depends('qty_allowed', 'state', 'sale_order_line_ids', 'sale_order_line_ids.product_uom_qty')
     def _compute_qty_consumed(self):
@@ -465,9 +491,12 @@ class ConsumptionAggreementLine(models.Model):
             partner=self.agreement_id.partner_id,
             currency=self.currency_id,
             product=self.product_id,
-            #taxes=self.tax_id,
             price_unit=self.price_unit,
             quantity=self.qty_allowed,
-           # discount=self.discount,
             price_subtotal=self.untaxed_amount,
         )
+
+    @api.onchange('product_id')
+    def _onchange_product(self):
+        if self.product_id.seller_ids:
+            self.vendor_id = self.product_id.seller_ids[0].partner_id  # Always get first

@@ -4,6 +4,16 @@ odoo.define('consumption_agreement.consumption_agreement_portal', function (requ
     var publicWidget = require('web.public.widget');
 
 
+    publicWidget.registry.PortalHomeCounters.include({
+        /**
+         * @override
+         */
+        _getCountersAlwaysDisplayed() {
+            return this._super(...arguments).concat(['consumptions_count']);
+        },
+    });
+
+
     publicWidget.registry.ConsumptionAgreementPortal = publicWidget.Widget.extend({
         selector: '.o_portal_sale_sidebar',
         events: {

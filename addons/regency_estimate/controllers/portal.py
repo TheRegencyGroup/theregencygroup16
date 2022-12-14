@@ -10,7 +10,7 @@ from odoo.addons.portal.controllers.portal import pager as portal_pager, get_rec
 from odoo.addons.portal.controllers.mail import _message_post_helper
 
 from odoo import fields, http, SUPERUSER_ID, _, Command
-from odoo.addons.regency_tools import SystemMessages
+from odoo.addons.regency_tools.system_messages import accept_format_string, SystemMessages
 
 
 class CustomerPortal(portal.CustomerPortal):
@@ -28,7 +28,8 @@ class CustomerPortal(portal.CustomerPortal):
 
     def _prepare_price_sheets_domain(self, partner):
         return [
-            ('state', 'in', ['confirmed', 'done']),
+            ('state', 'in', ['approved', 'closed']),
+            '|', ('partner_id', 'child_of', [partner.commercial_partner_id.id]),
             ('message_partner_ids', 'child_of', [partner.commercial_partner_id.id]),
         ]
 
@@ -73,7 +74,7 @@ class CustomerPortal(portal.CustomerPortal):
         except (AccessError, MissingError):
             return request.redirect('/my')
 
-        if order_sudo.state not in ('draft', 'confirmed'):
+        if order_sudo.state == 'closed':
             return False
         order_line = request.env['product.price.sheet.line'].sudo().browse(int(line_id))
         if order_line.price_sheet_id != order_sudo:
@@ -119,7 +120,7 @@ class CustomerPortal(portal.CustomerPortal):
         except (AccessError, MissingError):
             return request.redirect('/my')
 
-        if order_sudo.state not in ('draft', 'confirmed'):
+        if order_sudo.state ==  'closed':
             return False
         order_line = request.env['product.price.sheet.line'].sudo().browse(int(line_id))
         if order_line.price_sheet_id != order_sudo:
@@ -340,8 +341,25 @@ class CustomerPortal(portal.CustomerPortal):
             raise UserError('Orders not found.')
 
         sale_order = order_sudo.create_sale_order(selected_price_sheet_line_ids)
+        # to make quotation visible on Portal set it Sent
+        sale_order.state = 'sent'
 
         query_string = f'&comeback_url_caption={order_sudo.name}&comeback_url={order_sudo.get_portal_url()}'
+
+        # Notify
+        estimate_id = selected_price_sheet_line_ids.price_sheet_id.estimate_id
+        if estimate_id:
+            partners_to_subscribe = selected_price_sheet_line_ids.price_sheet_id.message_follower_ids.mapped('partner_id')
+            if estimate_id.estimate_manager_id:
+                partners_to_subscribe += estimate_id.estimate_manager_id.partner_id
+            if estimate_id.purchase_agreement_ids:
+                for partner in estimate_id.purchase_agreement_ids.mapped('user_id.partner_id'):
+                    partners_to_subscribe += partner
+
+            if partners_to_subscribe:
+                sale_order.message_subscribe(partner_ids=partners_to_subscribe.ids,
+                                              subtype_ids=[request.env.ref('mail.mt_activities').id,
+                                                           request.env.ref('mail.mt_comment').id])
 
         return {
             'force_refresh': True,
@@ -374,6 +392,20 @@ class CustomerPortal(portal.CustomerPortal):
             raise UserError('Orders not found.')
 
         consumption = order_sudo.create_consumption_agreement(selected_price_sheet_line_ids)
+        # Notify
+        estimate_id = selected_price_sheet_line_ids.price_sheet_id.estimate_id
+        if estimate_id:
+            partners_to_subscribe = selected_price_sheet_line_ids.price_sheet_id.message_follower_ids.mapped('partner_id')
+            if estimate_id.estimate_manager_id:
+                partners_to_subscribe += estimate_id.estimate_manager_id.partner_id
+            if estimate_id.purchase_agreement_ids:
+                for partner in estimate_id.purchase_agreement_ids.mapped('user_id.partner_id'):
+                    partners_to_subscribe += partner
+
+            if partners_to_subscribe:
+                consumption.message_subscribe(partner_ids=partners_to_subscribe.ids,
+                                              subtype_ids=[request.env.ref('mail.mt_activities').id,
+                                                           request.env.ref('mail.mt_comment').id])
 
         query_string = f'&comeback_url_caption={order_sudo.name}&comeback_url={order_sudo.get_portal_url()}'
 

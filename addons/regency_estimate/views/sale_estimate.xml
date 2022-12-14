@@ -11,11 +11,14 @@
                                 title="Create new Purchase Requisition"/>
                            <button string="New Price Sheet" name="action_new_price_sheet" type="object" class="oe_highlight" data-hotkey="q"
                                 title="Create new Price Sheet"/>
-                           <field name="stage_id" widget="statusbar"
-                                options="{'clickable': '1', 'fold_field': 'fold'}"/>
+                           <field name="state" widget="statusbar"/>
                     </header>
                     <sheet>
                         <div class="oe_button_box" name="button_box">
+                            <button class="oe_stat_button" type="object"
+                                    name="action_view_consumption_agreements" icon="fa-pencil-square-o">
+                                    <field name="consumption_agreements_count" widget="statinfo" string="Consumption Agreements"/>
+                           </button>
                             <button class="oe_stat_button" type="object"
                                     name="action_view_purchase_agreement" icon="fa-pencil-square-o">
                                     <field name="purchase_agreement_count" widget="statinfo" string="Purchase Requisitions"/>
@@ -76,7 +79,8 @@
                              </group>
                             <group>
                                 <field name="user_id" widget="many2one_avatar_user"/>
-                                 <field name="company_id" invisible="1"/>
+                                <field name="estimate_manager_id"/>
+                                <field name="company_id" invisible="1"/>
                             </group>
                             <group name="lead_priority" >
                                 <field name="priority" widget="priority"/>
@@ -193,6 +197,7 @@
                     <div class="oe_chatter">
                         <field name="message_follower_ids"/>
                         <field name="message_ids" options="{'post_refresh': 'recipients'}"/>
+                        <field name="activity_ids"/>
                     </div>
                 </form>
              </field>
@@ -210,7 +215,9 @@
                     <field name="contact_name" optional="hide"/>
                     <field name="city" optional="show"/>
                     <field name="state_id" optional="hide"/>
-                    <field name="stage_id"/>
+                    <field name="state" invisible="1"/>
+                    <field name="state_with_qty" widget="badge" decoration-success="state == 'done'"
+                           decoration-warning="state == 'in_progress'" decoration-info="state == 'draft'"/>
                     <field name="country_id" optional="show" options="{'no_open': True, 'no_create': True}"/>
                     <field name="partner_id" invisible="1"/>
                     <!-- Explicit domain due to multi edit -> real company domain would be complicated -->
@@ -228,9 +235,10 @@
             <field name="model">sale.estimate</field>
             <field name="priority" eval="1"/>
             <field name="arch" type="xml">
-                <kanban default_group_by="stage_id" class="o_kanban_small_column" on_create="quick_create" quick_create_view="regency_estimate.quick_create_sale_estimate_form"
+                <kanban default_group_by="state" class="o_kanban_small_column" on_create="quick_create" quick_create_view="regency_estimate.quick_create_sale_estimate_form"
                     archivable="false" sample="1">
-                    <field name="stage_id"/>
+                    <field name="state" widget="badge" decoration-success="state == 'done'"
+                           decoration-warning="state == 'in_progress'" decoration-info="state == 'draft'"/>
                     <field name="color"/>
                     <field name="priority"/>
                     <field name="user_id"/>

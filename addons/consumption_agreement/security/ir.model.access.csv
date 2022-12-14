@@ -3,3 +3,6 @@ access_consumption_agreement_users,access.consumption_agreement.internal_users,m
 access_consumption_agreement_line_users,access.consumption_agreement.internal_users,model_consumption_agreement_line,base.group_no_one,1,1,1,1
 access_sale_order_ca_wizard,access.sale.order.ca.wizard,model_sale_order_ca_wizard,base.group_no_one,1,1,1,1
 access_sale_order_ca_line_wizard,access.sale.order.ca.line.wizard,model_sale_order_ca_line_wizard,base.group_no_one,1,1,1,1
+access_consumption_agreement_portal,access.consumption_agreement.portal_users,model_consumption_agreement,base.group_portal,1,0,0,0
+access_consumption_agreement_line_portal,access.consumption_agreement.portal_users,model_consumption_agreement_line,base.group_portal,1,0,0,0
+access_product_product_portal,access.product_product.portal_users,product.model_product_product,base.group_portal,1,0,0,0

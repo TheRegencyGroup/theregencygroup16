@@ -7,6 +7,7 @@
     'depends': [
         'delivery',
         'purchase',
+        'sale'
     ],
     'category': 'Regency/Stock',
     'sequence': 10,
