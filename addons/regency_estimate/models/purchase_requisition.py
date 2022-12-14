@@ -1,4 +1,4 @@
-from odoo import fields, models, api, Command
+from odoo import fields, models, api
 
 
 class PurchaseRequisition(models.Model):
@@ -83,6 +83,15 @@ class PurchaseRequisition(models.Model):
                                message=f'User has confirmed Purchase Requisition #<a href="/web#id={self.id}&amp;'
                                        f'model={self._name}&amp;view_type=form">{self.name}</a>')
 
+    def action_open(self):
+        """
+        Overriden
+        """
+        super().action_open()
+        for line in self.line_ids:
+            if line.is_selected:
+                line.state = 'done'
+
 
 class PurchaseRequisitionLine(models.Model):
     _inherit = 'purchase.requisition.line'
@@ -98,6 +107,7 @@ class PurchaseRequisitionLine(models.Model):
     color = fields.Integer('Color Index', compute='_compute_color')
     fee = fields.Float(readonly=True, compute='_compute_fee')
     fee_value_ids = fields.One2many('fee.value', 'purchase_requisition_line_id')
+    is_selected = fields.Boolean()
 
     @api.depends('fee_value_ids', 'fee_value_ids.value', 'fee_value_ids.per_item', 'product_qty', 'price_unit')
     def _compute_fee(self):
