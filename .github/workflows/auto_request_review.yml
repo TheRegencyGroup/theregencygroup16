@@ -3,8 +3,7 @@ name: Auto Request Review
 on:
   pull_request:
     branches:
-      - 'main'
-      - 'master'
+      - 'prod'
     types: [ opened, ready_for_review, reopened ]
 
 jobs:
