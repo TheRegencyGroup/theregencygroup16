@@ -98,7 +98,7 @@ class PurchaseRequisitionLine(models.Model):
     color = fields.Integer('Color Index', compute='_compute_color')
     fee = fields.Float(readonly=True, compute='_compute_fee')
     fee_value_ids = fields.One2many('fee.value', 'purchase_requisition_line_id')
-    currency_id = fields.Many2one('res.currency')
+    currency_id = fields.Many2one('res.currency', default=lambda self: self.env.user.company_id.currency_id)
 
     @api.depends('fee_value_ids', 'fee_value_ids.value', 'fee_value_ids.per_item', 'product_qty', 'price_unit')
     def _compute_fee(self):
