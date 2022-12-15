@@ -39,6 +39,9 @@
                 <xpath expr="//field[@name='line_ids']/tree/field[@name='product_qty']" position="before">
                     <field name="produced_overseas"/>
                 </xpath>
+                <xpath expr="//field[@name='line_ids']/tree/field[@name='price_unit']" position="before">
+                    <field name="currency_id" readonly="1"/>
+                </xpath>
             </field>
         </record>
 

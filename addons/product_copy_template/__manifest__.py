@@ -1,6 +1,6 @@
 {
     'name': 'Create new Products by copying existed',
-    'version': '16.0.0.1',
+    'version': '16.0.0.2',
     'summary': 'When creating a new product set a template product to copy',
     'author': 'OpsWay',
     'description': "",
