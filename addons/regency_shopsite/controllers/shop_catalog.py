@@ -54,6 +54,8 @@ class ShopCatalog(http.Controller):
         active_hotel_id = request.env.user._active_hotel_id()
         if active_hotel_id:
             domain = [('hotel_ids', 'in', active_hotel_id.id), ('website_published', '=', True)]
+            if catalog_model == 'overlay.template':
+                domain.append(('product_template_id.website_published', '=', True))
             catalog_items_total = request.env[catalog_model].sudo().search_count(domain)
             order = DEFAULT_SHOP_CATALOG_TAB_SORT[catalog_tab]
             offset = (page - 1) * limit
