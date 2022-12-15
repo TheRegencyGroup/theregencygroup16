@@ -8,12 +8,8 @@ class ConsumptionAgreement(models.Model):
     from_pricesheet_id = fields.Many2one('product.price.sheet', help='From what Pricesheet created')
 
     def action_confirm(self):
+        super().action_confirm()
         for rec in self:
-            rec._check_is_vendor_set()
-            rec.state = 'confirmed'
-            if not rec.signed_date:
-                rec.signed_date = fields.Date.today()
-            rec.update_product_route_ids()
             if rec.from_pricesheet_id and rec.from_pricesheet_id.estimate_id:
                 partners_to_inform = self.env['res.partner']
                 if rec.from_pricesheet_id.estimate_id.estimate_manager_id:
