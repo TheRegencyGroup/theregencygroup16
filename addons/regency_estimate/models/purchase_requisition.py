@@ -1,6 +1,17 @@
 from odoo import fields, models, api
 
 
+# Overridden to rename open state
+PURCHASE_REQUISITION_STATES = [
+    ('draft', 'Draft'),
+    ('ongoing', 'Ongoing'),
+    ('in_progress', 'Confirmed'),
+    ('open', 'Validated'),
+    ('done', 'Closed'),
+    ('cancel', 'Cancelled')
+]
+
+
 class PurchaseRequisition(models.Model):
     _inherit = 'purchase.requisition'
 
@@ -11,6 +22,9 @@ class PurchaseRequisition(models.Model):
     color = fields.Integer('Color Index', compute='_compute_color')
     customer_id = fields.Many2one(related='estimate_id.partner_id')
     product_ids = fields.One2many('product.product', compute='_compute_product_ids')
+    state = fields.Selection(PURCHASE_REQUISITION_STATES,
+                             'Status', tracking=True, required=True,
+                             copy=False, default='draft')
 
     def _compute_product_ids(self):
         for rec in self:
@@ -127,10 +141,7 @@ class PurchaseRequisitionLine(models.Model):
     @api.depends('requisition_id', 'partner_id', 'requisition_id.state', 'price_unit')
     def _compute_state(self):
         for prl in self:
-            if prl.partner_id and prl.price_unit > 0:
-                prl.state = 'done'
-                continue
-            elif prl.requisition_id.state == 'draft':
+            if prl.requisition_id.state == 'draft':
                 prl.state = 'draft'
                 continue
             else:
