@@ -8,6 +8,10 @@ class SaleOrder(models.Model):
 
     consumption_agreement_id = fields.Many2one('consumption.agreement')
 
+    # currency_id overridden according to the requirements in https://lumirang.atlassian.net/browse/REG-482
+    # paragraph 8
+    currency_id = fields.Many2one('res.currency', default=lambda self: self.env.user.company_id.currency_id)
+
     def action_confirm(self):
         unconfirmed_agreements = self.mapped('order_line').filtered(lambda s: s.consumption_agreement_line_id
                                                                   and s.consumption_agreement_line_id.state == 'draft')
