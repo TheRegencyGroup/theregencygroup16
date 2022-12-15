@@ -54,8 +54,6 @@ class ShopCatalog(http.Controller):
         active_hotel_id = request.env.user._active_hotel_id()
         if active_hotel_id:
             domain = [('hotel_ids', 'in', active_hotel_id.id), ('website_published', '=', True)]
-            if catalog_model == 'overlay.template':
-                domain.append(('product_template_id.website_published', '=', True))
             catalog_items_total = request.env[catalog_model].sudo().search_count(domain)
             order = DEFAULT_SHOP_CATALOG_TAB_SORT[catalog_tab]
             offset = (page - 1) * limit
@@ -67,7 +65,7 @@ class ShopCatalog(http.Controller):
                 catalog_item_list = cls._prepare_overlay_product_data(catalog_item_ids)
             else:
                 catalog_item_list = cls._prepare_overlay_template_data(catalog_item_ids)
-            
+
         return {
             'itemList': catalog_item_list,
             'totalItemsNumber': catalog_items_total,
@@ -75,7 +73,7 @@ class ShopCatalog(http.Controller):
             'currentPage': page,
             'currentTab': catalog_tab,
         }
-        
+
     @http.route(['/shop'], type='http', auth='user', website=True)
     def shop_catalog_page(self, **kwargs):
         page = 1
@@ -103,7 +101,7 @@ class ShopCatalog(http.Controller):
                 'currentTab': SHOP_CATALOG_TAB_URL_PARAMETER,
             },
         })
-        
+
         return request.render('regency_shopsite.shop_catalog_page', {
             'shop_catalog_data': Markup(json.dumps(catalog_list_data)),
         })
