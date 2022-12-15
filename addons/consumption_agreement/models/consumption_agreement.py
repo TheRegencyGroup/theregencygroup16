@@ -39,7 +39,6 @@ class ConsumptionAgreement(models.Model):
     deposit_percent_str = fields.Char(compute='_compute_invoice_stat')
     invoice_ids = fields.One2many('account.move', 'consumption_agreement_id', string="Invoices")
     tax_totals = fields.Binary(compute='_compute_tax_totals')
-    from_pricesheet_id = fields.Many2one('product.price.sheet', help='From what Pricesheet created')
 
     @api.depends('line_ids.price_unit', 'line_ids.qty_allowed')
     def _compute_tax_totals(self):
