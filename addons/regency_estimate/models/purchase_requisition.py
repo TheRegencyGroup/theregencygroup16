@@ -108,8 +108,7 @@ class PurchaseRequisitionLine(models.Model):
     @api.onchange('partner_id')
     def _onchange_partner(self):
         self.produced_overseas = self.partner_id.is_company\
-                                 and self.partner_id.contact_type == 'vendor'\
-                                 and self.partner_id.vendor_type == 'overseas'
+                                 and self.partner_id.is_vendor and self.partner_id.vendor_type == 'overseas'
 
     def _compute_display_name(self):
         for prl in self:
