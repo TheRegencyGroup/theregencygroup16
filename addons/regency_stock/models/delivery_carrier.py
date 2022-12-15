@@ -35,19 +35,20 @@ class DeliveryCarrier(models.Model):
             packages.append(DeliveryPackage(None, weight, default_package_type, total_cost=partial_cost, currency=order.company_id.currency_id, order=order))
         return packages
 
-
     def _get_estimated_weight(self, order):
         self.ensure_one()
         weight = 0.0
-        for order_line in order.order_line.filtered(lambda l: l.product_id.type in ['product', 'consu'] and not l.is_delivery and not l.display_type):
-            in_stock_picking = order_line.move_ids.mapped('picking_id').filtered(lambda f: f.picking_type_code == 'incoming' and f.state == 'done')
-            if in_stock_picking:
-                stock_quants = in_stock_picking.mapped('package_ids.quant_ids').filtered(lambda f: f.product_id == order_line.product_id)
+        for order_line in order.order_line.filtered(
+                lambda l: l.product_id.type in ['product', 'consu'] and not l.is_delivery and not l.display_type):
+            stock_picking = order_line.move_ids.mapped('picking_id').filtered(lambda f: f.state == 'done')
+            if stock_picking:
+                stock_quants = stock_picking.package_ids.mapped('quant_ids').filtered(
+                    lambda f: f.product_id == order_line.product_id)
                 qty = sum(stock_quants.mapped('quantity'))
-                package_weight = sum(stock_quants.mapped('package_weight'))
-                move_lines = order_line.mapped('move_ids.move_line_ids').filtered(lambda f: f.picking_id == in_stock_picking)
+                package_weight = sum(stock_quants.mapped('package_id').mapped('shipping_weight'))
+                move_lines = order_line.mapped('move_ids.move_line_ids').filtered(
+                    lambda f: f.picking_id == stock_picking)
                 weight = package_weight / qty * sum(move_lines.mapped('qty_done'))
-
             else:
                 weight += order_line.product_qty * order_line.product_id.weight
         return weight
