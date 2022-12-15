@@ -10,7 +10,7 @@ class ConsumptionAgreement(models.Model):
 
     name = fields.Char(required=True, copy=False, index=True, default=lambda self: _('New'))
     signed_date = fields.Date()
-    partner_id = fields.Many2one('res.partner', domain=[('contact_type', '=', 'customer')], string='Primary Customer')
+    partner_id = fields.Many2one('res.partner', domain=[('is_customer', '=', True)], string='Primary Customer')
     possible_partners = fields.One2many('res.partner', compute='_compute_possible_partners')
     allowed_partner_ids = fields.Many2many('res.partner', string="Allowed Customers")
     line_ids = fields.One2many('consumption.agreement.line', 'agreement_id')
@@ -163,6 +163,7 @@ class ConsumptionAgreement(models.Model):
                                                 'product_uom': p.product_id.uom_id.id,
                                                 'consumption_agreement_line_id': p.id
                                             }) for p in self.line_ids.filtered(lambda l: l.id in selected_line_ids)]})
+        order.currency_id = self.currency_id.id
         order.message_subscribe([order.partner_id.id])
         return order, order_count
 
@@ -196,6 +197,13 @@ class ConsumptionAgreement(models.Model):
                     'customer_id': line.agreement_id.partner_id.id
                 })]
             })
+            if po.partner_id.country_id:
+                po.currency_id = po.partner_id.country_id.currency_id
+                for po_line in po.order_line:
+                    if po.currency_id != self.currency_id:
+                        po_line.price_unit = self.currency_id._convert(po_line.price_unit, po_line.currency_id,
+                                                                          self.company_id, fields.Date.today())
+
             new_purchase_orders += po
         if not order_count:
             action = self.env["ir.actions.act_window"]._for_xml_id("purchase.purchase_rfq")
@@ -333,6 +341,8 @@ class ConsumptionAgreement(models.Model):
         for ca in self:
             if ca.partner_id:
                 ca.allowed_partner_ids = ca.partner_id + ca.possible_partners
+                if ca.partner_id.country_id:
+                    ca.currency_id = ca.partner_id.country_id.currency_id.id
             else:
                 ca.allowed_partner_ids = False
 
@@ -354,10 +364,9 @@ class ConsumptionAggreementLine(models.Model):
     currency_id = fields.Many2one(related='agreement_id.currency_id', store=True)
     state = fields.Selection(related='agreement_id.state', store=True)
     sale_order_line_ids = fields.One2many('sale.order.line', 'consumption_agreement_line_id')
-    partner_id = fields.Many2one(related='agreement_id.partner_id', domain=[('contact_type', '=', 'customer')],
-                                 store=True)
+    partner_id = fields.Many2one(related='agreement_id.partner_id', domain=[('is_customer', '=', True)], store=True)
     allowed_partner_ids = fields.Many2many('res.partner', string="Allowed Customers")
-    vendor_id = fields.Many2one('res.partner', domain=[('contact_type', '=', 'vendor')], required=True)
+    vendor_id = fields.Many2one('res.partner', domain=[('is_vendor', '=', True)], required=True)
     untaxed_amount = fields.Monetary(compute='_compute_untaxed_amount', store=True)
     name = fields.Text(string='Description')
     product_custom_attribute_value_ids = fields.One2many('product.attribute.custom.value', 'ca_product_line_id',
