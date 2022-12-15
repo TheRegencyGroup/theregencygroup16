@@ -157,7 +157,7 @@ class OverlayTemplate(models.Model):
                 rec.areas_overlay_font_ids = [Command.set(font_ids)]
                 rec.areas_overlay_color_ids = [Command.set(color_ids)]
 
-    @api.depends('is_ready_for_website', 'product_template_id')
+    @api.depends('is_ready_for_website', 'product_template_id.website_published')
     def _compute_website_published(self):
         for rec in self:
             rec.website_published = rec.is_ready_for_website and rec.product_template_id.website_published
