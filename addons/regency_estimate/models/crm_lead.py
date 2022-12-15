@@ -32,7 +32,6 @@ class CRMLead(models.Model):
                                                         'tag_ids': rec.tag_ids.ids,
                                                         'company_id': rec.company_id.id,
                                                         'color': rec.color,
-                                                        'stage_id': rec.env.ref('regency_estimate.sale_estimate_stage_new').id,
                                                         'user_id': rec.user_id.id,
                                                         'description': rec.description})
             rec.message_post(body=_("Estimate %s have been created", estimate.name))

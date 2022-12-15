@@ -1,6 +1,8 @@
+from odoo.tests import tagged
 from odoo.addons.purchase_requisition.tests.common import TestPurchaseRequisitionCommon
 
 
+@tagged('all_run')
 class TestFee(TestPurchaseRequisitionCommon):
 
     def setUp(self):
