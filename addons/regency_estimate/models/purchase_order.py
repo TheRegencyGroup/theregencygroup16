@@ -1,5 +1,6 @@
 from odoo import fields, models, api
 from odoo.tools import get_lang
+from odoo.addons.regency_tools.system_messages import accept_format_string, SystemMessages
 from odoo.addons.purchase_requisition.models.purchase import PurchaseOrderLine
 
 
@@ -80,6 +81,15 @@ class PurchaseOrder(models.Model):
                         'fee_value_ids': [f.id for f in new_fees],
                         'currency_id': rec.currency_id.id
                     })
+
+        if set(self.requisition_id.purchase_ids.mapped('state')) == {'confirmed_prices'}:
+            if self.requisition_id.estimate_id.estimate_manager_id:
+                partner_ids = self.requisition_id.estimate_id.estimate_manager_id.partner_id.ids
+                self.requisition_id.message_subscribe(partner_ids=partner_ids,
+                                                      subtype_ids=[self.env.ref('mail.mt_activities').id,
+                                                                   self.env.ref('mail.mt_comment').id])
+                msg = accept_format_string(SystemMessages.get('M-014'), self.requisition_id.name)
+                self.requisition_id.message_post(body=msg, partner_ids=partner_ids)
 
     def _prepare_invoice(self):
         invoice_vals = super()._prepare_invoice()

@@ -32,6 +32,7 @@ class SaleOrder(models.Model):
                 self.message_post(body=msg, partner_ids=partner.ids)
         return res
 
+
 class SaleOrderLine(models.Model):
     _inherit = 'sale.order.line'
 

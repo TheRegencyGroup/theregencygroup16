@@ -1,4 +1,5 @@
 from odoo import fields, models, api
+from odoo.exceptions import UserError
 
 
 # Overridden to rename open state
@@ -102,9 +103,11 @@ class PurchaseRequisition(models.Model):
         Overriden
         """
         super().action_open()
-        for line in self.line_ids:
-            if line.is_selected:
-                line.state = 'done'
+        lines_to_validate = self.line_ids.filtered(lambda f: f.is_selected)
+        if not lines_to_validate:
+            raise UserError('Please, select Product lines for validation')
+        for line in lines_to_validate:
+            line.state = 'done'
 
 
 class PurchaseRequisitionLine(models.Model):
