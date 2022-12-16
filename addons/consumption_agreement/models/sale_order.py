@@ -52,6 +52,12 @@ class SaleOrder(models.Model):
                                                         filtered(lambda x: x.display_type == 'product')]
                 self.env['sale.order.line'].create(line_values)
 
+    @api.onchange('partner_id')
+    def onchange_partner_id(self):
+        if self.partner_id.country_id:
+            self.currency_id = self.partner_id.country_id.currency_id.id
+
+
 class SaleOrderLine(models.Model):
     _inherit = 'sale.order.line'
 
