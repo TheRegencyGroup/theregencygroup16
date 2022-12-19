@@ -54,7 +54,7 @@
                                 </span>
                             </div>
                         </t>
-                        <div class="ot_modal_image_container"
+                        <div t-if="!this.withOverlayProducts" class="ot_modal_image_container"
                              t-on-click="() => this.onClickImage(false)">
                             <span class="fa fa-remove"/>
                             Remove image
@@ -85,11 +85,29 @@
     <t t-name="overlay_areas_position" owl="1">
         <div class="ot_areas_position">
             <div class="ot_areas_position_header">
-                <t t-esc="props.overlayPositionName"/>
+                <div  class="ot_areas_position_header_left">
+                    <t t-esc="props.overlayPositionName"/>
+                    <div t-if="props.editMode and props.allowEditAreas" class="ot_areas_position_tools">
+                        <t t-if="!!state.editorImage">
+                            <button class="btn btn-secondary" t-on-click="() => this.addRectangleArea({})">
+                                <i class="fa fa-plus-circle"/>Rectangle
+                            </button>
+                            <button class="btn btn-secondary" t-on-click="() => this.addEllipseArea({})">
+                                <i class="fa fa-plus-circle"/>Ellipse
+                            </button>
+                            <button class="btn btn-secondary" t-on-click="() => this.addTextArea({})">
+                                <i class="fa fa-plus-circle"/>Text
+                            </button>
+                        </t>
+                    </div>
+                </div>
                 <div t-if="!!props.productTemplateId"
-                     class="ot_areas_position_header_tab_buttons">
-                    <button class="btn btn-secondary mx-2" t-on-click="onClickOpenAreasTab">
-                        <i class="fa fa-object-group mx-2"/>Areas
+                     class="ot_areas_position_header_right">
+                    <button t-if="state.activeTab === AREAS_TAB" class="btn btn-secondary" t-on-click="onClickChangeEditorViewMode">
+                        <i class="fa fa-window-restore mr-1"/><t t-esc="state.editorFullViewMode ? 'Min' : 'Full'"/>
+                    </button>
+                    <button class="btn btn-secondary" t-on-click="onClickOpenAreasTab">
+                        <i class="fa fa-object-group mr-1"/>Areas
                     </button>
                     <button class="btn btn-secondary" t-on-click="onClickOpenImagesTab">
                         <i class="fa fa-image mr-1"/>Images
@@ -97,23 +115,15 @@
                 </div>
             </div>
             <div class="ot_areas_position_main" t-att-class="{ 'd-none': !props.productTemplateId }">
-                <div class="ot_areas_tab" t-att-class="{ 'ot_areas_tab_hide': state.activeTab !== AREAS_TAB }">
-                    <div t-if="props.editMode and props.allowEditAreas" class="ot_areas_position_tools">
-                        <t t-if="!!state.editorImage">
-                            <button class="btn btn-primary" t-on-click="() => this.addRectangleArea({})">
-                                <i class="fa fa-plus-circle"/>Rectangle
-                            </button>
-                            <button class="btn btn-primary" t-on-click="() => this.addEllipseArea({})">
-                                <i class="fa fa-plus-circle"/>Ellipse
-                            </button>
-                            <button class="btn btn-primary" t-on-click="() => this.addTextArea({})">
-                                <i class="fa fa-plus-circle"/>Text
-                            </button>
-                        </t>
-                    </div>
+                <div class="ot_areas_tab"
+                     t-att-class="{
+                        'ot_areas_tab_hide': state.activeTab !== AREAS_TAB,
+                        'oot_areas_tab_full_view_mode': state.editorFullViewMode,
+                     }">
                     <div class="ot_areas_position_editor_block"
                          t-att-class="{ 'd-none': !state.editorImage }">
-                        <div class="ot_areas_position_editor">
+                        <div class="ot_areas_position_editor" t-ref="editor"
+                             t-att-style="editorContainerStyle">
                             <img t-att-src="state.editorImage.src || ''"
                                  t-ref="image_ref"/>
                             <div class="ot_areas_position_canvas_container" t-ref="canvas_container_ref">

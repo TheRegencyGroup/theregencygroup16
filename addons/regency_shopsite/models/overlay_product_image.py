@@ -13,5 +13,5 @@ class OverlayProductImage(models.Model):
         return {
             'type': 'ir.actions.act_url',
             'target': 'new',
-            'url': f'/web/image?model={self._name}&id={self.id}&field=image&download=True',
+            'url': f'/web/content/{self._name}/{self.id}/image?download=True',
         }

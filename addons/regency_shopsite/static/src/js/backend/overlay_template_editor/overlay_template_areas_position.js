@@ -4,8 +4,14 @@ import {
     PRODUCT_IMAGE_MODEL,
     PRODUCT_IMAGE_FIELD,
     AREAS_IMAGE_NON_ATTRIBUTE_VALUE_ID,
-    computeImageSrc, RECTANGLE_AREA_TYPE, ELLIPSE_AREA_TYPE, TEXT_AREA_TYPE,
+    RECTANGLE_AREA_TYPE,
+    ELLIPSE_AREA_TYPE,
+    TEXT_AREA_TYPE,
+    FULL_IMAGE_WIDTH,
+    MIN_IMAGE_WIDTH,
+    computeImageSrc,
     enableCanvasPointerEvents,
+    computeEditorScaleStyle,
 } from '../../main';
 import { AreaParameters } from './area_parameters';
 
@@ -33,8 +39,12 @@ class OverlayAreasPositionComponent extends Component {
             selectedAreaIndex: false,
             activeTab: AREAS_TAB,
             areaList: {},
+            editorFullViewMode: false,
+            editorFullViewModeContainerStyle: '',
+            editorMinViewModeContainerStyle: '',
         });
 
+        this.editorRef = useRef('editor');
         this.canvasRef = useRef('canvas_ref');
         this.imageRef = useRef('image_ref');
         this.canvasContainerRef = useRef('canvas_container_ref');
@@ -106,6 +116,12 @@ class OverlayAreasPositionComponent extends Component {
         }));
     }
 
+    get editorContainerStyle() {
+        return this.state.editorFullViewMode ?
+            this.state.editorFullViewModeContainerStyle
+            : this.state.editorMinViewModeContainerStyle;
+    }
+
     onMounted() {
         this.setImageOnloadCallback();
         this.updateEditorSwitcherImageValueId();
@@ -158,6 +174,22 @@ class OverlayAreasPositionComponent extends Component {
                 });
             }
         }
+    }
+
+    computeEditorContainerStyles() {
+        const imageWidth = this.imageRef.el.clientWidth;
+        const imageHeight = this.imageRef.el.clientHeight;
+        this.state.editorFullViewModeContainerStyle = computeEditorScaleStyle({
+            width: imageWidth,
+            height: imageHeight,
+            scaleWidth: FULL_IMAGE_WIDTH,
+            transformOrigin: 'top',
+        });
+        this.state.editorMinViewModeContainerStyle = computeEditorScaleStyle({
+            width: imageWidth,
+            height: imageHeight,
+            scaleWidth: MIN_IMAGE_WIDTH,
+        });
     }
 
     updateEditorSwitcherImageValueId() {
@@ -220,6 +252,7 @@ class OverlayAreasPositionComponent extends Component {
 
         this.createCanvas(this.canvasRef.el, this.areaList);
         this.selectableCanvas(this.props.editMode);
+        this.computeEditorContainerStyles();
     }
 
     onClickOpenAreasTab(event) {
@@ -232,6 +265,10 @@ class OverlayAreasPositionComponent extends Component {
         if (this.state.activeTab !== IMAGES_TAB) {
             this.state.activeTab = IMAGES_TAB;
         }
+    }
+
+    onClickChangeEditorViewMode(event) {
+        this.state.editorFullViewMode = !this.state.editorFullViewMode;
     }
 
     onClickChangeValueImage(areasImageAttributeValueId) {
