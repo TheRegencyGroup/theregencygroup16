@@ -5,7 +5,6 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  flex-flow: row wrap;
   font-family: "Raleway", Arial, sans-serif;
 
   .form-group {
@@ -14,14 +13,9 @@
 }
 
 .product-top-left {
-  width: 530px;
   display: flex;
   border-radius: 4px;
   border: 1px solid $grey70;
-
-  @include media-breakpoint-down(xl) {
-    width: 430px;
-  }
 
   .form-group {
     width: 100%;
@@ -88,18 +82,27 @@
   display: flex;
   justify-content: space-between;
   flex-flow: row wrap;
-}
 
-.product-left {
-  //width: 530px;
-  width: fit-content;
-  @include media-breakpoint-down(xl) {
-    width: 430px;
+  @include media-breakpoint-down(lg) {
+    flex-direction: column;
+
+    .product-right {
+      margin-left: 0;
+    }
   }
-}
 
-.product-right {
-  width: 406px;
+  .product-left {
+
+  }
+
+  .product-right {
+    width: 406px;
+    @include media-breakpoint-down(xl) {
+      width: unset;
+      margin-left: 32px;
+      flex: 1;
+    }
+  }
 }
 
 .product-add-to-cart {
@@ -136,25 +139,25 @@
   }
 }
 
-.product-image {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 530px;
-  height: 530px;
-  margin-bottom: 20px;
-  background: $grey90;
-  @include media-breakpoint-down(xl) {
-    width: 430px;
-    height: 430px;
-  }
-
-  img {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-  }
-}
+//.product-image {
+//  display: flex;
+//  align-items: center;
+//  justify-content: center;
+//  width: 530px;
+//  height: 530px;
+//  margin-bottom: 20px;
+//  background: $grey90;
+//  @include media-breakpoint-down(xl) {
+//    width: 430px;
+//    height: 430px;
+//  }
+//
+//  img {
+//    width: 100%;
+//    height: 100%;
+//    object-fit: contain;
+//  }
+//}
 
 .product-previews {
   display: flex;
@@ -230,5 +233,34 @@
 
   h3, .h3 {
     margin-bottom: 16px;
+  }
+}
+
+.overlay_template_editor_full_view {
+  .content-in {
+    max-width: 1245px;
+  }
+  .product-row {
+    flex-direction: column;
+
+    .product-right {
+      width: unset;
+      margin-left: 0;
+      display: flex;
+      justify-content: center;
+      gap: 32px;
+
+      & > div {
+        width: 406px;
+      }
+
+      .product-right-bottom {
+        padding-top: 16px;
+
+        .line {
+          display: none;
+        }
+      }
+    }
   }
 }

@@ -14,6 +14,7 @@ if (overlayTemplatePageData) {
             this.selectedPriceId = this.getSelectedPriceId();
             this.quantity = this.selectedPriceId ? this.selectedPrice.quantity : null;
             this.editMode = false;
+            this.editorFullViewMode = false;
 
             this._checkOverlayProductIdUrlParameter();
 
@@ -249,6 +250,10 @@ if (overlayTemplatePageData) {
             }
             Object.assign(this.overlayProduct, data);
             this._updateOverlayProductIdUrlParameter();
+        }
+
+        changeEditorViewMode() {
+            this.editorFullViewMode = !this.editorFullViewMode;
         }
     }
 

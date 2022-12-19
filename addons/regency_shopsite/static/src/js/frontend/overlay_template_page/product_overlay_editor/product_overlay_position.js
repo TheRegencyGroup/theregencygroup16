@@ -8,8 +8,11 @@ import {
     TEXT_AREA_TYPE,
     PRODUCT_IMAGE_MODEL,
     OVERLAY_PRODUCT_AREA_IMAGE,
+    FULL_IMAGE_WIDTH,
+    MIN_IMAGE_WIDTH,
     computeImageSrc,
     readImageDataFromFile,
+    computeEditorScaleStyle,
 } from '../../../main';
 import { RectangleArea } from './rectangle_area';
 import { EllipseArea } from './ellipse_area';
@@ -47,6 +50,8 @@ export class ProductOverlayPositionComponent extends Component {
             selectedAreaIndex: null,
             showAddTextPopover: false,
             showLoader: false,
+            editorFullViewModeContainerStyle: '',
+            editorMinViewModeContainerStyle: '',
         });
 
         this.areas = {};
@@ -59,8 +64,9 @@ export class ProductOverlayPositionComponent extends Component {
         this.lastSelectedAreasImageAttributeValueId = this.store.otPage.selectedAreasImageAttributeValueId;
         this.lastOverlayProductId = this.store.otPage.overlayProduct?.id;
         this.lastEditModeState = this.store.otPage.editMode;
-        
         this.imageTimestamp = new Date().valueOf();
+
+        this.computeEditorContainerStyles();
     }
 
     onMounted() {
@@ -114,6 +120,12 @@ export class ProductOverlayPositionComponent extends Component {
         return !this.state.selectedAreaIndex || this.state.showLoader;
     }
 
+    get editorContainerStyle() {
+        return this.store.otPage.editorFullViewMode ?
+            this.state.editorFullViewModeContainerStyle
+            : this.state.editorMinViewModeContainerStyle;
+    }
+
     updateImageSrc() {
         const position = this.props.overlayPosition;
         const valueId = this.store.otPage.selectedAreasImageAttributeValueId;
@@ -126,7 +138,7 @@ export class ProductOverlayPositionComponent extends Component {
             src: computeImageSrc({
                 id: imageId,
                 model: PRODUCT_IMAGE_MODEL,
-                field: 'image_512',
+                field: 'image_1920',
                 timestamp: this.imageTimestamp,
             }),
         };
@@ -142,6 +154,21 @@ export class ProductOverlayPositionComponent extends Component {
                 this.updateAreas();
             }
         };
+    }
+
+    computeEditorContainerStyles() {
+        const width = this.props.overlayPosition.canvasSize.width;
+        const height = this.props.overlayPosition.canvasSize.height;
+        this.state.editorFullViewModeContainerStyle = computeEditorScaleStyle({
+            width,
+            height,
+            scaleWidth: FULL_IMAGE_WIDTH,
+        });
+        this.state.editorMinViewModeContainerStyle = computeEditorScaleStyle({
+            width,
+            height,
+            scaleWidth: MIN_IMAGE_WIDTH,
+        });
     }
 
     updateAreas() {
@@ -276,6 +303,10 @@ export class ProductOverlayPositionComponent extends Component {
             return;
         }
         this.areas[this.state.selectedAreaIndex].removeActiveObject();
+    }
+
+    onClickChaneViewMode(event) {
+        this.store.otPage.changeEditorViewMode();
     }
 }
 
