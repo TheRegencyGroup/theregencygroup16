@@ -55,7 +55,7 @@ if (cartData) {
                     params,
                 });
                 if (res && res.cartData) {
-                    Object.assign(this, res.cartData);
+                    this.updateData(res.cartData);
                 }
                 if (res && res.overlayProductData) {
                     data = res.overlayProductData;
@@ -65,6 +65,10 @@ if (cartData) {
             }
             this.addingToCart = false;
             return data;
+        }
+
+        updateData (data) {
+            Object.assign(this, data);
         }
     }
 

@@ -8,6 +8,10 @@ class SaleOrder(models.Model):
 
     consumption_agreement_id = fields.Many2one('consumption.agreement')
 
+    # currency_id overridden according to the requirements in https://lumirang.atlassian.net/browse/REG-482
+    # paragraph 8
+    currency_id = fields.Many2one('res.currency', default=lambda self: self.env.user.company_id.currency_id)
+
     def action_confirm(self):
         unconfirmed_agreements = self.mapped('order_line').filtered(lambda s: s.consumption_agreement_line_id
                                                                   and s.consumption_agreement_line_id.state == 'draft')
@@ -47,6 +51,12 @@ class SaleOrder(models.Model):
                 line_values['invoice_lines'] = [Command.link(invl.id) for invl in con.invoice_ids.mapped('line_ids').
                                                         filtered(lambda x: x.display_type == 'product')]
                 self.env['sale.order.line'].create(line_values)
+
+    @api.onchange('partner_id')
+    def onchange_partner_id(self):
+        if self.partner_id.country_id:
+            self.currency_id = self.partner_id.country_id.currency_id.id
+
 
 class SaleOrderLine(models.Model):
     _inherit = 'sale.order.line'

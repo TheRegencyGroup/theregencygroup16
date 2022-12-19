@@ -4,6 +4,7 @@ on:
   pull_request:
     branches:
       - 'prod'
+      - 'main'
     types: [ opened, ready_for_review, reopened ]
 
 jobs:

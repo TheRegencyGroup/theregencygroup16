@@ -10,11 +10,9 @@ class ResPartner(models.Model):
                                        column1='res_partner_id', column2='customer_association_id')
     association_partner_ids = fields.One2many('res.partner', compute='_compute_association_partner_ids',
                                               compute_sudo=True)
-    contact_type = fields.Selection([
-        ('customer', 'Customer'),
-        ('vendor', 'Vendor')
-    ])
-    vendor_type = fields.Selection([('overseas', 'Overseas'), ('domestic', 'Domestic')])
+    is_customer = fields.Boolean(default=False, string='Customer')
+    is_vendor = fields.Boolean(default=False, string='Vendor')
+    vendor_type = fields.Selection([('overseas', 'Overseas'), ('domestic', 'Domestic')], string='Vendor Type')
     cc_invoice = fields.Boolean(string='CC on Invoice')
     default_shipping_percent = fields.Float()
     on_hold = fields.Boolean()
