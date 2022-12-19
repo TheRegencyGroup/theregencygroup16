@@ -66,9 +66,9 @@ class TestDownpayment(TestConsumptionCommon):
             'advance_payment_method': 'delivered'
         })
         downpayment.create_invoices()
-        self.assertEqual(100, so.tax_totals.get('amount_total'))
+        self.assertEqual(100, so.tax_totals.get('amount_untaxed'))
         self.assertEqual(3, so.invoice_count)
         invoice = so.invoice_ids.sorted('id')[2]
-        self.assertEqual(100 - 100 * 0.15, invoice.tax_totals.get('amount_total'))
+        self.assertEqual(100 - 100 * 0.15, invoice.tax_totals.get('amount_untaxed'))
 
 
