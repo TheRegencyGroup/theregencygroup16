@@ -61,9 +61,8 @@ class SaleOrder(models.Model):
     def create(self, values):
         res = super().create(values)
         # onchange_partner_id not save currency changes
-        customer_id = self.env['res.partner'].browse(values.get('partner_id'))
-        if customer_id.country_id:
-            values.update({'currency_id': customer_id.country_id.currency_id.id})
+        if res.partner_id.country_id:
+            res.currency_id = res.partner_id.country_id.currency_id
         return res
 
 
