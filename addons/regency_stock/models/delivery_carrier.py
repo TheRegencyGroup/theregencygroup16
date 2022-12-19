@@ -40,15 +40,12 @@ class DeliveryCarrier(models.Model):
         weight = 0.0
         for order_line in order.order_line.filtered(
                 lambda l: l.product_id.type in ['product', 'consu'] and not l.is_delivery and not l.display_type):
-            stock_picking = order_line.move_ids.mapped('picking_id').filtered(lambda f: f.state == 'done')
+            stock_picking = order_line.move_ids.mapped('picking_id').filtered(lambda f: f.state in ['assigned', 'done'])
             if stock_picking:
-                stock_quants = stock_picking.package_ids.mapped('quant_ids').filtered(
-                    lambda f: f.product_id == order_line.product_id)
-                qty = sum(stock_quants.mapped('quantity'))
-                package_weight = sum(stock_quants.mapped('package_id').mapped('shipping_weight'))
-                move_lines = order_line.mapped('move_ids.move_line_ids').filtered(
-                    lambda f: f.picking_id == stock_picking)
-                weight = package_weight / qty * sum(move_lines.mapped('qty_done'))
+                package_id = stock_picking.move_line_ids.mapped('package_id')
+                product_stock_quant = package_id.quant_ids.filtered(lambda f: f.product_id == order_line.product_id)
+                weight = package_id.shipping_weight / product_stock_quant.quantity * sum(
+                    stock_picking.move_line_ids.mapped('reserved_qty'))
             else:
                 weight += order_line.product_qty * order_line.product_id.weight
         return weight
