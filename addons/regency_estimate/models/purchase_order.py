@@ -15,6 +15,13 @@ class PurchaseOrder(models.Model):
     show_column_produced_overseas = fields.Boolean(compute='_compute_show_column_produced_overseas')
     tracking_ref = fields.Char(compute='_compute_tracking_references')
     cancellation_reason = fields.Char()
+    estimate_ids = fields.One2many('sale.estimate', compute='_compute_estimate_ids')
+
+    def _compute_estimate_ids(self):
+        for rec in self:
+            rec.estimate_ids += rec._get_sale_orders().consumption_agreement_id.from_pricesheet_id.estimate_id
+            rec.estimate_ids += rec._get_sale_orders().price_sheet_id.estimate_id
+            rec.estimate_ids += rec.requisition_id.estimate_id
 
     def _compute_tracking_references(self):
         for entry in self:
