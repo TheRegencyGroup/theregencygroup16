@@ -1,7 +1,6 @@
 from odoo import models, _
 from odoo.addons.delivery.models.delivery_request_objects import DeliveryPackage
 from odoo.exceptions import UserError
-from .sendcloud_service import SendCloudExt
 
 
 class DeliveryCarrier(models.Model):
@@ -50,16 +49,3 @@ class DeliveryCarrier(models.Model):
             else:
                 weight += order_line.product_qty * order_line.product_id.weight
         return weight
-
-    def sendcloud_rate_shipment(self, order):
-        """ Overriden """
-        sendcloud = SendCloudExt(self.sendcloud_public_key, self.sendcloud_secret_key, self.log_xml)
-        price, packages_no = sendcloud.get_shipping_rate(self, order=order)
-        message = None
-        if packages_no:
-            message = _('Note that this price is for %s packages since the order weight is more than max weight of the shipping method.', packages_no)
-        return {
-            'success': True,
-            'price': price,
-            'warning_message': message
-        }
