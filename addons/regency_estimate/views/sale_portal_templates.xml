@@ -8,7 +8,7 @@
         </xpath>
 
         <xpath expr="//section[@id='details']//t[@t-if='not line.display_type']/td[last()]" position="after">
-            <td t-if="sale_order.state != 'draft'">
+            <td t-if="sale_order.state not in ['draft', 'sent']">
                 <a class="btn btn-primary btn-block reorder_line" role="button" t-att-data-line-id="line.id">Reorder</a>
             </td>
         </xpath>
