@@ -276,6 +276,8 @@ class ProductPriceSheet(models.Model):
                                                 'pricesheet_line_id': p.id,
                                                 'name': p.name,
                                             }) for p in lines_to_order]})
+        if order.partner_id.country_id:
+            order.currency_id = order.partner_id.country_id.currency_id
         order.message_subscribe([order.partner_id.id])
         sequence = 10
         for line in order.order_line:
