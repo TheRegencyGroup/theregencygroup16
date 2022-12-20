@@ -81,9 +81,10 @@ RUN mkdir -p /mnt/extra-addons \
         && chown -R odoo /mnt/extra-addons
 RUN mkdir -p /mnt/opsway/regency-enterprise \
         && mkdir -p /mnt/opsway/submodules \
+        && mkdir -p /mnt/opsway/product_multiple_images_upload_submodule \
         && chown -R odoo /mnt/opsway
 
-VOLUME ["/var/lib/odoo", "/mnt/extra-addons", "/mnt/opsway/regency-enterprise", "/mnt/opsway/submodules"]
+VOLUME ["/var/lib/odoo", "/mnt/extra-addons", "/mnt/opsway/regency-enterprise", "/mnt/opsway/submodules", "/mnt/opsway/product_multiple_images_upload_submodule"]
 
 # Expose Odoo services
 EXPOSE 8069 8071

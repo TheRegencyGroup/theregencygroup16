@@ -18,6 +18,7 @@
           <mapping local-root="$PROJECT_DIR$/addons" remote-root="/mnt/extra-addons" />
           <mapping local-root="$PROJECT_DIR$/opsway/regency-enterprise" remote-root="/mnt/opsway/regency-enterprise" />
           <mapping local-root="$PROJECT_DIR$/opsway/submodules" remote-root="/mnt/opsway/submodules" />
+          <mapping local-root="$PROJECT_DIR$/opsway/product_multiple_images_upload_submodule" remote-root="/mnt/opsway/product_multiple_images_upload_submodule" />
         </list>
       </option>
     </PathMappingSettings>
