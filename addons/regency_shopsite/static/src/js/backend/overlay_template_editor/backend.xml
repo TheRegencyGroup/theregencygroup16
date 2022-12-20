@@ -87,7 +87,7 @@
             <div class="ot_areas_position_header">
                 <div  class="ot_areas_position_header_left">
                     <t t-esc="props.overlayPositionName"/>
-                    <div t-if="props.editMode and props.allowEditAreas" class="ot_areas_position_tools">
+                    <div t-if="showToolsButtons" class="ot_areas_position_tools">
                         <t t-if="!!state.editorImage">
                             <button class="btn btn-secondary" t-on-click="() => this.addRectangleArea({})">
                                 <i class="fa fa-plus-circle"/>Rectangle

@@ -15,6 +15,8 @@ if (overlayTemplatePageData) {
             this.quantity = this.selectedPriceId ? this.selectedPrice.quantity : null;
             this.editMode = false;
             this.editorFullViewMode = false;
+            this.fullViewModeScale = 1;
+            this.minViewModeScale = 1;
 
             this._checkOverlayProductIdUrlParameter();
 
@@ -250,10 +252,19 @@ if (overlayTemplatePageData) {
             }
             Object.assign(this.overlayProduct, data);
             this._updateOverlayProductIdUrlParameter();
+            this.editorFullViewMode = false;
         }
 
         changeEditorViewMode() {
             this.editorFullViewMode = !this.editorFullViewMode;
+        }
+
+        setFullViewModeScale(scale) {
+            this.fullViewModeScale = scale;
+        }
+
+        setMinViewModeScale(scale) {
+            this.minViewModeScale = scale;
         }
     }
 

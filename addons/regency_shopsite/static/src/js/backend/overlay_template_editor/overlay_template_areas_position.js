@@ -11,7 +11,7 @@ import {
     MIN_IMAGE_WIDTH,
     computeImageSrc,
     enableCanvasPointerEvents,
-    computeEditorScaleStyle,
+    computeEditorScale,
 } from '../../main';
 import { AreaParameters } from './area_parameters';
 
@@ -53,9 +53,10 @@ class OverlayAreasPositionComponent extends Component {
         this.lastSelectedImageIds = this.selectedImageIds;
         this.lastAreasImageAttributeId = this.props.areasImageAttributeId;
         this.areaList = this.props.areaList;
-
         this.firstEditorImageLoad = false;
         this.imageTimestamp = new Date().valueOf();
+        this.fullViewModeScale = 1;
+        this.minViewModeScale = 1;
 
         this.changeAreaFunctions = {
             width: this.changeAreaWidth.bind(this),
@@ -122,6 +123,10 @@ class OverlayAreasPositionComponent extends Component {
             : this.state.editorMinViewModeContainerStyle;
     }
 
+    get showToolsButtons() {
+        return this.props.editMode && this.props.allowEditAreas && this.state.activeTab === AREAS_TAB;
+    }
+
     onMounted() {
         this.setImageOnloadCallback();
         this.updateEditorSwitcherImageValueId();
@@ -179,17 +184,21 @@ class OverlayAreasPositionComponent extends Component {
     computeEditorContainerStyles() {
         const imageWidth = this.imageRef.el.clientWidth;
         const imageHeight = this.imageRef.el.clientHeight;
-        this.state.editorFullViewModeContainerStyle = computeEditorScaleStyle({
+        const fullParams = computeEditorScale({
             width: imageWidth,
             height: imageHeight,
             scaleWidth: FULL_IMAGE_WIDTH,
             transformOrigin: 'top',
         });
-        this.state.editorMinViewModeContainerStyle = computeEditorScaleStyle({
+        this.state.editorFullViewModeContainerStyle = fullParams.editorStyle;
+        this.fullViewModeScale = fullParams.scale;
+        const minParams = computeEditorScale({
             width: imageWidth,
             height: imageHeight,
             scaleWidth: MIN_IMAGE_WIDTH,
         });
+        this.state.editorMinViewModeContainerStyle = minParams.editorStyle;
+        this.minViewModeScale = minParams.scale;
     }
 
     updateEditorSwitcherImageValueId() {
@@ -269,6 +278,7 @@ class OverlayAreasPositionComponent extends Component {
 
     onClickChangeEditorViewMode(event) {
         this.state.editorFullViewMode = !this.state.editorFullViewMode;
+        this.scaleAreasControls();
     }
 
     onClickChangeValueImage(areasImageAttributeValueId) {
@@ -427,10 +437,41 @@ class OverlayAreasPositionComponent extends Component {
          this.state.selectedAreaIndex = event.target.areaIndex;
     }
 
+    computeAreaControlSize() {
+        let controlSize = 13;
+        if (this.state.editorFullViewMode) {
+            controlSize = Math.ceil(controlSize / this.fullViewModeScale);
+        } else {
+            controlSize = Math.ceil(controlSize / this.minViewModeScale);
+        }
+        return controlSize;
+    }
+
+    computeAreaControlRotateOffset() {
+        let offset = 20;
+        if (this.state.editorFullViewMode) {
+            offset = Math.ceil(offset / this.fullViewModeScale);
+        } else {
+            offset = Math.ceil(offset / this.minViewModeScale);
+        }
+        return offset;
+    }
+
+    setControlsParams(object) {
+        object.padding = 0;
+        object.borderColor = 'transparent';
+        object.cornerColor = '#000000';
+        object.cornerStrokeColor = '#000000';
+        object.cornerSize = this.computeAreaControlSize();
+        object.transparentCorners = false;
+        object.controls.mtr.offsetY = -this.computeAreaControlRotateOffset();
+        this.canvas.renderAll();
+    }
     addRectangleArea({ area, select=true }) {
         const index = area ? area.index : this.newAreaIndex;
         const data = area ? area.data : {};
         let object = this.createRectangle(index, data, select);
+        this.setControlsParams(object);
         this.state.areaList[index] = {
             object,
             index,
@@ -444,6 +485,7 @@ class OverlayAreasPositionComponent extends Component {
         const index = area ? area.index : this.newAreaIndex;
         const data = area ? area.data : {};
         let object = this.createEllipse(index, data, select);
+        this.setControlsParams(object);
         this.state.areaList[index] = {
             object,
             index,
@@ -457,6 +499,7 @@ class OverlayAreasPositionComponent extends Component {
         const index = area ? area.index : this.newAreaIndex;
         const data = area ? area.data : {};
         let object = this.createTextRectangle(index, data, select);
+        this.setControlsParams(object);
         this.state.areaList[index] = {
             object,
             index,
@@ -564,6 +607,13 @@ class OverlayAreasPositionComponent extends Component {
         }
         if (!(this.props.editMode && this.props.allowEditAreas) && this.state.selectedAreaIndex) {
             this.state.areaList[this.state.selectedAreaIndex].object.set('fill', '#E5112473');
+        }
+        this.canvas.renderAll();
+    }
+
+    scaleAreasControls() {
+        for (let area of Object.values(this.state.areaList)) {
+            this.setControlsParams(area.object);
         }
         this.canvas.renderAll();
     }
