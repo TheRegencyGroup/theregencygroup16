@@ -43,7 +43,7 @@ jobs:
       - name: preparing odoo
         run: |
           mv addons/* /mnt/extra-addons
-          mv opsway/submodules/* /mnt/opsway/submodules
+          mv opsway/submodules/* /mnt/opsway/submodules /mnt/opsway/product_multiple_images_upload_submodule
           mv env/ci-test/odoo.conf /etc/odoo/odoo.conf
       - name: run tests
         run: python3 -u /usr/bin/odoo --conf /etc/odoo/odoo.conf -i regency_init
