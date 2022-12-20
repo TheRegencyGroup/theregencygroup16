@@ -18,8 +18,8 @@ export class RectangleArea extends Area {
 
     getMaskObject() {
         return new fabric.Rect({
-            width: this.data.width - 2,
-            height: this.data.height - 2,
+            width: this.data.width,
+            height: this.data.height,
             top: this.data.y - this.data.boundRect.y,
             left: this.data.x - this.data.boundRect.x ,
             angle: this.data.angle,

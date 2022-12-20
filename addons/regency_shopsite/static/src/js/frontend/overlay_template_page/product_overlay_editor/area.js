@@ -104,8 +104,8 @@ export class Area {
 
     createCanvas() {
         this.canvasEl = document.createElement('canvas');
-        this.canvasEl.width = this.data.boundRect.width + 2;
-        this.canvasEl.height = this.data.boundRect.height + 2;
+        this.canvasEl.width = this.data.boundRect.width;
+        this.canvasEl.height = this.data.boundRect.height;
         this.areaEl = document.createElement('div');
         this.areaEl.classList.add('product_overlay_area');
         this.areaEl.style.top = this.data.boundRect.y + 'px';
