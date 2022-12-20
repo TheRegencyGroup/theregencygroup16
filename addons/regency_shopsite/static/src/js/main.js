@@ -35,7 +35,7 @@ export async function readImageDataFromFile(blob) {
     });
 }
 
-export function computeEditorScaleStyle({ width, height, scaleWidth, transformOrigin=false }) {
+export function computeEditorScale({ width, height, scaleWidth, transformOrigin=false }) {
     let scale = 1;
     let deltaX = 0;
     let deltaY = 0;
@@ -46,9 +46,10 @@ export function computeEditorScaleStyle({ width, height, scaleWidth, transformOr
         deltaY = -((height * (1 - scale)) / 2);
         marginBottom = deltaY * 2;
     }
-    return `
+    const editorStyle = `
         scale: ${scale};
         margin-bottom: ${marginBottom}px;
         transform-origin: ${transformOrigin || 'left top'};
     `;
+    return { scale, editorStyle };
 }
