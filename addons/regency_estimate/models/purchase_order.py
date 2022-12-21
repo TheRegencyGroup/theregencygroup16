@@ -24,9 +24,9 @@ class PurchaseOrder(models.Model):
                  'order_line.move_ids.move_dest_ids.group_id.sale_id')
     def _compute_estimate_ids(self):
         for rec in self:
-            rec.estimate_ids += rec._get_sale_orders().consumption_agreement_id.from_pricesheet_id.estimate_id
-            rec.estimate_ids += rec._get_sale_orders().price_sheet_id.estimate_id
-            rec.estimate_ids += rec.requisition_id.estimate_id
+            sale_orders = rec._get_sale_orders()
+            rec.estimate_ids = sale_orders.consumption_agreement_id.from_pricesheet_id.estimate_id \
+                               + sale_orders.price_sheet_id.estimate_id + rec.requisition_id.estimate_id
 
     def _compute_tracking_references(self):
         for entry in self:
