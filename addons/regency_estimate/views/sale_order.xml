@@ -13,6 +13,11 @@
             <xpath expr="//field[@name='date_order']" position="attributes">
                 <attribute name="widget">date</attribute>
             </xpath>
+            <xpath expr="//field[@name='date_order']" position="replace">
+            </xpath>
+            <xpath expr="//field[@name='date_order']" position="attributes">
+                <attribute name="widget">date</attribute>
+            </xpath>
         </field>
     </record>
 </odoo>
