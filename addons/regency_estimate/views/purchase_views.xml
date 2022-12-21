@@ -57,5 +57,15 @@
                 </xpath>
             </field>
         </record>
+        <record id="view_purchase_order_filter" model="ir.ui.view">
+            <field name="inherit_id" ref="purchase.view_purchase_order_filter"/>
+            <field name="model">purchase.order</field>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='origin']" position="after">
+                    <field name="estimate_ids"/>
+                    <filter string="Estimate" name="estimate" domain="[]" context="{'group_by': 'estimate_ids'}"/>
+                </xpath>
+            </field>
+        </record>
     </data>
 </odoo>
