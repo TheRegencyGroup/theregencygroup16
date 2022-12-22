@@ -43,7 +43,7 @@ class SaleEstimate(models.Model):
         default=AVAILABLE_PRIORITIES[0][0])
     state = fields.Selection([('draft', 'New'), ('in_progress', 'In Progress'), ('done', 'Prices Confirmed')], 'Status',
                              compute='_compute_state', store=True)
-    state_with_qty = fields.Char(compute='_compute_state')
+    state_with_qty = fields.Char(compute='_compute_state', compute_sudo=True)
     tag_ids = fields.Many2many(
         'crm.tag', 'estimate_tag_rel', 'estimate_id', 'tag_id', string='Tags',
         help="Classify and analyze your estimates categories like: Training, Service")
