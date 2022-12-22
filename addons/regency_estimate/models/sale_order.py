@@ -14,7 +14,7 @@ class SaleOrder(models.Model):
 
     def toggle_legal_accepted(self, checked):
         self.ensure_one()
-        if self.state == 'draft':
+        if self.state in ['draft', 'sent']:
             self.legal_accepted = checked
         return self.legal_accepted
 
