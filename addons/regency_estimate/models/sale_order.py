@@ -37,14 +37,6 @@ class SaleOrderLine(models.Model):
 
     pricesheet_line_id = fields.Many2one('product.price.sheet.line')
 
-    def _compute_tax_id(self):
-        """
-            Temporary disable taxes calculation
-        :return:
-        """
-        #TODO: uncomment when taxes will be handled in a correct way
-        pass
-
     def get_purchase_order_lines(self):
         return self.purchase_line_ids |\
                self.order_id.procurement_group_id.stock_move_ids.filtered(lambda x: x.product_id == self.product_id).created_purchase_line_id |\
