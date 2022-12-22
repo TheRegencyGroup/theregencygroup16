@@ -32,18 +32,11 @@ class SaleOrder(models.Model):
                 self.message_post(body=msg, partner_ids=partner.ids)
         return res
 
+
 class SaleOrderLine(models.Model):
     _inherit = 'sale.order.line'
 
     pricesheet_line_id = fields.Many2one('product.price.sheet.line')
-
-    def _compute_tax_id(self):
-        """
-            Temporary disable taxes calculation
-        :return:
-        """
-        #TODO: uncomment when taxes will be handled in a correct way
-        pass
 
     def get_purchase_order_lines(self):
         return self.purchase_line_ids |\

@@ -1,4 +1,16 @@
-from odoo import fields, models, api, Command
+from odoo import fields, models, api
+from odoo.exceptions import UserError
+
+
+# Overridden to rename open state
+PURCHASE_REQUISITION_STATES = [
+    ('draft', 'Draft'),
+    ('ongoing', 'Ongoing'),
+    ('in_progress', 'Confirmed'),
+    ('open', 'Validated'),
+    ('done', 'Closed'),
+    ('cancel', 'Cancelled')
+]
 
 
 class PurchaseRequisition(models.Model):
@@ -11,6 +23,9 @@ class PurchaseRequisition(models.Model):
     color = fields.Integer('Color Index', compute='_compute_color')
     customer_id = fields.Many2one(related='estimate_id.partner_id')
     product_ids = fields.One2many('product.product', compute='_compute_product_ids')
+    state = fields.Selection(PURCHASE_REQUISITION_STATES,
+                             'Status', tracking=True, required=True,
+                             copy=False, default='draft')
 
     def _compute_product_ids(self):
         for rec in self:
@@ -83,6 +98,17 @@ class PurchaseRequisition(models.Model):
                                message=f'User has confirmed Purchase Requisition #<a href="/web#id={self.id}&amp;'
                                        f'model={self._name}&amp;view_type=form">{self.name}</a>')
 
+    def action_open(self):
+        """
+        Overriden
+        """
+        super().action_open()
+        lines_to_validate = self.line_ids.filtered(lambda f: f.is_selected)
+        if not lines_to_validate:
+            raise UserError('Please, select Product lines for validation')
+        for line in lines_to_validate:
+            line.state = 'done'
+
 
 class PurchaseRequisitionLine(models.Model):
     _inherit = 'purchase.requisition.line'
@@ -98,6 +124,8 @@ class PurchaseRequisitionLine(models.Model):
     color = fields.Integer('Color Index', compute='_compute_color')
     fee = fields.Float(readonly=True, compute='_compute_fee')
     fee_value_ids = fields.One2many('fee.value', 'purchase_requisition_line_id')
+    currency_id = fields.Many2one('res.currency', default=lambda self: self.env.user.company_id.currency_id)
+    is_selected = fields.Boolean()
 
     @api.depends('fee_value_ids', 'fee_value_ids.value', 'fee_value_ids.per_item', 'product_qty', 'price_unit')
     def _compute_fee(self):
@@ -116,10 +144,7 @@ class PurchaseRequisitionLine(models.Model):
     @api.depends('requisition_id', 'partner_id', 'requisition_id.state', 'price_unit')
     def _compute_state(self):
         for prl in self:
-            if prl.partner_id and prl.price_unit > 0:
-                prl.state = 'done'
-                continue
-            elif prl.requisition_id.state == 'draft':
+            if prl.requisition_id.state == 'draft':
                 prl.state = 'draft'
                 continue
             else:

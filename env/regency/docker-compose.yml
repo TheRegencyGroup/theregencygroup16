@@ -13,6 +13,7 @@ services:
       - ../../addons:/mnt/extra-addons
       - ../../opsway/regency-enterprise:/mnt/opsway/regency-enterprise
       - ../../opsway/submodules:/mnt/opsway/submodules
+      - ../../opsway/product_multiple_images_upload_submodule:/mnt/opsway/product_multiple_images_upload_submodule
       - ./odoo.conf:/etc/odoo/odoo.conf
       - ./data:/var/lib/odoo
     environment:

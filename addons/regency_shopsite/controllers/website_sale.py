@@ -73,8 +73,9 @@ class WebsiteSaleRegency(WebsiteSale):
             'variant_values': sale_order_line.product_template_attribute_value_ids.ids,
             'force_create': True
         }
-        return self.cart_update_json(product_id=sale_order_line.product_id.id, add_qty=sale_order_line.product_uom_qty,
+        self.cart_update_json(product_id=sale_order_line.product_id.id, add_qty=sale_order_line.product_uom_qty,
                                      kw=data)
+        return request.website._get_cart_data()
 
     @http.route(['/shop/cart/save_delivery_address'],
                 type='json', auth="user", methods=['POST'], website=True, csrf=False)
