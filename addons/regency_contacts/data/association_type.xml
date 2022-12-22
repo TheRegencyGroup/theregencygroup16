@@ -11,57 +11,57 @@
         <record id="management_group_to_hotel" model="association.type">
             <field name="left_tech_name">management_group</field>
             <field name="right_tech_name">hotel</field>
-            <field name="left_to_right_name">Hotel Management Company for</field>
-            <field name="right_to_left_name">Controlled by Hotel Management Company</field>
+            <field name="left_to_right_name">Hotel Management Group for</field>
+            <field name="right_to_left_name">Controlled by Hotel Management Group</field>
         </record>
 
         <record id="rebate_company_to_hotel" model="association.type">
             <field name="left_tech_name">rebate_company</field>
             <field name="right_tech_name">hotel</field>
-            <field name="left_to_right_name">Producer Company for</field>
-            <field name="right_to_left_name">Controlled by Producer Company</field>
+            <field name="left_to_right_name">Rebate Company for</field>
+            <field name="right_to_left_name">Controlled by Rebate Company</field>
         </record>
 
         <record id="rebate_company_to_hotel_brand" model="association.type">
             <field name="left_tech_name">rebate_company</field>
             <field name="right_tech_name">hotel_brand</field>
-            <field name="left_to_right_name">Producer Company for</field>
-            <field name="right_to_left_name">Controlled by Producer Company</field>
+            <field name="left_to_right_name">Rebate Company for</field>
+            <field name="right_to_left_name">Controlled by Rebate Company</field>
         </record>
 
         <record id="rebate_company_to_hotel_group" model="association.type">
             <field name="left_tech_name">rebate_company</field>
             <field name="right_tech_name">hotel_group</field>
-            <field name="left_to_right_name">Producer Company for</field>
-            <field name="right_to_left_name">Controlled by Producer Company</field>
+            <field name="left_to_right_name">Rebate Company for</field>
+            <field name="right_to_left_name">Controlled by Rebate Company</field>
         </record>
 
         <record id="partner_company_to_hotel_group" model="association.type">
             <field name="left_tech_name">partner_company</field>
             <field name="right_tech_name">hotel_group</field>
-            <field name="left_to_right_name">Procurement Partner for</field>
-            <field name="right_to_left_name">Controlled by Procurement Partner</field>
+            <field name="left_to_right_name">Partner Company for</field>
+            <field name="right_to_left_name">Controlled by Partner Company</field>
         </record>
 
         <record id="hotel_brand_to_hotel_group" model="association.type">
             <field name="left_tech_name">hotel_brand</field>
             <field name="right_tech_name">hotel_group</field>
-            <field name="left_to_right_name">Brand Management Company for</field>
-            <field name="right_to_left_name">Controlled by Brand Management Company</field>
+            <field name="left_to_right_name">Hotel Brand Company for</field>
+            <field name="right_to_left_name">Controlled by Hotel Brand Company</field>
         </record>
 
         <record id="partner_company_to_hotel_brand" model="association.type">
             <field name="left_tech_name">partner_company</field>
             <field name="right_tech_name">hotel_brand</field>
-            <field name="left_to_right_name">Procurement Partner for</field>
-            <field name="right_to_left_name">Controlled by Procurement Partner</field>
+            <field name="left_to_right_name">Partner Company for</field>
+            <field name="right_to_left_name">Controlled by Partner Company</field>
         </record>
 
         <record id="partner_company_to_hotel" model="association.type">
             <field name="left_tech_name">partner_company</field>
             <field name="right_tech_name">hotel</field>
-            <field name="left_to_right_name">Procurement Partner for</field>
-            <field name="right_to_left_name">Controlled by Procurement Partner</field>
+            <field name="left_to_right_name">Partner Company for</field>
+            <field name="right_to_left_name">Controlled by Partner Company</field>
         </record>
 
         <record id="hotel_to_contact" model="association.type">
