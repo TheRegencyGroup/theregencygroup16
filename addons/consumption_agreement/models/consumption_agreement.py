@@ -39,7 +39,6 @@ class ConsumptionAgreement(models.Model):
     deposit_percent_str = fields.Char(compute='_compute_invoice_stat')
     invoice_ids = fields.One2many('account.move', 'consumption_agreement_id', string="Invoices")
     tax_totals = fields.Binary(compute='_compute_tax_totals')
-    from_pricesheet_id = fields.Many2one('product.price.sheet', help='From what Pricesheet created')
 
     @api.depends('line_ids.price_unit', 'line_ids.qty_allowed')
     def _compute_tax_totals(self):
@@ -109,16 +108,6 @@ class ConsumptionAgreement(models.Model):
             if not rec.signed_date:
                 rec.signed_date = fields.Date.today()
             rec.update_product_route_ids()
-            if rec.from_pricesheet_id and rec.from_pricesheet_id.estimate_id:
-                partners_to_inform = self.env['res.partner']
-                if rec.from_pricesheet_id.estimate_id.estimate_manager_id:
-                    partners_to_inform += rec.from_pricesheet_id.estimate_id.estimate_manager_id.partner_id
-                if rec.from_pricesheet_id.estimate_id.purchase_agreement_ids:
-                    for partner in rec.from_pricesheet_id.estimate_id.purchase_agreement_ids.mapped('user_id.partner_id'):
-                        partners_to_inform += partner
-                for partner in partners_to_inform:
-                    msg = accept_format_string(SystemMessages.get('M-011'), partner.name, rec.name)
-                    rec.message_post(body=msg, partner_ids=partner.ids)
 
     def update_product_route_ids(self):
         products = self.line_ids.mapped('product_id')
@@ -164,6 +153,7 @@ class ConsumptionAgreement(models.Model):
                                                 'product_uom': p.product_id.uom_id.id,
                                                 'consumption_agreement_line_id': p.id
                                             }) for p in self.line_ids.filtered(lambda l: l.id in selected_line_ids)]})
+        order.currency_id = self.currency_id.id
         order.message_subscribe([order.partner_id.id])
         return order, order_count
 
@@ -197,6 +187,13 @@ class ConsumptionAgreement(models.Model):
                     'customer_id': line.agreement_id.partner_id.id
                 })]
             })
+            if po.partner_id.country_id:
+                po.currency_id = po.partner_id.country_id.currency_id
+                for po_line in po.order_line:
+                    if po.currency_id != self.currency_id:
+                        po_line.price_unit = self.currency_id._convert(po_line.price_unit, po_line.currency_id,
+                                                                          self.company_id, fields.Date.today())
+
             new_purchase_orders += po
         if not order_count:
             action = self.env["ir.actions.act_window"]._for_xml_id("purchase.purchase_rfq")
@@ -334,6 +331,8 @@ class ConsumptionAgreement(models.Model):
         for ca in self:
             if ca.partner_id:
                 ca.allowed_partner_ids = ca.partner_id + ca.possible_partners
+                if ca.partner_id.country_id:
+                    ca.currency_id = ca.partner_id.country_id.currency_id.id
             else:
                 ca.allowed_partner_ids = False
 

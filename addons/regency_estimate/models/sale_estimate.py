@@ -18,6 +18,8 @@ AVAILABLE_PRIORITIES = [
     ('3', 'Very High'),
 ]
 
+DEFAULT_MARGIN = 1.6
+
 
 class SaleEstimate(models.Model):
     _name = 'sale.estimate'
@@ -41,7 +43,7 @@ class SaleEstimate(models.Model):
         default=AVAILABLE_PRIORITIES[0][0])
     state = fields.Selection([('draft', 'New'), ('in_progress', 'In Progress'), ('done', 'Prices Confirmed')], 'Status',
                              compute='_compute_state', store=True)
-    state_with_qty = fields.Char(compute='_compute_state')
+    state_with_qty = fields.Char(compute='_compute_state', compute_sudo=True)
     tag_ids = fields.Many2many(
         'crm.tag', 'estimate_tag_rel', 'estimate_id', 'tag_id', string='Tags',
         help="Classify and analyze your estimates categories like: Training, Service")
@@ -309,6 +311,12 @@ class SaleEstimate(models.Model):
         new_requisition_lines = confirmed_requisition_lines.filtered(lambda x: (x.product_id, x.product_qty) not in products_to_estimate)
         sheet_lines = []
         for p in self.product_lines.filtered(lambda x: x.selected or x.display_type).sorted('sequence'):
+
+            if self.partner_id.country_id:
+                new_pricesheet_currency_id = self.partner_id.country_id.currency_id
+            else:
+                new_pricesheet_currency_id = self.env.company.currency_id
+
             seq = p.sequence
             if p.display_type:
                 sheet_lines.append(Command.create({
@@ -336,8 +344,8 @@ class SaleEstimate(models.Model):
                                 'partner_id': line.partner_id.id,
                                 'min_quantity': line.product_qty,
                                 'vendor_price': line.price_unit,
-                                'price': line.price_unit * 1.6,
-                                'total': line.price_unit * 1.6 * line.product_qty,
+                                'price': price,
+                                'total': price * line.product_qty,
                                 'display_type': p.display_type,
                                 'produced_overseas': line.produced_overseas,
                                 'sale_estimate_line_ids': [(6, 0, [p.id])],
@@ -398,6 +406,8 @@ class SaleEstimate(models.Model):
                 'partner_id': self.partner_id,
                 'item_ids': [s.id for s in sheet_lines],
             })
+            if new_pricesheet.partner_id.country_id:
+                new_pricesheet.currency_id = new_pricesheet.partner_id.country_id.currency_id
             new_pricesheet.message_subscribe(partner_ids=(self.estimate_manager_id.partner_id + self.purchase_agreement_ids.mapped('user_id.partner_id')).ids)
             action = self.env["ir.actions.actions"]._for_xml_id("regency_estimate.action_product_price_sheet_new")
             action['res_id'] = new_pricesheet.id

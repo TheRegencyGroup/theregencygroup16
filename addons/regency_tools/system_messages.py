@@ -28,5 +28,6 @@ SystemMessages = {
     "M-009": "%s %s created!",
     "M-010": "%s is created!",
     "M-011": "%s has signed the %s",
-    "M-013": "%s requests your approval"
+    "M-013": "%s requests your approval",
+    "M-014": "Purchase requisition (%s) requests your validation"
 }
