@@ -2,6 +2,8 @@
 
 const { Component, useRef, useState, useEnv } = owl;
 
+export const TEXT_AREA_ALIGN_LIST = ['left', 'center', 'right'];
+
 class AreaParametersNumberInput extends Component {
     setup() {
         this.input = useRef('input')
@@ -56,6 +58,8 @@ AreaParametersNumberInput.template = 'areas_parameters_number_input';
 
 export class AreaParameters extends Component {
     setup() {
+        this.TEXT_AREA_ALIGN_LIST = TEXT_AREA_ALIGN_LIST;
+
         this.env = useEnv();
     }
 
@@ -79,6 +83,11 @@ export class AreaParameters extends Component {
             name: option.dataset.name,
             color: option.dataset.color,
         });
+    }
+
+    onChangeTextAlign(event) {
+        const option =  event.target.selectedOptions[0];
+        this.props.area.change.align(this.props.area.index, option.value);
     }
 
     onClickAreaListItem() {

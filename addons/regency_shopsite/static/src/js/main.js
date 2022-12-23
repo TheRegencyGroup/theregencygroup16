@@ -53,3 +53,11 @@ export function computeEditorScale({ width, height, scaleWidth, transformOrigin=
     `;
     return { scale, editorStyle };
 }
+
+export function convertCanvasPixelsToLineSpacing({ lineSpacingPixels, fontSize }) {
+    return (lineSpacingPixels + fontSize) / fontSize / fabric.Text.prototype._fontSizeMult;
+}
+
+export function convertCanvasPixelsToCharSpacing({ charSpacingPixels, fontSize }) {
+    return (charSpacingPixels * 1000) / fontSize;
+}
