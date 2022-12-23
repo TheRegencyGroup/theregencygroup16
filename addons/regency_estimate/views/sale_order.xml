@@ -8,6 +8,11 @@
             <xpath expr="//field[@name='partner_id']" position="attributes">
                 <attribute name="domain">[('contact_type', '=', 'customer'),('is_company', '=', True)]</attribute>
             </xpath>
+            <xpath expr="//field[@name='date_order']" position="replace">
+            </xpath>
+            <xpath expr="//field[@name='date_order']" position="attributes">
+                <attribute name="widget">date</attribute>
+            </xpath>
         </field>
     </record>
 </odoo>

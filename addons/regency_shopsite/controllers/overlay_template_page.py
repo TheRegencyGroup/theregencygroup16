@@ -219,8 +219,9 @@ class OverlayTemplatePage(http.Controller):
     def overlay_template_page(self, overlay_template_id, **kwargs):
         if not overlay_template_id or not overlay_template_id.exists():
             return request.render('website.page_404')
-
         if not self._overlay_template_is_available_for_user(overlay_template_id):
+            return request.render('website.page_404')
+        if not overlay_template_id.website_published:
             return request.render('website.page_404')
 
         overlay_template_id = overlay_template_id.sudo()
