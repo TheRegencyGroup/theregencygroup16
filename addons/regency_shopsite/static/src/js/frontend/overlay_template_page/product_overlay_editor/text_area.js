@@ -1,6 +1,10 @@
 /** @odoo-module **/
 
 import { RectangleArea } from './rectangle_area';
+import {
+    convertCanvasPixelsToLineSpacing,
+    convertCanvasPixelsToCharSpacing,
+} from '../../../main';
 
 export class TextArea extends RectangleArea {
     initAreaObjects() {
@@ -22,12 +26,21 @@ export class TextArea extends RectangleArea {
         if (!text) {
             text = data.text;
         }
+
         const object = new fabric.Textbox(text, {
             editable: false,
             fill: this.data.color.color || '#000000',
             fontFamily: this.data.font.name,
             fontSize: this.data.fontSize,
-            lineHeight: 1,
+            lineHeight: convertCanvasPixelsToLineSpacing({
+                lineSpacingPixels: this.data.lineSpacing,
+                fontSize: this.data.fontSize,
+            }),
+            charSpacing: convertCanvasPixelsToCharSpacing({
+                charSpacingPixels: this.data.charSpacing,
+                fontSize: this.data.fontSize,
+            }),
+            textAlign: this.data.align,
         });
         if (!objIndex) {
             objIndex = this.objectIndex;
@@ -76,6 +89,9 @@ export class TextArea extends RectangleArea {
                     fontName: textObj.object.fontFamily,
                     fontColor: textObj.object.fill,
                     fontSize: textObj.object.fontSize,
+                    lineSpacing: this.data.lineSpacing,
+                    charSpacing: this.data.charSpacing,
+                    align: this.data.align,
                     x: Math.ceil(textObj.object.left),
                     y: Math.ceil(textObj.object.top),
                     angle: Math.ceil(textObj.object.angle),

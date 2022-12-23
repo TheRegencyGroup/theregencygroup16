@@ -13,7 +13,7 @@ import {
     enableCanvasPointerEvents,
     computeEditorScale,
 } from '../../main';
-import { AreaParameters } from './area_parameters';
+import { AreaParameters, TEXT_AREA_ALIGN_LIST } from './area_parameters';
 
 const { Component, onMounted, onPatched, useState, useRef, reactive, useBus } = owl;
 
@@ -68,7 +68,10 @@ class OverlayAreasPositionComponent extends Component {
             angle: this.changeAreaAngle.bind(this),
             font: this.changeTextAreaFont.bind(this),
             fontSize: this.changeTextAreaFontSize.bind(this),
+            lineSpacing: this.changeTextAreaLineSpacing.bind(this),
+            charSpacing: this.changeTextAreaCharSpacing.bind(this),
             color: this.changeTextAreaColor.bind(this),
+            align: this.changeTextAreaAlign.bind(this),
         };
 
         this.defaultTextColor = this.props.colorList.length ? this.props.colorList[0] : null;
@@ -343,8 +346,11 @@ class OverlayAreasPositionComponent extends Component {
         return  {
             ...this.getRectangleObjData(object),
             fontSize: object.textAreaFontSize,
+            lineSpacing: object.textAreaLineSpacing,
+            charSpacing: object.textAreaCharSpacing,
             font: object.textAreaFont,
-            color: object.textAreaColor
+            color: object.textAreaColor,
+            align: object.textAreaAlign,
         };
     }
 
@@ -390,16 +396,23 @@ class OverlayAreasPositionComponent extends Component {
         return object;
     }
 
-    getTextLineHeight(fontSize, font) {
-        let tempTb = new fabric.Textbox('123', {
-            fontSize: fontSize,
-            lineHeight: 1,
-            fontFamily: font,
-        });
-        return tempTb.getScaledHeight();
-    }
-
-    createTextRectangle(index, { width, height, x, y, angle, fontSize, font, color }, select) {
+    createTextRectangle(
+        index,
+        {
+            width,
+            height,
+            x,
+            y,
+            angle,
+            fontSize,
+            lineSpacing,
+            charSpacing,
+            font,
+            color,
+            align,
+        },
+        select,
+    ) {
         let object = new fabric.Rect({
             width: width || this.sizeForNewArea,
             height: height || this.sizeForNewArea,
@@ -408,6 +421,8 @@ class OverlayAreasPositionComponent extends Component {
             angle: angle || 0,
             fill: '#0000003D',
             textAreaFontSize: fontSize || DEFAULT_TEXT_AREA_FONT_SIZE,
+            textAreaLineSpacing: lineSpacing || 0,
+            textAreaCharSpacing: charSpacing || 0,
             textAreaFont: {
                 id: font ? font.id : DEFAULT_TEXT_FONT_ID,
                 name: font ? font.name : DEFAULT_TEXT_FONT_NAME,
@@ -417,6 +432,7 @@ class OverlayAreasPositionComponent extends Component {
                 name: color ? color.name : (this.defaultTextColor ? this.defaultTextColor.name : null),
                 color: color ? color.color : (this.defaultTextColor ? this.defaultTextColor.color : null),
             },
+            textAreaAlign: align || TEXT_AREA_ALIGN_LIST[0],
         });
         object.areaIndex = index;
         object.areaType = TEXT_AREA_TYPE;
@@ -572,6 +588,18 @@ class OverlayAreasPositionComponent extends Component {
         this.updateAreaData(area);
     }
 
+    changeTextAreaLineSpacing(areaIndex, lineSpacing) {
+        const area = this.state.areaList[areaIndex];
+        area.object.textAreaLineSpacing = lineSpacing;
+        this.updateAreaData(area);
+    }
+
+    changeTextAreaCharSpacing(areaIndex, charSpacing) {
+        const area = this.state.areaList[areaIndex];
+        area.object.textAreaCharSpacing = charSpacing;
+        this.updateAreaData(area);
+    }
+
     changeTextAreaFont(areaIndex, font) {
         const area = this.state.areaList[areaIndex];
         area.object.textAreaFont = font;
@@ -581,6 +609,12 @@ class OverlayAreasPositionComponent extends Component {
     changeTextAreaColor(areaIndex, color) {
         const area = this.state.areaList[areaIndex];
         area.object.textAreaColor = color;
+        this.updateAreaData(area);
+    }
+
+    changeTextAreaAlign(areaIndex, align) {
+        const area = this.state.areaList[areaIndex];
+        area.object.textAreaAlign = align;
         this.updateAreaData(area);
     }
 
