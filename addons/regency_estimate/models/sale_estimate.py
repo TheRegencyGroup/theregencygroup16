@@ -330,8 +330,9 @@ class SaleEstimate(models.Model):
                 if matched_lines:
                     for line in matched_lines:
                         if new_pricesheet_currency_id != line.currency_id and line.currency_id:
+                            company_id = self.company_id or self.env.company
                             price = line.currency_id._convert(line.price_unit * DEFAULT_MARGIN,
-                                                              new_pricesheet_currency_id, self.company_id,
+                                                              new_pricesheet_currency_id, company_id,
                                                               fields.Date.today())
                         else:
                             price = line.price_unit * DEFAULT_MARGIN
