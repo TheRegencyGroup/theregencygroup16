@@ -1,10 +1,14 @@
 /** @odoo-module **/
 
-import env from 'web.public_env';
+import publicEnv from 'web.public_env';
+import { env } from '@fe_owl_base/js/main';
 import {
     enableCanvasPointerEvents,
     readImageDataFromFile,
 } from '../../../main';
+
+const MASK_BACKGROUND_COLOR = '#ffffff50';
+const MASK_BACKGROUND_COLOR_SELECTED = '#de18188c';
 
 export class Area {
 
@@ -37,7 +41,7 @@ export class Area {
             for (let imageObj of this.areaObjectData) {
                 promises.push(new Promise(async (resolve, reject) => {
                     try {
-                        let res = await env.services.rpc({
+                        let res = await publicEnv.services.rpc({
                             route: '/shop/area_image',
                             params: {
                                overlay_product_area_image_id: imageObj.areaImageId,
@@ -78,9 +82,9 @@ export class Area {
     createMask() {
         let object = this.getMaskObject();
         object.isAreaMask = true;
-        object.fill = 'transparent';
-        object.stroke = '#000000';
-        object.strokeWidth = 1;
+        object.fill = MASK_BACKGROUND_COLOR;
+        object.stroke = 'transparent';
+        object.strokeWidth = 0;
         object.hoverCursor = 'default';
         object.selectable = false;
         this.canvas.add(object);
@@ -100,8 +104,8 @@ export class Area {
 
     createCanvas() {
         this.canvasEl = document.createElement('canvas');
-        this.canvasEl.width = this.data.boundRect.width + 2;
-        this.canvasEl.height = this.data.boundRect.height + 2;
+        this.canvasEl.width = this.data.boundRect.width;
+        this.canvasEl.height = this.data.boundRect.height;
         this.areaEl = document.createElement('div');
         this.areaEl.classList.add('product_overlay_area');
         this.areaEl.style.top = this.data.boundRect.y + 'px';
@@ -135,14 +139,45 @@ export class Area {
     }
 
     selectedArea() {
-        this.canvas.backgroundColor = '#00000022';
+        this.canvas.backgroundColor = MASK_BACKGROUND_COLOR_SELECTED;
         this.clipMask();
         this.canvas.renderAll();
     }
 
     unselectedArea() {
-        this.canvas.backgroundColor = 'transparent';
+        this.canvas.backgroundColor = MASK_BACKGROUND_COLOR;
         this.clipMask();
+        this.canvas.renderAll();
+    }
+
+    computeAreaControlSize() {
+        let controlSize = 13;
+        if (env.store.otPage.editorFullViewMode) {
+            controlSize = Math.ceil(controlSize / env.store.otPage.fullViewModeScale);
+        } else {
+            controlSize = Math.ceil(controlSize / env.store.otPage.minViewModeScale);
+        }
+        return controlSize;
+    }
+
+    computeAreaControlRotateOffset() {
+        let offset = 20;
+        if (env.store.otPage.editorFullViewMode) {
+            offset = Math.ceil(offset / env.store.otPage.fullViewModeScale);
+        } else {
+            offset = Math.ceil(offset / env.store.otPage.minViewModeScale);
+        }
+        return offset;
+    }
+
+    setControlsParams(object) {
+        object.padding = 0;
+        object.borderColor = 'transparent';
+        object.cornerColor = '#000000';
+        object.cornerStrokeColor = '#000000';
+        object.cornerSize = this.computeAreaControlSize();
+        object.transparentCorners = false;
+        object.controls.mtr.offsetY = -this.computeAreaControlRotateOffset();
         this.canvas.renderAll();
     }
 
@@ -178,7 +213,6 @@ export class Area {
             object.top = data.y;
             object.angle = data.angle;
         }
-
         this.objectList[objIndex] = {
             index: objIndex,
             image: originalImageData || previewImage.src,
@@ -192,6 +226,7 @@ export class Area {
             'mr': false,
             'mt': false,
         });
+        this.setControlsParams(object);
         object.on('moving', () => this.wasChanged = true);
         object.on('scaling', () => this.wasChanged = true);
         this.canvas.add(object);
@@ -274,9 +309,14 @@ export class Area {
     }
 
     showMaskBorders(state) {
-        this.mask.set('stroke', state ? '#000000' : 'transparent');
-        this.canvas.backgroundColor = 'transparent';
+        this.canvas.backgroundColor = state ? MASK_BACKGROUND_COLOR : MASK_BACKGROUND_COLOR_SELECTED;
         this.canvas.renderAll();
+    }
+
+    updateObjectsControls() {
+        for (let item of Object.values(this.objectList)) {
+            this.setControlsParams(item.object);
+        }
     }
 
     destroy() {

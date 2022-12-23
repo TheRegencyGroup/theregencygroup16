@@ -56,6 +56,7 @@ export class TextArea extends RectangleArea {
             'ml': false,
             'mr': false,
         });
+        this.setControlsParams(object);
         object.on('moving', () => this.wasChanged = true);
         object.on('scaling', () => this.wasChanged = true);
         this.canvas.add(object);
