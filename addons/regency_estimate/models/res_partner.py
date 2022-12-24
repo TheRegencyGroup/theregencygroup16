@@ -1,4 +1,4 @@
-from odoo import models, fields
+from odoo import models, fields, api
 
 
 class ResPartner(models.Model):
@@ -72,3 +72,13 @@ class ResPartner(models.Model):
         action['views'] = [x for x in action['views'] if False not in x]
         return action
 
+    @api.model_create_multi
+    def create(self, vals_list):
+        for vals in vals_list:
+            contact_type = self.env.context.get('contact_type')
+            is_company = self.env.context.get('is_company')
+            if is_company:
+                vals['is_company'] = is_company
+            if contact_type:
+                vals['contact_type'] = contact_type
+        return super(ResPartner, self).create(vals_list)
