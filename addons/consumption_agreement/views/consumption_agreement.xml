@@ -62,7 +62,8 @@
                                              'show_address': 1,
                                              'show_vat': True,
                                              'contact_type': 'customer',
-                                             'is_company': True
+                                             'default_is_customer': True,
+                                             'default_is_company': True
                                    }"
                                    options='{"always_reload": True}' required="1"/>
                         </group>

@@ -50,7 +50,7 @@
                                     'default_zip': zip,
                                     'default_country_id': country_id,
                                     'show_vat': True,
-                                    'contact_type': 'customer',
+                                    'default_is_customer': True,
                                 }"
                             />
                         </group>
