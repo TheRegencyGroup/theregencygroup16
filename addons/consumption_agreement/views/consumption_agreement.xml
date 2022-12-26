@@ -61,7 +61,6 @@
                                    context="{'res_partner_search_mode': 'customer',
                                              'show_address': 1,
                                              'show_vat': True,
-                                             'contact_type': 'customer',
                                              'default_is_customer': True,
                                              'default_is_company': True
                                    }"
