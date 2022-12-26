@@ -93,9 +93,9 @@
                                       <field name="insection_rownumber" invisible="1"/>
                                       <field name="qty_range_str"/>
                                       <field name="vendor_price" groups="regency_estimate.group_processor" string="Vendor Price" options="{'hide_sort_icon': True, 'width': '70px'}"/>
-                                      <field name="duty" options="{'hide_sort_icon': True,  'width': '70px'}"
+                                      <field name="duty" groups="regency_estimate.group_processor" options="{'hide_sort_icon': True,  'width': '70px'}"
                                              attrs="{'column_invisible': [('parent.has_produced_overseas_items', '=', False)]}"/>
-                                      <field name="freight" options="{'hide_sort_icon': True, 'width': '70px'}"
+                                      <field name="freight" groups="regency_estimate.group_processor" options="{'hide_sort_icon': True, 'width': '70px'}"
                                              attrs="{'column_invisible': [('parent.has_produced_overseas_items', '=', False)]}"/>
                                       <field name="currency_id" invisible="1"/>
                                       <field name="unit_price" groups="regency_estimate.group_processor" string="Unit Price"/>
@@ -111,8 +111,8 @@
                                               icon="fa-pencil"/>
                                       <field name="total"/>
                                       <field name="margin" groups="regency_estimate.group_processor"/>
-                                      <field name="allow_consumption_agreement"  options="{'hide_sort_icon': True, 'width': '50px'}"
-                                             string="Allow CA" groups="regency_estimate.group_processor"/>
+                                      <field name="allow_consumption_agreement" groups="regency_estimate.group_processor"
+                                             options="{'hide_sort_icon': True, 'width': '50px'}" string="Allow CA" />
                                       <field name="sale_estimate_line_ids" invisible="1"/>
                                       <button name="action_check_prices" groups="regency_estimate.group_processor" type="object" class="fa fa-history"/>
                                       <field name="attachment_id" string="Attach a file" widget="binary"
