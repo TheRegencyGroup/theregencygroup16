@@ -120,9 +120,14 @@ class MyPurchaseOrderLine(models.Model):
     @api.depends('product_qty', 'price_unit', 'taxes_id', 'fee')
     def _compute_amount(self):
         super()._compute_amount()
-        for line in self:
-            line_subtotal = line.price_subtotal + line.fee
-            line.update({'price_subtotal': line_subtotal})
+
+    def _convert_to_tax_base_line_dict(self):
+        """ add fee as a part of unit cost to built in standard odoo logic taxes calculation.
+        """
+        res = super(MyPurchaseOrderLine, self)._convert_to_tax_base_line_dict()
+        res['price_unit'] += res['record'].fee / res['quantity'] if res['quantity'] else 0
+        return res
+
 
     @api.onchange('product_id')
     def onchange_product_id(self):
