@@ -7,13 +7,12 @@ class Product(models.Model):
     _inherit = 'product.template'
 
     product_source_id = fields.Many2one('product.template', string='Template Product')
-    allowed_partner_ids = fields.Many2many('res.partner',  domain=[('contact_type', '=', 'customer'),
-                                                                   ('is_company', '=', True)],
+    allowed_partner_ids = fields.Many2many('res.partner',
+                                           domain=[('is_customer', '=', True), ('is_company', '=', True)],
                                            string="Allowed Customers")
 
     @api.onchange('product_source_id')
     def _onchange_product_source_id(self):
-
         if self.product_source_id:
             vals = self.product_source_id.with_context(active_test=False).copy_data()[0]
             for key, val in vals.items():
@@ -26,5 +25,3 @@ class Product(models.Model):
         for val in values:
             val[2]['value_ids'] = []
         return values
-
-

@@ -21,9 +21,6 @@
                     <field string="Overlay template" name="overlay_template_count" widget="statinfo"/>
                 </button>
             </xpath>
-            <!--                <xpath expr="//field[@name='image_1920']" position="attributes">-->
-            <!--                    <attribute name="attrs">{'readonly': [('is_fit_for_overlay', '=', True)]}</attribute>-->
-            <!--                </xpath>-->
         </field>
     </record>
 

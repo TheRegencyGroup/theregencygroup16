@@ -3,7 +3,9 @@
 
     <t t-inherit="web.FormView" t-inherit-mode="extension" owl="1">
         <xpath expr="//div[hasclass('o_form_view_container')]" position="attributes">
-            <attribute name="t-att-class" add="model.root.resModel === 'overlay.template' ? 'form_view_for_overlay_template' : ''" separator=" "/>
+            <attribute name="t-att-class"
+                       add="model.root.resModel === 'overlay.template' ? 'form_view_for_overlay_template' : ''"
+                       separator=" "/>
         </xpath>
         <xpath expr="//div[hasclass('o_form_view_container')]" position="before">
             <t t-if="model.root.resModel === 'overlay.template'">
@@ -54,7 +56,7 @@
                                 </span>
                             </div>
                         </t>
-                        <div class="ot_modal_image_container"
+                        <div t-if="!this.withOverlayProducts" class="ot_modal_image_container"
                              t-on-click="() => this.onClickImage(false)">
                             <span class="fa fa-remove"/>
                             Remove image
@@ -85,11 +87,31 @@
     <t t-name="overlay_areas_position" owl="1">
         <div class="ot_areas_position">
             <div class="ot_areas_position_header">
-                <t t-esc="props.overlayPositionName"/>
+                <div class="ot_areas_position_header_left">
+                    <t t-esc="props.overlayPositionName"/>
+                    <div t-if="showToolsButtons" class="ot_areas_position_tools">
+                        <t t-if="!!state.editorImage">
+                            <button class="btn btn-secondary" t-on-click="() => this.addRectangleArea({})">
+                                <i class="fa fa-plus-circle"/>Rectangle
+                            </button>
+                            <button class="btn btn-secondary" t-on-click="() => this.addEllipseArea({})">
+                                <i class="fa fa-plus-circle"/>Ellipse
+                            </button>
+                            <button class="btn btn-secondary" t-on-click="() => this.addTextArea({})">
+                                <i class="fa fa-plus-circle"/>Text
+                            </button>
+                        </t>
+                    </div>
+                </div>
                 <div t-if="!!props.productTemplateId"
-                     class="ot_areas_position_header_tab_buttons">
-                    <button class="btn btn-secondary mx-2" t-on-click="onClickOpenAreasTab">
-                        <i class="fa fa-object-group mx-2"/>Areas
+                     class="ot_areas_position_header_right">
+                    <button t-if="state.activeTab === AREAS_TAB and !!state.editorImage"
+                            class="btn btn-secondary"
+                            t-on-click="onClickChangeEditorViewMode">
+                        <i class="fa fa-window-restore mr-1"/><t t-esc="state.editorFullViewMode ? 'Min' : 'Full'"/>
+                    </button>
+                    <button class="btn btn-secondary" t-on-click="onClickOpenAreasTab">
+                        <i class="fa fa-object-group mr-1"/>Areas
                     </button>
                     <button class="btn btn-secondary" t-on-click="onClickOpenImagesTab">
                         <i class="fa fa-image mr-1"/>Images
@@ -97,23 +119,15 @@
                 </div>
             </div>
             <div class="ot_areas_position_main" t-att-class="{ 'd-none': !props.productTemplateId }">
-                <div class="ot_areas_tab" t-att-class="{ 'ot_areas_tab_hide': state.activeTab !== AREAS_TAB }">
-                    <div t-if="props.editMode and props.allowEditAreas" class="ot_areas_position_tools">
-                        <t t-if="!!state.editorImage">
-                            <button class="btn btn-primary" t-on-click="() => this.addRectangleArea({})">
-                                <i class="fa fa-plus-circle"/>Rectangle
-                            </button>
-                            <button class="btn btn-primary" t-on-click="() => this.addEllipseArea({})">
-                                <i class="fa fa-plus-circle"/>Ellipse
-                            </button>
-                            <button class="btn btn-primary" t-on-click="() => this.addTextArea({})">
-                                <i class="fa fa-plus-circle"/>Text
-                            </button>
-                        </t>
-                    </div>
+                <div class="ot_areas_tab"
+                     t-att-class="{
+                        'ot_areas_tab_hide': state.activeTab !== AREAS_TAB,
+                        'oot_areas_tab_full_view_mode': state.editorFullViewMode,
+                     }">
                     <div class="ot_areas_position_editor_block"
                          t-att-class="{ 'd-none': !state.editorImage }">
-                        <div class="ot_areas_position_editor">
+                        <div class="ot_areas_position_editor" t-ref="editor"
+                             t-att-style="editorContainerStyle">
                             <img t-att-src="state.editorImage.src || ''"
                                  t-ref="image_ref"/>
                             <div class="ot_areas_position_canvas_container" t-ref="canvas_container_ref">
@@ -139,16 +153,16 @@
                         </div>
                     </t>
                     <div class="ot_area_list">
-                    <t t-foreach="Object.values(state.areaList)" t-as="area" t-key="area.index">
-                        <AreaParameters area="area"
-                                        editMode="props.editMode and props.allowEditAreas"
-                                        selectedAreaIndex="state.selectedAreaIndex || 0"
-                                        selectArea="(args) => this.selectAreaListItem(args)"
-                                        removeArea="(args) => this.removeArea(args)"
-                                        fontList="props.fontList"
-                                        colorList="props.colorList"/>
-                    </t>
-                </div>
+                        <t t-foreach="Object.values(state.areaList)" t-as="area" t-key="area.index">
+                            <AreaParameters area="area"
+                                            editMode="props.editMode and props.allowEditAreas"
+                                            selectedAreaIndex="state.selectedAreaIndex || 0"
+                                            selectArea="(args) => this.selectAreaListItem(args)"
+                                            removeArea="(args) => this.removeArea(args)"
+                                            fontList="props.fontList"
+                                            colorList="props.colorList"/>
+                        </t>
+                    </div>
                 </div>
                 <div class="ot_images_tab" t-att-class="{ 'd-none': state.activeTab !== IMAGES_TAB }">
                     <t t-foreach="areasImageValueList" t-as="value" t-key="value.id">
@@ -233,44 +247,71 @@
                                                    disabled="!props.editMode"
                                                    changeValue="props.area.change.angle"/>
                     </div>
-                    <div t-if="props.area.areaType === 'text'" class="ot_area_list_item_data_row">
-                        <div class="ot_area_list_item_param">
-                            <span>Font</span>
-                            <select t-attf-style="font-family: '{{props.area.data.font.name}}';"
-                                    t-att-disabled="!props.editMode"
-                                    t-on-change="onChangeFont">
-                                <t t-foreach="props.fontList" t-as="font" t-key="font_index">
-                                    <option t-att-value="font.id"
-                                            t-att-selected="font.id === props.area.data.font.id"
-                                            t-att-data-name="font.name"
-                                            t-attf-style="font-family: '{{font.name}}';">
-                                        <t t-esc="font.name"/>
-                                    </option>
-                                </t>
-                            </select>
+                    <t t-if="props.area.areaType === 'text'">
+                        <div class="ot_area_list_item_data_row">
+                            <AreaParametersNumberInput areaIndex="props.area.index"
+                                                       label="'Font size'"
+                                                       value="props.area.data.fontSize"
+                                                       disabled="!props.editMode"
+                                                       inputMin="0"
+                                                       changeValue="props.area.change.fontSize"/>
+                            <AreaParametersNumberInput areaIndex="props.area.index"
+                                                       label="'Line spacing'"
+                                                       value="props.area.data.lineSpacing"
+                                                       disabled="!props.editMode"
+                                                       inputMin="0"
+                                                       changeValue="props.area.change.lineSpacing"/>
+                            <AreaParametersNumberInput areaIndex="props.area.index"
+                                                       label="'Char spacing'"
+                                                       value="props.area.data.charSpacing"
+                                                       disabled="!props.editMode"
+                                                       inputMin="0"
+                                                       changeValue="props.area.change.charSpacing"/>
+                            <div t-if="props.colorList.length" class="ot_area_list_item_param">
+                                <span>Color</span>
+                                <select t-att-disabled="!props.editMode"
+                                        t-on-change="onChangeTextColor">
+                                    <t t-foreach="props.colorList" t-as="color" t-key="color_index">
+                                        <option t-att-value="color.id"
+                                                t-att-selected="color.id === props.area.data.color.id"
+                                                t-att-data-color="color.color"
+                                                t-att-data-name="color.name">
+                                            <t t-esc="color.name"/>
+                                        </option>
+                                    </t>
+                                </select>
+                            </div>
+                            <div class="ot_area_list_item_param">
+                                <span>Align</span>
+                                <select t-att-disabled="!props.editMode"
+                                        t-on-change="onChangeTextAlign">
+                                    <t t-foreach="TEXT_AREA_ALIGN_LIST" t-as="align" t-key="align_index">
+                                        <option t-att-value="align"
+                                                t-att-selected="align === props.area.data.align">
+                                            <t t-esc="align"/>
+                                        </option>
+                                    </t>
+                                </select>
+                            </div>
                         </div>
-                        <AreaParametersNumberInput areaIndex="props.area.index"
-                                                   label="'Font size'"
-                                                   value="props.area.data.fontSize"
-                                                   disabled="!props.editMode"
-                                                   inputMin="0"
-                                                   inputMax="100"
-                                                   changeValue="props.area.change.fontSize"/>
-                        <div t-if="props.colorList.length" class="ot_area_list_item_param">
-                            <span>Color</span>
-                            <select t-att-disabled="!props.editMode"
-                                    t-on-change="onChangeTextColor">
-                                <t t-foreach="props.colorList" t-as="color" t-key="color_index">
-                                    <option t-att-value="color.id"
-                                            t-att-selected="color.id === props.area.data.color.id"
-                                            t-att-data-color="color.color"
-                                            t-att-data-name="color.name">
-                                        <t t-esc="color.name"/>
-                                    </option>
-                                </t>
-                            </select>
+                        <div class="ot_area_list_item_data_row">
+                            <div class="ot_area_list_item_param">
+                                <span>Font</span>
+                                <select t-attf-style="font-family: '{{props.area.data.font.name}}';"
+                                        t-att-disabled="!props.editMode"
+                                        t-on-change="onChangeFont">
+                                    <t t-foreach="props.fontList" t-as="font" t-key="font_index">
+                                        <option t-att-value="font.id"
+                                                t-att-selected="font.id === props.area.data.font.id"
+                                                t-att-data-name="font.name"
+                                                t-attf-style="font-family: '{{font.name}}';">
+                                            <t t-esc="font.name"/>
+                                        </option>
+                                    </t>
+                                </select>
+                            </div>
                         </div>
-                    </div>
+                    </t>
                 </div>
             </div>
             <div t-if="props.editMode"

@@ -1,6 +1,6 @@
 {
     'name': 'Regency Contacts',
-    'version': '16.0.1.0',
+    'version': '16.0.1.2',
     'summary': '',
     'author': 'OpsWay',
     'description': "",

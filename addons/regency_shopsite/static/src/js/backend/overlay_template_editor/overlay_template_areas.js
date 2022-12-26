@@ -3,7 +3,7 @@
 import { registry } from "@web/core/registry";
 import { standardFieldProps } from "@web/views/fields/standard_field_props";
 import { OverlayAreasPositionComponent } from "./overlay_template_areas_position";
-import { useBus, useService } from "@web/core/utils/hooks";
+import { useBus } from "@web/core/utils/hooks";
 import legacyEnv from "web.env";
 import {
     PRODUCT_IMAGE_FIELD,

@@ -148,3 +148,14 @@ class StockRule(models.Model):
                     if fields.Date.to_date(order_date_planned) < fields.Date.to_date(po.date_order):
                         po.date_order = order_date_planned
             self.env['purchase.order.line'].sudo().create(po_line_values)
+
+    def _prepare_purchase_order(self, company_id, origins, values):
+        """
+        Overridden
+        Set currency based on vendor country
+        """
+        res = super()._prepare_purchase_order(company_id, origins, values)
+        partner_id = self.env['res.partner'].browse(res['partner_id'])
+        if partner_id.country_id:
+            res.update({'currency_id': partner_id.country_id.currency_id.id})
+        return res

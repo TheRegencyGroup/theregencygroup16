@@ -59,7 +59,8 @@ class ResPartner(models.Model):
     def _compute_product_product_count(self):
         for rec in self:
             product_ids = rec.purchase_order_ids.filtered(
-                lambda order: order.invoice_status == 'invoiced' and order.receipt_status == 'full').mapped('product_id')
+                lambda order: order.invoice_status == 'invoiced' and order.receipt_status == 'full'
+                              and order.product_id.active).mapped('product_id')
             rec.product_count = len(product_ids)
 
     def action_show_products(self):

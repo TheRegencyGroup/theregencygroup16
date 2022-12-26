@@ -21,7 +21,7 @@ export class RectangleArea extends Area {
             width: this.data.width,
             height: this.data.height,
             top: this.data.y - this.data.boundRect.y,
-            left: this.data.x - this.data.boundRect.x,
+            left: this.data.x - this.data.boundRect.x ,
             angle: this.data.angle,
         });
     }

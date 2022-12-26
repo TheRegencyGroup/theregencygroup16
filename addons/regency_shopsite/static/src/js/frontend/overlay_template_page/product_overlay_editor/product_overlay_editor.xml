@@ -10,7 +10,7 @@
                  }
              </style>
         </t>
-        <div class="product_overlay_editor">
+        <div class="product_overlay_editor" t-att-class="!store.otPage.editMode and store.otPage.hasOverlayProductId ? 'read_mode' : ''">
             <div class="product_overlay_editor_positions">
                 <t t-foreach="Object.values(store.otPage.overlayPositions)" t-as="position"
                    t-key="position.id">
@@ -19,8 +19,7 @@
                     </div>
                 </t>
             </div>
-            <div class="product_overlay_editor_position_list"
-                 t-attf-style="margin-left: {{store.otPage.hasOverlayProductId ? 0 : 45}}px;">
+            <div class="product_overlay_editor_position_list">
                 <t t-foreach="overlayPositionSwitcherList" t-as="position"
                    t-key="position.id">
                     <div class="product_overlay_editor_position_list_item"
@@ -40,6 +39,11 @@
         <div class="product_overlay_position_editor">
             <div t-if="!store.otPage.hasOverlayProductId || store.otPage.editMode"
                  class="product_overlay_position_editor_tools">
+                <button class="ot_tools_btn"
+                        t-on-click="onClickChaneViewMode"
+                        title="Change view mode Full/Min">
+                    <i class="fa fa-window-restore"/>
+                </button>
                 <t t-if="selectedAreaIsText">
                     <div class="ot_add_text_block">
                         <button class="ot_tools_btn"
@@ -83,7 +87,7 @@
                 </button>
             </div>
             <div class="product_overlay_position_container">
-                <div class="product_overlay_position">
+                <div class="product_overlay_position" t-att-style="editorContainerStyle">
                     <div t-if="state.showLoader" class="product_overlay_position_loader">
                         <div class="spinner"></div>
                     </div>

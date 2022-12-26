@@ -8,7 +8,7 @@
         <field name="arch" type="xml">
             <xpath expr="//group[@name='misc']/field[@name='company_id']" position="after">
                 <field name="background_image" widget="image"
-                       attrs="{'invisible': ['|', ('is_company', '=', False), ('contact_type', '!=', 'customer')]}"/>
+                       attrs="{'invisible': ['|', ('is_company', '=', False), ('is_customer', '=', False)]}"/>
             </xpath>
         </field>
     </record>
