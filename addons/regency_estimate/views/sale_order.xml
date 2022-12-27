@@ -7,6 +7,7 @@
         <field name="arch" type="xml">
             <xpath expr="//field[@name='partner_id']" position="attributes">
                 <attribute name="domain">[('is_customer', '=', True),('is_company', '=', True)]</attribute>
+                <attribute name="context">{'default_is_customer': True, 'default_is_company': True}</attribute>
             </xpath>
             <xpath expr="//field[@name='date_order'][1]" position="attributes">
                 <attribute name="widget">date</attribute>

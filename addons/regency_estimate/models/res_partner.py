@@ -72,4 +72,3 @@ class ResPartner(models.Model):
         # One more unknown form view gets into views and blocks this method
         action['views'] = [x for x in action['views'] if False not in x]
         return action
-

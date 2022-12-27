@@ -62,6 +62,12 @@
         <field name="model">crm.lead</field>
         <field name="inherit_id" ref="crm.crm_lead_view_form"/>
          <field name="arch" type="xml">
+             <xpath expr="//group[@name='opportunity_partner']/field[@name='partner_id']" position="attributes">
+                 <attribute name="context">{'default_is_customer': True, 'default_is_company': True}</attribute>
+             </xpath>
+             <xpath expr="//group[@name='lead_partner']/field[@name='partner_id']" position="attributes">
+                 <attribute name="context">{'default_is_customer': True, 'default_is_company': True}</attribute>
+             </xpath>
              <xpath expr="//group[@name='lead_priority']" position="after">
                   <group name="number_of_keys">
                       <field name="number_of_keys"/>
