@@ -14,27 +14,56 @@
 
 .product-top-left {
   display: flex;
-  border-radius: 4px;
-  border: 1px solid $grey70;
+  gap: 10px;
 
-  .form-group {
-    width: 100%;
+  .product-listing-name {
+    display: flex;
+    border-radius: 4px;
+    border: 1px solid $grey70;
 
-    input {
-      border: none !important;
+    .form-group {
+      width: 100%;
+
+      input {
+        border: none !important;
+      }
+    }
+
+    .listing-name-info {
+      padding: 0 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      i {
+        font-size: 24px;
+        line-height: 24px;
+        color: $grey50;
+      }
     }
   }
 
-  .listing-name-info {
-    padding: 0 16px;
+  .product-example-btn {
+    padding: 0 10px;
     display: flex;
     align-items: center;
     justify-content: center;
+    gap: 5px;
+    border-radius: 4px;
+    border: 1px solid $grey70;
+    background-color: transparent;
+    outline: none;
+    color: $grey20;
+    font-family: 'Raleway', sans-serif;
+    line-height: initial;
+    transition: all 0.2s;
+
+    &:hover {
+      background-color: $grey70;
+    }
 
     i {
-      font-size: 24px;
-      line-height: 24px;
-      color: $grey50;
+      font-size: 20px;
     }
   }
 }
@@ -261,6 +290,56 @@
           display: none;
         }
       }
+    }
+  }
+}
+
+
+
+.product-example-image-modal-container {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #00000067;
+  z-index: 999;
+
+  .product-example-image-modal {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    background-color: #FFFFFF;
+    border: 1px solid $grey10;
+    box-shadow: 0 4px 4px rgba(0, 0, 0, 0.25);
+    font-size: 24px;
+    font-family: 'Playfair Display', serif;
+
+    & > div {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      color: $grey10;
+
+      span {
+        cursor: pointer;
+        transition: all 0.2s;
+
+        &:hover {
+          color: transparentize($grey10, 0.2);
+        }
+      }
+    }
+
+    img {
+      max-width: 80vw;
+      max-height: calc(70vh - 70px);
+      margin-top: 15px;
+      object-fit: contain;
+      border: 1px solid $grey10;
     }
   }
 }

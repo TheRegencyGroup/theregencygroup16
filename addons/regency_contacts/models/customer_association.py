@@ -39,20 +39,25 @@ class CustomerAssociation(models.Model):
                     "|",
                     ('left_tech_name', "=", entity_type),
                     ('right_tech_name', "=", entity_type),
-                ]
+                ],
             }
         }
 
     @api.onchange('association_type_id')
     def _onchange_association_type_id(self):
-        if not self.left_partner_id:
-            return {}
-        assoc_id = self.association_type_id
-        opposite_name = assoc_id.right_tech_name if assoc_id.left_tech_name == self.left_partner_id.entity_type else \
-            assoc_id.left_tech_name
+        if not self.left_partner_id or not self.association_type_id:
+            domain = [('id', "=", 0,)]
+        else:
+            assoc_id = self.association_type_id
+            opposite_name = assoc_id.right_tech_name if \
+                assoc_id.left_tech_name == self.left_partner_id.entity_type else assoc_id.left_tech_name
+            domain = [
+                ('entity_type', "=", opposite_name),
+                ('id', 'not in', self.left_partner_id.association_partner_ids.ids),
+            ]
         return {
             'domain': {
-                'right_partner_id': [('entity_type', "=", opposite_name)],
+                'right_partner_id': domain,
             }
         }
 
@@ -95,9 +100,13 @@ class AssociationType(models.Model):
     def _compute_name(self):
         current_partner_id = self.env.context.get('current_partner_id')
         current_partner_id = self.env['res.partner'].browse(current_partner_id)
+        tech_names = dict(self._fields['right_tech_name'].selection)
         for entry in self:
             if not current_partner_id:
                 current_type = entry.left_tech_name
             else:
                 current_type = current_partner_id.entity_type
-            entry.name = entry.left_to_right_name if current_type == entry.left_tech_name else entry.right_to_left_name
+            if current_type == entry.left_tech_name:
+                entry.name = f"{entry.left_to_right_name} ({tech_names[entry.right_tech_name]})"
+            else:
+                entry.name = f"{entry.right_to_left_name} ({tech_names[entry.left_tech_name]})"

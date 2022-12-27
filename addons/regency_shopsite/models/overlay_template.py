@@ -59,6 +59,7 @@ class OverlayTemplate(models.Model):
     areas_overlay_color_ids = fields.Many2many('overlay.color', compute='_compute_areas_data_values', store=True,
                                                ondelete='restrict')
     preview_image = fields.Image(compute='_compute_preview_image', store=True)
+    example_image = fields.Image()
 
     @api.constrains('areas_data')
     def _check_areas_data(self):
