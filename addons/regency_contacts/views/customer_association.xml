@@ -5,11 +5,13 @@
         <field name="model">customer.association</field>
         <field name="arch" type="xml">
             <form>
-                <label for="association_type_id"/>
-                <field name="association_type_id" context="{'current_partner_id':left_partner_id}"/>
-                <label for="right_partner_id"/>
-                <field name="right_partner_id" string="Partner"/>
-                <field name="left_partner_id" invisible="1"/>
+                <group>
+                    <group>
+                        <field name="association_type_id" context="{'current_partner_id':left_partner_id}"/>
+                        <field name="right_partner_id" string="Partner"/>
+                        <field name="left_partner_id" invisible="1"/>
+                    </group>
+                </group>
             </form>
         </field>
     </record>
