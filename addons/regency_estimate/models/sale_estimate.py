@@ -43,7 +43,7 @@ class SaleEstimate(models.Model):
         default=AVAILABLE_PRIORITIES[0][0])
     state = fields.Selection([('draft', 'New'), ('in_progress', 'In Progress'), ('done', 'Prices Confirmed')], 'Status',
                              compute='_compute_state', store=True)
-    state_with_qty = fields.Char(compute='_compute_state')
+    state_with_qty = fields.Char(compute='_compute_state', compute_sudo=True)
     tag_ids = fields.Many2many(
         'crm.tag', 'estimate_tag_rel', 'estimate_id', 'tag_id', string='Tags',
         help="Classify and analyze your estimates categories like: Training, Service")
@@ -330,8 +330,9 @@ class SaleEstimate(models.Model):
                 if matched_lines:
                     for line in matched_lines:
                         if new_pricesheet_currency_id != line.currency_id and line.currency_id:
+                            company_id = self.company_id or self.env.company
                             price = line.currency_id._convert(line.price_unit * DEFAULT_MARGIN,
-                                                              new_pricesheet_currency_id, self.company_id,
+                                                              new_pricesheet_currency_id, company_id,
                                                               fields.Date.today())
                         else:
                             price = line.price_unit * DEFAULT_MARGIN

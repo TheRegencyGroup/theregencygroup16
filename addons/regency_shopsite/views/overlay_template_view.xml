@@ -87,6 +87,10 @@
                               attrs="{'invisible': [('overlay_attribute_value_id', '=', False)]}">
                             <field name="overlay_product_ids" context="{'default_overlay_template_id': id}"/>
                         </page>
+                        <page string="Example" id="example_image">
+                            <field name="example_image" widget="image" class="border"
+                                   options="{'accepted_file_extensions': 'image/*'}"/>
+                        </page>
                     </notebook>
                     <field name="areas_data" widget="overlay_areas"/>
                 </sheet>

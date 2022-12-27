@@ -17,10 +17,14 @@ export class OverlayTemplatePageComponent extends Component {
         this.state = useState({
             nameInputIsFilled: !!this.store.otPage.overlayProduct?.name,
             showPostAddToCart: false,
+            showExampleImageModal: false,
         });
 
         this.inputNameRef = useRef('name_input');
-        this.listingNameInfoRef = useRef('listing_name_info')
+        this.listingNameInfoRef = useRef('listing_name_info');
+        this.imageUnique = new Date().valueOf();
+
+        this.headerHeight = document.querySelector('.regency-top').clientHeight;
 
         env.bus.on('active-hotel-changed', null, this.onChangedActiveHotel.bind(this));
     }
@@ -227,6 +231,14 @@ export class OverlayTemplatePageComponent extends Component {
 
     onClickContinueShoppingBtn() {
         this.state.showPostAddToCart = false;
+    }
+
+    onClickShowExampleImage() {
+        this.state.showExampleImageModal = true;
+    }
+
+    onClickCloseExampleImageModal() {
+        this.state.showExampleImageModal = false;
     }
 }
 
