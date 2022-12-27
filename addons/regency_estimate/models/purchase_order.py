@@ -87,20 +87,26 @@ class PurchaseOrder(models.Model):
         return invoice_vals
 
     def button_cancel(self):
-        for order in self:
-            invoices = order.invoice_ids.filtered(lambda inv: inv.state not in ('cancel', 'draft'))
-            moves = order.order_line.mapped('move_ids').filtered(lambda move: move.state == 'done')
-            if not (invoices or moves):
-                if order.state == 'purchase':
-                    value = self.env['purchase.order.cancel.wizard'].sudo().create({'cancellation_reason': ''})
-                    return {
-                        'name': 'Cancel',
-                        'view_mode': 'form',
-                        'res_model': 'purchase.order.cancel.wizard',
-                        'type': 'ir.actions.act_window',
-                        'target': 'new',
-                        'res_id': value.id
-                    }
+        po_cancel_reason = self.env.context.get('po_cancel_reason')
+        if po_cancel_reason:
+            for order in self:
+                order.message_post(body=('PO was cancelled due to the reason: %s' % po_cancel_reason))
+                order.cancellation_reason = po_cancel_reason
+            return super(PurchaseOrder, self).button_cancel()
+        self.ensure_one()
+        invoices = self.invoice_ids.filtered(lambda inv: inv.state not in ('cancel', 'draft'))
+        moves = self.order_line.mapped('move_ids').filtered(lambda move: move.state == 'done')
+        if not (invoices or moves):
+            if self.state == 'purchase':
+                value = self.env['purchase.order.cancel.wizard'].sudo().create({'cancellation_reason': ''})
+                return {
+                    'name': 'Cancel',
+                    'view_mode': 'form',
+                    'res_model': 'purchase.order.cancel.wizard',
+                    'type': 'ir.actions.act_window',
+                    'target': 'new',
+                    'res_id': value.id
+                }
         return super(PurchaseOrder, self).button_cancel()
 
 
