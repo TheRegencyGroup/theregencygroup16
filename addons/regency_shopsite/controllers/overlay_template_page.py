@@ -281,6 +281,10 @@ class OverlayTemplatePage(http.Controller):
                 'name': overlay_template_id.name,
                 'hotelIds': overlay_template_id.hotel_ids.ids,
                 'positionsData': overlay_template_id.areas_data or {},
+                'exampleImageUrl':
+                    f'/web/image?model=overlay.template&id={overlay_template_id.id}'
+                    f'&field=example_image&width=3840&height=2160'
+                    if overlay_template_id.example_image else False,
             },
             'productTemplateId': product_template_id.id,
             'productName': product_template_id.name,
