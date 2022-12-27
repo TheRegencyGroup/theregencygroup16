@@ -524,15 +524,8 @@ class SaleEstimateLine(models.Model):
         product = self.product_id.with_context(
             lang=get_lang(self.env, self.estimate_id.partner_id.lang).code,
         )
-        product_temp_id = self.product_template_id.id
-        sorted_by_sequence = self.product_template_attribute_value_ids.mapped('attribute_line_id').sorted('sequence').ids
-        product_template_attribute_values = []
-        for line in sorted_by_sequence:
-            product_template_attribute_values.append(self.env['product.template.attribute.value'].search([
-                ('product_tmpl_id', '=', product_temp_id),
-                ('attribute_line_id', '=', line)
-            ]))
-        self.update({'name': self.get_multiline_description_sale(product, product_template_attribute_values)})
+        self.update({'name': self.get_multiline_description_sale(product,
+                     self.product_template_attribute_value_ids.sorted(lambda x: x.attribute_line_id.sequence))})
 
     def get_multiline_description_sale(self, product, picked_attrs):
         """ Compute a default multiline description for this product line.
