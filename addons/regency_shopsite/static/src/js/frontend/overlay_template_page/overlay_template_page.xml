@@ -17,20 +17,39 @@
 
                 <div class="product-top">
                     <div class="product-top-left">
-                        <div class="form-group form-group-large"
-                             t-att-class="{ 'filled': state.nameInputIsFilled }">
-                            <label class="label">Listing name</label>
-                            <input type="text" name="" class="form-control"
-                                   t-ref="name_input"
-                                   t-att-disabled="disabledEditName"
-                                   t-att-value="store.otPage.overlayProduct?.name"
-                                   t-on-focusin="onInputNameFocusin"
-                                   t-on-focusout="onInputNameFocusout"/>
+                        <div class="product-listing-name">
+                            <div class="form-group form-group-large"
+                                 t-att-class="{ 'filled': state.nameInputIsFilled }">
+                                <label class="label">Listing name</label>
+                                <input type="text" name="" class="form-control"
+                                       t-ref="name_input"
+                                       t-att-disabled="disabledEditName"
+                                       t-att-value="store.otPage.overlayProduct?.name"
+                                       t-on-focusin="onInputNameFocusin"
+                                       t-on-focusout="onInputNameFocusout"/>
+                            </div>
+                            <div class="listing-name-info"
+                                 t-att-class="{ 'd-none': !showListingNameInfoPopover }">
+                                <i class="icon-info" t-ref="listing_name_info"/>
+                            </div>
                         </div>
-                        <div class="listing-name-info"
-                             t-att-class="{ 'd-none': !showListingNameInfoPopover }">
-                            <i class="icon-info" t-ref="listing_name_info"/>
-                        </div>
+                            <t t-if="!!store.otPage.overlayTemplate.exampleImageUrl">
+                                <button class="product-example-btn" t-on-click="onClickShowExampleImage">
+                                    <i class="icon-image"/>
+                                    Example
+                                </button>
+                                <div t-if="state.showExampleImageModal" t-portal="'#wrapwrap'"
+                                     class="product-example-image-modal-container"
+                                     t-attf-style="height: calc(100% - {{headerHeight}}px);">
+                                    <div class="product-example-image-modal">
+                                        <div class="product-example-image-modal-header">
+                                            Example
+                                            <span t-on-click="onClickCloseExampleImageModal" class="fa fa-close"/>
+                                        </div>
+                                        <img t-attf-src="{{store.otPage.overlayTemplate.exampleImageUrl}}&amp;unique={{imageUnique}}"/>
+                                    </div>
+                                </div>
+                            </t>
                     </div>
                     <div class="product-top-right">
                         <button t-if="showEditBtn"
