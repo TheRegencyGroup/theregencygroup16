@@ -147,6 +147,7 @@ class MyPurchaseOrderLine(models.Model):
     def _convert_to_tax_base_line_dict(self):
         """ add fee as a part of unit cost to built in standard odoo logic taxes calculation.
         """
+        # TODO A case with discount is not tested(likely discount will be applied to a fee_amount as well)
         res = super(MyPurchaseOrderLine, self)._convert_to_tax_base_line_dict()
         res['price_unit'] += res['record'].fee / res['quantity'] if res['quantity'] else 0
         return res
