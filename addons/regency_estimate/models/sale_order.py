@@ -14,7 +14,7 @@ class SaleOrder(models.Model):
 
     def toggle_legal_accepted(self, checked):
         self.ensure_one()
-        if self.state == 'draft':
+        if self.state in ['draft', 'sent']:
             self.legal_accepted = checked
         return self.legal_accepted
 
@@ -31,6 +31,7 @@ class SaleOrder(models.Model):
                 msg = accept_format_string(SystemMessages.get('M-011'), partner.name, self.name)
                 self.message_post(body=msg, partner_ids=partner.ids)
         return res
+
 
 class SaleOrderLine(models.Model):
     _inherit = 'sale.order.line'
