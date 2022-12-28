@@ -524,8 +524,8 @@ class SaleEstimateLine(models.Model):
         product = self.product_id.with_context(
             lang=get_lang(self.env, self.estimate_id.partner_id.lang).code,
         )
-
-        self.update({'name': self.get_multiline_description_sale(product, self.product_template_attribute_value_ids)})
+        self.update({'name': self.get_multiline_description_sale(product,
+                     self.product_template_attribute_value_ids.sorted(lambda x: x.attribute_line_id.sequence))})
 
     def get_multiline_description_sale(self, product, picked_attrs):
         """ Compute a default multiline description for this product line.
