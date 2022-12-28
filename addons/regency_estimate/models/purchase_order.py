@@ -109,6 +109,12 @@ class PurchaseOrder(models.Model):
         invoice_vals['invoice_date'] = fields.Datetime.now()
         return invoice_vals
 
+    def cancel_order_with_requisition_cancellation(self, cancellation_reason):
+        for order in self:
+            order.message_post(body=('PO was cancelled due to the reason: %s' % cancellation_reason))
+            order.cancellation_reason = cancellation_reason
+        return super(PurchaseOrder, self).button_cancel()
+
     def button_cancel(self):
         self.ensure_one()
         invoices = self.invoice_ids.filtered(lambda inv: inv.state not in ('cancel', 'draft'))
