@@ -125,7 +125,8 @@
                        domain="[('is_company', '!=', True), ('parent_id', '=', partner_id)]"/>
             </field>
             <field name="partner_id" position="attributes">
-                <attribute name="domain">[('is_company', '=', True)]</attribute>/>
+                <attribute name="domain">[('is_company', '=', True)]</attribute>
+                <attribute name="context">{'default_is_customer': True, 'default_is_company': True}</attribute>
             </field>
         </field>
     </record>
