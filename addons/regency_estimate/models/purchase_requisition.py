@@ -90,8 +90,7 @@ class PurchaseRequisition(models.Model):
             for requisition_line in requisition.line_ids:
                 requisition_line.supplier_info_ids.unlink()
             if requisition.purchase_ids:
-                requisition.purchase_ids.with_context(
-                    po_cancel_reason='purchase requisition has been canceled').button_cancel()
+                requisition.purchase_ids.cancel_order_with_requisition_cancellation('purchase requisition has been canceled')
             for po in requisition.purchase_ids:
                 po.message_post(body=('Cancelled by the agreement associated to this quotation.'))
         self.write({'state': 'cancel'})
