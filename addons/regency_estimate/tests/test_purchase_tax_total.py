@@ -8,7 +8,7 @@ FEE_VALUE = 7
 TAX_AMOUNT = 21
 
 
-@tagged('post_install', '-at_install')
+@tagged('all_run')
 class PurchaseTestTaxTotals(TestTaxTotals):
 
     def setUp(self):
