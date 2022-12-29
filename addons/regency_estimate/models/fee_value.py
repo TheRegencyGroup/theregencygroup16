@@ -21,16 +21,11 @@ class FeeValue(models.Model):
     portal_value = fields.Float(compute='_compute_portal_value', store=True)
     per_item = fields.Boolean()
 
-    @api.depends('price_sheet_line_id.product_uom_qty', 'value', 'percent_value', 'price_sheet_line_id.min_quantity')
+    @api.depends('price_sheet_line_id.product_uom_qty', 'value', 'percent_value', 'price_sheet_line_id.min_quantity',
+                 'per_item')
     def _compute_portal_value(self):
         for rec in self:
-            if rec.price_sheet_line_id.product_uom_qty > 0:
-                if not rec.percent_value:
-                    rec.portal_value = rec.value
-                else:
-                    rec.portal_value = rec.price_sheet_line_id.price * rec.price_sheet_line_id.product_uom_qty * rec.percent_value / 100
-            else:
-                rec.portal_value = 0
+            rec.portal_value = rec.get_fee_sum(rec.price_sheet_line_id.product_uom_qty, rec.price_sheet_line_id.price)
 
     def get_fee_sum(self, qty, price):
         fee_sum = 0
