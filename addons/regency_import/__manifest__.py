@@ -9,7 +9,8 @@
         'regency_contacts',
         'regency_crm',
         'stock_mts_mto_rule',
-        'purchase_stock'
+        'purchase_stock',
+        'regency_estimate'
     ],
     'data': [
         'data/ir_action_server.xml',
