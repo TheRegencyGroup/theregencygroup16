@@ -95,7 +95,7 @@ class OverlayProduct(models.Model):
     @api.model_create_multi
     def create(self, vals):
         res = super().create(vals)
-        res._create_attribute_value()
+        res.with_context(from_overlay_product=True)._create_attribute_value()
         return res
 
     def unlink(self):
