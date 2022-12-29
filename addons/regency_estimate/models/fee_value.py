@@ -25,7 +25,12 @@ class FeeValue(models.Model):
                  'per_item')
     def _compute_portal_value(self):
         for rec in self:
-            rec.portal_value = 100  # rec.get_fee_sum(rec.price_sheet_line_id.product_uom_qty, rec.price_sheet_line_id.price)
+            qty = rec.price_sheet_line_id.product_uom_qty
+            if qty > 0:
+                price = rec.price_sheet_line_id.price
+                rec.portal_value = rec.get_fee_sum(qty, price)
+            else:
+                rec.portal_value = 0
 
     def get_fee_sum(self, qty, price):
         fee_sum = 0
