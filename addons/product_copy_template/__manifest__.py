@@ -7,8 +7,7 @@
     'website': '',
     'depends': [
         'web',
-        'sale',
-        'regency_contacts'
+        'sale'
     ],
     'data': [
         'views/product_product.xml'
