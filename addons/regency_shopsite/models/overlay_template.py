@@ -363,7 +363,7 @@ class OverlayTemplate(models.Model):
     @api.model_create_multi
     def create(self, vals):
         res = super().create(vals)
-        res.with_context(is_overlay_template_initiator=True)._create_overlay_attribute_value()
+        res.with_context(from_overlay_template=True)._create_overlay_attribute_value()
         return res
 
     def unlink(self):
