@@ -14,6 +14,19 @@ class PurchaseOrder(models.Model):
     show_column_produced_overseas = fields.Boolean(compute='_compute_show_column_produced_overseas')
     tracking_ref = fields.Char(compute='_compute_tracking_references')
     cancellation_reason = fields.Char()
+    estimate_ids = fields.Many2many('sale.estimate', compute='_compute_estimate_ids', store=True)
+
+    @api.depends('order_line.sale_order_id',
+                 'order_line.sale_order_id.consumption_agreement_id.from_pricesheet_id.estimate_id',
+                 'order_line.sale_order_id.price_sheet_id.estimate_id',
+                 'requisition_id.estimate_id',
+                 'order_line.move_dest_ids.group_id.sale_id',
+                 'order_line.move_ids.move_dest_ids.group_id.sale_id')
+    def _compute_estimate_ids(self):
+        for rec in self:
+            sale_orders = rec._get_sale_orders()
+            rec.estimate_ids = sale_orders.consumption_agreement_id.from_pricesheet_id.estimate_id \
+                               + sale_orders.price_sheet_id.estimate_id + rec.requisition_id.estimate_id
 
     def _compute_tracking_references(self):
         for entry in self:
