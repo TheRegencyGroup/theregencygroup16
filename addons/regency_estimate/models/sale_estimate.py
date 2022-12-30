@@ -18,6 +18,8 @@ AVAILABLE_PRIORITIES = [
     ('3', 'Very High'),
 ]
 
+DEFAULT_MARGIN = 1.6
+
 
 class SaleEstimate(models.Model):
     _name = 'sale.estimate'
@@ -49,7 +51,7 @@ class SaleEstimate(models.Model):
     # Customer / contact
     partner_id = fields.Many2one(
         'res.partner', string='Customer', check_company=True, index=True, tracking=10,
-        domain="[('is_company', '=', True),('contact_type', '=', 'customer'),'|', ('company_id', '=', False), ('company_id', '=', company_id)]",
+        domain="[('is_company', '=', True),('is_customer', '=', True),'|', ('company_id', '=', False), ('company_id', '=', company_id)]",
         help="Linked partner (optional). Usually created when converting the lead. You can find a partner by its Name, TIN, Email or Internal Reference.")
     contact_name = fields.Char(
         'Contact Name', tracking=30,
@@ -309,6 +311,12 @@ class SaleEstimate(models.Model):
         new_requisition_lines = confirmed_requisition_lines.filtered(lambda x: (x.product_id, x.product_qty) not in products_to_estimate)
         sheet_lines = []
         for p in self.product_lines.filtered(lambda x: x.selected or x.display_type).sorted('sequence'):
+
+            if self.partner_id.country_id:
+                new_pricesheet_currency_id = self.partner_id.country_id.currency_id
+            else:
+                new_pricesheet_currency_id = self.env.company.currency_id
+
             seq = p.sequence
             if p.display_type:
                 sheet_lines.append(Command.create({
@@ -321,6 +329,14 @@ class SaleEstimate(models.Model):
                                                            and x.product_qty == p.product_uom_qty).sorted('product_qty')
                 if matched_lines:
                     for line in matched_lines:
+                        if new_pricesheet_currency_id != line.currency_id and line.currency_id:
+                            company_id = self.company_id or self.env.company
+                            price = line.currency_id._convert(line.price_unit * DEFAULT_MARGIN,
+                                                              new_pricesheet_currency_id, company_id,
+                                                              fields.Date.today())
+                        else:
+                            price = line.price_unit * DEFAULT_MARGIN
+
                         sheet_line = self.env['product.price.sheet.line'].create({
                                 'name': p.name,
                                 'sequence': seq,
@@ -328,8 +344,8 @@ class SaleEstimate(models.Model):
                                 'partner_id': line.partner_id.id,
                                 'min_quantity': line.product_qty,
                                 'vendor_price': line.price_unit,
-                                'price': line.price_unit * 1.6,
-                                'total': line.price_unit * 1.6 * line.product_qty,
+                                'price': price,
+                                'total': price * line.product_qty,
                                 'display_type': p.display_type,
                                 'produced_overseas': line.produced_overseas,
                                 'sale_estimate_line_ids': [(6, 0, [p.id])],
@@ -390,6 +406,8 @@ class SaleEstimate(models.Model):
                 'partner_id': self.partner_id,
                 'item_ids': [s.id for s in sheet_lines],
             })
+            if new_pricesheet.partner_id.country_id:
+                new_pricesheet.currency_id = new_pricesheet.partner_id.country_id.currency_id
             new_pricesheet.message_subscribe(partner_ids=(self.estimate_manager_id.partner_id + self.purchase_agreement_ids.mapped('user_id.partner_id')).ids)
             action = self.env["ir.actions.actions"]._for_xml_id("regency_estimate.action_product_price_sheet_new")
             action['res_id'] = new_pricesheet.id

@@ -1,6 +1,6 @@
 {
     'name': 'Regency Sales Estimates',
-    'version': '16.0.0.8',
+    'version': '16.0.0.9',
     'summary': '',
     'author': 'OpsWay',
     'description': "",
@@ -23,6 +23,7 @@
     'category': 'Regency/Sales',
     'sequence': 10,
     'data': [
+        'report/report_inherit_purchase_order.xml',
         'data/product_price_sheet.xml',
         'data/purchase_requisition_data.xml',
         'data/sale_estimate_sequence.xml',

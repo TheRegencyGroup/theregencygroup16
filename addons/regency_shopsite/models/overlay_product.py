@@ -64,10 +64,13 @@ class OverlayProduct(models.Model):
                     table_content += f'''
                         <tr>
                             {first_cell}
-                            <td>{area['objectData'].get('text') or ''}</td>
-                            <td>{area['objectData'].get('fontName') or ''}</td>
-                            <td>{area['objectData'].get('fontSize') or ''}</td>
-                            <td>{area['objectData'].get('fontColor') or ''}</td>
+                            <td>{area['objectData'].get('text', '')}</td>
+                            <td>{area['objectData'].get('fontName', '')}</td>
+                            <td>{area['objectData'].get('fontSize', '0')}</td>
+                            <td>{area['objectData'].get('lineSpacing') or '0'}</td>
+                            <td>{area['objectData'].get('charSpacing', '0')}</td>
+                            <td>{area['objectData'].get('fontColor', '')}</td>
+                            <td>{area['objectData'].get('align', '').capitalize()}</td>
                         </tr>
                     '''
             table = f'''
@@ -77,7 +80,10 @@ class OverlayProduct(models.Model):
                         <th>Text</th>
                         <th>Font</th>
                         <th>Font size</th>
+                        <th>Line spacing</th>
+                        <th>Char spacing</th>
                         <th>Color</th>
+                        <th>Align</th>
                     </thead>
                     <tbody>
                         {table_content}

@@ -35,30 +35,38 @@ class PurchaseOrder(models.Model):
             else:
                 entry.tracking_ref = False
 
-    @api.depends('partner_id', 'partner_id.is_company', 'partner_id.contact_type', 'partner_id.vendor_type')
+    @api.depends('partner_id', 'partner_id.is_company', 'partner_id.is_vendor', 'partner_id.vendor_type')
     def _compute_show_column_produced_overseas(self):
         for rec in self:
             rec.show_column_produced_overseas = rec.partner_id.is_company \
-                                                and rec.partner_id.contact_type == 'vendor' \
+                                                and rec.partner_id.is_vendor \
                                                 and rec.partner_id.vendor_type == 'overseas'
 
     @api.onchange('partner_id')
-    @api.depends('partner_id', 'partner_id.is_company', 'partner_id.contact_type', 'partner_id.vendor_type')
+    @api.depends('partner_id', 'partner_id.is_company', 'partner_id.is_vendor', 'partner_id.vendor_type')
     def _onchange_partner_id(self):
         if self.partner_id.is_company \
-                and self.partner_id.contact_type == 'vendor' \
+                and self.partner_id.is_vendor \
                 and self.partner_id.vendor_type == 'overseas':
             self.order_line.write({'produced_overseas': True})
         else:
             self.order_line.write({'produced_overseas': False})
+
+    @api.onchange('partner_id', 'company_id')
+    def onchange_partner_id(self):
+        """Overridden"""
+        super().onchange_partner_id()
+        if self.partner_id.country_id:
+            self.currency_id = self.partner_id.country_id.currency_id.id
 
     def action_confirm_prices(self):
         self.write({'state': 'confirmed_prices'})
         for rec in self.filtered(lambda f: f.requisition_id):
             for line in rec.order_line:
                 req_line = rec.requisition_id.line_ids.filtered(lambda f: f.product_id == line.product_id
-                                                                and (f.partner_id == rec.partner_id or not f.partner_id)
-                                                                and f.product_qty == line.product_qty)
+                                                                          and (
+                                                                                  f.partner_id == rec.partner_id or not f.partner_id)
+                                                                          and f.product_qty == line.product_qty)
 
                 new_fees = [f.copy() for f in line.fee_value_ids]
                 for fee in new_fees:
@@ -69,7 +77,8 @@ class PurchaseOrder(models.Model):
                                     'price_unit': line.price_unit,
                                     'product_qty': line.product_qty,
                                     'produced_overseas': line.produced_overseas,
-                                    'fee_value_ids': [f.id for f in new_fees]})
+                                    'fee_value_ids': [f.id for f in new_fees],
+                                    'currency_id': rec.currency_id.id})
                 else:
                     req_line.fee_value_ids = []
                     self.env['purchase.requisition.line'].create({
@@ -82,6 +91,7 @@ class PurchaseOrder(models.Model):
                         'product_uom_id': line.product_uom.id,
                         'produced_overseas': line.produced_overseas,
                         'fee_value_ids': [f.id for f in new_fees],
+                        'currency_id': rec.currency_id.id
                     })
 
     def _prepare_invoice(self):
@@ -130,8 +140,8 @@ class MyPurchaseOrderLine(models.Model):
     @api.onchange('product_id')
     def onchange_product_id(self):
         super().onchange_product_id()
-        self.produced_overseas = self.partner_id.is_company \
-                                 and self.partner_id.contact_type == 'vendor' \
+        self.produced_overseas = self.partner_id.is_company\
+                                 and self.partner_id.is_vendor\
                                  and self.partner_id.vendor_type == 'overseas'
 
     def _new_compute_price_unit_and_date_planned_and_name(self):

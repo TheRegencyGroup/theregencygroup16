@@ -8,7 +8,7 @@
   }
 
   .o_form_sheet {
-    width: 1280px !important;
+    width: 1300px !important;
     min-width: unset !important;
     max-width: unset !important;
     margin: 12px auto !important;
@@ -61,8 +61,25 @@
         color: #FFFFFF;
         font-weight: 500;
 
-        &_tab_buttons {
+        button {
+          margin-left: 8px;
+          padding: 6px 8px;
+          text-align: left;
+          border: none;
+          white-space: nowrap;
+
+          i {
+            margin-right: 4px;
+          }
+        }
+
+        .ot_areas_position_header_left {
           display: flex;
+          align-items: center;
+
+          .ot_areas_position_tools {
+            margin-left: 20px;
+          }
         }
       }
 
@@ -79,25 +96,8 @@
             top: 100%;
           }
 
-          .ot_areas_position_tools {
-            margin-right: 8px;
-            display: flex;
-            flex-direction: column;
-
-            button {
-              padding: 4px 8px;
-              margin-bottom: 8px;
-              text-align: left;
-              border: none;
-              white-space: nowrap;
-
-              i {
-                margin-right: 4px;
-              }
-            }
-          }
-
           .ot_areas_position_editor_block {
+            max-width: 502px;
 
             .ot_areas_position_editor {
               position: relative;
@@ -105,8 +105,6 @@
               border: 1px solid map-get($theme-colors, 'primary');
 
               & > img {
-                max-width: 500px;
-                max-height: 500px;
                 object-fit: contain;
                 background-color: #ffffff;
               }
@@ -120,9 +118,7 @@
 
             .ot_areas_position_editor_image_switcher {
               margin-top: 8px;
-              max-width: 500px;
-              display: grid;
-              grid-template-columns: repeat(4, 119px);
+              display: flex;
               gap: 8px;
 
               div {
@@ -231,15 +227,20 @@
                       }
 
                       select {
-                        width: 150px;
+                        min-width: 100px;
                         padding: 0 4px;
                         height: 22px;
                         background-color: #FFFFFF;
                         border: none;
                         outline: none;
+                        text-transform: capitalize;
 
                         &:disabled {
                           opacity: 1;
+                        }
+
+                        option {
+                          text-transform: capitalize;
                         }
                       }
                     }
@@ -259,6 +260,27 @@
                 }
               }
             }
+          }
+        }
+
+        .oot_areas_tab_full_view_mode {
+          flex-direction: column;
+
+          .ot_areas_position_editor_block {
+            max-width: unset;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+          }
+
+          .ot_area_list {
+            margin-left: 0;
+            margin-top: 8px;
+
+            //.ot_area_list_item_data {
+            //  flex-direction: row !important;
+            //}
           }
         }
 

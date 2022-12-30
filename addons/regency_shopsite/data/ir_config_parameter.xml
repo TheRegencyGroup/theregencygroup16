@@ -6,4 +6,9 @@
         <field name="value">1</field>
     </record>
 
+    <record id="image_autoresize_max_px" model="ir.config_parameter">
+        <field name="key">base.image_autoresize_max_px</field>
+        <field name="value">0</field>
+    </record>
+
 </odoo>

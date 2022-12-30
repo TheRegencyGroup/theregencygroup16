@@ -3,7 +3,7 @@
 
     <t t-name="overlay_template_page" owl="1">
         <div t-if="state.showPostAddToCart" t-portal="'.content'" class="content-freeze-overlay"/>
-        <div class="container">
+        <div t-att-class="store.otPage.editorFullViewMode ? 'overlay_template_editor_full_view' : 'container'">
             <div class="content-in">
 
                 <div class="path">
@@ -17,20 +17,39 @@
 
                 <div class="product-top">
                     <div class="product-top-left">
-                        <div class="form-group form-group-large"
-                             t-att-class="{ 'filled': state.nameInputIsFilled }">
-                            <label class="label">Listing name</label>
-                            <input type="text" name="" class="form-control"
-                                   t-ref="name_input"
-                                   t-att-disabled="disabledEditName"
-                                   t-att-value="store.otPage.overlayProduct?.name"
-                                   t-on-focusin="onInputNameFocusin"
-                                   t-on-focusout="onInputNameFocusout"/>
+                        <div class="product-listing-name">
+                            <div class="form-group form-group-large"
+                                 t-att-class="{ 'filled': state.nameInputIsFilled }">
+                                <label class="label">Listing name</label>
+                                <input type="text" name="" class="form-control"
+                                       t-ref="name_input"
+                                       t-att-disabled="disabledEditName"
+                                       t-att-value="store.otPage.overlayProduct?.name"
+                                       t-on-focusin="onInputNameFocusin"
+                                       t-on-focusout="onInputNameFocusout"/>
+                            </div>
+                            <div class="listing-name-info"
+                                 t-att-class="{ 'd-none': !showListingNameInfoPopover }">
+                                <i class="icon-info" t-ref="listing_name_info"/>
+                            </div>
                         </div>
-                        <div class="listing-name-info"
-                             t-att-class="{ 'd-none': !showListingNameInfoPopover }">
-                            <i class="icon-info" t-ref="listing_name_info"/>
-                        </div>
+                            <t t-if="!!store.otPage.overlayTemplate.exampleImageUrl">
+                                <button class="product-example-btn" t-on-click="onClickShowExampleImage">
+                                    <i class="icon-image"/>
+                                    Example
+                                </button>
+                                <div t-if="state.showExampleImageModal" t-portal="'#wrapwrap'"
+                                     class="product-example-image-modal-container"
+                                     t-attf-style="height: calc(100% - {{headerHeight}}px);">
+                                    <div class="product-example-image-modal">
+                                        <div class="product-example-image-modal-header">
+                                            Example
+                                            <span t-on-click="onClickCloseExampleImageModal" class="fa fa-close"/>
+                                        </div>
+                                        <img t-attf-src="{{store.otPage.overlayTemplate.exampleImageUrl}}&amp;unique={{imageUnique}}"/>
+                                    </div>
+                                </div>
+                            </t>
                     </div>
                     <div class="product-top-right">
                         <button t-if="showEditBtn"
@@ -79,82 +98,85 @@
                         </div>
                     </div>
                     <div class="product-right">
-                        <h1><t t-esc="store.otPage.productName"/></h1>
-                        <t t-set="productDescription" t-value="store.otPage.productDescription"/>
-                        <div t-if="productDescription" class="product-text">
-                            <p><t t-esc="productDescription"/></p>
-                        </div>
-
-                        <div class="line"></div>
-
-                        <ColorAttributeSelector t-if="showColorAttributeSelector"
-                                                attributeId="store.otPage.colorAttributeId"/>
-                        <t t-foreach="sortedAttributeList" t-as="attribute" t-key="attribute.id">
-                            <AttributeSelector t-if="attribute.id" attributeId="attribute.id"/>
-                        </t>
-
-                        <!--                            <div class="product-group">-->
-                        <!--                                <div class="h3">Sections</div>-->
-
-                        <!--                                <div class="form-set">-->
-                        <!--                                    <div class="form-set-top">-->
-                        <!--                                        <h3 class="form-set-title">Top logo</h3>-->
-                        <!--                                        <div class="form-set-type">Text</div>-->
-                        <!--                                    </div>-->
-                        <!--                                    <div class="form-set-content">-->
-                        <!--                                        <textarea class="form-control" placeholder="Add your text here"></textarea>-->
-                        <!--                                    </div>-->
-                        <!--                                </div>-->
-
-                        <!--                                <div class="form-set">-->
-                        <!--                                    <div class="form-set-top">-->
-                        <!--                                        <h3 class="form-set-title">Main centered logo</h3>-->
-                        <!--                                        <div class="form-set-type">Rectangle</div>-->
-                        <!--                                    </div>-->
-                        <!--                                    <div class="form-set-content">-->
-                        <!--                                        <div class="upload">-->
-                        <!--                                            <div class="upload-preview">-->
-                        <!--                                                <span class="icon-image"></span>-->
-                        <!--                                            </div>-->
-                        <!--                                            <div class="upload-text">-->
-                        <!--                                                <div class="upload-text-title">Drop or upload image</div>-->
-                        <!--                                                <div class="upload-text-subtitle">10x7 cm</div>-->
-                        <!--                                            </div>-->
-                        <!--                                            <div class="upload-buttons">-->
-                        <!--                                                <button class="btn btn-sm btn-dark">-->
-                        <!--                                                    <span class="icon-upload"></span>-->
-                        <!--                                                </button>-->
-                        <!--                                            </div>-->
-                        <!--                                        </div>-->
-                        <!--                                    </div>-->
-                        <!--                                </div>-->
-                        <!--                            </div>-->
-
-                        <QuantitySelector t-if="showQuantitySelector"/>
-
-                        <t t-if="!state.showPostAddToCart">
-                            <button t-if="showAddToCartBtn" class="btn btn-block btn-dark product-add-to-cart"
-                                    t-att-class="{ 'product-add-to-cart-disabled': !store.otPage.canAddedToCart || store.cart.addingToCart }"
-                                    t-on-click="onClickAddToCart">
-                                <span>Add to cart</span>
-                                <span class="icon-cart"></span>
-                            </button>
-                        </t>
-                        <t t-else="">
-                            <div class="post-product-add-to-cart-buttons">
-                                <button class="btn btn-block btn-dark product-add-to-cart"
-                                        t-on-click="onClickContinueShoppingBtn">
-                                    <span>Continue shopping</span>
-                                </button>
-                                <a href="/shop/cart" class="btn btn-block btn-dark product-add-to-cart">
-                                    <span>Proceed to checkout</span>
-                                </a>
+                        <div class="product-right-top">
+                            <h1><t t-esc="store.otPage.productName"/></h1>
+                            <t t-set="productDescription" t-value="store.otPage.productDescription"/>
+                            <div t-if="productDescription" class="product-text">
+                                <p><t t-esc="productDescription"/></p>
                             </div>
-                        </t>
-                        <span t-if="!store.otPage.overlayTemplate?.isAvailableForActiveHotel and !store.otPage.overlayProductIsArchived"
-                              class="product-unavailable-message">
-                            <sup>*</sup>This product is unavailable for selected hotel
-                        </span>
+
+                            <div class="line"></div>
+
+                            <ColorAttributeSelector t-if="showColorAttributeSelector"
+                                                    attributeId="store.otPage.colorAttributeId"/>
+                            <t t-foreach="sortedAttributeList" t-as="attribute" t-key="attribute.id">
+                                <AttributeSelector t-if="attribute.id" attributeId="attribute.id"/>
+                            </t>
+
+                            <!--                            <div class="product-group">-->
+                            <!--                                <div class="h3">Sections</div>-->
+
+                            <!--                                <div class="form-set">-->
+                            <!--                                    <div class="form-set-top">-->
+                            <!--                                        <h3 class="form-set-title">Top logo</h3>-->
+                            <!--                                        <div class="form-set-type">Text</div>-->
+                            <!--                                    </div>-->
+                            <!--                                    <div class="form-set-content">-->
+                            <!--                                        <textarea class="form-control" placeholder="Add your text here"></textarea>-->
+                            <!--                                    </div>-->
+                            <!--                                </div>-->
+
+                            <!--                                <div class="form-set">-->
+                            <!--                                    <div class="form-set-top">-->
+                            <!--                                        <h3 class="form-set-title">Main centered logo</h3>-->
+                            <!--                                        <div class="form-set-type">Rectangle</div>-->
+                            <!--                                    </div>-->
+                            <!--                                    <div class="form-set-content">-->
+                            <!--                                        <div class="upload">-->
+                            <!--                                            <div class="upload-preview">-->
+                            <!--                                                <span class="icon-image"></span>-->
+                            <!--                                            </div>-->
+                            <!--                                            <div class="upload-text">-->
+                            <!--                                                <div class="upload-text-title">Drop or upload image</div>-->
+                            <!--                                                <div class="upload-text-subtitle">10x7 cm</div>-->
+                            <!--                                            </div>-->
+                            <!--                                            <div class="upload-buttons">-->
+                            <!--                                                <button class="btn btn-sm btn-dark">-->
+                            <!--                                                    <span class="icon-upload"></span>-->
+                            <!--                                                </button>-->
+                            <!--                                            </div>-->
+                            <!--                                        </div>-->
+                            <!--                                    </div>-->
+                            <!--                                </div>-->
+                            <!--                            </div>-->
+                        </div>
+                        <div class="product-right-bottom">
+                            <QuantitySelector t-if="showQuantitySelector"/>
+
+                            <t t-if="!state.showPostAddToCart">
+                                <button t-if="showAddToCartBtn" class="btn btn-block btn-dark product-add-to-cart"
+                                        t-att-class="{ 'product-add-to-cart-disabled': !store.otPage.canAddedToCart || store.cart.addingToCart }"
+                                        t-on-click="onClickAddToCart">
+                                    <span>Add to cart</span>
+                                    <span class="icon-cart"></span>
+                                </button>
+                            </t>
+                            <t t-else="">
+                                <div class="post-product-add-to-cart-buttons">
+                                    <button class="btn btn-block btn-dark product-add-to-cart"
+                                            t-on-click="onClickContinueShoppingBtn">
+                                        <span>Continue shopping</span>
+                                    </button>
+                                    <a href="/shop/cart" class="btn btn-block btn-dark product-add-to-cart">
+                                        <span>Proceed to checkout</span>
+                                    </a>
+                                </div>
+                            </t>
+                            <span t-if="!store.otPage.overlayTemplate?.isAvailableForActiveHotel and !store.otPage.overlayProductIsArchived"
+                                  class="product-unavailable-message">
+                                <sup>*</sup>This product is unavailable for selected hotel
+                            </span>
+                        </div>
                     </div>
                 </div>
 
