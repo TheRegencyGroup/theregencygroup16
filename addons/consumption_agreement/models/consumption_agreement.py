@@ -164,6 +164,7 @@ class ConsumptionAgreement(models.Model):
                                                 'product_uom': p.product_id.uom_id.id,
                                                 'consumption_agreement_line_id': p.id
                                             }) for p in self.line_ids.filtered(lambda l: l.id in selected_line_ids)]})
+        order.currency_id = self.currency_id.id
         order.message_subscribe([order.partner_id.id])
         return order, order_count
 
@@ -197,6 +198,13 @@ class ConsumptionAgreement(models.Model):
                     'customer_id': line.agreement_id.partner_id.id
                 })]
             })
+            if po.partner_id.country_id:
+                po.currency_id = po.partner_id.country_id.currency_id
+                for po_line in po.order_line:
+                    if po.currency_id != self.currency_id:
+                        po_line.price_unit = self.currency_id._convert(po_line.price_unit, po_line.currency_id,
+                                                                          self.company_id, fields.Date.today())
+
             new_purchase_orders += po
         if not order_count:
             action = self.env["ir.actions.act_window"]._for_xml_id("purchase.purchase_rfq")
@@ -334,6 +342,8 @@ class ConsumptionAgreement(models.Model):
         for ca in self:
             if ca.partner_id:
                 ca.allowed_partner_ids = ca.partner_id + ca.possible_partners
+                if ca.partner_id.country_id:
+                    ca.currency_id = ca.partner_id.country_id.currency_id.id
             else:
                 ca.allowed_partner_ids = False
 
