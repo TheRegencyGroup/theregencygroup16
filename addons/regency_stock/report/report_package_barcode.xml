@@ -2,7 +2,7 @@
 
     <template id="report_package_barcode_small_regency_quants">
         <t t-call="web.basic_layout">
-           <page>
+            <page>
                 <t t-call="web.html_container">
                     <t t-foreach="docs" t-as="o">
                         <div style="width: 102mm; height: 51mm; padding: 10px; display: flex; flex-direction: column;">
@@ -39,17 +39,17 @@
                 <t t-call="web.html_container">
                     <t t-foreach="docs" t-as="o">
                         <div style="width: 100%; height: 100%; padding: 10px; display: flex; flex-direction: column;">
-                        <div class="d-flex">
-                            <div class="text-center">
-                                <div t-out="o.name"
-                                     t-options="{'widget': 'barcode', 'img_style': 'width:182px;height:70px;'}"/>
-                                <div t-out="o.name" style="font-size:12px;"/>
+                            <div class="d-flex">
+                                <div class="text-center">
+                                    <div t-out="o.name"
+                                         t-options="{'widget': 'barcode', 'img_style': 'width:182px;height:70px;'}"/>
+                                    <div t-out="o.name" style="font-size:12px;"/>
+                                </div>
+                                <div style="width: 182px; text-align: right;">
+                                    <img t-if="o.company_id.logo" t-att-src="image_data_uri(o.company_id.logo)"
+                                         style="height: 45px; margin-right: 20px;"/>
+                                </div>
                             </div>
-                            <div style="width: 182px; text-align: right;">
-                                <img t-if="o.company_id.logo" t-att-src="image_data_uri(o.company_id.logo)"
-                                     style="height: 45px; margin-right: 20px;"/>
-                            </div>
-                        </div>
                         </div>
                     </t>
                 </t>
@@ -57,9 +57,9 @@
         </t>
     </template>
 
-        <template id="report_purchase_order_barcode">
+    <template id="report_purchase_order_barcode">
         <t t-call="web.basic_layout">
-           <page>
+            <page>
                 <t t-call="web.html_container">
                     <t t-foreach="docs" t-as="o">
                         <div style="width: 102mm; height: 51mm; padding: 10px; display: flex; flex-direction: column;">
@@ -80,6 +80,38 @@
                             </div>
                             <div style="font-weight: bolder; text-align: left;">
                                 <div t-out="o.product_id.name" style="padding-top: 20px;"/>
+                            </div>
+                        </div>
+                    </t>
+                </t>
+            </page>
+        </t>
+    </template>
+
+    <template id="report_package_barcode_small_regency_stock_move_lines">
+        <t t-call="web.basic_layout">
+            <page>
+                <t t-call="web.html_container">
+                    <t t-foreach="docs" t-as="r">
+                        <div style="width: 102mm; height: 51mm; padding: 10px; display: flex; flex-direction: column;">
+                            <div class="d-flex">
+                                <div class="text-center">
+                                    <div t-out="r.package_name"
+                                         t-options="{'widget': 'barcode', 'img_style': 'width:182px;height:70px;'}"/>
+                                    <div t-out="r.package_name"
+                                         style="font-size:12px;"/>
+                                </div>
+                                <div style="width: 182px; text-align: right; position: relative;">
+                                    <img t-if="r.company.logo"
+                                         t-att-src="image_data_uri(r.company.logo)"
+                                         style="height: 45px; margin-right: 20px;"/>
+                                    <div t-out="round(r.qty_done)"
+                                         style="position: absolute; top: 65px; left: 20px; font-weight: bolder;"/>
+                                </div>
+                            </div>
+                            <div style="font-weight: bolder; text-align: left;">
+                                <div t-if="r.customer_name" t-out="r.customer_name" style="padding-top: 20px;"/>
+                                <div t-out="r.product_name" style="padding-top: 20px;"/>
                             </div>
                         </div>
                     </t>
