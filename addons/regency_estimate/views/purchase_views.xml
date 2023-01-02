@@ -36,6 +36,9 @@
                 <xpath expr="//field[@name='date_approve']" position="attributes">
                     <attribute name="widget">date</attribute>
                 </xpath>
+                <field name="currency_id" position="after">
+                    <field name="company_id"/>
+                </field>
             </field>
          </record>
         <record id="purchase_order_view_inherit" model="ir.ui.view">

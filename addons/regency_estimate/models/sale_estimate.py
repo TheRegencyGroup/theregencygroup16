@@ -33,7 +33,7 @@ class SaleEstimate(models.Model):
     description = fields.Html('Notes')
     company_id = fields.Many2one(
         'res.company', string='Company', index=True,
-        compute='_compute_company_id', readonly=False, store=True)
+        default=lambda self: self.env.company, readonly=False, store=True)
     user_id = fields.Many2one(
         'res.users', string='Salesperson', default=lambda self: self.env.user,
         domain="[('share', '=', False)]",
@@ -150,35 +150,11 @@ class SaleEstimate(models.Model):
         for rec in self:
             rec.sale_order_count = len(rec.sale_order_ids)
 
-    @api.depends('user_id')
-    def _compute_company_id(self):
-        """ Compute company_id coherency. """
-        for rec in self:
-            proposal = rec.company_id
-
-            # invalidate wrong configuration
-            if proposal:
-                # company not in responsible companies
-                if rec.user_id and proposal not in rec.user_id.company_ids:
-                    proposal = False
-
-            # propose a new company based on responsible
-            if not proposal:
-                if rec.user_id:
-                    proposal = rec.user_id.company_id & self.env.companies
-                else:
-                    proposal = False
-
-            # set a new company
-            if rec.company_id != proposal:
-                rec.company_id = proposal
-
     @api.depends('partner_id')
     def _compute_contact_name(self):
         """ compute the new values when partner_id has changed """
         for rec in self:
             rec.update(rec._prepare_contact_name_from_partner(rec.partner_id))
-
 
     def _prepare_contact_name_from_partner(self, partner):
         contact_name = False if partner.is_company else partner.name
@@ -237,6 +213,7 @@ class SaleEstimate(models.Model):
             'search_default_estimate_id': self.id,
             'default_estimate_id': self.id,
             'default_type_id': self.env.ref('regency_estimate.type_multi').id,
+            'default_company_id': self.company_id.id,
             'default_estimate_line_ids': [
                 Command.link(l.id) for l in selected_lines
             ],
@@ -259,6 +236,7 @@ class SaleEstimate(models.Model):
         action['context'] = {
             'default_partner_id': self.partner_id.id,
             'default_estimate_id': self.id,
+            'default_company_id': self.company_id.id,
             'default_order_line': [
                 Command.create({
                     'name': p.product_id.name,
@@ -402,6 +380,7 @@ class SaleEstimate(models.Model):
         else:
             new_pricesheet = existing_draft_pricesheets.create({
                 'estimate_id': self.id,
+                'company_id': self.company_id.id,
                 'partner_id': self.partner_id,
                 'item_ids': [s.id for s in sheet_lines],
             })

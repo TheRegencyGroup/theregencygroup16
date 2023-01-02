@@ -37,10 +37,11 @@
                            </button>
                         </div>
                         <group>
-                            <field name="partner_id" required="1"
-                                widget="res_partner_many2one"
-                                string="Customer"
-                                context="{'res_partner_search_mode': 'customer',
+                            <group>
+                                <field name="partner_id" required="1"
+                                       widget="res_partner_many2one"
+                                       string="Customer"
+                                       context="{'res_partner_search_mode': 'customer',
                                     'default_name': contact_name,
                                     'default_street': street,
                                     'default_is_company': contact_name == False,
@@ -51,7 +52,11 @@
                                     'default_country_id': country_id,
                                     'show_vat': True,
                                 }"
-                            />
+                                />
+                            </group>
+                            <group>
+                                <field name="company_id"/>
+                            </group>
                         </group>
                         <div class="oe_title">
                             <label for="name" string="Estimate"/>>
