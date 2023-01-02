@@ -40,6 +40,17 @@
             <field name="paperformat_id" ref="paperformat_barcode_regency"/>
         </record>
 
+        <record id="action_report_quant_package_barcode_small_stock_move_line" model="ir.actions.report">
+            <field name="name">Regency Package Barcode (PDF)</field>
+            <field name="model">barcode.report</field>
+            <field name="report_type">qweb-pdf</field>
+            <field name="report_name">regency_stock.report_package_barcode_small_regency_stock_move_lines</field>
+            <field name="report_file">stock.report_package_barcode</field>
+            <field name="binding_model_id" eval="False"/>
+            <field name="binding_type">report</field>
+            <field name="paperformat_id" ref="paperformat_barcode_regency"/>
+        </record>
+
         <record id="stock.action_report_quant_package_barcode_small" model="ir.actions.report">
             <field name="name">Package Barcode (PDF)</field>
             <field name="model">stock.quant.package</field>

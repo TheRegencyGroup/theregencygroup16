@@ -1,2 +1,3 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 access_choose_receipt_package,access.choose.receipt.package,model_choose_receipt_package,stock.group_stock_user,1,1,1,0
+access_barcode_report,access.barcode.report,model_barcode_report,base.group_user,1,1,1,1
