@@ -143,7 +143,8 @@ class PurchaseRequisitionLine(models.Model):
         for prl in self:
             if prl.requisition_id.state == 'draft':
                 prl.state = 'draft'
-                continue
+            elif prl.requisition_id.state == 'done':
+                prl.state = 'done'
             else:
                 prl.state = 'in_progress'
 
