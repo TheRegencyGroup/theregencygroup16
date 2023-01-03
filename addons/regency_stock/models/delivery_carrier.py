@@ -1,6 +1,7 @@
 from odoo import models, _
 from odoo.addons.delivery.models.delivery_request_objects import DeliveryPackage
 from odoo.exceptions import UserError
+from .sendcloud_service import SendCloudExt
 
 
 class DeliveryCarrier(models.Model):
@@ -35,19 +36,30 @@ class DeliveryCarrier(models.Model):
             packages.append(DeliveryPackage(None, weight, default_package_type, total_cost=partial_cost, currency=order.company_id.currency_id, order=order))
         return packages
 
-
     def _get_estimated_weight(self, order):
         self.ensure_one()
         weight = 0.0
-        for order_line in order.order_line.filtered(lambda l: l.product_id.type in ['product', 'consu'] and not l.is_delivery and not l.display_type):
-            in_stock_picking = order_line.move_ids.mapped('picking_id').filtered(lambda f: f.picking_type_code == 'incoming' and f.state == 'done')
-            if in_stock_picking:
-                stock_quants = in_stock_picking.mapped('package_ids.quant_ids').filtered(lambda f: f.product_id == order_line.product_id)
-                qty = sum(stock_quants.mapped('quantity'))
-                package_weight = sum(stock_quants.mapped('package_weight'))
-                move_lines = order_line.mapped('move_ids.move_line_ids').filtered(lambda f: f.picking_id == in_stock_picking)
-                weight = package_weight / qty * sum(move_lines.mapped('qty_done'))
-
+        for order_line in order.order_line.filtered(
+                lambda l: l.product_id.type in ['product', 'consu'] and not l.is_delivery and not l.display_type):
+            stock_picking = order_line.move_ids.mapped('picking_id').filtered(lambda f: f.state in ['assigned', 'done'])
+            if stock_picking:
+                package_id = stock_picking.move_line_ids.mapped('package_id')
+                product_stock_quant = package_id.quant_ids.filtered(lambda f: f.product_id == order_line.product_id)
+                weight = sum(package_id.mapped('shipping_weight')) / sum(product_stock_quant.mapped('quantity')) * sum(
+                    stock_picking.move_line_ids.mapped('reserved_qty'))
             else:
                 weight += order_line.product_qty * order_line.product_id.weight
         return weight
+
+    def sendcloud_rate_shipment(self, order):
+        """ Overriden """
+        sendcloud = SendCloudExt(self.sendcloud_public_key, self.sendcloud_secret_key, self.log_xml)
+        price, packages_no = sendcloud.get_shipping_rate(self, order=order)
+        message = None
+        if packages_no:
+            message = _('Note that this price is for %s packages since the order weight is more than max weight of the shipping method.', packages_no)
+        return {
+            'success': True,
+            'price': price,
+            'warning_message': message
+        }
