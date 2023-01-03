@@ -45,7 +45,7 @@ class DeliveryCarrier(models.Model):
             if stock_picking:
                 package_id = stock_picking.move_line_ids.mapped('package_id')
                 product_stock_quant = package_id.quant_ids.filtered(lambda f: f.product_id == order_line.product_id)
-                weight = package_id.shipping_weight / product_stock_quant.quantity * sum(
+                weight = sum(package_id.mapped('shipping_weight')) / sum(product_stock_quant.mapped('quantity')) * sum(
                     stock_picking.move_line_ids.mapped('reserved_qty'))
             else:
                 weight += order_line.product_qty * order_line.product_id.weight
