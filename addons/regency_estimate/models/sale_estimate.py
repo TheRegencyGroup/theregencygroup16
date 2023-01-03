@@ -31,9 +31,7 @@ class SaleEstimate(models.Model):
     name = fields.Char(
         'Estimate', index=True, required=True, readonly=True, default=lambda self: _('New'))
     description = fields.Html('Notes')
-    company_id = fields.Many2one(
-        'res.company', string='Company', index=True,
-        default=lambda self: self.env.company, readonly=False, store=True)
+    company_id = fields.Many2one('res.company', string='Company', index=True, default=lambda self: self.env.company)
     user_id = fields.Many2one(
         'res.users', string='Salesperson', default=lambda self: self.env.user,
         domain="[('share', '=', False)]",
