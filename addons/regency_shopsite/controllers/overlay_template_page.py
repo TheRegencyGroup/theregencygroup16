@@ -135,8 +135,6 @@ class OverlayTemplatePage(http.Controller):
 
         product_template_attribute_value_ids = []
         if not old_overlay_product or overlay_product_was_changed:
-            if not attribute_list:
-                raise ValidationError('attribute_list argument is required!')
             for attribute in attribute_list:
                 attribute_id = attribute['attribute_id']
                 product_template_attribute_line_id = product_template_id.attribute_line_ids \
@@ -210,7 +208,7 @@ class OverlayTemplatePage(http.Controller):
             'active': overlay_product_id.active if overlay_product_id else False,
             'name': overlay_product_id.name if overlay_product_id else False,
             'positionImagesUrls': {
-                x.overlay_position_id.id: f'/web/image?model={x._name}&id={x.id}&field=image'
+                x.overlay_position_id.id: f'/web/content/{x._name}/{x.id}/image'
                 for x in overlay_product_id.overlay_product_image_ids
             }
         }
@@ -219,8 +217,9 @@ class OverlayTemplatePage(http.Controller):
     def overlay_template_page(self, overlay_template_id, **kwargs):
         if not overlay_template_id or not overlay_template_id.exists():
             return request.render('website.page_404')
-
         if not self._overlay_template_is_available_for_user(overlay_template_id):
+            return request.render('website.page_404')
+        if not overlay_template_id.website_published:
             return request.render('website.page_404')
 
         overlay_template_id = overlay_template_id.sudo()
@@ -282,6 +281,10 @@ class OverlayTemplatePage(http.Controller):
                 'name': overlay_template_id.name,
                 'hotelIds': overlay_template_id.hotel_ids.ids,
                 'positionsData': overlay_template_id.areas_data or {},
+                'exampleImageUrl':
+                    f'/web/image?model=overlay.template&id={overlay_template_id.id}'
+                    f'&field=example_image&width=3840&height=2160'
+                    if overlay_template_id.example_image else False,
             },
             'productTemplateId': product_template_id.id,
             'productName': product_template_id.name,

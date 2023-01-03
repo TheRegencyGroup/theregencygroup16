@@ -27,6 +27,15 @@
                 <xpath expr="//field[@name='requisition_id']" position="attributes">
                     <attribute name="string">Purchase Requisition</attribute>
                 </xpath>
+                <xpath expr="//field[@name='date_order']" position="attributes">
+                    <attribute name="widget">date</attribute>
+                </xpath>
+                <xpath expr="//field[@name='date_planned']" position="attributes">
+                    <attribute name="widget">date</attribute>
+                </xpath>
+                <xpath expr="//field[@name='date_approve']" position="attributes">
+                    <attribute name="widget">date</attribute>
+                </xpath>
             </field>
          </record>
         <record id="purchase_order_view_inherit" model="ir.ui.view">
@@ -39,5 +48,24 @@
                 </xpath>
             </field>
          </record>
+        <record id="purchase_order_tree" model="ir.ui.view">
+            <field name="inherit_id" ref="purchase.purchase_order_kpis_tree"/>
+            <field name="model">purchase.order</field>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='partner_id']" position="after">
+                    <field name="estimate_ids" widget="many2many_tags"/>
+                </xpath>
+            </field>
+        </record>
+        <record id="view_purchase_order_filter" model="ir.ui.view">
+            <field name="inherit_id" ref="purchase.view_purchase_order_filter"/>
+            <field name="model">purchase.order</field>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='origin']" position="after">
+                    <field name="estimate_ids"/>
+                    <filter string="Estimate" name="estimate" domain="[]" context="{'group_by': 'estimate_ids'}"/>
+                </xpath>
+            </field>
+        </record>
     </data>
 </odoo>

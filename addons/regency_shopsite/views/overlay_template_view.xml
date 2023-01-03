@@ -36,6 +36,7 @@
                     <group>
                         <group>
                             <field name="name"/>
+                            <field name="is_ready_for_website"/>
                             <field name="product_template_id"
                                    attrs="{'readonly': [('allow_edit', '=', False)]}"/>
                             <field name="overlay_attribute_value_id"/>
@@ -85,6 +86,10 @@
                         <page string="Customized items" id="customized_items"
                               attrs="{'invisible': [('overlay_attribute_value_id', '=', False)]}">
                             <field name="overlay_product_ids" context="{'default_overlay_template_id': id}"/>
+                        </page>
+                        <page string="Example" id="example_image">
+                            <field name="example_image" widget="image" class="border"
+                                   options="{'accepted_file_extensions': 'image/*'}"/>
                         </page>
                     </notebook>
                     <field name="areas_data" widget="overlay_areas"/>

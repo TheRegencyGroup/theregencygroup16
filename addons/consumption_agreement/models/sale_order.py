@@ -52,6 +52,20 @@ class SaleOrder(models.Model):
                                                         filtered(lambda x: x.display_type == 'product')]
                 self.env['sale.order.line'].create(line_values)
 
+    @api.onchange('partner_id')
+    def onchange_partner_id(self):
+        if self.partner_id.country_id:
+            self.currency_id = self.partner_id.country_id.currency_id.id
+
+    @api.model
+    def create(self, values):
+        res = super().create(values)
+        # onchange_partner_id not save currency changes
+        if res.partner_id.country_id:
+            res.currency_id = res.partner_id.country_id.currency_id
+        return res
+
+
 class SaleOrderLine(models.Model):
     _inherit = 'sale.order.line'
 
@@ -81,6 +95,7 @@ class SaleOrderLine(models.Model):
                               ('agreement_id.allowed_partner_ids', 'in', partner_id.id)],
                    order='signed_date',
                    limit=1)
+
     def write(self, vals):
         res = super(SaleOrderLine, self).write(vals)
         if 'product_uom_qty' in vals:

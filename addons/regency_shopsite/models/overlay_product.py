@@ -17,7 +17,7 @@ class OverlayProduct(models.Model):
     overlay_template_id = fields.Many2one('overlay.template', required=True, ondelete='restrict')
     product_tmpl_id = fields.Many2one(string="Product template", related='overlay_template_id.product_template_id',
                                       store=True)
-    website_published = fields.Boolean(related='product_tmpl_id.website_published')
+    website_published = fields.Boolean(related='overlay_template_id.website_published')
     hotel_ids = fields.Many2many(related='overlay_template_id.hotel_ids')
     name = fields.Char()
     product_id = fields.Many2one('product.product', copy=False)
@@ -64,10 +64,13 @@ class OverlayProduct(models.Model):
                     table_content += f'''
                         <tr>
                             {first_cell}
-                            <td>{area['objectData'].get('text') or ''}</td>
-                            <td>{area['objectData'].get('fontName') or ''}</td>
-                            <td>{area['objectData'].get('fontSize') or ''}</td>
-                            <td>{area['objectData'].get('fontColor') or ''}</td>
+                            <td>{area['objectData'].get('text', '')}</td>
+                            <td>{area['objectData'].get('fontName', '')}</td>
+                            <td>{area['objectData'].get('fontSize', '0')}</td>
+                            <td>{area['objectData'].get('lineSpacing') or '0'}</td>
+                            <td>{area['objectData'].get('charSpacing', '0')}</td>
+                            <td>{area['objectData'].get('fontColor', '')}</td>
+                            <td>{area['objectData'].get('align', '').capitalize()}</td>
                         </tr>
                     '''
             table = f'''
@@ -77,7 +80,10 @@ class OverlayProduct(models.Model):
                         <th>Text</th>
                         <th>Font</th>
                         <th>Font size</th>
+                        <th>Line spacing</th>
+                        <th>Char spacing</th>
                         <th>Color</th>
+                        <th>Align</th>
                     </thead>
                     <tbody>
                         {table_content}
@@ -89,7 +95,7 @@ class OverlayProduct(models.Model):
     @api.model_create_multi
     def create(self, vals):
         res = super().create(vals)
-        res._create_attribute_value()
+        res.with_context(from_overlay_product=True)._create_attribute_value()
         return res
 
     def unlink(self):

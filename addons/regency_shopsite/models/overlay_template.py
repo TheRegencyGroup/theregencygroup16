@@ -19,7 +19,8 @@ class OverlayTemplate(models.Model):
     name = fields.Char(required=True)
     product_template_id = fields.Many2one('product.template', required=True, string='Product',
                                           domain="[('is_fit_for_overlay', '=', True)]")
-    website_published = fields.Boolean(related='product_template_id.website_published')
+    is_ready_for_website = fields.Boolean(string='Website Published')
+    website_published = fields.Boolean(compute='_compute_website_published', store=True)
     overlay_attribute_value_id = fields.Many2one('product.attribute.value',
                                                  compute='_compute_overlay_attribute_value_id',
                                                  compute_sudo=True)
@@ -58,6 +59,7 @@ class OverlayTemplate(models.Model):
     areas_overlay_color_ids = fields.Many2many('overlay.color', compute='_compute_areas_data_values', store=True,
                                                ondelete='restrict')
     preview_image = fields.Image(compute='_compute_preview_image', store=True)
+    example_image = fields.Image()
 
     @api.constrains('areas_data')
     def _check_areas_data(self):
@@ -155,6 +157,12 @@ class OverlayTemplate(models.Model):
                 rec.areas_image_attribute_selected_value_ids = [Command.set(value_ids)]
                 rec.areas_overlay_font_ids = [Command.set(font_ids)]
                 rec.areas_overlay_color_ids = [Command.set(color_ids)]
+
+    @api.depends('is_ready_for_website', 'product_template_id.website_published')
+    def _compute_website_published(self):
+        for rec in self:
+            rec.website_published = rec.is_ready_for_website and rec.product_template_id.website_published
+
 
     @api.depends('overlay_attribute_value_ids')
     def _compute_overlay_attribute_value_id(self):
@@ -355,7 +363,7 @@ class OverlayTemplate(models.Model):
     @api.model_create_multi
     def create(self, vals):
         res = super().create(vals)
-        res.with_context(is_overlay_template_initiator=True)._create_overlay_attribute_value()
+        res.with_context(from_overlay_template=True)._create_overlay_attribute_value()
         return res
 
     def unlink(self):

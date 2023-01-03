@@ -1,6 +1,8 @@
+from odoo.tests import tagged
 from odoo.addons.purchase_requisition.tests.common import TestPurchaseRequisitionCommon
 
 
+@tagged('all_run')
 class TestFee(TestPurchaseRequisitionCommon):
 
     def setUp(self):
@@ -8,6 +10,7 @@ class TestFee(TestPurchaseRequisitionCommon):
             'vendor_price': 33,
             'product_id': self.product_09.id,
             'min_quantity': 10,
+            'product_uom_qty': 10,
             'unit_price': 50,
             'price': 75,
             'total': 75 * 10
@@ -74,7 +77,7 @@ class TestFee(TestPurchaseRequisitionCommon):
         self.assertEqual(10 * 75 * 5 / 100, self.fee_value_percent.value)  # 37.5
         self.assertEqual(7, self.fee_value_abs.value)  # 7
 
-        self.psl.write({'min_quantity': 20})
+        self.psl.write({'min_quantity': 20, 'product_uom_qty': 20})
 
         self.assertEqual(1.5 * 20 + 75 * 20 * 5 / 100 + 7, self.psl.fee)  # 112
         self.assertEqual(112 + 20 * 75, self.psl.total)

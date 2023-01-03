@@ -1,6 +1,6 @@
 {
     'name': 'Regency Contacts',
-    'version': '16.0.1.1',
+    'version': '16.0.1.2',
     'summary': '',
     'author': 'OpsWay',
     'description': "",
@@ -15,6 +15,11 @@
         'views/customer_association.xml',
         'data/association_type.xml'
     ],
+    'assets': {
+        'web.assets_backend': [
+            'regency_contacts/static/src/*/**.js',
+        ],
+    },
     'installable': True,
     'application': True,
     'auto_install': False,

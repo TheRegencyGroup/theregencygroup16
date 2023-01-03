@@ -11,6 +11,7 @@ class ProductAttribute(models.Model):
     def _get_restricted_for_unlink(self):
         return (
             self.env.ref('regency_shopsite.overlay_attribute').id,
+            self.env.ref('regency_shopsite.customization_attribute').id,
             self.env.ref('regency_shopsite.color_attribute').id,
             self.env.ref('regency_shopsite.size_attribute').id,
         )
@@ -54,9 +55,6 @@ class ProductTemplateAttributeLine(models.Model):
                 continue
             overlay_template_ids = rec.product_tmpl_id.overlay_template_ids \
                 .filtered(lambda x: x.areas_image_attribute_id.id == rec.attribute_id.id)
-            # overlay_template_ids = self.env['overlay.template'].search(
-            #     [('product_template_id', '=', rec.product_tmpl_id.id),
-            #      ('areas_image_attribute_id', '=', rec.attribute_id.id)])
             if overlay_template_ids:
                 raise UserError(f'You can not remove the "{rec.attribute_id.name}" attribute because it is used in '
                                 f'overlay templates with IDS({", ".join([str(x) for x in overlay_template_ids.ids])})')
@@ -96,10 +94,6 @@ class ProductTemplateAttributeValue(models.Model):
             overlay_template_ids = rec.product_tmpl_id.overlay_template_ids \
                 .filtered(lambda x: x.areas_image_attribute_id.id == rec.attribute_id.id and
                                     rec.product_attribute_value_id.id in x.areas_image_attribute_selected_value_ids.ids)
-            # overlay_template_ids = self.env['overlay.template'].search(
-            #     [('product_template_id', '=', rec.product_tmpl_id.id),
-            #      ('areas_image_attribute_id', '=', rec.attribute_id.id),
-            #      ('areas_image_attribute_selected_value_ids', 'in', rec.product_attribute_value_id.id)])
             if overlay_template_ids:
                 raise UserError(f'You can not remove "{rec.product_attribute_value_id.name}" value because it is used '
                                 f'in overlay templates with IDS({", ".join([str(x) for x in overlay_template_ids.ids])})')
@@ -128,20 +122,15 @@ class ProductTemplateAttributeValue(models.Model):
 
     @api.constrains('product_attribute_value_id', 'ptav_active')
     def _check_correct_attribute_value(self):
-        """ Restrict values changes in the product not from the overlay template. """
         for ptav in self:
-            is_overlay_template_initiator = self._context.get('is_overlay_template_initiator') or not self._context.get(
-                'sale_multi_pricelist_product_template')
-            if not is_overlay_template_initiator:
-                is_overlay_attr = ptav.attribute_id == self.env.ref('regency_shopsite.overlay_attribute')
-                is_none_overlay_value = ptav.product_attribute_value_id == self.env.ref(
-                    'regency_shopsite.none_overlay_attribute_value')
-                if is_overlay_attr and not is_none_overlay_value:
-                    raise UserError('Overlay attribute line values possible to change only from overlay template.')
+            overlay_attribute_id = self.env.ref('regency_shopsite.overlay_attribute')
+            customization_attribute_id = self.env.ref('regency_shopsite.customization_attribute')
+            none_customization_attribute_value_id = self.env.ref('regency_shopsite.none_overlay_attribute_value')
 
-                is_customization_attr = ptav.attribute_id == self.env.ref('regency_shopsite.customization_attribute')
-                is_none_customization_value = ptav.product_attribute_value_id == self.env.ref(
-                    'regency_shopsite.no_customization_value')
-                if is_customization_attr and not is_none_customization_value:
-                    raise UserError(
-                        'Customization attribute line values possible to change only from overlay template.')
+            if ptav.attribute_id.id == overlay_attribute_id.id and \
+                    not self.env.context.get('from_overlay_template', False):
+                raise UserError('Overlay attribute line values possible to change only from overlay template.')
+            elif ptav.attribute_id.id == customization_attribute_id.id and \
+                    not self.env.context.get('from_overlay_product', False) and \
+                    ptav.product_attribute_value_id.id != none_customization_attribute_value_id.id:
+                raise UserError('Customization attribute line values possible to change only from customization.')

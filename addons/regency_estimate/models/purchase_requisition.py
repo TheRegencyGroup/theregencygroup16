@@ -1,4 +1,4 @@
-from odoo import fields, models, api, Command
+from odoo import fields, models, api, Command, _
 
 
 class PurchaseRequisition(models.Model):
@@ -68,6 +68,17 @@ class PurchaseRequisition(models.Model):
             for rec in self:
                 rec.send_notification(self.env['res.users'].browse(user_id))
         return res
+
+    def action_cancel(self):
+        # try to set all associated quotations to cancel state
+        for requisition in self:
+            for requisition_line in requisition.line_ids:
+                requisition_line.supplier_info_ids.unlink()
+            if requisition.purchase_ids:
+                requisition.purchase_ids.cancel_order_with_requisition_cancellation('purchase requisition has been canceled')
+            for po in requisition.purchase_ids:
+                po.message_post(body=_('Cancelled by the agreement associated to this quotation.'))
+        self.write({'state': 'cancel'})
 
     def send_notification(self, user_id, message=False):
         if not message:

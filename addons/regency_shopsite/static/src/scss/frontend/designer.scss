@@ -1,7 +1,24 @@
+$editor_tools_btn_width: 40px;
+$editor_tools_padding: 5px;
+$image-border-width: 1px;
+$editor_tools_width: $editor_tools_btn_width + $editor_tools_padding;
+$editor_min_width: 500px;
+$editor_full_width: 1200px;
+
 .product_overlay_editor {
   margin-bottom: 20px;
   display: flex;
   flex-direction: column;
+
+  &.read_mode {
+    .product_overlay_editor_positions {
+      width: $editor_min_width + 2 * $image-border-width;
+    }
+
+    .product_overlay_editor_position_list {
+      margin-left: 0;
+    }
+  }
 
   .product_overlay_disabled {
     pointer-events: none;
@@ -9,6 +26,8 @@
   }
 
   .product_overlay_editor_positions {
+    width: $editor_tools_width + $editor_min_width + 2 * $image-border-width;
+
     .product_overlay_editor_position_hide {
       position: absolute;
       top: 0;
@@ -70,8 +89,8 @@
         }
 
         .ot_tools_btn {
-          width: 40px;
-          height: 40px;
+          width: $editor_tools_btn_width;
+          height: $editor_tools_btn_width;
           margin: 0 0 5px;
           display: flex;
           align-items: center;
@@ -101,8 +120,6 @@
       }
 
       .product_overlay_position_container {
-        //width: 500px;
-        //height: 500px;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -153,8 +170,6 @@
           }
 
           img {
-            max-width: 500px;
-            max-height: 500px;
             object-fit: contain;
           }
 
@@ -179,6 +194,7 @@
   }
 
   .product_overlay_editor_position_list {
+    margin-left: $editor_tools_width;
     margin-top: 10px;
     display: flex;
 
@@ -221,6 +237,21 @@
       &_selected {
         box-shadow: 0 0 2px 2px transparentize($grey10, 0.3);
       }
+    }
+  }
+}
+
+.overlay_template_editor_full_view {
+  .product_overlay_editor {
+    align-items: center;
+
+    .product_overlay_editor_positions {
+      width: $editor_full_width + $editor_tools_width + 2 * $image-border-width;
+      overflow: hidden;
+    }
+
+    .product_overlay_editor_position_list {
+      width: $editor_full_width;
     }
   }
 }
