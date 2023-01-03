@@ -52,7 +52,8 @@
         'views/stock_picking.xml',
         'views/account_move.xml',
         'views/sale_order.xml',
-        'views/res_config_settings.xml'
+        'views/res_config_settings.xml',
+        'data/ir_rules.xml',
     ],
     'demo': [
     ],

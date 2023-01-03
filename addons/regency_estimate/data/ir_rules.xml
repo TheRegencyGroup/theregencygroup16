@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <record id="regency_estimate_user_company_rule" model="ir.rule">
+            <field name="name">Regency Estimate User Company Rule</field>
+            <field name="model_id" ref="model_sale_estimate"/>
+            <field name="domain_force">['|', ('company_id', '=', False), ('company_id', 'in', company_ids)]</field>
+        </record>
+
+        <record id="regency_price_sheet_user_company_rule" model="ir.rule">
+            <field name="name">Regency Price Sheet User Company Rule</field>
+            <field name="model_id" ref="model_product_price_sheet"/>
+            <field name="domain_force">['|', ('company_id', '=', False), ('company_id', 'in', company_ids)]</field>
+        </record>
+
+    </data>
+</odoo>

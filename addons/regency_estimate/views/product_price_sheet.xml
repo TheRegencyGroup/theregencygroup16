@@ -72,6 +72,7 @@
                               <field name="estimate_id"/>
                               <field name="partner_id"/>
                               <field name="currency_id" groups="base.group_multi_currency"/>
+                              <field name="company_id"/>
                           </group>
                         </group>
                         <notebook>
