@@ -144,6 +144,7 @@
                     <field name="currency_id"/>
                     <field name="opportunity_id"/>
                     <field name="state"/>
+                    <field name="company_id"/>
                 </tree>
             </field>
         </record>

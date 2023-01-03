@@ -1,6 +1,7 @@
 <?xml version="1.0"?>
 <odoo>
     <data>
+
          <record id="sale_view_order_form_regency" model="ir.ui.view">
             <field name="name">purchase.order.regency</field>
             <field name="model">purchase.order</field>
@@ -41,6 +42,7 @@
                 </field>
             </field>
          </record>
+
         <record id="purchase_order_view_inherit" model="ir.ui.view">
             <field name="name">purchase.order.regency</field>
             <field name="model">purchase.order</field>
@@ -51,5 +53,26 @@
                 </xpath>
             </field>
          </record>
+
+        <record id="rfq_tree_regency" model="ir.ui.view">
+            <field name="model">purchase.order</field>
+            <field name="inherit_id" ref="purchase.purchase_order_kpis_tree"/>
+            <field name="arch" type="xml">
+                <field name="company_id" position="attributes">
+                    <attribute name="groups" remove="base.group_multi_company"/>
+                </field>
+            </field>
+        </record>
+
+        <record id="purchase_order_tree_regency" model="ir.ui.view">
+            <field name="model">purchase.order</field>
+            <field name="inherit_id" ref="purchase.purchase_order_view_tree"/>
+            <field name="arch" type="xml">
+                <field name="company_id" position="attributes">
+                    <attribute name="groups" remove="base.group_multi_company"/>
+                </field>
+            </field>
+        </record>
+
     </data>
 </odoo>
