@@ -8,6 +8,8 @@
         'delivery',
         'purchase',
         'sale',
+        'delivery_ups',
+        'delivery_dhl',
         'regency_estimate',
     ],
     'category': 'Regency/Stock',

@@ -15,6 +15,9 @@
             <xpath expr="//field[@name='date_order'][2]" position="attributes">
                 <attribute name="widget">date</attribute>
             </xpath>
+            <field name="payment_term_id" position="before">
+                <field name="company_id"/>
+            </field>
         </field>
     </record>
 </odoo>
