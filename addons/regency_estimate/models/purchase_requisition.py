@@ -1,4 +1,4 @@
-from odoo import fields, models, api,  Command, _
+from odoo import fields, models, api,  Command
 from odoo.exceptions import UserError
 
 
@@ -92,7 +92,7 @@ class PurchaseRequisition(models.Model):
             if requisition.purchase_ids:
                 requisition.purchase_ids.cancel_order_with_requisition_cancellation('purchase requisition has been canceled')
             for po in requisition.purchase_ids:
-                po.message_post(body=_('Cancelled by the agreement associated to this quotation.'))
+                po.message_post(body=('Cancelled by the agreement associated to this quotation.'))
         self.write({'state': 'cancel'})
 
     def send_notification(self, user_id, message=False):
