@@ -42,7 +42,7 @@
 
         <record id="action_report_quant_package_barcode_small_stock_move_line" model="ir.actions.report">
             <field name="name">Regency Package Barcode (PDF)</field>
-            <field name="model">barcode.report</field>
+            <field name="model">stock.move.line</field>
             <field name="report_type">qweb-pdf</field>
             <field name="report_name">regency_stock.report_package_barcode_small_regency_stock_move_lines</field>
             <field name="report_file">stock.report_package_barcode</field>

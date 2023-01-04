@@ -92,26 +92,26 @@
         <t t-call="web.basic_layout">
             <page>
                 <t t-call="web.html_container">
-                    <t t-foreach="docs" t-as="r">
+                    <t t-foreach="docs" t-as="sml">
                         <div style="width: 102mm; height: 51mm; padding: 10px; display: flex; flex-direction: column;">
                             <div class="d-flex">
                                 <div class="text-center">
-                                    <div t-out="r.package_name"
+                                    <div t-out="sml.result_package_id.name"
                                          t-options="{'widget': 'barcode', 'img_style': 'width:182px;height:70px;'}"/>
-                                    <div t-out="r.package_name"
+                                    <div t-out="sml.result_package_id.name"
                                          style="font-size:12px;"/>
                                 </div>
                                 <div style="width: 182px; text-align: right; position: relative;">
-                                    <img t-if="r.company.logo"
-                                         t-att-src="image_data_uri(r.company.logo)"
+                                    <img t-if="sml.company_id.logo"
+                                         t-att-src="image_data_uri(sml.company_id.logo)"
                                          style="height: 45px; margin-right: 20px;"/>
-                                    <div t-out="round(r.qty_done)"
+                                    <div t-out="round(sml.qty_done)"
                                          style="position: absolute; top: 65px; left: 20px; font-weight: bolder;"/>
                                 </div>
                             </div>
                             <div style="font-weight: bolder; text-align: left;">
-                                <div t-if="r.customer_name" t-out="r.customer_name" style="padding-top: 20px;"/>
-                                <div t-out="r.product_name" style="padding-top: 20px;"/>
+                                <div t-if="sml.move_id.purchase_line_id.sale_line_id.order_id.partner_id.name" t-out="sml.move_id.purchase_line_id.sale_line_id.order_id.partner_id.name" style="padding-top: 20px;"/>
+                                <div t-out="sml.product_id.name" style="padding-top: 20px;"/>
                             </div>
                         </div>
                     </t>

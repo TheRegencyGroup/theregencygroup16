@@ -26,19 +26,10 @@ class ChooseReceiptPackage(models.TransientModel):
                 ml.qty_done, 0.0,
                 precision_rounding=ml.product_uom_id.rounding) == 0)
 
-        qty_done = move_line_ids.qty_done
         delivery_package = self.picking_id._put_in_pack(move_line_ids)
 
         if self.weight:
             delivery_package.shipping_weight = self.weight
 
-        barcode_report = self.env['barcode.report'].create({
-                'package_name': delivery_package.name,
-                'company': move_line_ids.company_id.id,
-                'qty_done': qty_done,
-                'customer_name': move_line_ids.move_id.purchase_line_id.sale_line_id.order_id.partner_id.name,
-                'product_name': move_line_ids.product_id.name,
-            })
-        report_action = self.env.ref('regency_stock.action_report_quant_package_barcode_small_stock_move_line').report_action(barcode_report)
-        report_action.update({'close_on_report_download': True})
-        return report_action
+        stock_move_line = self.env['stock.move.line'].search([('result_package_id', '=', delivery_package.id)])
+        return self.env['stock.quant.package'].print_barcode(stock_move_line=stock_move_line)
