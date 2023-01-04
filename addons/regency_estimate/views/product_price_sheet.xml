@@ -94,9 +94,9 @@
                                       <field name="insection_rownumber" invisible="1"/>
                                       <field name="qty_range_str"/>
                                       <field name="vendor_price" groups="regency_estimate.group_processor" string="Vendor Price" options="{'hide_sort_icon': True, 'width': '70px'}"/>
+                                      <widget name="multi_currency_widget" options="{'value_field': 'vendor_price'}" width="20px"/>
                                       <field name="duty" groups="regency_estimate.group_processor" options="{'hide_sort_icon': True,  'width': '70px'}"
                                           attrs="{'column_invisible': [('parent.has_produced_overseas_items', '=', False)]}"/>
-                                      <widget name="multi_currency_widget" options="{'value_field': 'vendor_price'}" width="20px"/>
                                       <field name="freight" groups="regency_estimate.group_processor" options="{'hide_sort_icon': True, 'width': '70px'}"
                                              attrs="{'column_invisible': [('parent.has_produced_overseas_items', '=', False)]}"/>
                                       <field name="currency_id" invisible="1"/>
