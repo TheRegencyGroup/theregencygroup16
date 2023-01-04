@@ -341,6 +341,7 @@ class ConsumptionAgreement(models.Model):
 
 class ConsumptionAggreementLine(models.Model):
     _name = 'consumption.agreement.line'
+    _inherit = ['multi.currency.mixin']
 
     agreement_id = fields.Many2one('consumption.agreement', 'Consumption Agreement')
     signed_date = fields.Date(related='agreement_id.signed_date', store=True)

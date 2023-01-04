@@ -330,6 +330,7 @@ class ProductPriceSheet(models.Model):
 class ProductPriceSheetLine(models.Model):
     _name = 'product.price.sheet.line'
     _order = 'product_id ASC, min_quantity ASC'
+    _inherit = ['multi.currency.mixin']
 
     price_sheet_id = fields.Many2one('product.price.sheet')
     name = fields.Text('Description')

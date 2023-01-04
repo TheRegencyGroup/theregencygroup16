@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<template id="template" xml:space="preserve">
+
+    <t t-name="multi_currency_widget.MultiCurrencyWidget" owl="1">
+        <div>
+            <a tabindex="0" t-on-click="showPopup" class="fa fa-exchange text-primary"/>
+        </div>
+    </t>
+
+    <t t-name="multi_currency_widget.MultiCurrencyPopOver" owl="1">
+        <div>
+        <h6>Currency Values:</h6>
+            <div style="margin:5px">
+                <t t-if="props.calcData">
+                    <t t-foreach="props.calcData" t-as="val" t-key="val_index">
+                        <p><t t-out="val[0]"/> <t t-out="val[1]"/></p>
+                    </t>
+                </t>
+            </div>
+        </div>
+    </t>
+</template>
