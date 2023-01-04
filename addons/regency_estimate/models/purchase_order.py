@@ -126,7 +126,7 @@ class PurchaseOrder(models.Model):
 class MyPurchaseOrderLine(models.Model):
     _inherit = 'purchase.order.line'
 
-    produced_overseas = fields.Boolean(string='Produced overseas', copy=True)
+    produced_overseas = fields.Boolean(string='Produced overseas')
     customer_id = fields.Many2one('res.partner')
     fee = fields.Float(readonly=True, compute='_compute_fee', store=True)
     fee_value_ids = fields.One2many('fee.value', 'po_line_id', store=True, required=True)
