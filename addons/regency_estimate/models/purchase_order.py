@@ -1,5 +1,6 @@
 from odoo import fields, models, api
 from odoo.tools import get_lang
+from odoo.addons.regency_tools.system_messages import accept_format_string, SystemMessages
 from odoo.addons.purchase_requisition.models.purchase import PurchaseOrderLine
 
 
@@ -94,6 +95,15 @@ class PurchaseOrder(models.Model):
                         'currency_id': rec.currency_id.id
                     })
 
+        if set(self.requisition_id.purchase_ids.mapped('state')) == {'confirmed_prices'}:
+            if self.requisition_id.estimate_id.estimate_manager_id:
+                partner_ids = self.requisition_id.estimate_id.estimate_manager_id.partner_id.ids
+                self.requisition_id.message_subscribe(partner_ids=partner_ids,
+                                                      subtype_ids=[self.env.ref('mail.mt_activities').id,
+                                                                   self.env.ref('mail.mt_comment').id])
+                msg = accept_format_string(SystemMessages.get('M-014'), self.requisition_id.name)
+                self.requisition_id.message_post(body=msg, partner_ids=partner_ids)
+
     def _prepare_invoice(self):
         invoice_vals = super()._prepare_invoice()
         invoice_vals['invoice_date'] = fields.Datetime.now()
@@ -139,9 +149,15 @@ class MyPurchaseOrderLine(models.Model):
     @api.depends('product_qty', 'price_unit', 'taxes_id', 'fee')
     def _compute_amount(self):
         super()._compute_amount()
-        for line in self:
-            line_subtotal = line.price_subtotal + line.fee
-            line.update({'price_subtotal': line_subtotal})
+
+    def _convert_to_tax_base_line_dict(self):
+        """ add fee as a part of unit cost to built in standard odoo logic taxes calculation.
+        """
+        # TODO A case with discount is not tested(likely discount will be applied to a fee_amount as well)
+        res = super(MyPurchaseOrderLine, self)._convert_to_tax_base_line_dict()
+        res['price_unit'] += res['record'].fee / res['quantity'] if res['quantity'] else 0
+        return res
+
 
     @api.onchange('product_id')
     def onchange_product_id(self):

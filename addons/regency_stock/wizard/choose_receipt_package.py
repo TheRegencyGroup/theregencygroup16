@@ -27,8 +27,9 @@ class ChooseReceiptPackage(models.TransientModel):
                 precision_rounding=ml.product_uom_id.rounding) == 0)
 
         delivery_package = self.picking_id._put_in_pack(move_line_ids)
+
         if self.weight:
             delivery_package.shipping_weight = self.weight
-        report_action = self.env.ref('stock.action_report_quant_package_barcode_small').report_action(self.picking_id.package_ids)
-        report_action.update({'close_on_report_download': True})
-        return report_action
+
+        stock_move_line = self.env['stock.move.line'].search([('result_package_id', '=', delivery_package.id)])
+        return self.env['stock.quant.package'].print_barcode(stock_move_line=stock_move_line)

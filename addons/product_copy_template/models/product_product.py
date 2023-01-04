@@ -7,9 +7,6 @@ class Product(models.Model):
     _inherit = 'product.template'
 
     product_source_id = fields.Many2one('product.template', string='Template Product')
-    allowed_partner_ids = fields.Many2many('res.partner',
-                                           domain=[('is_customer', '=', True), ('is_company', '=', True)],
-                                           string="Allowed Customers")
 
     @api.onchange('product_source_id')
     def _onchange_product_source_id(self):

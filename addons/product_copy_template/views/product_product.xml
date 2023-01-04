@@ -9,11 +9,6 @@
                     <label for="product_source_id"/>
                     <field class="o_text_overflow" name="product_source_id" />
                 </xpath>
-                <xpath expr="//group[@name='sale']" position="before">
-                     <group>
-                        <field name="allowed_partner_ids" widget="many2many_tags" mode="tree"/>
-                     </group>
-                </xpath>
             </field>
        </record>
 
