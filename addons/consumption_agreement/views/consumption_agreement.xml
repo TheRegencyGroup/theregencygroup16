@@ -99,6 +99,7 @@
                                     <field name="qty_consumed"/>
                                     <field name="qty_remaining"/>
                                     <field name="price_unit"/>
+                                    <widget name="multi_currency_widget" options="{'value_field': 'price_unit'}" width="20px"/>
                                 </tree>
                             </field>
                              <group name="note_group" col="6" class="mt-2 mt-md-0">

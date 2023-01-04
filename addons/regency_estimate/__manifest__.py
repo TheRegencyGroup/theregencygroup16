@@ -1,6 +1,6 @@
 {
     'name': 'Regency Sales Estimates',
-    'version': '16.0.0.9',
+    'version': '16.0.0.10',
     'summary': '',
     'author': 'OpsWay',
     'description': "",
@@ -18,7 +18,8 @@
         'regency_backend_interface',
         'mail_chatter_customization',
         'product',
-        'regency_tools'
+        'regency_tools',
+        'multi_currency_widget'
     ],
     'category': 'Regency/Sales',
     'sequence': 10,
@@ -52,7 +53,8 @@
         'views/stock_picking.xml',
         'views/account_move.xml',
         'views/sale_order.xml',
-        'views/res_config_settings.xml'
+        'views/res_config_settings.xml',
+        # 'views/consumption_agreement.xml'
     ],
     'demo': [
     ],

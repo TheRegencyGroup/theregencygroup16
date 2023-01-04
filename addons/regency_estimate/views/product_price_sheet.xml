@@ -93,12 +93,14 @@
                                       <field name="insection_rownumber" invisible="1"/>
                                       <field name="qty_range_str"/>
                                       <field name="vendor_price" string="Vendor Price" options="{'hide_sort_icon': True, 'width': '70px'}"/>
+                                      <widget name="multi_currency_widget" options="{'value_field': 'vendor_price'}" width="20px"/>
                                       <field name="duty" options="{'hide_sort_icon': True,  'width': '70px'}"
                                              attrs="{'column_invisible': [('parent.has_produced_overseas_items', '=', False)]}"/>
                                       <field name="freight" options="{'hide_sort_icon': True, 'width': '70px'}"
                                              attrs="{'column_invisible': [('parent.has_produced_overseas_items', '=', False)]}"/>
                                       <field name="currency_id" invisible="1"/>
                                       <field name="unit_price" string="Unit Price"/>
+                                      <widget name="multi_currency_widget" options="{'value_field': 'unit_price'}" width="20px"/>
                                       <field name="production_lead_time" options="{'hide_sort_icon': True, 'width': '80px'}"/>
                                       <field name="shipping_lead_time" options="{'hide_sort_icon': True, 'width': '80px'}"
                                              string="ETA for delivery"/>
