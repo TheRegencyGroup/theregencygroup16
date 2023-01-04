@@ -148,7 +148,6 @@ class MyPurchaseOrderLine(models.Model):
         res['price_unit'] += res['record'].fee / res['quantity'] if res['quantity'] else 0
         return res
 
-
     @api.onchange('product_id')
     def onchange_product_id(self):
         super().onchange_product_id()
@@ -192,10 +191,5 @@ class MyPurchaseOrderLine(models.Model):
         action['domain'] = [('po_line_id', '=', self.id)]
         action['context'] = {'default_po_line_id': self.id}
         return action
-
-    def copy_data(self, default=None):
-        a = 1
-        return super().copy_data()
-
 
 PurchaseOrderLine._compute_price_unit_and_date_planned_and_name = MyPurchaseOrderLine._new_compute_price_unit_and_date_planned_and_name
