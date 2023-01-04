@@ -17,7 +17,7 @@
 
     <template id="sale_order_portal_content" inherit_id="sale.sale_order_portal_content">
         <xpath expr="//section[@id='terms']" position="inside">
-            <div t-if="sale_order.state == 'draft'" class="regency_legal_accept">
+            <div t-if="sale_order.state in ['draft', 'sent']" class="regency_legal_accept">
                 <input class="form-check-input" id="legal_accept" type="checkbox" t-att-checked="sale_order.legal_accepted" t-att-data-sale-order-id="sale_order.id"/>
                 <label class="form-check-label" for="legal_accept">By checking this box, you are agreeing to our Terms &amp; Conditions</label>
             </div>

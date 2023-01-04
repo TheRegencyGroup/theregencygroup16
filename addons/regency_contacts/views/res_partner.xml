@@ -71,7 +71,8 @@
             <xpath expr="//page[@name='internal_notes']" position="after">
                 <page name="associations" string="Associations">
                     <field name="association_partner_ids" invisible="1"/>
-                    <field name="association_ids" widget="one2many" context="{'default_left_partner_id': id}">
+                    <field name="association_ids" widget="x2many_no_selection"
+                           context="{'default_left_partner_id': id}">
                         <tree editable="top">
                             <field string="Association Type" name="display_assoc_title"/>
                             <field name="display_partner_id" string="Partner"/>

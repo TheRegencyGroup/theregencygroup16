@@ -1,5 +1,6 @@
 from odoo import fields, models, api
 from odoo.tools import get_lang
+from odoo.addons.regency_tools.system_messages import accept_format_string, SystemMessages
 from odoo.addons.purchase_requisition.models.purchase import PurchaseOrderLine
 
 
@@ -14,6 +15,19 @@ class PurchaseOrder(models.Model):
     show_column_produced_overseas = fields.Boolean(compute='_compute_show_column_produced_overseas')
     tracking_ref = fields.Char(compute='_compute_tracking_references')
     cancellation_reason = fields.Char()
+    estimate_ids = fields.Many2many('sale.estimate', compute='_compute_estimate_ids', store=True)
+
+    @api.depends('order_line.sale_order_id',
+                 'order_line.sale_order_id.consumption_agreement_id.from_pricesheet_id.estimate_id',
+                 'order_line.sale_order_id.price_sheet_id.estimate_id',
+                 'requisition_id.estimate_id',
+                 'order_line.move_dest_ids.group_id.sale_id',
+                 'order_line.move_ids.move_dest_ids.group_id.sale_id')
+    def _compute_estimate_ids(self):
+        for rec in self:
+            sale_orders = rec._get_sale_orders()
+            rec.estimate_ids = sale_orders.consumption_agreement_id.from_pricesheet_id.estimate_id \
+                               + sale_orders.price_sheet_id.estimate_id + rec.requisition_id.estimate_id
 
     def _compute_tracking_references(self):
         for entry in self:
@@ -81,10 +95,25 @@ class PurchaseOrder(models.Model):
                         'currency_id': rec.currency_id.id
                     })
 
+        if set(self.requisition_id.purchase_ids.mapped('state')) == {'confirmed_prices'}:
+            if self.requisition_id.estimate_id.estimate_manager_id:
+                partner_ids = self.requisition_id.estimate_id.estimate_manager_id.partner_id.ids
+                self.requisition_id.message_subscribe(partner_ids=partner_ids,
+                                                      subtype_ids=[self.env.ref('mail.mt_activities').id,
+                                                                   self.env.ref('mail.mt_comment').id])
+                msg = accept_format_string(SystemMessages.get('M-014'), self.requisition_id.name)
+                self.requisition_id.message_post(body=msg, partner_ids=partner_ids)
+
     def _prepare_invoice(self):
         invoice_vals = super()._prepare_invoice()
         invoice_vals['invoice_date'] = fields.Datetime.now()
         return invoice_vals
+
+    def cancel_order_with_requisition_cancellation(self, cancellation_reason):
+        for order in self:
+            order.message_post(body=('PO was cancelled due to the reason: %s' % cancellation_reason))
+            order.cancellation_reason = cancellation_reason
+        return super(PurchaseOrder, self).button_cancel()
 
     def button_cancel(self):
         self.ensure_one()
@@ -120,9 +149,15 @@ class MyPurchaseOrderLine(models.Model):
     @api.depends('product_qty', 'price_unit', 'taxes_id', 'fee')
     def _compute_amount(self):
         super()._compute_amount()
-        for line in self:
-            line_subtotal = line.price_subtotal + line.fee
-            line.update({'price_subtotal': line_subtotal})
+
+    def _convert_to_tax_base_line_dict(self):
+        """ add fee as a part of unit cost to built in standard odoo logic taxes calculation.
+        """
+        # TODO A case with discount is not tested(likely discount will be applied to a fee_amount as well)
+        res = super(MyPurchaseOrderLine, self)._convert_to_tax_base_line_dict()
+        res['price_unit'] += res['record'].fee / res['quantity'] if res['quantity'] else 0
+        return res
+
 
     @api.onchange('product_id')
     def onchange_product_id(self):

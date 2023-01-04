@@ -267,6 +267,7 @@ class ProductPriceSheet(models.Model):
                                        'partner_id': self.partner_id.id,
                                        'estimate_id': lines_to_order.price_sheet_id.estimate_id.id,
                                        'price_sheet_id': self.id,
+                                       'company_id': self.company_id.id,
                                        'order_line': [
                                             Command.create({
                                                 'product_id': p.product_id.id,

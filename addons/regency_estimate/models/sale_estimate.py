@@ -31,9 +31,7 @@ class SaleEstimate(models.Model):
     name = fields.Char(
         'Estimate', index=True, required=True, readonly=True, default=lambda self: _('New'))
     description = fields.Html('Notes')
-    company_id = fields.Many2one(
-        'res.company', string='Company', index=True,
-        compute='_compute_company_id', readonly=False, store=True)
+    company_id = fields.Many2one('res.company', string='Company', index=True, default=lambda self: self.env.company)
     user_id = fields.Many2one(
         'res.users', string='Salesperson', default=lambda self: self.env.user,
         domain="[('share', '=', False)]",
@@ -43,7 +41,7 @@ class SaleEstimate(models.Model):
         default=AVAILABLE_PRIORITIES[0][0])
     state = fields.Selection([('draft', 'New'), ('in_progress', 'In Progress'), ('done', 'Prices Confirmed')], 'Status',
                              compute='_compute_state', store=True)
-    state_with_qty = fields.Char(compute='_compute_state')
+    state_with_qty = fields.Char(compute='_compute_state', compute_sudo=True)
     tag_ids = fields.Many2many(
         'crm.tag', 'estimate_tag_rel', 'estimate_id', 'tag_id', string='Tags',
         help="Classify and analyze your estimates categories like: Training, Service")
@@ -150,35 +148,11 @@ class SaleEstimate(models.Model):
         for rec in self:
             rec.sale_order_count = len(rec.sale_order_ids)
 
-    @api.depends('user_id')
-    def _compute_company_id(self):
-        """ Compute company_id coherency. """
-        for rec in self:
-            proposal = rec.company_id
-
-            # invalidate wrong configuration
-            if proposal:
-                # company not in responsible companies
-                if rec.user_id and proposal not in rec.user_id.company_ids:
-                    proposal = False
-
-            # propose a new company based on responsible
-            if not proposal:
-                if rec.user_id:
-                    proposal = rec.user_id.company_id & self.env.companies
-                else:
-                    proposal = False
-
-            # set a new company
-            if rec.company_id != proposal:
-                rec.company_id = proposal
-
     @api.depends('partner_id')
     def _compute_contact_name(self):
         """ compute the new values when partner_id has changed """
         for rec in self:
             rec.update(rec._prepare_contact_name_from_partner(rec.partner_id))
-
 
     def _prepare_contact_name_from_partner(self, partner):
         contact_name = False if partner.is_company else partner.name
@@ -237,6 +211,7 @@ class SaleEstimate(models.Model):
             'search_default_estimate_id': self.id,
             'default_estimate_id': self.id,
             'default_type_id': self.env.ref('regency_estimate.type_multi').id,
+            'default_company_id': self.company_id.id,
             'default_estimate_line_ids': [
                 Command.link(l.id) for l in selected_lines
             ],
@@ -259,6 +234,7 @@ class SaleEstimate(models.Model):
         action['context'] = {
             'default_partner_id': self.partner_id.id,
             'default_estimate_id': self.id,
+            'default_company_id': self.company_id.id,
             'default_order_line': [
                 Command.create({
                     'name': p.product_id.name,
@@ -330,8 +306,9 @@ class SaleEstimate(models.Model):
                 if matched_lines:
                     for line in matched_lines:
                         if new_pricesheet_currency_id != line.currency_id and line.currency_id:
+                            company_id = self.company_id or self.env.company
                             price = line.currency_id._convert(line.price_unit * DEFAULT_MARGIN,
-                                                              new_pricesheet_currency_id, self.company_id,
+                                                              new_pricesheet_currency_id, company_id,
                                                               fields.Date.today())
                         else:
                             price = line.price_unit * DEFAULT_MARGIN
@@ -402,6 +379,7 @@ class SaleEstimate(models.Model):
         else:
             new_pricesheet = existing_draft_pricesheets.create({
                 'estimate_id': self.id,
+                'company_id': self.company_id.id,
                 'partner_id': self.partner_id,
                 'item_ids': [s.id for s in sheet_lines],
             })
@@ -523,8 +501,8 @@ class SaleEstimateLine(models.Model):
         product = self.product_id.with_context(
             lang=get_lang(self.env, self.estimate_id.partner_id.lang).code,
         )
-
-        self.update({'name': self.get_multiline_description_sale(product, self.product_template_attribute_value_ids)})
+        self.update({'name': self.get_multiline_description_sale(product,
+                     self.product_template_attribute_value_ids.sorted(lambda x: x.attribute_line_id.sequence))})
 
     def get_multiline_description_sale(self, product, picked_attrs):
         """ Compute a default multiline description for this product line.

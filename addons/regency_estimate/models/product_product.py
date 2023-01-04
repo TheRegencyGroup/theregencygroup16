@@ -13,6 +13,8 @@ class ProductProduct(models.Model):
     customer_ids = fields.Many2many('res.partner', 'customer_product_rel', compute='_compute_customer_ids', store=True,
                                     index=True)
     detailed_type = fields.Selection(default='product')
+    allowed_partner_ids = fields.Many2many('res.partner', string="Allowed Customers",
+                                           domain=[('is_customer', '=', True), ('is_company', '=', True)])
 
     @api.depends('sale_order_line_ids')
     def _compute_customer_ids(self):
