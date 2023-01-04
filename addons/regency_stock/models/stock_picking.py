@@ -6,9 +6,7 @@ class StockPicking(models.Model):
 
     def action_print_barcode_pdf(self):
         quants = self.package_ids.mapped('quant_ids')
-        if quants:
-            return self.env.ref('regency_stock.action_report_quant_package_barcode_small_quants').report_action(quants)
-        return self.env.ref('regency_stock.action_report_quant_package_barcode_small_packages').report_action(self.package_ids)
+        return self.env['stock.quant.package'].print_barcode(quants=quants)
 
     def _pre_put_in_pack_hook(self, move_line_ids):
         """
