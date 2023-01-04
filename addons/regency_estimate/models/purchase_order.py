@@ -126,7 +126,7 @@ class PurchaseOrder(models.Model):
 class MyPurchaseOrderLine(models.Model):
     _inherit = 'purchase.order.line'
 
-    produced_overseas = fields.Boolean(string='Produced overseas')
+    produced_overseas = fields.Boolean(string='Produced overseas', copy=True)
     customer_id = fields.Many2one('res.partner')
     fee = fields.Float(readonly=True, compute='_compute_fee', store=True)
     fee_value_ids = fields.One2many('fee.value', 'po_line_id', store=True, required=True)
@@ -167,7 +167,7 @@ class MyPurchaseOrderLine(models.Model):
                 if line.product_id == pol.product_id:
                     pol.price_unit = line.product_uom_id._compute_price(line.price_unit, pol.product_uom)
                     partner = pol.order_id.partner_id or pol.order_id.requisition_id.vendor_id
-                    product_ctx = {'seller_id': partner.id, 'lang': get_lang(pol.env, partner.lang).code}
+                    product_ctx = {'partner_id': partner.id, 'lang': get_lang(pol.env, partner.lang).code}
                     name = pol._get_product_purchase_description(pol.product_id.with_context(product_ctx))
                     if line.product_description_variants:
                         name += '\n' + line.product_description_variants
@@ -192,6 +192,10 @@ class MyPurchaseOrderLine(models.Model):
         action['domain'] = [('po_line_id', '=', self.id)]
         action['context'] = {'default_po_line_id': self.id}
         return action
+
+    def copy_data(self, default=None):
+        a = 1
+        return super().copy_data()
 
 
 PurchaseOrderLine._compute_price_unit_and_date_planned_and_name = MyPurchaseOrderLine._new_compute_price_unit_and_date_planned_and_name
