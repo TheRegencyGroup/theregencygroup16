@@ -469,7 +469,7 @@ class SaleEstimateLine(models.Model):
                                                      compute='_compute_purchase_requisition_line_ids', store=True)
     price_sheet_line_ids = fields.Many2many('product.price.sheet.line',
                                             'product_price_sheet_line_sale_estimate_line_relation',
-                                            'sale_estimate_line_id', 'price_sheet_line_id')
+                                            'sale_estimate_line_id', 'price_sheet_line_id', domain=[('price_sheet_id', '!=', False)])
     display_type = fields.Selection([
         ('line_section', "Section"),
         ('line_note', "Note")], default=False, help="Technical field for UX purpose.")
