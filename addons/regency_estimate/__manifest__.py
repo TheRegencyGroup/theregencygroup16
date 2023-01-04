@@ -24,13 +24,13 @@
     'category': 'Regency/Sales',
     'sequence': 10,
     'data': [
+        'security/groups.xml',
+        'security/ir.model.access.csv',
         'report/report_inherit_purchase_order.xml',
         'data/product_price_sheet.xml',
         'data/purchase_requisition_data.xml',
         'data/sale_estimate_sequence.xml',
         'wizard/cancellation_purchase_order.xml',
-        'security/ir.model.access.csv',
-        'security/groups.xml',
         'views/sale_estimate.xml',
         'views/purchase_requisition_views.xml',
         'views/product_price_sheet.xml',
@@ -54,7 +54,7 @@
         'views/account_move.xml',
         'views/sale_order.xml',
         'views/res_config_settings.xml',
-        # 'views/consumption_agreement.xml'
+        'data/ir_rules.xml',
     ],
     'demo': [
     ],
