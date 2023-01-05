@@ -6,4 +6,14 @@
       }
     }
   }
+
+  div[name='options'] {
+    .o_field_boolean {
+      margin-right: 0 !important;
+
+      & > div {
+        margin-right: -2px !important;
+      }
+    }
+  }
 }
