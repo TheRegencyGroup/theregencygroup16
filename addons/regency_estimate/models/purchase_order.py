@@ -158,7 +158,6 @@ class MyPurchaseOrderLine(models.Model):
         res['price_unit'] += res['record'].fee / res['quantity'] if res['quantity'] else 0
         return res
 
-
     @api.onchange('product_id')
     def onchange_product_id(self):
         super().onchange_product_id()
@@ -177,7 +176,7 @@ class MyPurchaseOrderLine(models.Model):
                 if line.product_id == pol.product_id:
                     pol.price_unit = line.product_uom_id._compute_price(line.price_unit, pol.product_uom)
                     partner = pol.order_id.partner_id or pol.order_id.requisition_id.vendor_id
-                    product_ctx = {'seller_id': partner.id, 'lang': get_lang(pol.env, partner.lang).code}
+                    product_ctx = {'partner_id': partner.id, 'lang': get_lang(pol.env, partner.lang).code}
                     name = pol._get_product_purchase_description(pol.product_id.with_context(product_ctx))
                     if line.product_description_variants:
                         name += '\n' + line.product_description_variants
@@ -202,6 +201,5 @@ class MyPurchaseOrderLine(models.Model):
         action['domain'] = [('po_line_id', '=', self.id)]
         action['context'] = {'default_po_line_id': self.id}
         return action
-
 
 PurchaseOrderLine._compute_price_unit_and_date_planned_and_name = MyPurchaseOrderLine._new_compute_price_unit_and_date_planned_and_name
