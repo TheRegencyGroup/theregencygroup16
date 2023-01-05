@@ -13,9 +13,12 @@
                             attrs="{'invisible': [('state', '!=', 'confirmed')]}"/>
                     <field name="state" widget="statusbar" statusbar_visible="draft,confirmed"/>
                     <button name="generate_purchase_order" data-hotkey="g" type="object"
-                            string="Generate Purchase Order"/>
+                            string="Generate Purchase Order" attrs="{'invisible': [('state', '!=', 'confirmed')]}"/>
                     <button name="generate_downpayment_invoice" string="Create Downpayment Invoice"
                             type="object"  attrs="{'invisible': [('state', '!=', 'confirmed')]}"/>
+                    <button name="action_reject"
+                            string="Reject" type="object"
+                            attrs="{'invisible': [('state', 'not in', ['draft', 'confirmed'])]}"/>
                 </header>
                 <sheet>
                      <div class="oe_button_box" name="button_box">

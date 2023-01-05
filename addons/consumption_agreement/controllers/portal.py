@@ -182,7 +182,7 @@ class CustomerPortal(portal.CustomerPortal):
 
         query_string = False
         if order_sudo.has_to_be_signed() and message:
-            order_sudo.action_cancel()
+            order_sudo.action_reject()
             _message_post_helper('consumption.agreement', order_id, message, **{'token': access_token} if access_token else {})
         else:
             query_string = "&message=cant_reject"
