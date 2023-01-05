@@ -321,10 +321,10 @@ class ProductPriceSheet(models.Model):
 
     def update_lines(self, sheet_lines):
         for rec in self:
-            existing_product_lines = self.item_ids.mapped(lambda x: (x.product_id.id, x.partner_id.id, x.product_uom_qty))
+            existing_product_lines = self.item_ids.mapped(lambda x: (x.product_id.id, x.partner_id.id, x.min_quantity))
             for line in sheet_lines:
-                if (line.product_id, line.partner_id, line.product_uom_qty) not in existing_product_lines:
-                    rec.write({'item_ids': [line.id]})
+                if (line.product_id.id, line.partner_id.id, line.min_quantity) not in existing_product_lines:
+                    rec.write({'item_ids': [(4, line.id)]})
 
 
 class ProductPriceSheetLine(models.Model):
