@@ -108,10 +108,12 @@
                                       <field name="partner_id"  optional="hide"/>
                                       <field name="produced_overseas"  optional="hide"/>
                                       <field name="price" string="Customer Price" options="{'hide_sort_icon': True, 'width': '70px'}"/>
+                                      <widget name="multi_currency_widget" options="{'value_field': 'price'}" width="20px"/>
                                       <field name="fee"/>
                                       <button class="float-end" name="action_edit_fee_value" type="object"
                                               icon="fa-pencil"/>
                                       <field name="total"/>
+                                      <widget name="multi_currency_widget" options="{'value_field': 'total'}" width="20px"/>
                                       <field name="margin"/>
                                       <field name="allow_consumption_agreement"  options="{'hide_sort_icon': True, 'width': '50px'}"
                                              string="Allow CA"/>
