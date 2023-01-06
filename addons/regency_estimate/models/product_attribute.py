@@ -17,6 +17,8 @@ class ProductAttributeCustomValue(models.Model):
 class ProductTemplateAttributeLine(models.Model):
     _inherit = "product.template.attribute.line"
 
+    sequence = fields.Integer("Sequence", default=10)
+
     @api.constrains('active', 'value_ids', 'attribute_id')
     def _check_valid_values(self):
         res = super(ProductTemplateAttributeLine, self)._check_valid_values()

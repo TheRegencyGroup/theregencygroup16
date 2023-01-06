@@ -7,7 +7,8 @@
     'depends': [
         'delivery',
         'purchase',
-        'sale'
+        'sale',
+        'regency_estimate',
     ],
     'category': 'Regency/Stock',
     'sequence': 10,
@@ -17,7 +18,7 @@
         'wizard/choose_receipt_package_views.xml',
         'views/stock_quant_package.xml',
         'security/ir.model.access.csv',
-        'views/stock_quant.xml'
+        'views/stock_quant.xml',
     ],
     'installable': True,
     'application': True,
