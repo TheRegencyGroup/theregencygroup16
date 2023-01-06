@@ -1,6 +1,6 @@
 {
     'name': 'Regency Sales Estimates',
-    'version': '16.0.0.9',
+    'version': '16.0.0.11',
     'summary': '',
     'author': 'OpsWay',
     'description': "",
@@ -18,7 +18,8 @@
         'regency_backend_interface',
         'mail_chatter_customization',
         'product',
-        'regency_tools'
+        'regency_tools',
+        'multi_currency_widget'
     ],
     'category': 'Regency/Sales',
     'sequence': 10,

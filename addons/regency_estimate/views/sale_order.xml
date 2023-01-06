@@ -9,11 +9,17 @@
                 <attribute name="domain">[('is_customer', '=', True),('is_company', '=', True)]</attribute>
                 <attribute name="context">{'default_is_customer': True, 'default_is_company': True}</attribute>
             </xpath>
+            <xpath expr="//field[@name='order_line']/tree/field[@name='price_unit']" position="after">
+                 <widget name="multi_currency_widget" options="{'value_field': 'price_unit'}" width="20px"/>
+            </xpath>
             <xpath expr="//field[@name='date_order'][1]" position="attributes">
                 <attribute name="widget">date</attribute>
             </xpath>
             <xpath expr="//field[@name='date_order'][2]" position="attributes">
                 <attribute name="widget">date</attribute>
+            </xpath>
+            <xpath expr="//field[@name='order_line']/tree/field[@name='price_total']" position="after">
+                 <widget name="multi_currency_widget" options="{'value_field': 'price_total'}" width="20px"/>
             </xpath>
         </field>
     </record>

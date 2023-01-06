@@ -1,6 +1,6 @@
 {
     'name': 'Regency Consumption Agreement',
-    'version': '16.0.0.5',
+    'version': '16.0.0.6',
     'summary': '',
     'author': 'OpsWay',
     'description': "",
@@ -11,7 +11,8 @@
         'regency_contacts',
         'purchase_stock',
         'stock_mts_mto_rule',
-        'stock_dropshipping'
+        'stock_dropshipping',
+        'multi_currency_widget'
     ],
     'category': 'Regency',
     'sequence': 3,

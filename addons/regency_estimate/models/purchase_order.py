@@ -124,7 +124,8 @@ class PurchaseOrder(models.Model):
 
 
 class MyPurchaseOrderLine(models.Model):
-    _inherit = 'purchase.order.line'
+    _name = 'purchase.order.line'
+    _inherit = ['purchase.order.line', 'multi.currency.mixin']
 
     produced_overseas = fields.Boolean(string='Produced overseas')
     customer_id = fields.Many2one('res.partner')
