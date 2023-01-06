@@ -25,6 +25,12 @@
                     <button class="float-end" name="action_edit_fee_value" type="object"
                             icon="fa-pencil"/>
                 </xpath>
+                <xpath expr="//field[@name='price_unit']" position="after">
+                     <widget name="multi_currency_widget" options="{'value_field': 'price_unit'}" width="20px"/>
+                </xpath>
+                <xpath expr="//field[@name='price_subtotal']" position="after">
+                     <widget name="multi_currency_widget" options="{'value_field': 'price_subtotal'}" width="20px"/>
+                </xpath>
                 <xpath expr="//field[@name='requisition_id']" position="attributes">
                     <attribute name="string">Purchase Requisition</attribute>
                 </xpath>

@@ -35,6 +35,7 @@
                     <field name="state" invisible="1"/>
                 </xpath>
                 <xpath expr="//field[@name='line_ids']/tree/field[@name='price_unit']" position="after">
+                    <widget name="multi_currency_widget" options="{'value_field': 'price_unit'}" width="20px"/>
                     <field name="fee"/>
                     <button class="float-end" name="action_edit_fee_value" type="object"
                             icon="fa-pencil"/>

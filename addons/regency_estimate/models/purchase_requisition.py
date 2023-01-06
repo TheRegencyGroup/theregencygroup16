@@ -122,7 +122,8 @@ class PurchaseRequisition(models.Model):
 
 
 class PurchaseRequisitionLine(models.Model):
-    _inherit = 'purchase.requisition.line'
+    _name = 'purchase.requisition.line'
+    _inherit = [ 'purchase.requisition.line', 'multi.currency.mixin']
 
     partner_id = fields.Many2one('res.partner', 'Vendor')
     produced_overseas = fields.Boolean('Produced Overseas')
