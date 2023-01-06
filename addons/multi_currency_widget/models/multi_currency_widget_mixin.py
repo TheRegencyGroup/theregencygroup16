@@ -30,6 +30,6 @@ class MultiCurrencyMixin(models.AbstractModel):
         currencies = self.env['res.currency'].search([('active', '=', True), ('id', '!=', currency_id.id)])
         result = []
         for cur in currencies:
-            new_val = cur._convert(value, currency_id, company_id, date, round=True)
+            new_val = currency_id._convert(value, cur, company_id, date, round=True)
             result.append([round(new_val, 6), cur.symbol])
         return result
