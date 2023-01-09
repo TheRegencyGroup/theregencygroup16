@@ -69,6 +69,7 @@
                         <group name="other_details">
                             <field name="signed_date" />
                             <field name="currency_id" attrs="{'readonly': [('state', 'not in', ['draft'])]}"/>
+                            <field name="company_id"/>
                         </group>
                     </group>
                     <group>
@@ -168,6 +169,7 @@
                 <field name="currency_id"/>
                 <field name="signed_date"/>
                 <field name="state"/>
+                <field name="company_id" optional="hide"/>
             </tree>
         </field>
     </record>
