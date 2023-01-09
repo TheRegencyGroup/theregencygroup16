@@ -177,7 +177,7 @@
                                 <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
                                 <header class="modal-header">
                                     <h4 class="modal-title">Reject This Consumption</h4>
-                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">×</button>
+                                    <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">×</button>
                                 </header>
                                 <main class="modal-body">
                                     <p>
@@ -231,13 +231,13 @@
 
                         <t t-if="consumption.has_to_be_signed()">
                             <div class="col-sm-auto mt8">
-                                <a role="button" id="accept_sign" class="btn btn-primary" data-toggle="modal" data-bs-target="#modalaccept_consumption" href="#"><i class="fa fa-check"/> Accept &amp; Sign</a>
+                                <a t-if="consumption.state == 'draft'" role="button" id="accept_sign" class="btn btn-primary" data-toggle="modal" data-bs-target="#modalaccept_consumption" href="#"><i class="fa fa-check"/> Accept &amp; Sign</a>
                             </div>
                             <div class="col-sm-auto mt8">
                                 <a role="button" class="btn btn-secondary" href="#discussion"><i class="fa fa-comment"/> Feedback</a>
                             </div>
                             <div class="col-sm-auto mt8">
-                                <a role="button" class="btn btn-danger" data-toggle="modal" data-target="#modaldecline_consumption" href="#"> <i class="fa fa-times"/> Reject</a>
+                                <a t-if="consumption.state == 'draft'" role="button" class="btn btn-danger" id="reject" data-bs-toggle="modal" data-bs-target="#modaldecline_consumption" href="#"> <i class="fa fa-times"/> Reject</a>
                             </div>
                         </t>
                         <t t-if="consumption.state == 'confirmed'">

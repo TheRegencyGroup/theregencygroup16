@@ -109,6 +109,10 @@ class ConsumptionAgreement(models.Model):
                 rec.signed_date = fields.Date.today()
             rec.update_product_route_ids()
 
+    def action_reject(self):
+        for rec in self:
+            rec.state = 'cancel'
+
     def update_product_route_ids(self):
         products = self.line_ids.mapped('product_id')
         cross_docks = self.env['stock.warehouse'].search([]).mapped('crossdock_route_id')
