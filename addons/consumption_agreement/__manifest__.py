@@ -25,7 +25,8 @@
         'security/ir.model.access.csv',
         'wizard/create_so_wizard.xml',
         'wizard/sale_make_invoice_advance_views.xml',
-        'report/consumption_agreement.xml'
+        'report/consumption_agreement.xml',
+        'data/ir_rules.xml',
     ],
     'assets': {
         'web.assets_frontend': [
