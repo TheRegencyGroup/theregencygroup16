@@ -15,6 +15,7 @@ class ProductProduct(models.Model):
     detailed_type = fields.Selection(default='product')
     allowed_partner_ids = fields.Many2many('res.partner', string="Allowed Customers",
                                            domain=[('is_customer', '=', True), ('is_company', '=', True)])
+    entity_type = fields.Selection([('product', 'Product'), ('product_template', 'Product Template')])
 
     @api.depends('sale_order_line_ids')
     def _compute_customer_ids(self):
